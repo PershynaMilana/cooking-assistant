@@ -14,7 +14,10 @@ router.get("/recipe/:id", recipeController.getRecipeWithIngredients);
 // Поиск рецептов по ингредиенту
 router.get("/recipes-by-ingredient", recipeController.getRecipesByIngredient);
 
-router.get("/recipes-by-ingredient-name", recipeController.getRecipesByIngredientName);
+router.get(
+  "/recipes-by-ingredient-name",
+  recipeController.getRecipesByIngredientName
+);
 
 router.get("/ingredients", recipeController.getAllIngredients);
 
@@ -23,7 +26,6 @@ router.put("/recipe/:id", recipeController.updateRecipe);
 
 // Удаление рецепта по ID
 router.delete("/recipe/:id", recipeController.deleteRecipe);
-
 
 //router.get("/recipe", recipeController.getRecipesByPerson);
 

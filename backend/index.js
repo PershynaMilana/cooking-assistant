@@ -8,9 +8,9 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 const corsOptions = {
-    origin: "http://localhost:5174", // Разрешите доступ только с этого домена
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Разрешенные методы
-    credentials: true, // Разрешите отправку куки
+  origin: "http://localhost:5173", // Разрешите доступ только с этого домена
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Разрешенные методы
+  credentials: true, // Разрешите отправку куки
 };
 
 app.use(cors(corsOptions)); // Применяем CORS ко всем маршрутам

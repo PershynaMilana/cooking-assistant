@@ -6,16 +6,16 @@ class RecipeController {
 
     try {
       const newRecipe = await db.query(
-          `INSERT INTO recipes (title, content, person_id) VALUES ($1, $2, $3) RETURNING *`,
-          [title, content, person_id]
+        `INSERT INTO recipes (title, content, person_id) VALUES ($1, $2, $3) RETURNING *`,
+        [title, content, person_id]
       );
 
       const recipeId = newRecipe.rows[0].id;
 
       for (let ingredientId of ingredients) {
         await db.query(
-            `INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES ($1, $2)`,
-            [recipeId, ingredientId]
+          `INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES ($1, $2)`,
+          [recipeId, ingredientId]
         );
       }
 
@@ -28,7 +28,7 @@ class RecipeController {
   async getAllRecipes(req, res) {
     try {
       const recipes = await db.query(
-          `SELECT r.*, array_agg(i.name) AS ingredients
+        `SELECT r.*, array_agg(i.name) AS ingredients
          FROM recipes r
          LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
          LEFT JOIN ingredients i ON ri.ingredient_id = i.id
@@ -46,13 +46,13 @@ class RecipeController {
 
     try {
       const recipe = await db.query(
-          `SELECT r.*, array_agg(i.name) AS ingredients
+        `SELECT r.*, array_agg(i.name) AS ingredients
          FROM recipes r
          LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
          LEFT JOIN ingredients i ON ri.ingredient_id = i.id
          WHERE r.id = $1
          GROUP BY r.id`,
-          [recipeId]
+        [recipeId]
       );
 
       if (recipe.rows.length === 0) {
@@ -70,7 +70,7 @@ class RecipeController {
 
     try {
       const recipes = await db.query(
-          `SELECT recipes.id, recipes.title, recipes.content,
+        `SELECT recipes.id, recipes.title, recipes.content,
                 json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name)) AS ingredients
           FROM recipes
           LEFT JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
@@ -79,7 +79,7 @@ class RecipeController {
               SELECT recipe_id FROM recipe_ingredients WHERE ingredient_id = $1
           )
           GROUP BY recipes.id;`,
-          [ingredient_id]
+        [ingredient_id]
       );
 
       res.json(recipes.rows);
@@ -93,14 +93,14 @@ class RecipeController {
 
     try {
       const recipes = await db.query(
-          `SELECT recipes.id, recipes.title, recipes.content,
+        `SELECT recipes.id, recipes.title, recipes.content,
               json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name)) AS ingredients
         FROM recipes
         LEFT JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
         LEFT JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
         WHERE ingredients.name ILIKE $1
         GROUP BY recipes.id;`,
-          [`%${ingredient_name}%`] // Используем ILIKE для поиска по названию
+        [`%${ingredient_name}%`] // Используем ILIKE для поиска по названию
       );
 
       res.json(recipes.rows);
@@ -111,30 +111,70 @@ class RecipeController {
 
   async updateRecipe(req, res) {
     const recipeId = req.params.id;
-    const { title, content, ingredients } = req.body;
+    const { title, content, ingredients: newIngredients } = req.body;
 
     try {
+      // Проверяем, что title и content не пустые
+      if (!title || !content) {
+        return res
+          .status(400)
+          .json({ error: "Название и содержание не могут быть пустыми" });
+      }
+
       const result = await db.query(
-          `UPDATE recipes SET title = $1, content = $2 WHERE id = $3 RETURNING *`,
-          [title, content, recipeId]
+        `UPDATE recipes SET title = $1, content = $2 WHERE id = $3 RETURNING *`,
+        [title, content, recipeId]
       );
 
       if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Recipe not found" });
+        return res.status(404).json({ error: "Рецепт не найден" });
       }
 
-      // Обновление ингредиентов
-      await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [recipeId]);
+      let ingredients; // Объявляем переменную ingredients, чтобы её можно было изменить
+
+      // Проверяем ингредиенты
+      if (!newIngredients || newIngredients.length === 0) {
+        // Если ингредиенты не указаны, получаем старые ингредиенты
+        const oldIngredients = await db.query(
+          `SELECT ingredient_id FROM recipe_ingredients WHERE recipe_id = $1`,
+          [recipeId]
+        );
+
+        const existingIngredientIds = oldIngredients.rows.map(
+          (row) => row.ingredient_id
+        );
+
+        if (existingIngredientIds.length === 0) {
+          return res
+            .status(400)
+            .json({ error: "Нельзя оставить рецепт без ингредиентов" });
+        }
+
+        // Если старые ингредиенты есть, оставляем их
+        console.log(
+          "Нет новых ингредиентов, оставляем старые:",
+          existingIngredientIds
+        );
+        ingredients = existingIngredientIds; // Оставляем старые ингредиенты
+      } else {
+        ingredients = newIngredients; // Используем новые ингредиенты
+      }
+
+      // Удаление старых ингредиентов и добавление новых
+      await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
+        recipeId,
+      ]);
 
       for (let ingredientId of ingredients) {
         await db.query(
-            `INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES ($1, $2)`,
-            [recipeId, ingredientId]
+          `INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES ($1, $2)`,
+          [recipeId, ingredientId]
         );
       }
 
       res.json(result.rows[0]);
     } catch (error) {
+      console.error("Ошибка при обновлении рецепта:", error); // Логируем ошибку
       res.status(500).json({ error: error.message });
     }
   }
@@ -143,14 +183,13 @@ class RecipeController {
     const recipeId = req.params.id;
 
     try {
-      await db.query(
-          `DELETE FROM recipe_ingredients WHERE recipe_id = $1`,
-          [recipeId]
-      );
+      await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
+        recipeId,
+      ]);
 
       const result = await db.query(
-          `DELETE FROM recipes WHERE id = $1 RETURNING *`,
-          [recipeId]
+        `DELETE FROM recipes WHERE id = $1 RETURNING *`,
+        [recipeId]
       );
 
       if (result.rowCount === 0) {
@@ -163,7 +202,6 @@ class RecipeController {
     }
   }
 
-
   async getAllIngredients(req, res) {
     try {
       const ingredients = await db.query(`SELECT * FROM ingredients`);
@@ -172,7 +210,6 @@ class RecipeController {
       res.status(500).json({ error: error.message });
     }
   }
-
 
   // get by user
 
