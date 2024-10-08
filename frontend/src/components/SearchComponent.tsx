@@ -13,7 +13,7 @@ const SearchComponent: React.FC = () => {
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            setSearchParams({ ingredient_name: searchTerm }); // Передаем значение через searchParams
+            setSearchParams({ ingredient_name: searchTerm }); // Передаємо значення через searchParams
             setSearchTerm('');
             if (inputRef.current) {
                 inputRef.current.blur();

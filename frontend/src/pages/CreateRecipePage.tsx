@@ -8,12 +8,20 @@ interface Ingredient {
   name: string;
 }
 
+interface RecipeType {
+  id: number;
+  type_name: string;
+}
+
 const CreateRecipePage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
+  const [allTypes, setAllTypes] = useState<RecipeType[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
+  const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [typeError, setTypeError] = useState<string | null>(null); // Новое состояние для ошибки выбора типа
   const navigate = useNavigate();
 
   // Отримання списку інгредієнтів
@@ -22,13 +30,25 @@ const CreateRecipePage: React.FC = () => {
       const response = await axios.get("http://localhost:8080/api/ingredients");
       setAllIngredients(response.data);
     } catch (error: unknown) {
-      // Заменили any на unknown
+      setError((error as Error).message); // Обробка помилки
+    }
+  };
+
+  // Отримання списку типів рецептів
+  const fetchRecipeTypes = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/recipe-types"
+      );
+      setAllTypes(response.data);
+    } catch (error: unknown) {
       setError((error as Error).message); // Обробка помилки
     }
   };
 
   useEffect(() => {
     fetchIngredients(); // Отримуємо інгредієнти при завантаженні сторінки
+    fetchRecipeTypes(); // Отримуємо типи рецептів
   }, []);
 
   // Обробка кліків по кнопках інгредієнтів
@@ -44,20 +64,28 @@ const CreateRecipePage: React.FC = () => {
 
   // Валідація форми
   const validateForm = () => {
+    let isValid = true; // Флаг для отслеживания валидности формы
+    setError(null); // Сбрасываем ошибки
+    setTypeError(null); // Сбрасываем ошибку типа
+
     if (!title.trim()) {
       setError("Назва рецепта не може бути порожньою"); // Перевірка назви
-      return false;
+      isValid = false;
     }
     if (!content.trim()) {
       setError("Опис рецепта не може бути порожнім"); // Перевірка опису
-      return false;
+      isValid = false;
     }
     if (selectedIngredients.length === 0) {
       setError("Виберіть принаймні один інгредієнт"); // Перевірка вибору інгредієнтів
-      return false;
+      isValid = false;
     }
-    setError(null); // Скидаємо помилку, якщо валідація пройшла
-    return true; // Валідація успішна
+    if (selectedTypeId === null) {
+      setTypeError("Оберіть тип рецепта"); // Перевірка вибору типу
+      isValid = false;
+    }
+
+    return isValid; // Валідація успішна
   };
 
   // Відправка запиту на створення нового рецепта з використанням Axios
@@ -71,6 +99,7 @@ const CreateRecipePage: React.FC = () => {
         content: content,
         person_id: 1, // Змінити на актуальний ID
         ingredients: selectedIngredients, // Передаємо як масив чисел
+        type_id: selectedTypeId, // Передаємо ID типу рецепта
       };
       console.log(recipeData); // Виводимо дані рецепта в консоль
 
@@ -83,7 +112,6 @@ const CreateRecipePage: React.FC = () => {
 
       navigate("/"); // Перенаправляємо на головну сторінку після успішного створення
     } catch (error: unknown) {
-      // Заменили any на unknown
       setError((error as Error).message); // Обробка помилки
     }
   };
@@ -117,6 +145,27 @@ const CreateRecipePage: React.FC = () => {
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
               rows={4}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Тип рецепта
+            </label>
+            <select
+              value={selectedTypeId ?? ""}
+              onChange={(e) => setSelectedTypeId(Number(e.target.value))}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white"
+              required
+            >
+              {allTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.type_name}
+                </option>
+              ))}
+            </select>
+            {typeError && (
+              <div className="text-red-500">Оберіть тип рецепту</div>
+            )}{" "}
           </div>
 
           {/* Інгредієнти */}
