@@ -12,7 +12,7 @@ router.get("/recipes", recipeController.getAllRecipes);
 router.get("/recipe/:id", recipeController.getRecipeWithIngredients);
 
 // Поиск рецептов по ингредиенту
-router.get("/recipes-by-ingredient", recipeController.getRecipesByIngredient);
+// router.get("/recipes-by-ingredient", recipeController.getRecipesByIngredient);
 
 // Поиск рецептов по имени ингредиента
 router.get(
@@ -39,5 +39,7 @@ router.post("/recipe-type", recipeController.createRecipeType);
 router.put("/recipe-type/:id", recipeController.updateRecipeType);
 
 //router.get("/recipe", recipeController.getRecipesByPerson);
+
+router.get("/recipes-by-type", recipeController.getRecipesByType);
 
 module.exports = router;

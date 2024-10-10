@@ -31,7 +31,7 @@ const SearchComponent: React.FC = () => {
                 value={searchTerm}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
-                placeholder={`Пошук за інградієнтом`}
+                placeholder={`Пошук за інгредієнтом`}
                 className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
                 ref={inputRef}
             />
