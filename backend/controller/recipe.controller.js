@@ -28,11 +28,12 @@ class RecipeController {
   async getAllRecipes(req, res) {
     try {
       const recipes = await db.query(
-        `SELECT r.*, array_agg(i.name) AS ingredients
+        `SELECT r.*, rt.type_name, array_agg(i.name) AS ingredients
          FROM recipes r
          LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
          LEFT JOIN ingredients i ON ri.ingredient_id = i.id
-         GROUP BY r.id`
+         LEFT JOIN recipe_types rt ON r.type_id = rt.id  -- Присоединяем тип рецепта
+         GROUP BY r.id, rt.type_name` // Добавляем группировку по типу
       );
 
       res.json(recipes.rows);
@@ -66,39 +67,16 @@ class RecipeController {
     }
   }
 
-  // async getRecipesByIngredient(req, res) {
-  //   const { ingredient_id } = req.query;
-
-  //   try {
-  //     const recipes = await db.query(
-  //       `SELECT recipes.id, recipes.title, recipes.content,
-  //               json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name)) AS ingredients
-  //         FROM recipes
-  //         LEFT JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
-  //         LEFT JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
-  //         WHERE recipes.id IN (
-  //             SELECT recipe_id FROM recipe_ingredients WHERE ingredient_id = $1
-  //         )
-  //         GROUP BY recipes.id;`,
-  //       [ingredient_id]
-  //     );
-
-  //     res.json(recipes.rows);
-  //   } catch (error) {
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // }
-
   async getRecipesByIngredientName(req, res) {
     const { ingredient_name, type_ids } = req.query;
 
     try {
-      // Изменяем const на let, чтобы можно было изменять переменную
-      let ingredientsQuery = `SELECT recipes.id, recipes.title, recipes.content,
+      let ingredientsQuery = `SELECT recipes.id, recipes.title, recipes.content, rt.type_name,
             json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name)) AS ingredients
         FROM recipes
         LEFT JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
         LEFT JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
+        LEFT JOIN recipe_types rt ON recipes.type_id = rt.id  -- Присоединяем тип рецепта
         WHERE ingredients.name ILIKE $1`;
 
       const params = [`%${ingredient_name}%`];
@@ -108,7 +86,7 @@ class RecipeController {
         params.push(type_ids.split(",").map(Number));
       }
 
-      ingredientsQuery += ` GROUP BY recipes.id;`;
+      ingredientsQuery += ` GROUP BY recipes.id, rt.type_name;`; // Добавляем группировку по типу
 
       const recipes = await db.query(ingredientsQuery, params);
 
@@ -124,7 +102,6 @@ class RecipeController {
     const { title, content, ingredients: newIngredients, type_id } = req.body;
 
     try {
-      // Проверяем, что title и content не пустые
       if (!title || !content) {
         return res
           .status(400)
@@ -142,7 +119,6 @@ class RecipeController {
 
       let ingredients;
 
-      // Проверяем ингредиенты
       if (!newIngredients || newIngredients.length === 0) {
         const oldIngredients = await db.query(
           `SELECT ingredient_id FROM recipe_ingredients WHERE recipe_id = $1`,
@@ -164,7 +140,6 @@ class RecipeController {
         ingredients = newIngredients;
       }
 
-      // Удаление старых ингредиентов и добавление новых
       await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
         recipeId,
       ]);
@@ -263,15 +238,19 @@ class RecipeController {
 
     try {
       const recipes = await db.query(
-        `SELECT recipes.id, recipes.title, recipes.content,
-                    json_agg(json_build_object('id', ingredients.id, 'name', ingredients.name)) AS ingredients
-             FROM recipes
-             LEFT JOIN recipe_ingredients ON recipes.id = recipe_ingredients.recipe_id
-             LEFT JOIN ingredients ON recipe_ingredients.ingredient_id = ingredients.id
-             WHERE recipes.type_id = $1
-             GROUP BY recipes.id;`,
-        [type_id] // Используйте type_id из запроса
+        `SELECT r.*, rt.type_name, array_agg(i.name) AS ingredients
+         FROM recipes r
+         LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+         LEFT JOIN ingredients i ON ri.ingredient_id = i.id
+         LEFT JOIN recipe_types rt ON r.type_id = rt.id  -- Присоединяем тип рецепта
+         WHERE r.type_id = $1
+         GROUP BY r.id, rt.type_name`,
+        [type_id]
       );
+
+      if (recipes.rows.length === 0) {
+        return res.status(404).json({ error: "Рецепты не найдены" });
+      }
 
       res.json(recipes.rows);
     } catch (error) {
