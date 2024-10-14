@@ -22,7 +22,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           {content}
         </p>
         <p className="text-sm font-montserratRegular text-gray-500">
-          Тип рецепту: {typeName} {/* Отображаем тип рецепта */}
+          <span>Тип рецепту: </span>
+          <span className="font-bold">{typeName}</span> {/* Жирный текст */}
         </p>
       </div>
       <Link to={`/recipe/${id}`}>

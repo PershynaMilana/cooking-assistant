@@ -18,6 +18,12 @@ const Header: React.FC = () => {
                 Додати рецепт
               </Link>
             </li>
+            <li>
+              <Link to="/stats" className="font-montserratRegular text-l">
+                Статистика
+              </Link>
+            </li>{" "}
+            {/* Добавлена ссылка на статистику */}
           </div>
 
           {/* Права частина з елементами, притиснутими праворуч */}
