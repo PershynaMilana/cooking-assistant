@@ -17,31 +17,34 @@ interface Recipe {
   title: string;
   content: string;
   ingredients: Ingredient[];
-  type_id: number; // Добавлено поле для типа рецепта
+  type_id: number; // Додано поле для типу рецепта
+  cooking_time: number; // Додано поле для часу приготування
 }
 
 const ChangeRecipePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
-  const [allTypes, setAllTypes] = useState<RecipeType[]>([]); // Для хранения типов рецептов
-  const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
-  const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null); // Для хранения выбранного типа рецепта
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [ingredientError, setIngredientError] = useState<string | null>(null);
-  const [typeError, setTypeError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>(); // Отримання параметра id з URL
+  const [recipe, setRecipe] = useState<Recipe | null>(null); // Стан для рецепта
+  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]); // Всі доступні інгредієнти
+  const [allTypes, setAllTypes] = useState<RecipeType[]>([]); // Всі доступні типи рецептів
+  const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]); // Вибрані інгредієнти
+  const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null); // Вибраний тип рецепта
+  const [title, setTitle] = useState(""); // Назва рецепта
+  const [content, setContent] = useState(""); // Опис рецепта
+  const [cookingTime, setCookingTime] = useState(""); // Стан для часу приготування
+  const [error, setError] = useState<string | null>(null); // Загальні помилки
+  const [ingredientError, setIngredientError] = useState<string | null>(null); // Помилка вибору інгредієнтів
+  const [typeError, setTypeError] = useState<string | null>(null); // Помилка вибору типу рецепта
+  const [cookingTimeError, setCookingTimeError] = useState<string | null>(null); // Помилка для часу приготування
+  const navigate = useNavigate(); // Хук для навігації
 
-  // Функция для получения деталей рецепта, всех доступных ингредиентов и типов рецептов
+  //? Функція для отримання деталей рецепта, всіх доступних інгредієнтів і типів рецептів
   const fetchRecipeDetails = useCallback(async () => {
     try {
       const [recipeResponse, ingredientsResponse, typesResponse] =
         await Promise.all([
           axios.get(`http://localhost:8080/api/recipe/${id}`),
           axios.get("http://localhost:8080/api/ingredients"),
-          axios.get("http://localhost:8080/api/recipe-types"), // Получаем типы рецептов
+          axios.get("http://localhost:8080/api/recipe-types"), // Отримуємо типи рецептів
         ]);
 
       const recipeData: Recipe = recipeResponse.data;
@@ -53,8 +56,9 @@ const ChangeRecipePage: React.FC = () => {
         recipeData.ingredients.map((ing: Ingredient) => ing.id)
       );
       setAllIngredients(ingredientsResponse.data);
-      setAllTypes(typesResponse.data); // Сохраняем типы в состояние
-      setSelectedTypeId(recipeData.type_id); // Устанавливаем выбранный тип рецепта
+      setAllTypes(typesResponse.data); // Зберігаємо типи в стан
+      setSelectedTypeId(recipeData.type_id); // Встановлюємо вибраний тип рецепта
+      setCookingTime(formatCookingTime(recipeData.cooking_time)); // Встановлюємо час приготування як рядок
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         setError(
@@ -70,20 +74,32 @@ const ChangeRecipePage: React.FC = () => {
     fetchRecipeDetails();
   }, [fetchRecipeDetails]);
 
+  //? Функція для форматування часу приготування з хвилин у формат чч:мм
+  const formatCookingTime = (timeInMinutes: number) => {
+    const hours = Math.floor(timeInMinutes / 60);
+    const minutes = timeInMinutes % 60;
+    return `${hours}:${minutes.toString().padStart(2, "0")}`; // Форматуємо як чч:мм
+  };
+
+  //? Функція для перемикання вибору інгредієнта
   const toggleIngredientSelection = (ingredientId: number) => {
-    setSelectedIngredients((prevSelected) =>
-      prevSelected.includes(ingredientId)
-        ? prevSelected.filter((id) => id !== ingredientId)
-        : [...prevSelected, ingredientId]
+    setSelectedIngredients(
+      (prevSelected) =>
+        prevSelected.includes(ingredientId)
+          ? prevSelected.filter((id) => id !== ingredientId) // Видаляємо вибраний інгредієнт
+          : [...prevSelected, ingredientId] // Додаємо інгредієнт
     );
   };
 
+  //? Функція для оновлення рецепта
   const handleUpdateRecipe = async () => {
-    // Сброс ошибок
+    // Скидання помилок
+    setError(null);
     setIngredientError(null);
     setTypeError(null);
+    setCookingTimeError(null); // Скидаємо помилку часу
 
-    // Валидация формы
+    // Валідація форми
     if (!title.trim()) {
       setError("Назва рецепта не може бути порожньою");
       return;
@@ -101,13 +117,37 @@ const ChangeRecipePage: React.FC = () => {
       return;
     }
 
+    // Валідація часу приготування
+    const timeParts = cookingTime.split(":");
+    if (timeParts.length !== 2) {
+      setCookingTimeError("Введіть час у форматі чч:мм або мм:чч."); // Помилка для некоректного формату
+      return;
+    } else {
+      const hours = parseInt(timeParts[0], 10);
+      const minutes = parseInt(timeParts[1], 10);
+      if (
+        isNaN(hours) ||
+        isNaN(minutes) ||
+        hours < 0 ||
+        hours > 99 ||
+        minutes < 0 ||
+        minutes >= 60
+      ) {
+        setCookingTimeError("Введіть у коректній формі, будь ласка."); // Помилка для некоректного часу
+        return;
+      }
+    }
+
     const validIngredients = selectedIngredients.filter((id) => id != null);
 
     const updatedRecipe = {
       title,
       content,
       ingredients: validIngredients,
-      type_id: selectedTypeId, // Добавляем выбранный тип рецепта
+      type_id: selectedTypeId, // Додаємо вибраний тип рецепта
+      cooking_time:
+        (parseInt(timeParts[0], 10) || 0) * 60 +
+        (parseInt(timeParts[1], 10) || 0), // Перетворюємо час у хвилини
     };
 
     console.log("Оновлений рецепт:", updatedRecipe);
@@ -115,14 +155,14 @@ const ChangeRecipePage: React.FC = () => {
     try {
       await axios.put(`http://localhost:8080/api/recipe/${id}`, updatedRecipe, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", // Вказуємо тип контенту
         },
       });
 
-      navigate(`/main`);
+      navigate(`/main`); // Перенаправляємо на головну сторінку після успішного оновлення
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        // Проверка на ошибку внешнего ключа
+        // Перевірка на помилку зовнішнього ключа
         if (
           error.response &&
           error.response.data.error.includes("foreign key constraint")
@@ -139,6 +179,7 @@ const ChangeRecipePage: React.FC = () => {
     }
   };
 
+  //? Якщо рецепт або дані ще не завантажені
   if (!recipe || allIngredients.length === 0 || allTypes.length === 0) {
     return <div>Завантаження...</div>;
   }
@@ -151,6 +192,7 @@ const ChangeRecipePage: React.FC = () => {
           Змінити рецепт
         </h1>
         <form className="space-y-4">
+          {/* Назва рецепта */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Назва
@@ -163,6 +205,7 @@ const ChangeRecipePage: React.FC = () => {
             />
           </div>
 
+          {/* Опис рецепта */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Опис
@@ -175,6 +218,24 @@ const ChangeRecipePage: React.FC = () => {
             />
           </div>
 
+          {/* Час приготування */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Час приготування (годгод:хвхв)
+            </label>
+            <input
+              type="text"
+              placeholder="наприклад, 1:30 або 0:10"
+              value={cookingTime}
+              onChange={(e) => setCookingTime(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+            {cookingTimeError && (
+              <div className="text-red-500">{cookingTimeError}</div>
+            )}
+          </div>
+
+          {/* Тип рецепта */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Тип рецепта
@@ -183,8 +244,12 @@ const ChangeRecipePage: React.FC = () => {
               value={selectedTypeId ?? ""}
               onChange={(e) => setSelectedTypeId(Number(e.target.value))}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white"
-              required // добавляем обязательность выбора
+              required // Додаємо обов'язковість вибору
             >
+              <option value="" disabled>
+                Оберіть тип рецепту
+              </option>
+              {/* Опції типів рецептів */}
               {allTypes.map((type) => (
                 <option key={type.id} value={type.id}>
                   {type.type_name}
@@ -194,6 +259,7 @@ const ChangeRecipePage: React.FC = () => {
             {typeError && <div className="text-red-500">{typeError}</div>}
           </div>
 
+          {/* Інгредієнти */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Інгредієнти
@@ -205,8 +271,8 @@ const ChangeRecipePage: React.FC = () => {
                   type="button"
                   className={`px-4 py-2 rounded-md ${
                     selectedIngredients.includes(ingredient.id)
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700"
+                      ? "bg-blue-500 text-white" // Вибраний інгредієнт
+                      : "bg-gray-200 text-gray-700" // Невибраний інгредієнт
                   }`}
                   onClick={() => toggleIngredientSelection(ingredient.id)}
                 >
@@ -219,8 +285,10 @@ const ChangeRecipePage: React.FC = () => {
             )}
           </div>
 
+          {/* Відображення загальної помилки */}
           {error && <div className="text-red-500 font-medium">{error}</div>}
 
+          {/* Кнопка оновлення рецепта */}
           <div>
             <button
               type="button"

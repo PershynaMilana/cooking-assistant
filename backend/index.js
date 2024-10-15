@@ -8,12 +8,12 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:5173", // Разрешите доступ только с этого домена
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Разрешенные методы
-  credentials: true, // Разрешите отправку куки
+  origin: "http://localhost:5173", // Дозволити доступ тільки з цього домену
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Дозволені методи
+  credentials: true, // Дозволити відправку куків
 };
 
-app.use(cors(corsOptions)); // Применяем CORS ко всем маршрутам
+app.use(cors(corsOptions)); // Застосовуємо CORS до всіх маршрутів
 app.use(express.json());
 app.use("/api", userRouter);
 app.use("/api", recipeRouter);

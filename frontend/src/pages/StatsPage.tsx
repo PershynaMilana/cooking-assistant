@@ -8,28 +8,53 @@ interface Stat {
   count: number;
 }
 
+interface Recipe {
+  id: number;
+  title: string;
+  cooking_time: number;
+  type_name: string;
+}
+
 const StatsPage: React.FC = () => {
-  const [stats, setStats] = useState<Stat[]>([]);
+  const [stats, setStats] = useState<Stat[]>([]); // Стан для зберігання статистики
+  const [fastestRecipe, setFastestRecipe] = useState<Recipe | null>(null); // Стан для найшвидшого рецепту
+  const [slowestRecipe, setSlowestRecipe] = useState<Recipe | null>(null); // Стан для найдовшого рецепту
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Отримання даних про рецепти з сервера
         const response = await axios.get("http://localhost:8080/api/recipes");
-        const recipes = response.data;
+        const recipes: Recipe[] = response.data;
 
+        // Рахуємо кількість рецептів кожного типу
         const typeCounts: { [key: string]: number } = {};
-        recipes.forEach((recipe: { type_name: string }) => {
+        recipes.forEach((recipe) => {
           typeCounts[recipe.type_name] =
             (typeCounts[recipe.type_name] || 0) + 1;
         });
 
+        // Форматуємо статистику для відображення
         const formattedStats = Object.keys(typeCounts).map((typeName) => ({
           typeName,
           count: typeCounts[typeName],
         }));
 
         setStats(formattedStats);
+
+        // Знаходимо найшвидший і найдовший рецепт
+        if (recipes.length > 0) {
+          const fastest = recipes.reduce((prev, curr) =>
+            prev.cooking_time < curr.cooking_time ? prev : curr
+          );
+          const slowest = recipes.reduce((prev, curr) =>
+            prev.cooking_time > curr.cooking_time ? prev : curr
+          );
+          setFastestRecipe(fastest);
+          setSlowestRecipe(slowest);
+        }
       } catch (error) {
+        // Обробка помилки при отриманні статистики
         console.error("Помилка отримання статистики:", error);
       }
     };
@@ -37,27 +62,28 @@ const StatsPage: React.FC = () => {
     fetchStats();
   }, []);
 
+  //? Налаштування для графіку
   const chartOptions = {
     chart: {
-      type: "pie" as const,
+      type: "pie" as const, // Використовуємо тип "пиріг" для графіка
     },
-    labels: stats.map((stat) => stat.typeName),
+    labels: stats.map((stat) => stat.typeName), // Мітки для кожного типу рецепту
     responsive: [
       {
         breakpoint: 480,
         options: {
           chart: {
-            width: 200,
+            width: 200, // Ширина графіка для мобільних пристроїв
           },
           legend: {
-            position: "bottom",
+            position: "bottom", // Розташування легенди на мобільних пристроях
           },
         },
       },
     ],
   };
 
-  const chartSeries = stats.map((stat) => stat.count);
+  const chartSeries = stats.map((stat) => stat.count); // Дані для відображення на графіку
 
   return (
     <div>
@@ -71,8 +97,8 @@ const StatsPage: React.FC = () => {
         <div className="flex justify-between">
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <Chart
-              options={chartOptions}
-              series={chartSeries}
+              options={chartOptions} // Параметри графіку
+              series={chartSeries} // Дані для графіку
               type="pie"
               width="500"
             />
@@ -90,6 +116,31 @@ const StatsPage: React.FC = () => {
                 </li>
               ))}
             </ul>
+
+            {/* Відображення найшвидшого і найдовшого рецептів */}
+            <div className="mt-4">
+              <h2 className="text-h3 font-semibold mb-2">
+                Швидкий і довгий рецепти
+              </h2>
+              <p>
+                <strong>Найшвидший рецепт:</strong> {fastestRecipe?.title} (
+                {fastestRecipe
+                  ? `${Math.floor(fastestRecipe.cooking_time / 60)} годин ${
+                      fastestRecipe.cooking_time % 60
+                    } хвилин`
+                  : "N/A"}
+                )
+              </p>
+              <p>
+                <strong>Найдовший рецепт:</strong> {slowestRecipe?.title} (
+                {slowestRecipe
+                  ? `${Math.floor(slowestRecipe.cooking_time / 60)} годин ${
+                      slowestRecipe.cooking_time % 60
+                    } хвилин`
+                  : "N/A"}
+                )
+              </p>
+            </div>
           </div>
         </div>
       </div>

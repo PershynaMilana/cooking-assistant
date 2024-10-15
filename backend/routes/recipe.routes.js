@@ -2,37 +2,34 @@ const Router = require("express");
 const router = new Router();
 const recipeController = require("../controller/recipe.controller");
 
-// Создание рецепта
+// Створення рецепта
 router.post("/recipe", recipeController.createRecipe);
 
-// Получение всех рецептов
+// Отримання всіх рецептів
 router.get("/recipes", recipeController.getAllRecipes);
 
-// Получение рецепта по ID
+// Отримання рецепта за ID
 router.get("/recipe/:id", recipeController.getRecipeWithIngredients);
 
-// Получение всех ингредиентов
+// Отримання всіх інгредієнтів
 router.get("/ingredients", recipeController.getAllIngredients);
 
-// Изменение рецепта по ID
+// Зміна рецепта за ID
 router.put("/recipe/:id", recipeController.updateRecipe);
 
-// Удаление рецепта по ID
+// Видалення рецепта за ID
 router.delete("/recipe/:id", recipeController.deleteRecipe);
 
-// Получение всех типов рецептов
+// Отримання всіх типів рецептів
 router.get("/recipe-types", recipeController.getAllRecipeTypes);
 
-// Создание нового типа рецепта
+// Створення нового типу рецепта
 router.post("/recipe-type", recipeController.createRecipeType);
 
-// Обновление типа рецепта
+// Оновлення типу рецепта
 router.put("/recipe-type/:id", recipeController.updateRecipeType);
 
-// Получение рецептов по типу
-// router.get("/recipes-by-type", recipeController.getRecipesByType);
-
-// Новый маршрут для фильтрации рецептов по типам и датам
+// Новий маршрут для фільтрації рецептів за типами і датами
 router.get("/recipes-by-filters", recipeController.searchRecipes);
 
 module.exports = router;

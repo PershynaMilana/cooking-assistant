@@ -14,17 +14,19 @@ interface RecipeType {
 }
 
 const CreateRecipePage: React.FC = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
-  const [allTypes, setAllTypes] = useState<RecipeType[]>([]);
-  const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
-  const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [typeError, setTypeError] = useState<string | null>(null); // Новое состояние для ошибки выбора типа
-  const navigate = useNavigate();
+  const [title, setTitle] = useState(""); // Назва рецепта
+  const [content, setContent] = useState(""); // Опис рецепта
+  const [cookingTime, setCookingTime] = useState(""); // Стан для часу приготування
+  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]); // Всі доступні інгредієнти
+  const [allTypes, setAllTypes] = useState<RecipeType[]>([]); // Всі доступні типи рецептів
+  const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]); // Вибрані інгредієнти
+  const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null); // Вибраний тип рецепта
+  const [error, setError] = useState<string | null>(null); // Загальні помилки
+  const [typeError, setTypeError] = useState<string | null>(null); // Помилка вибору типу
+  const [cookingTimeError, setCookingTimeError] = useState<string | null>(null); // Помилка часу приготування
+  const navigate = useNavigate(); // Хук для навігації
 
-  // Отримання списку інгредієнтів
+  //? Отримання списку інгредієнтів
   const fetchIngredients = async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/ingredients");
@@ -34,7 +36,7 @@ const CreateRecipePage: React.FC = () => {
     }
   };
 
-  // Отримання списку типів рецептів
+  //? Отримання списку типів рецептів
   const fetchRecipeTypes = async () => {
     try {
       const response = await axios.get(
@@ -51,22 +53,23 @@ const CreateRecipePage: React.FC = () => {
     fetchRecipeTypes(); // Отримуємо типи рецептів
   }, []);
 
-  // Обробка кліків по кнопках інгредієнтів
+  //?  Обробка кліків по кнопках інгредієнтів
   const toggleIngredientSelection = (ingredientId: number) => {
     setSelectedIngredients((prevSelected) => {
       if (prevSelected.includes(ingredientId)) {
-        return prevSelected.filter((id) => id !== ingredientId); // Убираємо вибраний інгредієнт
+        return prevSelected.filter((id) => id !== ingredientId); // Видаляємо обраний інгредієнт
       } else {
         return [...prevSelected, ingredientId]; // Додаємо інгредієнт
       }
     });
   };
 
-  // Валідація форми
+  //? Валідація форми
   const validateForm = () => {
-    let isValid = true; // Флаг для отслеживания валидности формы
-    setError(null); // Сбрасываем ошибки
-    setTypeError(null); // Сбрасываем ошибку типа
+    let isValid = true; // Флаг для відстеження валідності форми
+    setError(null); // Скидаємо загальні помилки
+    setTypeError(null); // Скидаємо помилку типу
+    setCookingTimeError(null); // Скидаємо помилку часу приготування
 
     if (!title.trim()) {
       setError("Назва рецепта не може бути порожньою"); // Перевірка назви
@@ -85,25 +88,50 @@ const CreateRecipePage: React.FC = () => {
       isValid = false;
     }
 
+    //? Валідація часу приготування
+    const timeParts = cookingTime.split(":");
+    if (timeParts.length !== 2) {
+      setCookingTimeError("Введіть час у форматі чч:мм або мм:чч."); // Помилка некоректного формату
+      isValid = false;
+    } else {
+      const hours = parseInt(timeParts[0], 10);
+      const minutes = parseInt(timeParts[1], 10);
+      if (
+        isNaN(hours) ||
+        isNaN(minutes) ||
+        hours < 0 ||
+        hours > 99 ||
+        minutes < 0 ||
+        minutes >= 60
+      ) {
+        setCookingTimeError("Введіть у коректній формі, будь ласка."); // Помилка некоректного часу
+        isValid = false;
+      }
+    }
+
     return isValid; // Валідація успішна
   };
 
-  // Відправка запиту на створення нового рецепта з використанням Axios
+  //? Надсилання запиту на створення нового рецепта з використанням Axios
   const handleCreateRecipe = async () => {
-    if (!validateForm()) return; // Перевіряємо валідацію
+    if (!validateForm()) return; // Перевірка валідації
+
+    const timeParts = cookingTime.split(":").map(Number);
+    const totalCookingTime = (timeParts[0] || 0) * 60 + (timeParts[1] || 0); // Перетворюємо час у хвилини
 
     try {
       // Формуємо JSON з даними
       const recipeData = {
-        title: title,
-        content: content,
+        title,
+        content,
         person_id: 1, // Змінити на актуальний ID
         ingredients: selectedIngredients, // Передаємо як масив чисел
         type_id: selectedTypeId, // Передаємо ID типу рецепта
+        cooking_time: totalCookingTime, // Передаємо cooking_time
       };
       console.log(recipeData); // Виводимо дані рецепта в консоль
 
-      // Використовуємо Axios для відправки даних
+      // Використовуємо Axios для надсилання даних
       await axios.post("http://localhost:8080/api/recipe", recipeData, {
         headers: {
           "Content-Type": "application/json", // Вказуємо тип контенту
@@ -124,6 +152,7 @@ const CreateRecipePage: React.FC = () => {
           Додати новий рецепт
         </h1>
         <form className="space-y-4">
+          {/* Назва рецепта */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Назва
@@ -135,6 +164,8 @@ const CreateRecipePage: React.FC = () => {
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
             />
           </div>
+
+          {/* Опис рецепта */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Опис
@@ -147,6 +178,23 @@ const CreateRecipePage: React.FC = () => {
             />
           </div>
 
+          {/* Час приготування */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Час приготування (годгод:хвхв)
+            </label>
+            <input
+              type="text"
+              placeholder="наприклад, 1:30 або 0:10"
+              value={cookingTime}
+              onChange={(e) => setCookingTime(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+            {cookingTimeError && (
+              <div className="text-red-500">{cookingTimeError}</div>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Тип рецепта
@@ -157,14 +205,14 @@ const CreateRecipePage: React.FC = () => {
                 setSelectedTypeId(
                   e.target.value === "" ? null : Number(e.target.value)
                 )
-              } // Установим null, если выбрана пустая строка
+              } // Встановлюємо null, якщо обрана порожня строка
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white"
               required
             >
               <option value="" disabled>
                 Оберіть тип рецепту
-              </option>{" "}
-              {/* Опция по умолчанию */}
+              </option>
+              {/* Опції типів рецептів */}
               {allTypes.map((type) => (
                 <option key={type.id} value={type.id}>
                   {type.type_name}
@@ -199,9 +247,10 @@ const CreateRecipePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Відображення помилки */}
+          {/* Відображення загальної помилки */}
           {error && <div className="text-red-500">{error}</div>}
 
+          {/* Кнопка створення рецепта */}
           <button
             type="button"
             onClick={handleCreateRecipe}
