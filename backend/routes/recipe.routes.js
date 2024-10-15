@@ -11,12 +11,6 @@ router.get("/recipes", recipeController.getAllRecipes);
 // Получение рецепта по ID
 router.get("/recipe/:id", recipeController.getRecipeWithIngredients);
 
-// Поиск рецептов по имени ингредиента
-router.get(
-  "/recipes-by-ingredient-name",
-  recipeController.getRecipesByIngredientName
-);
-
 // Получение всех ингредиентов
 router.get("/ingredients", recipeController.getAllIngredients);
 
@@ -36,6 +30,9 @@ router.post("/recipe-type", recipeController.createRecipeType);
 router.put("/recipe-type/:id", recipeController.updateRecipeType);
 
 // Получение рецептов по типу
-router.get("/recipes-by-type", recipeController.getRecipesByType);
+// router.get("/recipes-by-type", recipeController.getRecipesByType);
+
+// Новый маршрут для фильтрации рецептов по типам и датам
+router.get("/recipes-by-filters", recipeController.searchRecipes);
 
 module.exports = router;
