@@ -91,7 +91,7 @@ const CreateRecipePage: React.FC = () => {
     //? Валідація часу приготування
     const timeParts = cookingTime.split(":");
     if (timeParts.length !== 2) {
-      setCookingTimeError("Введіть час у форматі чч:мм або мм:чч."); // Помилка некоректного формату
+      setCookingTimeError("Введіть час у форматі годгод:хвхв або 0:хвхв."); // Помилка некоректного формату
       isValid = false;
     } else {
       const hours = parseInt(timeParts[0], 10);
@@ -129,7 +129,7 @@ const CreateRecipePage: React.FC = () => {
         type_id: selectedTypeId, // Передаємо ID типу рецепта
         cooking_time: totalCookingTime, // Передаємо cooking_time
       };
-      console.log(recipeData); // Виводимо дані рецепта в консоль
+      //? console.log(recipeData); // Виводимо дані рецепта в консоль
 
       // Використовуємо Axios для надсилання даних
       await axios.post("http://localhost:8080/api/recipe", recipeData, {

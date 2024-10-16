@@ -62,15 +62,17 @@ const StatsPage: React.FC = () => {
     fetchStats();
   }, []);
 
-
+  //TODO: dodelat'
   // useEffect(() => {
   //   const fetchStats2 = async () => {
   //     try {
   //       // Получение данных с бэкенда
-  //       const response = await axios.get("http://localhost:8080/api/recipes-stats");
+  //       const response = await axios.get(
+  //         "http://localhost:8080/api/recipes-stats"
+  //       );
   //       const { fastestRecipe, slowestRecipe, typeStats } = response.data;
-  //       console.log(response)
-  //
+  //       console.log(response);
+
   //       setFastestRecipe(fastestRecipe);
   //       setSlowestRecipe(slowestRecipe);
   //       setStats(typeStats);
@@ -78,7 +80,7 @@ const StatsPage: React.FC = () => {
   //       console.error("Ошибка при получении статистики:", error);
   //     }
   //   };
-  //
+
   //   fetchStats2();
   // }, []);
 

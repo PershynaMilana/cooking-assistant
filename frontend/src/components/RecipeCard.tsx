@@ -6,7 +6,7 @@ interface RecipeCardProps {
   title: string;
   typeName: string;
   creationDate: string;
-  cookingTime: number; // Добавляем поле для времени приготовления
+  cookingTime: number;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -14,15 +14,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   title,
   typeName,
   creationDate,
-  cookingTime, // Получаем время приготовления
+  cookingTime,
 }) => {
   const formattedDate = new Date(creationDate).toLocaleDateString("uk-UA");
 
-  // Функция для форматирования времени
+  // Функція форматування часу
   const formatCookingTime = (timeInMinutes: number) => {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
-    return `${hours} год : ${minutes.toString().padStart(2, "0")} хв`; // Форматируем как чч:мм
+    return `${hours} год : ${minutes.toString().padStart(2, "0")} хв`; // Форматуємо як годгод:хвхв
   };
 
   return (

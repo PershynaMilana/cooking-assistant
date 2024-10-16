@@ -2,79 +2,107 @@ import React, { useState } from "react";
 import axios from "axios";
 import Header from "../components/Header.tsx";
 
-const AddRecipeType = () => {
-    const [typeData, setTypeData] = useState({ type_name: "", description: "" });
-    const [errors, setErrors] = useState({ type_name: "", description: "" });
+interface RecipeType {
+  type_name: string;
+  description: string;
+}
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setTypeData((prevData) => ({ ...prevData, [name]: value }));
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
-    };
+const AddRecipeType: React.FC = () => {
+  // Використовуємо типізацію стану
+  const [typeData, setTypeData] = useState<RecipeType>({
+    type_name: "", // Ініціалізація поля назви
+    description: "", // Ініціалізація поля опису
+  });
+  const [errors, setErrors] = useState<{
+    type_name?: string; // Помилки для поля назви
+    description?: string; // Помилки для поля опису
+  }>({});
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  // Обробник зміни введення
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setTypeData((prevData) => ({ ...prevData, [name]: value })); // Оновлюємо стан
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" })); // Очищаємо помилки
+  };
 
-        // Проверка, заполнены ли все поля
-        const newErrors = {};
-        if (!typeData.type_name) {
-            newErrors.type_name = "Заповніть поле";
-        }
-        if (!typeData.description) {
-            newErrors.description = "Заповніть поле";
-        }
+  // Обробник відправлення форми
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // Запобігаємо перезавантаженню сторінки
 
-        // Если есть ошибки, обновляем состояние и выходим из функции
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
+    // Перевірка, чи заповнені всі поля
+    const newErrors: { type_name?: string; description?: string } = {};
+    if (!typeData.type_name) {
+      newErrors.type_name = "Заповніть поле"; // Помилка для назви
+    }
+    if (!typeData.description) {
+      newErrors.description = "Заповніть поле"; // Помилка для опису
+    }
 
-        try {
-            await axios.post("http://localhost:8080/api/recipe-types", typeData);
-            alert("Тип рецепта успішно додано");
-            window.location.href = "/types";
-        } catch (error) {
-            console.error("Помилка додавання типу рецепта", error);
-        }
-    };
+    // Якщо є помилки, оновлюємо стан і виходимо з функції
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-    return (
-        <>
-            <Header />
-            <div className="mx-[15vw]">
-                <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">Додавання нового типу рецепта</h1>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label>
-                            Назва:
-                            <input
-                                type="text"
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                                name="type_name"
-                                value={typeData.type_name}
-                                onChange={handleInputChange}
-                            />
-                        </label>
-                        {errors.type_name && <div className="text-red-500">{errors.type_name}</div>}
-                    </div>
-                    <div>
-                        <label>
-                            Опис:
-                            <textarea
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                                name="description"
-                                value={typeData.description}
-                                onChange={handleInputChange}
-                            />
-                        </label>
-                        {errors.description && <div className="text-red-500">{errors.description}</div>}
-                    </div>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md">Додати</button>
-                </form>
-            </div>
-        </>
-    );
+    try {
+      // Надсилаємо запит на сервер
+      await axios.post("http://localhost:8080/api/recipe-types", typeData);
+      alert("Тип рецепта успішно додано"); // Повідомлення про успіх
+      window.location.href = "/types"; // Перенаправлення на сторінку типів
+    } catch (error) {
+      console.error("Помилка додавання типу рецепта", error); // Лог помилки
+    }
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="mx-[15vw]">
+        <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
+          Додавання нового типу рецепта
+        </h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label>
+              Назва:
+              <input
+                type="text"
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                name="type_name"
+                value={typeData.type_name}
+                onChange={handleInputChange}
+              />
+            </label>
+            {errors.type_name && (
+              <div className="text-red-500">{errors.type_name}</div>
+            )}
+          </div>
+          <div>
+            <label>
+              Опис:
+              <textarea
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                name="description"
+                value={typeData.description}
+                onChange={handleInputChange}
+              />
+            </label>
+            {errors.description && (
+              <div className="text-red-500">{errors.description}</div>
+            )}
+          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+          >
+            Додати
+          </button>
+        </form>
+      </div>
+    </>
+  );
 };
 
 export default AddRecipeType;

@@ -16,16 +16,16 @@ interface RecipeType {
 interface Recipe {
   title: string;
   content: string;
-  ingredients: Ingredient[];
-  type_id: number; // Додано поле для типу рецепта
-  cooking_time: number; // Додано поле для часу приготування
+  ingredients: string[];
+  type_id: number;
+  cooking_time: number;
 }
 
 const ChangeRecipePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Отримання параметра id з URL
+  const { id } = useParams<{ id: string }>(); // Отримуємо id з URL
   const [recipe, setRecipe] = useState<Recipe | null>(null); // Стан для рецепта
-  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]); // Всі доступні інгредієнти
-  const [allTypes, setAllTypes] = useState<RecipeType[]>([]); // Всі доступні типи рецептів
+  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]); // Усі доступні інгредієнти
+  const [allTypes, setAllTypes] = useState<RecipeType[]>([]); // Усі доступні типи рецептів
   const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]); // Вибрані інгредієнти
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null); // Вибраний тип рецепта
   const [title, setTitle] = useState(""); // Назва рецепта
@@ -37,7 +37,7 @@ const ChangeRecipePage: React.FC = () => {
   const [cookingTimeError, setCookingTimeError] = useState<string | null>(null); // Помилка для часу приготування
   const navigate = useNavigate(); // Хук для навігації
 
-  //? Функція для отримання деталей рецепта, всіх доступних інгредієнтів і типів рецептів
+  //? Функція для отримання деталей рецепту, всіх доступних інгредієнтів та типів рецептів
   const fetchRecipeDetails = useCallback(async () => {
     try {
       const [recipeResponse, ingredientsResponse, typesResponse] =
@@ -52,13 +52,21 @@ const ChangeRecipePage: React.FC = () => {
       setRecipe(recipeData);
       setTitle(recipeData.title);
       setContent(recipeData.content);
-      setSelectedIngredients(
-        recipeData.ingredients.map((ing: Ingredient) => ing.id)
-      );
+
+      const existingIngredients = recipeData.ingredients
+        .map((name: string) => {
+          const ingredient = ingredientsResponse.data.find(
+            (ing: Ingredient) => ing.name === name
+          );
+          return ingredient ? ingredient.id : null; // Вертаємо id или null
+        })
+        .filter((id): id is number => id !== null); // Фільтруємо лише існуючі ID
+
+      setSelectedIngredients(existingIngredients); // Встановлюємо вибрані інгредієнти
       setAllIngredients(ingredientsResponse.data);
-      setAllTypes(typesResponse.data); // Зберігаємо типи в стан
-      setSelectedTypeId(recipeData.type_id); // Встановлюємо вибраний тип рецепта
-      setCookingTime(formatCookingTime(recipeData.cooking_time)); // Встановлюємо час приготування як рядок
+      setAllTypes(typesResponse.data);
+      setSelectedTypeId(recipeData.type_id);
+      setCookingTime(formatCookingTime(recipeData.cooking_time));
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         setError(
@@ -74,30 +82,29 @@ const ChangeRecipePage: React.FC = () => {
     fetchRecipeDetails();
   }, [fetchRecipeDetails]);
 
-  //? Функція для форматування часу приготування з хвилин у формат чч:мм
+  //? Функція для форматування часу приготування з хвилин до формату годгод:хвхв
   const formatCookingTime = (timeInMinutes: number) => {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
-    return `${hours}:${minutes.toString().padStart(2, "0")}`; // Форматуємо як чч:мм
+    return `${hours}:${minutes.toString().padStart(2, "0")}`; // Формуємо як годгод:хвхв
   };
 
-  //? Функція для перемикання вибору інгредієнта
+  //? Функція перемикання вибору інгредієнта
   const toggleIngredientSelection = (ingredientId: number) => {
     setSelectedIngredients(
       (prevSelected) =>
         prevSelected.includes(ingredientId)
-          ? prevSelected.filter((id) => id !== ingredientId) // Видаляємо вибраний інгредієнт
+          ? prevSelected.filter((id) => id !== ingredientId) // Видаляємо вибраний інгредієн
           : [...prevSelected, ingredientId] // Додаємо інгредієнт
     );
   };
 
-  //? Функція для оновлення рецепта
+  //? Функція оновлення рецепта
   const handleUpdateRecipe = async () => {
-    // Скидання помилок
     setError(null);
     setIngredientError(null);
     setTypeError(null);
-    setCookingTimeError(null); // Скидаємо помилку часу
+    setCookingTimeError(null);
 
     // Валідація форми
     if (!title.trim()) {
@@ -120,7 +127,7 @@ const ChangeRecipePage: React.FC = () => {
     // Валідація часу приготування
     const timeParts = cookingTime.split(":");
     if (timeParts.length !== 2) {
-      setCookingTimeError("Введіть час у форматі чч:мм або мм:чч."); // Помилка для некоректного формату
+      setCookingTimeError("Введіть час у форматі годгод:хвхв або 0:хвхв.");
       return;
     } else {
       const hours = parseInt(timeParts[0], 10);
@@ -133,7 +140,7 @@ const ChangeRecipePage: React.FC = () => {
         minutes < 0 ||
         minutes >= 60
       ) {
-        setCookingTimeError("Введіть у коректній формі, будь ласка."); // Помилка для некоректного часу
+        setCookingTimeError("Введіть у коректній формі, будь ласка.");
         return;
       }
     }
@@ -144,18 +151,18 @@ const ChangeRecipePage: React.FC = () => {
       title,
       content,
       ingredients: validIngredients,
-      type_id: selectedTypeId, // Додаємо вибраний тип рецепта
+      type_id: selectedTypeId, // Додаємо обраний тип рецепту
       cooking_time:
         (parseInt(timeParts[0], 10) || 0) * 60 +
-        (parseInt(timeParts[1], 10) || 0), // Перетворюємо час у хвилини
+        (parseInt(timeParts[1], 10) || 0), // Перетворимо час на хвилины
     };
 
-    console.log("Оновлений рецепт:", updatedRecipe);
+    //* console.log("Оновлений рецепт:", updatedRecipe);
 
     try {
       await axios.put(`http://localhost:8080/api/recipe/${id}`, updatedRecipe, {
         headers: {
-          "Content-Type": "application/json", // Вказуємо тип контенту
+          "Content-Type": "application/json", // Вказується тип контенту
         },
       });
 
@@ -179,7 +186,7 @@ const ChangeRecipePage: React.FC = () => {
     }
   };
 
-  //? Якщо рецепт або дані ще не завантажені
+  // Якщо рецепт чи дані ще не завантажені
   if (!recipe || allIngredients.length === 0 || allTypes.length === 0) {
     return <div>Завантаження...</div>;
   }
