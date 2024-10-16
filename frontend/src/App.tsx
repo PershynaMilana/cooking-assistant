@@ -13,6 +13,9 @@ import CreateRecipePage from "./pages/CreateRecipePage.tsx";
 import RecipeDetailsPage from "./pages/RecipeDetailsPage.tsx";
 import ChangeRecipePage from "./pages/ChangeRecipePage.tsx";
 import StatsPage from "./pages/StatsPage.tsx";
+import TypesPage from "./pages/TypesPage.tsx";
+import EditRecipeType from "./pages/EditRecipeType.tsx";
+import AddRecipeType from "./pages/AddTypePage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -23,6 +26,9 @@ const App: React.FC = () => {
       <Route path="/registration" element={<RegisterPage />} />
       {/* main */}
       <Route path="/main" element={<MainPage />} />
+        <Route path="/types" element={<TypesPage />} />
+        <Route path="/types/:id" element={<EditRecipeType />} />
+        <Route path="/add-type" element={<AddRecipeType />} />
       <Route path="/add-recipe" element={<CreateRecipePage />} />
       <Route path="/recipe/:id" element={<RecipeDetailsPage />} />
       <Route path="/change-recipe/:id" element={<ChangeRecipePage />} />

@@ -62,6 +62,26 @@ const StatsPage: React.FC = () => {
     fetchStats();
   }, []);
 
+
+  // useEffect(() => {
+  //   const fetchStats2 = async () => {
+  //     try {
+  //       // Получение данных с бэкенда
+  //       const response = await axios.get("http://localhost:8080/api/recipes-stats");
+  //       const { fastestRecipe, slowestRecipe, typeStats } = response.data;
+  //       console.log(response)
+  //
+  //       setFastestRecipe(fastestRecipe);
+  //       setSlowestRecipe(slowestRecipe);
+  //       setStats(typeStats);
+  //     } catch (error) {
+  //       console.error("Ошибка при получении статистики:", error);
+  //     }
+  //   };
+  //
+  //   fetchStats2();
+  // }, []);
+
   //? Налаштування для графіку
   const chartOptions = {
     chart: {

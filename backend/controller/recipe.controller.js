@@ -300,6 +300,76 @@ class RecipeController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  //? Получение самой быстрой и самой длинной рецептуры, а также статистики по типам
+  async getRecipesStats(req, res) {
+    try {
+      const { rows: fastestRecipe } = await db.query(
+          `SELECT r.*, rt.type_name as "typeName"
+       FROM recipes r
+       JOIN recipe_types rt ON r.type_id = rt.id
+       ORDER BY r.cooking_time ASC LIMIT 1`
+      );
+
+      const { rows: slowestRecipe } = await db.query(
+          `SELECT r.*, rt.type_name as "typeName"
+       FROM recipes r
+       JOIN recipe_types rt ON r.type_id = rt.id
+       ORDER BY r.cooking_time DESC LIMIT 1`
+      );
+
+      const { rows: typeStats } = await db.query(
+          `SELECT rt.type_name as "typeName", COUNT(*) as count
+       FROM recipes r
+       JOIN recipe_types rt ON r.type_id = rt.id
+       GROUP BY rt.type_name`
+      );
+
+      res.json({
+        fastestRecipe: fastestRecipe[0],
+        slowestRecipe: slowestRecipe[0],
+        typeStats,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  //? Видалення типу рецепта
+  async deleteRecipeType(req, res) {
+    const { id } = req.params;
+
+    try {
+      // Спочатку видаляємо всі рецепти, які належать до цього типу
+      await db.query("DELETE FROM recipe_ingredients WHERE recipe_id IN (SELECT id FROM recipes WHERE type_id = $1)", [id]);
+      await db.query("DELETE FROM recipes WHERE type_id = $1", [id]);
+
+      // Видаляємо сам тип рецепта
+      const result = await db.query("DELETE FROM recipe_types WHERE id = $1 RETURNING *", [id]);
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Тип рецепта не знайдено" });
+      }
+
+      res.json({ message: "Тип рецепта та всі пов'язані рецепти успішно видалено" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  async createRecipeType(req, res) {
+    const { type_name, description } = req.body;
+
+    try {
+      const newType = await db.query(
+          `INSERT INTO recipe_types (type_name, description) VALUES ($1, $2) RETURNING *`,
+          [type_name, description]
+      );
+      res.json(newType.rows[0]);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
 }
 
 module.exports = new RecipeController();

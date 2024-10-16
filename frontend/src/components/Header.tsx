@@ -22,26 +22,31 @@ const Header: React.FC = () => {
               <Link to="/stats" className="font-montserratRegular text-l">
                 Статистика
               </Link>
-            </li>{" "}
+            </li>
+            <li>
+              <Link to="/types" className="font-montserratRegular text-l">
+                Типи
+              </Link>
+            </li>
             {/* Добавлена ссылка на статистику */}
           </div>
 
           {/* Права частина з елементами, притиснутими праворуч */}
-          <div className="flex space-x-14 mr-[5vw]">
-            <li>
-              <Link to="/login" className="font-montserratRegular text-l">
-                Вхід
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/registration"
-                className="bg-dark-purple px-5 py-3 rounded-full font-montserratRegular text-l"
-              >
-                Реєстрація
-              </Link>
-            </li>
-          </div>
+          {/*<div className="flex space-x-14 mr-[5vw]">*/}
+          {/*  <li>*/}
+          {/*    <Link to="/login" className="font-montserratRegular text-l">*/}
+          {/*      Вхід*/}
+          {/*    </Link>*/}
+          {/*  </li>*/}
+          {/*  <li>*/}
+          {/*    <Link*/}
+          {/*      to="/registration"*/}
+          {/*      className="bg-dark-purple px-5 py-3 rounded-full font-montserratRegular text-l"*/}
+          {/*    >*/}
+          {/*      Реєстрація*/}
+          {/*    </Link>*/}
+          {/*  </li>*/}
+          {/*</div>*/}
         </ul>
       </nav>
     </header>

@@ -22,7 +22,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   const formatCookingTime = (timeInMinutes: number) => {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
-    return `${hours}:${minutes.toString().padStart(2, "0")}`; // Форматируем как чч:мм
+    return `${hours} год : ${minutes.toString().padStart(2, "0")} хв`; // Форматируем как чч:мм
   };
 
   return (

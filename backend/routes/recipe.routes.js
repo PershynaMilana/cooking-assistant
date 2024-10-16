@@ -29,7 +29,15 @@ router.post("/recipe-type", recipeController.createRecipeType);
 // Оновлення типу рецепта
 router.put("/recipe-type/:id", recipeController.updateRecipeType);
 
+
 // Новий маршрут для фільтрації рецептів за типами і датами
 router.get("/recipes-by-filters", recipeController.searchRecipes);
+
+router.get("/recipes-stats", recipeController.getRecipesStats);
+
+// Видалення типу рецепта
+router.delete("/recipe-type/:id", recipeController.deleteRecipeType);
+
+router.post("/recipe-types", recipeController.createRecipeType);
 
 module.exports = router;
