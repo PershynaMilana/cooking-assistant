@@ -49,7 +49,6 @@ const AddRecipeType: React.FC = () => {
     try {
       // Надсилаємо запит на сервер
       await axios.post("http://localhost:8080/api/recipe-types", typeData);
-      alert("Тип рецепта успішно додано"); // Повідомлення про успіх
       window.location.href = "/types"; // Перенаправлення на сторінку типів
     } catch (error) {
       console.error("Помилка додавання типу рецепта", error); // Лог помилки
