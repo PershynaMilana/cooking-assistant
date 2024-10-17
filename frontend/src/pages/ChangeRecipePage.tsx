@@ -44,7 +44,7 @@ const ChangeRecipePage: React.FC = () => {
         await Promise.all([
           axios.get(`http://localhost:8080/api/recipe/${id}`),
           axios.get("http://localhost:8080/api/ingredients"),
-          axios.get("http://localhost:8080/api/recipe-types"), // Отримуємо типи рецептів
+          axios.get("http://localhost:8080/api/recipe-types"),
         ]);
 
       const recipeData: Recipe = recipeResponse.data;
@@ -58,12 +58,17 @@ const ChangeRecipePage: React.FC = () => {
           const ingredient = ingredientsResponse.data.find(
             (ing: Ingredient) => ing.name === name
           );
-          return ingredient ? ingredient.id : null; // Вертаємо id или null
+          return ingredient ? ingredient.id : null;
         })
-        .filter((id): id is number => id !== null); // Фільтруємо лише існуючі ID
+        .filter((id): id is number => id !== null);
 
-      setSelectedIngredients(existingIngredients); // Встановлюємо вибрані інгредієнти
-      setAllIngredients(ingredientsResponse.data);
+      // Сортуємо інгредієнти за алфавітом перед встановленням у стан
+      const sortedIngredients = ingredientsResponse.data.sort(
+        (a: Ingredient, b: Ingredient) => a.name.localeCompare(b.name)
+      );
+
+      setSelectedIngredients(existingIngredients);
+      setAllIngredients(sortedIngredients); // Встановлюємо відсортовані інгредієнти
       setAllTypes(typesResponse.data);
       setSelectedTypeId(recipeData.type_id);
       setCookingTime(formatCookingTime(recipeData.cooking_time));
@@ -276,7 +281,7 @@ const ChangeRecipePage: React.FC = () => {
                 <button
                   key={ingredient.id}
                   type="button"
-                  className={`px-4 py-2 rounded-md ${
+                  className={`py-2 px-4 rounded-full ${
                     selectedIngredients.includes(ingredient.id)
                       ? "bg-blue-500 text-white" // Вибраний інгредієнт
                       : "bg-gray-200 text-gray-700" // Невибраний інгредієнт
@@ -300,7 +305,7 @@ const ChangeRecipePage: React.FC = () => {
             <button
               type="button"
               onClick={handleUpdateRecipe}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
+              className="bg-green-500 text-white py-2 px-4 rounded-full"
             >
               Оновити
             </button>

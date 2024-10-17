@@ -35,18 +35,37 @@ const MainPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<string>("asc"); // Порядок сортування рецептів
 
   //? Функція для отримання рецептів по фільтрам
+  const sortRecipes = useCallback(
+    (recipes: Recipe[]): Recipe[] => {
+      return recipes.sort((a, b) => {
+        if (sortOrder === "asc") {
+          if (a.cooking_time === b.cooking_time) {
+            return a.title.localeCompare(b.title);
+          }
+          return a.cooking_time - b.cooking_time;
+        } else {
+          if (a.cooking_time === b.cooking_time) {
+            return a.title.localeCompare(b.title);
+          }
+          return b.cooking_time - a.cooking_time;
+        }
+      });
+    },
+    [sortOrder]
+  );
+
   const fetchRecipes = useCallback(async () => {
     setError(null);
     setNoRecipes(false);
     setDateError(null);
 
-    // Перевіряємо правильність вибраного діапазону дат
+    //? Перевіряємо правильність вибраного діапазону дат
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
       setDateError("Початкова дата може бути пізніше кінцевої дати.");
       return;
     }
 
-    const today = new Date(); // Сьогоднішня дата
+    const today = new Date();
     if (new Date(startDate) > today || new Date(endDate) > today) {
       setDateError("Оберіть валідний проміжок часу.");
       return;
@@ -71,7 +90,9 @@ const MainPage: React.FC = () => {
       if (response.data.length === 0) {
         setNoRecipes(true);
       } else {
-        setRecipes(response.data); // Зберігаємо рецепти
+        // Сортуємо рецепти перед їх збереженням
+        const sortedRecipes = sortRecipes(response.data);
+        setRecipes(sortedRecipes);
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -84,7 +105,14 @@ const MainPage: React.FC = () => {
         setError("Невідома помилка");
       }
     }
-  }, [ingredientName, selectedTypes, startDate, endDate, sortOrder]);
+  }, [
+    ingredientName,
+    selectedTypes,
+    startDate,
+    endDate,
+    sortOrder,
+    sortRecipes,
+  ]);
 
   //? Функція для отримання описів вибраних типів рецептів
   useEffect(() => {
@@ -121,7 +149,6 @@ const MainPage: React.FC = () => {
       .join(", ");
   };
 
-  //? Функція для відображення описів вибраних типів
   const getFilteredDescriptions = () => {
     return typesDescriptions
       .filter((type) => selectedTypes.includes(type.id))

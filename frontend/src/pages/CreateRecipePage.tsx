@@ -30,7 +30,10 @@ const CreateRecipePage: React.FC = () => {
   const fetchIngredients = async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/ingredients");
-      setAllIngredients(response.data);
+      const sortedIngredients = response.data.sort(
+        (a: Ingredient, b: Ingredient) => a.name.localeCompare(b.name, "uk") // Сортуємо за ім'ям, враховуючи українську мову
+      );
+      setAllIngredients(sortedIngredients);
     } catch (error: unknown) {
       setError((error as Error).message); // Обробка помилки
     }

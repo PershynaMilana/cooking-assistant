@@ -139,9 +139,12 @@ const RecipeDetailsPage: React.FC = () => {
           Інгредієнти:
         </h3>
         <ul className="text-relative-ps list-disc font-montserratRegular pl-[3vw]">
-          {recipe.ingredients.map((ingredient, index) => (
-            <li key={index}>{ingredient}</li>
-          ))}
+          {recipe.ingredients
+            .slice() // Робимо копію масиву, щоб не мутувати оригінал
+            .sort((a, b) => a.localeCompare(b)) // Сортуємо інгредієнти
+            .map((ingredient, index) => (
+              <li key={index}>{ingredient}</li>
+            ))}
         </ul>
 
         {/* Відображаємо час приготування та дату створення */}

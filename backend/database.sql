@@ -28,7 +28,6 @@ CREATE TABLE
     FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
   );
 
---нове
 CREATE TABLE
   recipe_types (
     id SERIAL PRIMARY KEY,
@@ -77,3 +76,17 @@ ADD COLUMN creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 ALTER TABLE recipes
 ADD COLUMN cooking_time INTEGER;
+
+INSERT INTO
+  ingredients (name)
+VALUES
+  ('Базилік'),
+  ('Часник'),
+  ('Гриби'),
+  ('Сметана'),
+  ('Куряче філе'),
+  ('Молоко'),
+  ('Мед'),
+  ('Борошно'),
+  ('Цукор'),
+  ('Рис');

@@ -28,7 +28,7 @@ const EditRecipeType: React.FC = () => {
         `http://localhost:8080/api/recipe-type/${id}`
       );
       setTypeData(response.data);
-      //? console.log(response.data);
+      //? console.log(response.data); для логу дати рецепта, зараз не потрібно
       setIsLoading(false); // Дані завантажені, знімаємо стан завантаження
     } catch (error) {
       console.error("Помилка завантаження типу рецепта", error);
