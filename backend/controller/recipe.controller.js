@@ -138,21 +138,28 @@ class RecipeController {
     }
   }
 
-  //? Фільтрація рецептів за інгредієнтами, типами та датами
+  //? Фільтрація рецептів за інгредієнтами, типами, датами та часом приготування
   async searchRecipes(req, res) {
-    const { ingredient_name, type_ids, start_date, end_date, sort_order } =
-      req.query;
+    const {
+      ingredient_name,
+      type_ids,
+      start_date,
+      end_date,
+      min_cooking_time,
+      max_cooking_time,
+      sort_order,
+    } = req.query;
 
     try {
       let baseQuery = `
-        SELECT r.id, r.title, r.content, r.person_id, r.type_id, r.creation_date, r.cooking_time, 
-               rt.type_name, json_agg(json_build_object('id', i.id, 'name', i.name)) AS ingredients
-        FROM recipes r
-        LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
-        LEFT JOIN ingredients i ON ri.ingredient_id = i.id
-        LEFT JOIN recipe_types rt ON r.type_id = rt.id
-        WHERE 1=1
-      `;
+      SELECT r.id, r.title, r.content, r.person_id, r.type_id, r.creation_date, r.cooking_time, 
+             rt.type_name, json_agg(json_build_object('id', i.id, 'name', i.name)) AS ingredients
+      FROM recipes r
+      LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+      LEFT JOIN ingredients i ON ri.ingredient_id = i.id
+      LEFT JOIN recipe_types rt ON r.type_id = rt.id
+      WHERE 1=1
+    `;
 
       const params = [];
       let paramIndex = 1;
@@ -185,7 +192,21 @@ class RecipeController {
         paramIndex++;
       }
 
-      baseQuery += ` GROUP BY r.id, rt.type_name`; // Додаємо r.id в GROUP BY
+      // Додаємо фільтрацію за мінімальним часом приготування
+      if (min_cooking_time) {
+        baseQuery += ` AND r.cooking_time >= $${paramIndex}`;
+        params.push(Number(min_cooking_time));
+        paramIndex++;
+      }
+
+      // Додаємо фільтрацію за максимальним часом приготування
+      if (max_cooking_time) {
+        baseQuery += ` AND r.cooking_time <= $${paramIndex}`;
+        params.push(Number(max_cooking_time));
+        paramIndex++;
+      }
+
+      baseQuery += ` GROUP BY r.id, rt.type_name`;
 
       if (sort_order) {
         baseQuery += ` ORDER BY r.cooking_time ${

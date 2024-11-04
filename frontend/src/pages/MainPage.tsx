@@ -4,8 +4,10 @@ import RecipeCard from "../components/RecipeCard";
 import Header from "../components/Header.tsx";
 import SearchComponent from "../components/SearchComponent.tsx";
 import RecipeTypeFilter from "../components/RecipeTypeFilter";
+import DateFilterDropdown from "../components/DateFilterDropdown.tsx";
 import axios from "axios";
 
+// Інтерфейс для опису структури об'єкта рецепта
 interface Recipe {
   id: number;
   title: string;
@@ -14,6 +16,7 @@ interface Recipe {
   cooking_time: number;
 }
 
+// Інтерфейс для опису структури об'єкта типу рецепта
 interface RecipeType {
   id: number;
   type_name: string;
@@ -21,55 +24,45 @@ interface RecipeType {
 }
 
 const MainPage: React.FC = () => {
-  const [recipes, setRecipes] = useState<Recipe[]>([]); // Список рецептів
-  const [selectedTypes, setSelectedTypes] = useState<number[]>([]); // Вибрані типи рецептів
-  const [typesDescriptions, setTypesDescriptions] = useState<RecipeType[]>([]); // Опис вибраних типів
-  const [error, setError] = useState<string | null>(null); // Загальні помилки
-  const [dateError, setDateError] = useState<string | null>(null); // Помилки пов'язані з датами
-  const [noRecipes, setNoRecipes] = useState<boolean>(false); // Чи є рецепти в результатах пошуку?
-  const [searchParams] = useSearchParams(); // Параметри пошуку
-  const ingredientName = searchParams.get("ingredient_name"); // Назва інгредієнта з параметрів пошуку
+  // Стани для зберігання списку рецептів, обраних типів, описів типів тощо
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
+  const [typesDescriptions, setTypesDescriptions] = useState<RecipeType[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [noRecipes, setNoRecipes] = useState<boolean>(false);
+  const [searchParams] = useSearchParams();
+  const ingredientName = searchParams.get("ingredient_name");
 
-  const [startDate, setStartDate] = useState<string>(""); // Початкова дата для фільтрації
-  const [endDate, setEndDate] = useState<string>(""); // Кінцева дата для фільтрації
-  const [sortOrder, setSortOrder] = useState<string>("asc"); // Порядок сортування рецептів
+  // Стани для фільтрів за датою та часом приготування
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>("asc");
 
-  //? Функція для отримання рецептів по фільтрам
+  const [minCookingTime, setMinCookingTime] = useState<string>("");
+  const [maxCookingTime, setMaxCookingTime] = useState<string>("");
+
+  // Функція для сортування рецептів за часом приготування та назвою
   const sortRecipes = useCallback(
     (recipes: Recipe[]): Recipe[] => {
       return recipes.sort((a, b) => {
         if (sortOrder === "asc") {
-          if (a.cooking_time === b.cooking_time) {
-            return a.title.localeCompare(b.title);
-          }
-          return a.cooking_time - b.cooking_time;
+          return (
+            a.cooking_time - b.cooking_time || a.title.localeCompare(b.title)
+          );
         } else {
-          if (a.cooking_time === b.cooking_time) {
-            return a.title.localeCompare(b.title);
-          }
-          return b.cooking_time - a.cooking_time;
+          return (
+            b.cooking_time - a.cooking_time || a.title.localeCompare(b.title)
+          );
         }
       });
     },
     [sortOrder]
   );
 
+  // Функція для отримання рецептів із сервера з урахуванням фільтрів
   const fetchRecipes = useCallback(async () => {
     setError(null);
     setNoRecipes(false);
-    setDateError(null);
-
-    //? Перевіряємо правильність вибраного діапазону дат
-    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-      setDateError("Початкова дата може бути пізніше кінцевої дати.");
-      return;
-    }
-
-    const today = new Date();
-    if (new Date(startDate) > today || new Date(endDate) > today) {
-      setDateError("Оберіть валідний проміжок часу.");
-      return;
-    }
 
     try {
       const response = await axios.get(
@@ -81,26 +74,24 @@ const MainPage: React.FC = () => {
               selectedTypes.length > 0 ? selectedTypes.join(",") : undefined,
             start_date: startDate || undefined,
             end_date: endDate || undefined,
+            min_cooking_time: minCookingTime || undefined,
+            max_cooking_time: maxCookingTime || undefined,
             sort_order: sortOrder,
           },
         }
       );
 
-      // Якщо немає рецептів за вибраними фільтрами
+      // Перевірка, чи є рецепти у відповіді
       if (response.data.length === 0) {
         setNoRecipes(true);
       } else {
-        // Сортуємо рецепти перед їх збереженням
         const sortedRecipes = sortRecipes(response.data);
         setRecipes(sortedRecipes);
       }
     } catch (error: unknown) {
+      // Обробка помилок при запиті
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 404) {
-          setNoRecipes(true);
-        } else {
-          setError(error.response?.data?.error || error.message);
-        }
+        setError(error.response?.data?.error || error.message);
       } else {
         setError("Невідома помилка");
       }
@@ -110,38 +101,39 @@ const MainPage: React.FC = () => {
     selectedTypes,
     startDate,
     endDate,
+    minCookingTime,
+    maxCookingTime,
     sortOrder,
     sortRecipes,
   ]);
 
-  //? Функція для отримання описів вибраних типів рецептів
+  // Виклик функції завантаження рецептів при першому рендері або зміні фільтрів
   useEffect(() => {
     fetchRecipes();
   }, [fetchRecipes]);
 
+  // Функція для завантаження описів типів рецептів
   useEffect(() => {
     const fetchTypesDescriptions = async () => {
       try {
         if (selectedTypes.length > 0) {
           const response = await axios.get(
             `http://localhost:8080/api/recipe-types`,
-            {
-              params: { ids: selectedTypes.join(",") },
-            }
+            { params: { ids: selectedTypes.join(",") } }
           );
           setTypesDescriptions(response.data);
         } else {
           setTypesDescriptions([]);
         }
       } catch (error) {
-        console.error("Помилка при отриманні описаних типів рецептів.", error);
+        console.error("Помилка при отриманні описів типів рецептів.", error);
       }
     };
 
     fetchTypesDescriptions();
   }, [selectedTypes]);
 
-  //? Функція для заголовка вибраних типів рецептів
+  // Функція для формування заголовка з обраних типів рецептів
   const getTypesHeader = () => {
     return typesDescriptions
       .filter((type) => selectedTypes.includes(type.id))
@@ -149,6 +141,7 @@ const MainPage: React.FC = () => {
       .join(", ");
   };
 
+  // Функція для відображення описів обраних типів рецептів
   const getFilteredDescriptions = () => {
     return typesDescriptions
       .filter((type) => selectedTypes.includes(type.id))
@@ -163,6 +156,7 @@ const MainPage: React.FC = () => {
     <div>
       <Header />
       <div className="mx-[15vw]">
+        {/* Блок для компонентів фільтрації та пошуку */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
           <SearchComponent />
           <div className="ml-4 mt-4 sm:mt-0">
@@ -173,32 +167,65 @@ const MainPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Фільтрація за датами та сортування */}
+        {/* Блок для фільтрації за датою та часом приготування */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+          <DateFilterDropdown
+            startDate={startDate}
+            endDate={endDate}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+          />
+
+          {/* Поля для введення мінімального та максимального часу приготування */}
           <div className="flex items-center mb-2 sm:mb-0">
-            <label htmlFor="startDate" className="mr-2">
-              Початкова дата:
+            <label htmlFor="minCookingTime" className="mr-2">
+              Мін. час готовки:
             </label>
             <input
-              type="date"
-              id="startDate"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border rounded p-2"
+              type="number"
+              id="minCookingTime"
+              value={minCookingTime}
+              onChange={(e) => setMinCookingTime(e.target.value)}
+              placeholder="хвилини"
+              className="border rounded p-2 w-20"
+              min="0"
+              onKeyDown={(e) => {
+                if (e.key === "+" || e.key === "-") {
+                  e.preventDefault();
+                }
+              }}
+              onInput={(e) => {
+                const target = e.target as HTMLInputElement;
+                target.value = target.value.replace(/[^0-9]/g, "");
+              }}
             />
           </div>
+
           <div className="flex items-center mb-2 sm:mb-0">
-            <label htmlFor="endDate" className="mr-2">
-              Кінцева дата:
+            <label htmlFor="maxCookingTime" className="mr-2">
+              Макс. час готовки:
             </label>
             <input
-              type="date"
-              id="endDate"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border rounded p-2"
+              type="number"
+              id="maxCookingTime"
+              value={maxCookingTime}
+              onChange={(e) => setMaxCookingTime(e.target.value)}
+              placeholder="хвилини"
+              className="border rounded p-2 w-20"
+              min="1"
+              onKeyDown={(e) => {
+                if (e.key === "+" || e.key === "-") {
+                  e.preventDefault();
+                }
+              }}
+              onInput={(e) => {
+                const target = e.target as HTMLInputElement;
+                target.value = target.value.replace(/[^0-9]/g, "");
+              }}
             />
           </div>
+
+          {/* Вибір порядку сортування рецептів */}
           <div className="flex items-center mb-2 sm:mb-0">
             <label htmlFor="sortOrder" className="mr-2">
               Сортувати за часом:
@@ -215,31 +242,27 @@ const MainPage: React.FC = () => {
           </div>
         </div>
 
-        {dateError && <div className="text-red-500 mb-4">{dateError}</div>}
-
-        {/* Заголовок і фільтр рецептів */}
+        {/* Заголовок для списку рецептів */}
         <h1 className="text-relative-h3 font-normal font-montserratMedium p-4">
           {selectedTypes.length > 0
             ? `Рецепти: ${getTypesHeader()}`
             : "Всі рецепти"}
         </h1>
 
+        {/* Відображення описів типів, якщо вибрані */}
         {selectedTypes.length > 0 && (
           <div className="mb-4">{getFilteredDescriptions()}</div>
         )}
 
-        {/* Відображення результатів фільтрації */}
+        {/* Відображення повідомлення, якщо рецептів немає */}
         {noRecipes ? (
-          selectedTypes.length > 0 ? (
-            <div className="text-center text-gray-600 mb-4">
-              Не було створено таких рецептів.
-            </div>
-          ) : (
-            <div className="text-center text-gray-600 mb-4">
-              Створіть свій перший рецепт!
-            </div>
-          )
+          <div className="text-center text-gray-600 mb-4">
+            {selectedTypes.length > 0
+              ? "Не було створено таких рецептів."
+              : "Створіть свій перший рецепт!"}
+          </div>
         ) : (
+          // Відображення списку рецептів
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {recipes.map((recipe) => (
               <RecipeCard
@@ -254,6 +277,7 @@ const MainPage: React.FC = () => {
           </div>
         )}
 
+        {/* Відображення повідомлення про помилку */}
         {error && <div className="text-red-500 mb-4">Помилка: {error}</div>}
       </div>
     </div>

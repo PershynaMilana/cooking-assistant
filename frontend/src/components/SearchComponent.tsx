@@ -1,42 +1,72 @@
-import React, { useState, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import SearchIcon from '../assets/searchIcon.png';
+import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
+import SearchIcon from "../assets/searchIcon.png";
 
 const SearchComponent: React.FC = () => {
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const [, setSearchParams] = useSearchParams();
-    const inputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const location = useLocation();
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-    };
+  //? встановлення початкового терміну пошуку з параметрів пошуку URL-адрес
+  useEffect(() => {
+    const initialSearchTerm = searchParams.get("ingredient_name") || "";
+    setSearchTerm(initialSearchTerm);
+  }, [searchParams]);
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            setSearchParams({ ingredient_name: searchTerm }); // Передаємо значення через searchParams
-            setSearchTerm('');
-            if (inputRef.current) {
-                inputRef.current.blur();
-            }
-        }
-    };
+  //? видалення пошуку коли натискаємо на головну
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setSearchTerm("");
+      setSearchParams({});
+    }
+  }, [location, setSearchParams]);
 
-    return (
-        <div className="flex items-center w-full bg-perfect-pink my-[3vh] rounded-full p-2">
-            <div className="pr-3">
-                <img src={`${SearchIcon}`} alt={`img`} />
-            </div>
-            <input
-                type="text"
-                value={searchTerm}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                placeholder={`Пошук за інгредієнтом`}
-                className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
-                ref={inputRef}
-            />
-        </div>
-    );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSearchParams({ ingredient_name: searchTerm });
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
+    }
+  };
+
+  const handleReset = () => {
+    setSearchTerm("");
+    setSearchParams({});
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  return (
+    <div className="flex items-center w-full bg-perfect-pink my-[3vh] rounded-full p-2 relative">
+      <div className="pr-3">
+        <img src={SearchIcon} alt="Search Icon" />
+      </div>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={handleInputChange}
+        onKeyPress={handleKeyPress}
+        placeholder="Пошук за інгредієнтом"
+        className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
+        ref={inputRef}
+      />
+      {searchTerm && (
+        <button
+          onClick={handleReset}
+          className="absolute right-4 text-almost-black text-montserratMedium"
+        >
+          Скинути Пошук
+        </button>
+      )}
+    </div>
+  );
 };
 
 export default SearchComponent;
