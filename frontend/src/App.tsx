@@ -16,6 +16,7 @@ import StatsPage from "./pages/StatsPage.tsx";
 import TypesPage from "./pages/TypesPage.tsx";
 import EditRecipeType from "./pages/EditRecipeType.tsx";
 import AddRecipeType from "./pages/AddTypePage.tsx";
+import IngredientsPage from "./pages/IngredientsPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -26,14 +27,14 @@ const App: React.FC = () => {
       <Route path="/registration" element={<RegisterPage />} />
       {/* main */}
       <Route path="/main" element={<MainPage />} />
-        <Route path="/types" element={<TypesPage />} />
-        <Route path="/types/:id" element={<EditRecipeType />} />
-        <Route path="/add-type" element={<AddRecipeType />} />
+      <Route path="/types" element={<TypesPage />} />
+      <Route path="/types/:id" element={<EditRecipeType />} />
+      <Route path="/add-type" element={<AddRecipeType />} />
       <Route path="/add-recipe" element={<CreateRecipePage />} />
       <Route path="/recipe/:id" element={<RecipeDetailsPage />} />
       <Route path="/change-recipe/:id" element={<ChangeRecipePage />} />
-      <Route path="/stats" element={<StatsPage />} />{" "}
-      {/* Добавлен маршрут для статистики */}
+      <Route path="/stats" element={<StatsPage />} />
+      <Route path="/ingredients" element={<IngredientsPage />} />
       {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -3,6 +3,8 @@ const cors = require("cors");
 const userRouter = require("./routes/user.routes");
 const recipeRouter = require("./routes/recipe.routes");
 const typeRouter = require("./routes/type.routes");
+// const userIngredientsRouter = require("./routes/userIngredients.routes"); //TODO: finish this later, using userID
+const ingredientsRouter = require("./routes/ingredients.routes");
 
 const PORT = process.env.PORT || 8080;
 
@@ -19,5 +21,7 @@ app.use(express.json());
 app.use("/api", userRouter);
 app.use("/api", recipeRouter);
 app.use("/api", typeRouter);
+// app.use("/api", userIngredientsRouter); //TODO: finish this later, using userID
+app.use("/api", ingredientsRouter);
 
 app.listen(PORT, () => console.log(`server listening on ${PORT}`));

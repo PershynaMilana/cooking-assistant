@@ -90,3 +90,18 @@ VALUES
   ('Борошно'),
   ('Цукор'),
   ('Рис');
+
+CREATE TABLE
+  person_ingredients (
+    person_id INTEGER,
+    ingredient_id INTEGER,
+    PRIMARY KEY (person_id, ingredient_id),
+    FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+  ); --in progress
+
+CREATE TABLE
+  selected_ingredients (
+    ingredient_id INTEGER PRIMARY KEY,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+  ); 
