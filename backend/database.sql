@@ -98,22 +98,28 @@ CREATE TABLE
     PRIMARY KEY (person_id, ingredient_id),
     FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
     FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
-  ); --in progress
-
-CREATE TABLE
-  selected_ingredients (
-    ingredient_id INTEGER PRIMARY KEY,
-    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
   );
 
-
 -- milka changes
-
 ALTER TABLE person
-ALTER COLUMN name SET NOT NULL,
-ALTER COLUMN surname SET NOT NULL,
-ALTER COLUMN login SET NOT NULL,
-ALTER COLUMN password SET NOT NULL,
-ADD CONSTRAINT unique_login UNIQUE (login);
+ALTER COLUMN name
+SET
+  NOT NULL,
+ALTER COLUMN surname
+SET
+  NOT NULL,
+ALTER COLUMN login
+SET
+  NOT NULL,
+ALTER COLUMN password
+SET
+  NOT NULL,
+  ADD CONSTRAINT unique_login UNIQUE (login);
 
-      -- i lovvvveeee youuuu <3
+--! i lovvvveeee youuuu <3
+
+--TODO: валидация на регистрации на логине + перевести все на укр
+
+--TODO: рецепты показывались только пользователя и отдельной вкладкой добавить свои рецепты
+
+--TODO: когда пользователь удаляется, то удалять все его рецепты + ингридиенты
