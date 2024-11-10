@@ -1,6 +1,7 @@
 const db = require("../db");
 
 class TypeController {
+
   //? Створення нового типу рецепта
   async createRecipeType(req, res) {
     const { type_name, description } = req.body;
@@ -15,6 +16,7 @@ class TypeController {
       res.status(500).json({ error: error.message });
     }
   }
+
   //? Отримання всіх типів рецептів
   async getAllRecipeTypes(req, res) {
     try {
@@ -51,14 +53,12 @@ class TypeController {
     const { id } = req.params;
 
     try {
-      // Спочатку видаляємо всі рецепти, які належать до цього типу
       await db.query(
         "DELETE FROM recipe_ingredients WHERE recipe_id IN (SELECT id FROM recipes WHERE type_id = $1)",
         [id]
       );
       await db.query("DELETE FROM recipes WHERE type_id = $1", [id]);
 
-      // Видаляємо сам тип рецепта
       const result = await db.query(
         "DELETE FROM recipe_types WHERE id = $1 RETURNING *",
         [id]
@@ -75,7 +75,8 @@ class TypeController {
       res.status(500).json({ error: error.message });
     }
   }
-  //? Получение типа рецепта по ID
+
+  //? Отримання типа рецепта по ID
   async getRecipeTypeById(req, res) {
     const typeId = req.params.id;
 

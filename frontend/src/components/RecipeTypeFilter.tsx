@@ -23,14 +23,21 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
   //? Отримуємо список типів рецептів із бази даних
   useEffect(() => {
     const fetchTypes = async () => {
+      const token = localStorage.getItem("authToken");  // Получаем токен из localStorage
+
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/recipe-types"
+            "http://localhost:8080/api/recipe-types",
+            {
+              headers: {
+                Authorization: token ? `Bearer ${token}` : "", // Добавляем токен в заголовок
+              },
+            }
         );
-        setTypes(response.data); // Оновлюємо стан типами рецептів
+        setTypes(response.data); // Обновляем состояние с типами рецептов
       } catch (error) {
-        // Обробка помилки при отриманні даних
-        console.error("Помилка при отриманні типів рецептів:", error);
+        // Обработка ошибки при получении данных
+        console.error("Ошибка при получении типов рецептов:", error);
       }
     };
 

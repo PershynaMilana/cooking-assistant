@@ -104,4 +104,16 @@ CREATE TABLE
   selected_ingredients (
     ingredient_id INTEGER PRIMARY KEY,
     FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
-  ); 
+  );
+
+
+-- milka changes
+
+ALTER TABLE person
+ALTER COLUMN name SET NOT NULL,
+ALTER COLUMN surname SET NOT NULL,
+ALTER COLUMN login SET NOT NULL,
+ALTER COLUMN password SET NOT NULL,
+ADD CONSTRAINT unique_login UNIQUE (login);
+
+      -- i lovvvveeee youuuu <3

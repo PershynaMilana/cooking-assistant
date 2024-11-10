@@ -31,7 +31,7 @@ const Modal: React.FC<ModalProps> = ({
       onClick={handleOverlayClick} // Обробник кліка на затемненій зоні
     >
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 className="text-lg font-semibold mb-4 text-center">{title}</h2>{" "}
+        <h2 className="text-lg font-semibold font-montserratRegular mb-4 text-center">{title}</h2>{" "}
         {/* Вирівняний текст заголовка */}
         <p className="mb-6 text-center">{message}</p>{" "}
         {/* Вирівняний текст повідомлення */}

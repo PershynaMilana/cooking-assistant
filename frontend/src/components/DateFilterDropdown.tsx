@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 
-// Інтерфейс для властивостей DateFilterDropdown
 interface DateFilterDropdownProps {
   startDate: string;
   endDate: string;
@@ -18,7 +17,6 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
   const [dateError, setDateError] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  // Закриття випадаючого меню при кліку поза його межами
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -36,7 +34,7 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
   // Перевірка валідності дат
   const validateDates = (start: string, end: string) => {
     console.log("Перевірка дат", { start, end });
-    setDateError(null); // Скидання повідомлення про помилку перед перевіркою
+    setDateError(null);
 
     // Перевірка, чи не є початкова дата пізнішою за кінцеву
     if (start && end && new Date(start) > new Date(end)) {

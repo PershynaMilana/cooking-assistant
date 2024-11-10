@@ -256,7 +256,7 @@ class RecipeController {
     }
   }
 
-  //? Получение самой быстрой и самой длинной рецептуры, а также статистики по типам
+  //? Отримання найшвидшого та найдовшого рецепту, а також статистики за типами
   async getRecipesStats(req, res) {
     try {
       const { rows: fastestRecipe } = await db.query(
