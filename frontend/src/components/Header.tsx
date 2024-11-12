@@ -76,6 +76,11 @@ const Header: React.FC = () => {
               </Link>
             </li>
             <li>
+              <Link to="/my-recipes" className="font-montserratRegular text-l">
+                Мої рецепти
+              </Link>
+            </li>
+            <li>
               <Link to="/add-recipe" className="font-montserratRegular text-l">
                 Додати рецепт
               </Link>
@@ -107,21 +112,21 @@ const Header: React.FC = () => {
                 </button>
             ) : (
 
-              <div className="flex space-x-14 mr-[5vw]">
-                <li>
-                  <Link to="/login" className="font-montserratRegular text-l">
-                    Вхід
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/registration"
-                    className="bg-dark-purple px-5 py-3 rounded-full font-montserratRegular text-l"
-                  >
-                    Реєстрація
-                  </Link>
-                </li>
-              </div>
+                <div className="flex space-x-14 mr-[5vw]">
+                  <li>
+                    <Link to="/login" className="font-montserratRegular text-l">
+                      Вхід
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                        to="/registration"
+                        className="bg-dark-purple px-5 py-3 rounded-full font-montserratRegular text-l"
+                    >
+                      Реєстрація
+                    </Link>
+                  </li>
+                </div>
             )}
           </div>
 

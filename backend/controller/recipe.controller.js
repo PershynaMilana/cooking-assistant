@@ -222,6 +222,88 @@ class RecipeController {
     }
   }
 
+  //? Фільтрація рецептів за інгредієнтами, типами, датами, часом приготування та person_id
+  async searchPersonRecipes(req, res) {
+    const {
+      ingredient_name,
+      type_ids,
+      start_date,
+      end_date,
+      min_cooking_time,
+      max_cooking_time,
+      sort_order,
+    } = req.query;
+
+    const { id: person_id } = req.params;
+
+    try {
+      let baseQuery = `
+        SELECT r.id, r.title, r.content, r.person_id, r.type_id, r.creation_date, r.cooking_time,
+               rt.type_name, json_agg(json_build_object('id', i.id, 'name', i.name)) AS ingredients
+        FROM recipes r
+               LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+               LEFT JOIN ingredients i ON ri.ingredient_id = i.id
+               LEFT JOIN recipe_types rt ON r.type_id = rt.id
+        WHERE r.person_id = $1
+      `;
+
+      const params = [person_id];
+      let paramIndex = 2;
+
+      if (ingredient_name) {
+        baseQuery += ` AND i.name ILIKE $${paramIndex}`;
+        params.push(`%${ingredient_name}%`);
+        paramIndex++;
+      }
+
+      if (type_ids) {
+        baseQuery += ` AND r.type_id = ANY($${paramIndex}::int[])`;
+        params.push(type_ids.split(",").map(Number));
+        paramIndex++;
+      }
+
+      if (start_date && end_date) {
+        baseQuery += ` AND r.creation_date BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        params.push(start_date, end_date);
+        paramIndex += 2;
+      } else if (start_date) {
+        baseQuery += ` AND r.creation_date >= $${paramIndex}`;
+        params.push(start_date);
+        paramIndex++;
+      } else if (end_date) {
+        baseQuery += ` AND r.creation_date <= $${paramIndex}`;
+        params.push(end_date);
+        paramIndex++;
+      }
+
+      if (min_cooking_time) {
+        baseQuery += ` AND r.cooking_time >= $${paramIndex}`;
+        params.push(Number(min_cooking_time));
+        paramIndex++;
+      }
+
+      if (max_cooking_time) {
+        baseQuery += ` AND r.cooking_time <= $${paramIndex}`;
+        params.push(Number(max_cooking_time));
+        paramIndex++;
+      }
+
+      baseQuery += ` GROUP BY r.id, rt.type_name`;
+
+      if (sort_order) {
+        baseQuery += ` ORDER BY r.cooking_time ${sort_order === "asc" ? "ASC" : "DESC"}`;
+      }
+
+
+      const recipes = await db.query(baseQuery, params);
+
+      res.json(recipes.rows);
+    } catch (error) {
+      console.error("Ошибка при поиске рецептов:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   //? Видалення рецепта за ID
   async deleteRecipe(req, res) {
     const recipeId = req.params.id;

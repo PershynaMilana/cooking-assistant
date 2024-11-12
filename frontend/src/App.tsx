@@ -18,6 +18,7 @@ import EditRecipeType from "./pages/recipe-types/EditRecipeType.tsx";
 import AddRecipeType from "./pages/recipe-types/AddTypePage.tsx";
 import IngredientsPage from "./pages/person-ingradients/IngredientsPage.tsx.tsx";
 import PrivateRoute from "./components/PrivateRoute.tsx";
+import UserRecipesPage from "./pages/user-recipes/UserRecipesPage.tsx";
 
 const App: React.FC = () => {
     return (
@@ -30,6 +31,8 @@ const App: React.FC = () => {
 
             {/* main */}
             <Route path="/main" element={<PrivateRoute><MainPage /> </PrivateRoute>} />
+
+            <Route path="/my-recipes" element={<PrivateRoute><UserRecipesPage /> </PrivateRoute>} />
 
             {/* types */}
             <Route path="/types" element={<PrivateRoute><TypesPage /></PrivateRoute>} />

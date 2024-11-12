@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../../components/Header.tsx";
+import {jwtDecode} from "jwt-decode";
 
 interface Ingredient {
   id: number;
@@ -133,12 +134,21 @@ const CreateRecipePage: React.FC = () => {
     const timeParts = cookingTime.split(":").map(Number);
     const totalCookingTime = (timeParts[0] || 0) * 60 + (timeParts[1] || 0); // Перетворюємо час у хвилини
 
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("No auth token found.");
+      return;
+    }
+
+    const decodedToken: any = jwtDecode(token);
+    const userId = decodedToken.id;
+
     try {
       // Формуємо JSON з даними
       const recipeData = {
         title,
         content,
-        person_id: 1, // Змінити на актуальний ID
+        person_id: userId, // Змінити на актуальний ID
         ingredients: selectedIngredients, // Передаємо як масив чисел
         type_id: selectedTypeId, // Передаємо ID типу рецепта
         cooking_time: totalCookingTime, // Передаємо cooking_time

@@ -21,8 +21,11 @@ router.put("/recipe/:id", authenticateToken, recipeController.updateRecipe);
 //? Видалення рецепта за ID
 router.delete("/recipe/:id", authenticateToken, recipeController.deleteRecipe);
 
-//? Новий маршрут для фільтрації рецептів за типами та датами
+//? Фільтрація рецептів за типами та датами
 router.get("/recipes-by-filters", authenticateToken, recipeController.searchRecipes);
+
+//? Фільтрації рецептів за типами та датами та за користувачем
+router.get("/recipes-filters-person/:id", authenticateToken, recipeController.searchPersonRecipes);
 
 //? Отримання статистики
 router.get("/recipes-stats", authenticateToken, recipeController.getRecipesStats);

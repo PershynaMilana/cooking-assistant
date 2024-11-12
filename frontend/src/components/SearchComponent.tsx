@@ -60,7 +60,7 @@ const SearchComponent: React.FC = () => {
       {searchTerm && (
         <button
           onClick={handleReset}
-          className="absolute right-4 text-almost-black text-montserratMedium"
+          className="absolute right-4 text-almost-white bg-dark-purple rounded-full p-2 text-montserratMedium"
         >
           Скинути Пошук
         </button>
