@@ -120,4 +120,62 @@ SET
 
 -- !!!!! kuisanchik <3
 
---!!!!!!!!!!!!!!! I love You tooooooo!!!! <3
+
+-- Создаем таблицу для единиц измерения
+CREATE TABLE unit_measurement (
+                                  id SERIAL PRIMARY KEY,
+                                  unit_name VARCHAR(255) NOT NULL, -- Название единицы измерения
+                                  coefficient DOUBLE PRECISION    -- Коэффициент перевода в граммы, NULL если неприменимо
+);
+
+-- Заполняем таблицу unit_measurement основными единицами измерения
+INSERT INTO unit_measurement (unit_name, coefficient)
+VALUES
+    ('грам', 1),            -- 1 грам = 1 грам
+    ('кілограм', 1000),     -- 1 кг = 1000 грам
+    ('мілілітр', 1),        -- 1 мл води = 1 грам (приблизно)
+    ('літр', 1000),         -- 1 л води = 1000 грам (приблизно)
+    ('чайна ложка', 5),     -- 1 чайна ложка = 5 грам (приблизно)
+    ('столова ложка', 15),  -- 1 столова ложка = 15 грам (приблизно)
+    ('склянка', 250),       -- 1 склянка = 250 грам (приблизно)
+    ('штука', NULL);        -- "Штука" без переводу в грам
+
+-- Добавляем новое поле в таблицу ingredients для хранения id_unit_measurement
+-- Ставим значение по умолчанию 1 (граммы)
+ALTER TABLE ingredients
+    ADD COLUMN id_unit_measurement INTEGER NOT NULL DEFAULT 1,
+ADD CONSTRAINT fk_unit_measurement FOREIGN KEY (id_unit_measurement) REFERENCES unit_measurement (id) ON DELETE RESTRICT;
+
+-- Добавляем новое поле в таблицу recipe_ingredients для количества
+-- Значение по умолчанию — 1
+ALTER TABLE recipe_ingredients
+    ADD COLUMN quantity_recipe_ingredients DOUBLE PRECISION NOT NULL DEFAULT 1;
+
+-- Пример обновления существующих данных:
+-- Для определенных ингредиентов устанавливаем "штука"
+UPDATE ingredients
+SET id_unit_measurement = (SELECT id FROM unit_measurement WHERE unit_name = 'штука')
+WHERE name IN ('Картопля', 'Цибуля', 'Яйце', 'Лимон');
+
+
+-- Добавляем уникальное ограничение на поле name в таблице ingredients
+ALTER TABLE ingredients
+    ADD CONSTRAINT unique_name UNIQUE (name);
+
+-- Добавляем новые ингредиенты в таблицу ingredients
+INSERT INTO ingredients (name)
+VALUES
+    ('Сир'),
+    ('Перець'),
+    ('Паста'),
+    ('Оливкова олія')
+    ON CONFLICT (name) DO NOTHING;
+
+-- Обновляем единицы измерения для существующих ингредиентов
+UPDATE ingredients SET id_unit_measurement = 1 WHERE name IN ('Томат', 'Сир', 'Базилік', 'Курка', 'Чеснок', 'Сіль', 'Перець', 'Паста', 'Оливкова олія', 'Морква', 'Огірок', 'Вода', 'Чай');
+UPDATE ingredients SET id_unit_measurement = 8 WHERE name IN ('Картопля', 'Цибуля', 'Лимон');
+
+
+-- Добавляем поле quantity_person_ingradient с типом INTEGER
+ALTER TABLE person_ingredients
+    ADD COLUMN quantity_person_ingradient INTEGER NOT NULL DEFAULT 1;

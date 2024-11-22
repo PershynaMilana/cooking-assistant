@@ -8,7 +8,15 @@ class UserIngredientsController {
 
     try {
       const ingredients = await db.query(
-          `SELECT ingredient_id FROM person_ingredients WHERE person_id = $1`,
+          `SELECT
+             pi.ingredient_id,
+             i.name AS ingredient_name,
+             pi.quantity_person_ingradient,
+             um.unit_name
+           FROM person_ingredients pi
+                  JOIN ingredients i ON pi.ingredient_id = i.id
+                  JOIN unit_measurement um ON i.id_unit_measurement = um.id
+           WHERE pi.person_id = $1`,
           [userId]
       );
       res.json(ingredients.rows);

@@ -343,23 +343,31 @@ class RecipeController {
     try {
       const { rows: fastestRecipe } = await db.query(
         `SELECT r.*, rt.type_name as "typeName"
-       FROM recipes r
-       JOIN recipe_types rt ON r.type_id = rt.id
-       ORDER BY r.cooking_time ASC LIMIT 1`
+            FROM recipes r
+            JOIN recipe_types rt ON r.type_id = rt.id
+            --ORDER BY r.cooking_time ASC LIMIT 1
+            WHERE r.cooking_time = (  
+                SELECT MIN(cooking_time) 
+                FROM recipes 
+            )`
       );
 
       const { rows: slowestRecipe } = await db.query(
         `SELECT r.*, rt.type_name as "typeName"
-       FROM recipes r
-       JOIN recipe_types rt ON r.type_id = rt.id
-       ORDER BY r.cooking_time DESC LIMIT 1`
+            FROM recipes r
+            JOIN recipe_types rt ON r.type_id = rt.id
+            --ORDER BY r.cooking_time DESC LIMIT 1
+            WHERE r.cooking_time = ( 
+                SELECT MAX(cooking_time) 
+                FROM recipes  
+            )`
       );
 
       const { rows: typeStats } = await db.query(
         `SELECT rt.type_name as "typeName", COUNT(*) as count
-       FROM recipes r
-       JOIN recipe_types rt ON r.type_id = rt.id
-       GROUP BY rt.type_name`
+              FROM recipes r
+              JOIN recipe_types rt ON r.type_id = rt.id
+              GROUP BY rt.type_name`
       );
 
       res.json({
