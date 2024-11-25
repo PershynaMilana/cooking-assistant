@@ -16,7 +16,7 @@ import StatsPage from "./pages/statistics/StatsPage.tsx";
 import TypesPage from "./pages/recipe-types/TypesPage.tsx";
 import EditRecipeType from "./pages/recipe-types/EditRecipeType.tsx";
 import AddRecipeType from "./pages/recipe-types/AddTypePage.tsx";
-import IngredientsPage from "./pages/person-ingradients/IngredientsPage.tsx.tsx";
+import IngredientsPage from "./pages/person-ingradients/IngredientsPage.tsx";
 import PrivateRoute from "./components/PrivateRoute.tsx";
 import UserRecipesPage from "./pages/user-recipes/UserRecipesPage.tsx";
 import MenuPage from "./pages/menu/MenuPage.tsx";

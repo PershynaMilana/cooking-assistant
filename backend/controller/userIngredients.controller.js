@@ -1,7 +1,6 @@
 const db = require("../db");
 
 class UserIngredientsController {
-
   //? Отримання інгредієнтів користувача
   async getUserIngredients(req, res) {
     const userId = req.query.userId || 1;
@@ -31,28 +30,25 @@ class UserIngredientsController {
     const { ingredients } = req.body;
 
     if (!Array.isArray(ingredients)) {
-      return res.status(400).json({ error: "Некоректний формат даних" });
+      return res.status(400).json({ error: "Некорректный формат данных" });
     }
 
     const client = await db.connect();
     try {
       await client.query("BEGIN");
 
-      await client.query(
-          `DELETE FROM person_ingredients WHERE person_id = $1`,
-          [userId]
-      );
-
-      const values = ingredients
-          .map((_, index) => `($1, $${index + 2})`)
-          .join(",");
-      await client.query(
-          `INSERT INTO person_ingredients (person_id, ingredient_id) VALUES ${values}`,
-          [userId, ...ingredients]
-      );
+      for (const ingredient of ingredients) {
+        await client.query(
+            `INSERT INTO person_ingredients (person_id, ingredient_id, quantity_person_ingradient)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (person_id, ingredient_id)
+           DO UPDATE SET quantity_person_ingradient = EXCLUDED.quantity_person_ingradient`,
+            [userId, ingredient.id, ingredient.quantity_person_ingradient]
+        );
+      }
 
       await client.query("COMMIT");
-      res.json({ message: "Інгредієнти оновлено" });
+      res.json({ message: "Ингредиенты успешно обновлены" });
     } catch (error) {
       await client.query("ROLLBACK");
       res.status(500).json({ error: error.message });
@@ -73,7 +69,9 @@ class UserIngredientsController {
       );
 
       if (result.rowCount === 0) {
-        return res.status(404).json({ message: "Інгредієнт не знайдений для цього користувача" });
+        return res
+            .status(404)
+            .json({ message: "Інгредієнт не знайдений для цього користувача" });
       }
 
       res.json({ message: "Інгредієнт успішно видалено" });
@@ -82,7 +80,37 @@ class UserIngredientsController {
     }
   }
 
+  //? Оновлення кількості інгредієнтів
+  async updateIngredientQuantities(req, res) {
+    const userId = req.params.userId;
+    const { updatedIngredients } = req.body;
+
+    if (!Array.isArray(updatedIngredients)) {
+      return res.status(400).json({ error: "Некоректний формат даних" });
+    }
+
+    const client = await db.connect();
+    try {
+      await client.query("BEGIN");
+
+      for (const ingredient of updatedIngredients) {
+        await client.query(
+            `UPDATE person_ingredients
+         SET quantity_person_ingradient = $1
+         WHERE person_id = $2 AND ingredient_id = $3`,
+            [ingredient.quantity_person_ingradient, userId, ingredient.id]
+        );
+      }
+
+      await client.query("COMMIT");
+      res.json({ message: "Кількість інгредієнтів оновлено" });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      res.status(500).json({ error: error.message });
+    } finally {
+      client.release();
+    }
+  }
 }
 
 module.exports = new UserIngredientsController();
-
