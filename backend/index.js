@@ -4,6 +4,8 @@ const userRouter = require("./routes/user.routes");
 const recipeRouter = require("./routes/recipe.routes");
 const typeRouter = require("./routes/type.routes");
 const userIngredientsRouter = require("./routes/userIngredients.routes");
+const menuRouter = require("./routes/menu.routes");
+const menuCategoryRouter = require("./routes/menuCategory.routes");
 
 
 const PORT = process.env.PORT || 8080;
@@ -23,5 +25,8 @@ app.use("/api", userRouter);
 app.use("/api", recipeRouter);
 app.use("/api", typeRouter);
 app.use("/api", userIngredientsRouter);
+app.use("/api", menuRouter);
+app.use("/api", menuCategoryRouter);
+
 
 app.listen(PORT, () => console.log(`server listening on ${PORT}`));
