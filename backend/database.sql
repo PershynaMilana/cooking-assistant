@@ -252,3 +252,11 @@ VALUES
     'Вечеря',
     'Легкі або поживні страви для вечірнього прийому їжі'
   );
+
+
+
+-- !!!! milka changes
+
+ALTER TABLE menu_recipe
+    ADD CONSTRAINT fk_menu_id
+        FOREIGN KEY (menu_id) REFERENCES menu(menu_id) ON DELETE CASCADE;

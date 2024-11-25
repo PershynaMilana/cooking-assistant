@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router-dom";
 
 interface MenuCardProps {
   id: number;
@@ -8,7 +9,7 @@ interface MenuCardProps {
 }
 
 const MenuCard: React.FC<MenuCardProps> = ({
-  // id,
+  id,
   title,
   content,
   categoryName,
@@ -27,10 +28,11 @@ const MenuCard: React.FC<MenuCardProps> = ({
           {content}
         </div>
       </div>
-
-      <button className="mt-4 w-full bg-dark-purple font-montserratRegular text-white py-2 px-4 rounded-full">
-        Подробнее
-      </button>
+      <Link to={`/menu/${id}`}>
+        <button className="mt-4 w-full bg-dark-purple font-montserratRegular text-white py-2 px-4 rounded-full">
+          Подробнее
+        </button>
+      </Link>
     </div>
   );
 };

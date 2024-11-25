@@ -20,6 +20,8 @@ import IngredientsPage from "./pages/person-ingradients/IngredientsPage.tsx.tsx"
 import PrivateRoute from "./components/PrivateRoute.tsx";
 import UserRecipesPage from "./pages/user-recipes/UserRecipesPage.tsx";
 import MenuPage from "./pages/menu/MenuPage.tsx";
+import CreateMenuPage from "./pages/menu/CreateMenuPage.tsx";
+import MenuDetailsPage from "./pages/menu/MenuDetailsPage.tsx";
 
 const App: React.FC = () => {
     return (
@@ -53,6 +55,8 @@ const App: React.FC = () => {
 
             {/* menu */}
             <Route path="/menu" element={<PrivateRoute><MenuPage /></PrivateRoute>} />
+            <Route path="/add-menu" element={<PrivateRoute><CreateMenuPage /></PrivateRoute>} />
+            <Route path="/menu/:id" element={<PrivateRoute><MenuDetailsPage /></PrivateRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />

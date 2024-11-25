@@ -169,7 +169,7 @@ const MainPage: React.FC = () => {
       <div className="mx-[15vw]">
         {/* Блок для компонентів фільтрації та пошуку */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-          <SearchComponent />
+          <SearchComponent placeholder={"інградієнтом"}/>
           <div className="ml-4 mt-4 sm:mt-0">
             <RecipeTypeFilter
               selectedTypes={selectedTypes}

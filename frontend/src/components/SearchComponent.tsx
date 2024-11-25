@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 import SearchIcon from "../assets/searchIcon.png";
 
-const SearchComponent: React.FC = () => {
+interface SearchComponentProps {
+  placeholder: string;
+}
+
+const SearchComponent: React.FC<SearchComponentProps> = ({ placeholder = "Пошук за інгредієнтом" }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +57,7 @@ const SearchComponent: React.FC = () => {
         value={searchTerm}
         onChange={handleInputChange}
         onKeyPress={handleKeyPress}
-        placeholder="Пошук за інгредієнтом"
+        placeholder={`Пошук за ${placeholder}`}
         className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
         ref={inputRef}
       />

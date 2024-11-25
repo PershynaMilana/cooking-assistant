@@ -96,7 +96,7 @@ const Header: React.FC = () => {
     <header className="bg-perfect-purple p-6 py-8 text-white">
       <nav>
         <ul className="flex justify-between items-center">
-          <div className="flex space-x-14 ml-[20vw]">
+          <div className="flex space-x-14 ml-[10vw]">
             <li>
               <Link to="/main" className="font-montserratRegular text-l">
                 Головна
@@ -133,12 +133,17 @@ const Header: React.FC = () => {
                 Меню
               </Link>
             </li>
+            <li>
+              <Link to="/add-menu" className="font-montserratRegular text-l">
+                Додати меню
+              </Link>
+            </li>
           </div>
 
           {token ? (
-            <button
-              onClick={handleLogout}
-              className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 rounded-full"
+              <button
+                  onClick={handleLogout}
+                  className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 rounded-full"
             >
               Вийти
             </button>

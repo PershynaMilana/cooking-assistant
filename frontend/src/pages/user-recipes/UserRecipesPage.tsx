@@ -166,7 +166,7 @@ const UserRecipesPage: React.FC = () => {
       <div className="mx-[15vw]">
         {/* Блок для компонентів фільтрації та пошуку */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-          <SearchComponent />
+          <SearchComponent placeholder={"інградієнтом"}/>
           <div className="ml-4 mt-4 sm:mt-0">
             <RecipeTypeFilter
               selectedTypes={selectedTypes}
@@ -254,7 +254,7 @@ const UserRecipesPage: React.FC = () => {
         <h1 className="text-relative-h3 font-normal font-montserratMedium p-4">
           {selectedTypes.length > 0
             ? `Рецепти: ${getTypesHeader()}`
-            : "Всі рецепти"}
+            : "Мої рецепти"}
         </h1>
 
         {/* Відображення описів типів, якщо вибрані */}
