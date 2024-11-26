@@ -123,33 +123,31 @@ const IngredientsPage: React.FC = () => {
     const decodedToken: any = jwtDecode(token);
     const userId = decodedToken.id;
 
-    // формуємо данні для отправки
-    const ingredientsToSave = [
-      ...updatedIngredients, // існуючі інградієнти з фї к-стью
-      ...allIngredients
-          .filter(
-              (ingredient) =>
-                  selectedIngredients.includes(ingredient.id) &&
-                  !updatedIngredients.some((item) => item.id === ingredient.id)
-          )
-          .map((ingredient) => ({
-            id: ingredient.id,
-            ingredient_name: ingredient.name,
-            quantity_person_ingradient: 1, //нові інградієнти завжди 1
-          })),
-    ];
+    // Формуємо дані: додаємо лише нові інгредієнти з кількістю 1
+    const newIngredients = allIngredients
+        .filter(
+            (ingredient) =>
+                selectedIngredients.includes(ingredient.id) &&
+                !personIngredients.some((item) => item.id === ingredient.id)
+        )
+        .map((ingredient) => ({
+          id: ingredient.id,
+          ingredient_name: ingredient.name,
+          quantity_person_ingradient: 1, // Нові інгредієнти одержують кількість 1
+        }));
 
     try {
       await axios.put(
           `http://localhost:8080/api/user-ingredients/${userId}`,
-          { ingredients: ingredientsToSave },
+          { ingredients: newIngredients },
           {
             headers: { Authorization: `Bearer ${token}` },
             params: { userId },
           }
       );
+
       setIsEditing(false);
-      await fetchSelectedIngredients();
+      await fetchSelectedIngredients(); // оновлення
     } catch (error) {
       console.error("Помилка збереження інгредієнтів:", error);
     }
@@ -281,22 +279,30 @@ const IngredientsPage: React.FC = () => {
                     )}
                   </ul>
               ) : (
-                  /* Режим выбора всех ингредиентов */
+                  /* Режим выбора новых ингредиентов */
                   <div className="flex flex-wrap gap-2 mt-4">
-                    {allIngredients.map((ingredient) => (
-                        <button
-                            key={ingredient.id}
-                            type="button"
-                            onClick={() => toggleIngredientSelection(ingredient.id)}
-                            className={`py-2 px-4 rounded-full ${
-                                selectedIngredients.includes(ingredient.id)
-                                    ? "bg-blue-700 text-white"
-                                    : "bg-gray-300 text-black"
-                            }`}
-                        >
-                          {ingredient.name}
-                        </button>
-                    ))}
+                    {allIngredients
+                        .filter(
+                            (ingredient) =>
+                                !personIngredients.some(
+                                    (existingIngredient) =>
+                                        existingIngredient.id === ingredient.id
+                                )
+                        )
+                        .map((ingredient) => (
+                            <button
+                                key={ingredient.id}
+                                type="button"
+                                onClick={() => toggleIngredientSelection(ingredient.id)}
+                                className={`py-2 px-4 rounded-full ${
+                                    selectedIngredients.includes(ingredient.id)
+                                        ? "bg-blue-700 text-white"
+                                        : "bg-gray-300 text-black"
+                                }`}
+                            >
+                              {ingredient.name}
+                            </button>
+                        ))}
                   </div>
               )
           ) : null}
@@ -391,3 +397,4 @@ const IngredientsPage: React.FC = () => {
 };
 
 export default IngredientsPage;
+

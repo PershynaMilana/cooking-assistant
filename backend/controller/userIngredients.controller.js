@@ -30,7 +30,7 @@ class UserIngredientsController {
     const { ingredients } = req.body;
 
     if (!Array.isArray(ingredients)) {
-      return res.status(400).json({ error: "Некорректный формат данных" });
+      return res.status(400).json({ error: "Некоректний формат даних" });
     }
 
     const client = await db.connect();
@@ -40,15 +40,14 @@ class UserIngredientsController {
       for (const ingredient of ingredients) {
         await client.query(
             `INSERT INTO person_ingredients (person_id, ingredient_id, quantity_person_ingradient)
-           VALUES ($1, $2, $3)
-           ON CONFLICT (person_id, ingredient_id)
-           DO UPDATE SET quantity_person_ingradient = EXCLUDED.quantity_person_ingradient`,
+             VALUES ($1, $2, $3)
+               ON CONFLICT (person_id, ingredient_id) DO NOTHING`, // Зберігаємо лише нові інгредієнти
             [userId, ingredient.id, ingredient.quantity_person_ingradient]
         );
       }
 
       await client.query("COMMIT");
-      res.json({ message: "Ингредиенты успешно обновлены" });
+      res.status(200).json({ message: "Інгредієнти оновлено успішно" });
     } catch (error) {
       await client.query("ROLLBACK");
       res.status(500).json({ error: error.message });
@@ -96,8 +95,8 @@ class UserIngredientsController {
       for (const ingredient of updatedIngredients) {
         await client.query(
             `UPDATE person_ingredients
-         SET quantity_person_ingradient = $1
-         WHERE person_id = $2 AND ingredient_id = $3`,
+             SET quantity_person_ingradient = $1
+             WHERE person_id = $2 AND ingredient_id = $3`,
             [ingredient.quantity_person_ingradient, userId, ingredient.id]
         );
       }
