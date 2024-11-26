@@ -1,7 +1,7 @@
 const db = require("../db");
 
 class MenuCategoryController {
-  //? Получение всех категорий меню
+  //? Отримання всіх категорій меню
   async getAllMenuCategories(req, res) {
     try {
       const query = "SELECT * FROM menu_category ORDER BY category_name";
@@ -13,7 +13,7 @@ class MenuCategoryController {
     }
   }
 
-  //? Получение категории меню по ID
+  //? Отримання категорій меню за ID
   async getMenusByCategories(req, res) {
     const { category_id } = req.query;
     try {
@@ -40,15 +40,15 @@ class MenuCategoryController {
     }
   }
 
+  //? Отримання меню за категорією
   async getMenusByCategories(req, res) {
-    const { category_id } = req.query; // Получаем category_id из query string
+    const { category_id } = req.query;
 
     try {
       let query = "SELECT * FROM menu";
       const values = [];
 
       if (category_id) {
-        // Преобразуем category_id в число и проверяем его
         const categoryId = parseInt(category_id, 10);
         if (isNaN(categoryId)) {
           return res
@@ -56,7 +56,6 @@ class MenuCategoryController {
             .json({ message: "Неверный формат category_id" });
         }
 
-        // Добавляем фильтрацию по category_id в запрос
         query += " WHERE category_id = $1";
         values.push(categoryId);
       }

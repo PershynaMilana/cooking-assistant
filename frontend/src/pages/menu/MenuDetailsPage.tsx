@@ -76,24 +76,31 @@ const MenuDetailsPage: React.FC = () => {
 
     const handleConfirmDelete = () => {
         deleteMenu();
-        handleCloseModal(); // Закриваємо модальне вікно після видалення
+        handleCloseModal();
     };
 
+    const groupedRecipes = menu.recipes.reduce((groups: { [key: string]: Recipe[] }, recipe) => {
+        const { type_name } = recipe;
+        if (!groups[type_name]) {
+            groups[type_name] = [];
+        }
+        groups[type_name].push(recipe);
+        return groups;
+    }, {});
+
     const deleteMenu = async () => {
-        const token = localStorage.getItem("authToken");  // Получаем токен из localStorage
+        const token = localStorage.getItem("authToken");
         try {
             const response = await fetch(`http://localhost:8080/api/menu/${menu.menu.id}`, {
-                method: "DELETE",  // Указываем метод DELETE
+                method: "DELETE",
                 headers: {
-                    "Authorization": token ? `Bearer ${token}` : "",  // Добавляем токен в заголовок
+                    "Authorization": token ? `Bearer ${token}` : "",
                 },
             });
 
             if (!response.ok) {
                 throw new Error("Помилка при видаленні рецепта");
             }
-
-            // Успішне видалення - перенаправляємо на головну сторінку
             navigate("/menu");
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -128,21 +135,26 @@ const MenuDetailsPage: React.FC = () => {
                     <strong>Рецепти:</strong>{" "}
                 </p>
                 {/* Відображення карток рецептів */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                    {menu.recipes.map((recipe) => (
-                        <RecipeCard
-                            key={recipe.id}
-                            id={recipe.id}
-                            title={recipe.title}
-                            typeName={recipe.type_name}
-                            cookingTime={recipe.cooking_time}
-                            creationDate={recipe.creation_date}
-                        />
-                    ))}
-                </div>
+                {Object.keys(groupedRecipes).map((type) => (
+                    <div key={type}>
+                        <h2 className="text-xs-pxl font-monsterratRegular italic font-normal mt-4 mb-2">{type}:</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                            {groupedRecipes[type].map((recipe) => (
+                                <RecipeCard
+                                    key={recipe.id}
+                                    id={recipe.id}
+                                    title={recipe.title}
+                                    typeName={recipe.type_name}
+                                    cookingTime={recipe.cooking_time}
+                                    creationDate={recipe.creation_date}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
 
                 {/* Кнопка для редагування меню */}
-                <Link to={`/edit-menu/${menu.menu.id}`}>
+                <Link to={`/change-menu/${menu.menu.id}`}>
                     <button className="mt-6 mr-[1vw] bg-yellow-500 text-white py-2 px-4 rounded-full">
                         Змінити меню
                     </button>

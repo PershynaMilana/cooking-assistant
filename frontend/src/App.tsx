@@ -22,6 +22,8 @@ import UserRecipesPage from "./pages/user-recipes/UserRecipesPage.tsx";
 import MenuPage from "./pages/menu/MenuPage.tsx";
 import CreateMenuPage from "./pages/menu/CreateMenuPage.tsx";
 import MenuDetailsPage from "./pages/menu/MenuDetailsPage.tsx";
+import ChangeMenuPage from "./pages/menu/ChangeMenuPage.tsx";
+import UserMenuPage from "./pages/user-menu/UserMenuPage.tsx";
 
 const App: React.FC = () => {
     return (
@@ -35,7 +37,11 @@ const App: React.FC = () => {
             {/* main */}
             <Route path="/main" element={<PrivateRoute><MainPage /> </PrivateRoute>} />
 
+            {/* user recipes */}
             <Route path="/my-recipes" element={<PrivateRoute><UserRecipesPage /> </PrivateRoute>} />
+
+            {/* user menus */}
+            <Route path="/my-menus" element={<PrivateRoute><UserMenuPage /> </PrivateRoute>} />
 
             {/* types */}
             <Route path="/types" element={<PrivateRoute><TypesPage /></PrivateRoute>} />
@@ -57,6 +63,7 @@ const App: React.FC = () => {
             <Route path="/menu" element={<PrivateRoute><MenuPage /></PrivateRoute>} />
             <Route path="/add-menu" element={<PrivateRoute><CreateMenuPage /></PrivateRoute>} />
             <Route path="/menu/:id" element={<PrivateRoute><MenuDetailsPage /></PrivateRoute>} />
+            <Route path="/change-menu/:id" element={<PrivateRoute><ChangeMenuPage /></PrivateRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />

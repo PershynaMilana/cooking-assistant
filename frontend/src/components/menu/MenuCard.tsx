@@ -30,7 +30,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
       </div>
       <Link to={`/menu/${id}`}>
         <button className="mt-4 w-full bg-dark-purple font-montserratRegular text-white py-2 px-4 rounded-full">
-          Подробнее
+          Детальніше
         </button>
       </Link>
     </div>

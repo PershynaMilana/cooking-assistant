@@ -124,13 +124,18 @@ const Header: React.FC = () => {
             </li>
             <li>
               <Link to="/ingredients" className="font-montserratRegular text-l">
-                Інгредієнти
+                Мої інгредієнти
               </Link>
             </li>
             {/* Нова вкладка "Меню" */}
             <li>
               <Link to="/menu" className="font-montserratRegular text-l">
                 Меню
+              </Link>
+            </li>
+            <li>
+              <Link to="/my-menus" className="font-montserratRegular text-l">
+                Мої меню
               </Link>
             </li>
             <li>
@@ -143,7 +148,7 @@ const Header: React.FC = () => {
           {token ? (
               <button
                   onClick={handleLogout}
-                  className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 rounded-full"
+                  className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 mr-[3vw] rounded-full"
             >
               Вийти
             </button>
