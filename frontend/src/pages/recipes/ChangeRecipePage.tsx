@@ -35,34 +35,42 @@ const ChangeRecipePage: React.FC = () => {
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [allTypes, setAllTypes] = useState<RecipeType[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<
-      { id: number; name: string; quantity_recipe_ingredients: number; unit_name: string }[]
+    {
+      id: number;
+      name: string;
+      quantity_recipe_ingredients: number;
+      unit_name: string;
+    }[]
   >([]);
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cookingTimeError, setCookingTimeError] = useState<string | null>(null); // Добавлен cookingTimeError
+  const [servings, setServings] = useState<string>("");
+
   const navigate = useNavigate();
 
   const fetchRecipeDetails = useCallback(async () => {
     const token = localStorage.getItem("authToken");
     try {
       const [recipeResponse, ingredientsResponse, typesResponse] =
-          await Promise.all([
-            axios.get(`http://localhost:8080/api/recipe/${id}`, {
-              headers: { Authorization: token ? `Bearer ${token}` : "" },
-            }),
-            axios.get("http://localhost:8080/api/ingredients", {
-              headers: { Authorization: token ? `Bearer ${token}` : "" },
-            }),
-            axios.get("http://localhost:8080/api/recipe-types", {
-              headers: { Authorization: token ? `Bearer ${token}` : "" },
-            }),
-          ]);
+        await Promise.all([
+          axios.get(`http://localhost:8080/api/recipe/${id}`, {
+            headers: { Authorization: token ? `Bearer ${token}` : "" },
+          }),
+          axios.get("http://localhost:8080/api/ingredients", {
+            headers: { Authorization: token ? `Bearer ${token}` : "" },
+          }),
+          axios.get("http://localhost:8080/api/recipe-types", {
+            headers: { Authorization: token ? `Bearer ${token}` : "" },
+          }),
+        ]);
 
       const recipeData: Recipe = recipeResponse.data;
 
       setTitle(recipeData.title);
       setContent(recipeData.content);
       setCookingTime(formatCookingTime(recipeData.cooking_time));
+      setServings(recipeData.servings || ""); // Установка значения servings
       setAllIngredients(ingredientsResponse.data);
       setAllTypes(typesResponse.data);
       setSelectedIngredients(recipeData.ingredients);
@@ -82,13 +90,22 @@ const ChangeRecipePage: React.FC = () => {
     return `${hours}:${minutes.toString().padStart(2, "0")}`;
   };
 
-  const updateIngredientQuantity = (ingredientId: number, quantity_recipe_ingredients: number) => {
+  const updateIngredientQuantity = (
+    ingredientId: number,
+    quantity_recipe_ingredients: number
+  ) => {
     setSelectedIngredients((prev) =>
-        prev.map((ingredient) =>
-            ingredient.id === ingredientId
-                ? { ...ingredient, quantity_recipe_ingredients: Math.max(1, quantity_recipe_ingredients) }
-                : ingredient
-        )
+      prev.map((ingredient) =>
+        ingredient.id === ingredientId
+          ? {
+              ...ingredient,
+              quantity_recipe_ingredients: Math.max(
+                1,
+                quantity_recipe_ingredients
+              ),
+            }
+          : ingredient
+      )
     );
   };
 
@@ -116,23 +133,27 @@ const ChangeRecipePage: React.FC = () => {
     setError(null);
     setCookingTimeError(null);
 
+    if (!servings.trim()) {
+      setError("Кількість порцій не може бути порожнім.");
+      return;
+    }
     // Валидация времени приготовления
     const timeParts = cookingTime.split(":");
     if (timeParts.length !== 2) {
-      setCookingTimeError("Введите время в формате чч:мм");
+      setCookingTimeError("Введить час у форматі чч:мм");
       return;
     }
     const hours = parseInt(timeParts[0], 10);
     const minutes = parseInt(timeParts[1], 10);
     if (
-        isNaN(hours) ||
-        isNaN(minutes) ||
-        hours < 0 ||
-        hours > 99 ||
-        minutes < 0 ||
-        minutes >= 60
+      isNaN(hours) ||
+      isNaN(minutes) ||
+      hours < 0 ||
+      hours > 99 ||
+      minutes < 0 ||
+      minutes >= 60
     ) {
-      setCookingTimeError("Введите корректное время в формате чч:мм");
+      setCookingTimeError("Введіть корректний час у форматі чч:мм");
       return;
     }
 
@@ -141,12 +162,14 @@ const ChangeRecipePage: React.FC = () => {
       content,
       type_id: selectedTypeId,
       cooking_time: hours * 60 + minutes,
-      ingredients: selectedIngredients.map(({ id, quantity_recipe_ingredients }) => ({
-        id,
-        quantity_recipe_ingredients,
-      })),
+      servings, // Добавлено поле servings
+      ingredients: selectedIngredients.map(
+        ({ id, quantity_recipe_ingredients }) => ({
+          id,
+          quantity_recipe_ingredients,
+        })
+      ),
     };
-    console.log(updatedRecipe);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -164,115 +187,126 @@ const ChangeRecipePage: React.FC = () => {
   };
 
   return (
-      <div>
-        <Header />
-        <div className="mx-[15vw]">
-          <h1 className="text-relative-h3 my-[7vh] font-bold">Змінити рецепт</h1>
-          <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium">Назва</label>
-              <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Опис</label>
-              <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  rows={4}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">
-                Час приготування (чч:мм)
-              </label>
-              <input
-                  type="text"
-                  value={cookingTime}
-                  onChange={(e) => setCookingTime(e.target.value)}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              />
-              {cookingTimeError && (
-                  <div className="text-red-500">{cookingTimeError}</div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Тип рецепта</label>
-              <select
-                  value={selectedTypeId ?? ""}
-                  onChange={(e) => setSelectedTypeId(Number(e.target.value))}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-              >
-                <option value="" disabled>
-                  Оберіть тип рецепту
+    <div>
+      <Header />
+      <div className="mx-[15vw]">
+        <h1 className="text-relative-h3 my-[7vh] font-bold">Змінити рецепт</h1>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium">Назва</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Опис</label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              rows={4}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">
+              Час приготування (чч:мм)
+            </label>
+            <input
+              type="text"
+              value={cookingTime}
+              onChange={(e) => setCookingTime(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            />
+            {cookingTimeError && (
+              <div className="text-red-500">{cookingTimeError}</div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Тип рецепта</label>
+            <select
+              value={selectedTypeId ?? ""}
+              onChange={(e) => setSelectedTypeId(Number(e.target.value))}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="" disabled>
+                Оберіть тип рецепту
+              </option>
+              {allTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.type_name}
                 </option>
-                {allTypes.map((type) => (
-                    <option key={type.id} value={type.id}>
-                      {type.type_name}
-                    </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Інгредієнти</label>
-              <div className="flex flex-wrap gap-2">
-                {allIngredients.map((ingredient) => (
-                    <button
-                        key={ingredient.id}
-                        type="button"
-                        onClick={() => toggleIngredientSelection(ingredient)}
-                        className={`${
-                            selectedIngredients.some((i) => i.id === ingredient.id)
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-300"
-                        } px-4 py-2 rounded-md`}
-                    >
-                      {ingredient.name}
-                    </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-bold mt-4">Обрані інгредієнти</h4>
-              {selectedIngredients.map((ingredient) => (
-                  <div key={ingredient.id} className="flex items-center space-x-2">
-                    <span>{ingredient.name}</span>
-                    <input
-                        type="number"
-                        min={1}
-                        value={ingredient.quantity_recipe_ingredients}
-                        onChange={(e) =>
-                            updateIngredientQuantity(
-                                ingredient.id,
-                                parseInt(e.target.value, 10)
-                            )
-                        }
-                        className="w-20 p-2 border border-gray-300 rounded-md"
-                    />
-                    {/* Показываем unit_name */}
-                    <span className="text-gray-700">{ingredient.unit_name}</span>
-                  </div>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Інгредієнти</label>
+            <div className="flex flex-wrap gap-2">
+              {allIngredients.map((ingredient) => (
+                <button
+                  key={ingredient.id}
+                  type="button"
+                  onClick={() => toggleIngredientSelection(ingredient)}
+                  className={`${
+                    selectedIngredients.some((i) => i.id === ingredient.id)
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-300"
+                  } px-4 py-2 rounded-md`}
+                >
+                  {ingredient.name}
+                </button>
               ))}
             </div>
+          </div>
+          <div>
+            <h4 className="font-bold mt-4">Обрані інгредієнти</h4>
+            {selectedIngredients.map((ingredient) => (
+              <div key={ingredient.id} className="flex items-center space-x-2">
+                <span>{ingredient.name}</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={ingredient.quantity_recipe_ingredients}
+                  onChange={(e) =>
+                    updateIngredientQuantity(
+                      ingredient.id,
+                      parseInt(e.target.value, 10)
+                    )
+                  }
+                  className="w-20 p-2 border border-gray-300 rounded-md"
+                />
+                {/* Показываем unit_name */}
+                <span className="text-gray-700">{ingredient.unit_name}</span>
+              </div>
+            ))}
+          </div>
+          <div>
+            <label className="block text-sm font-medium">
+              Кількість порцій (на яку тару розраховано рецепт) :
+            </label>
+            <input
+              type="text"
+              value={servings}
+              onChange={(e) => setServings(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Наприклад, 1 порція або цілий казан"
+            />
+          </div>
 
-            <button
-                type="button"
-                onClick={handleUpdateRecipe}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-              Оновити рецепт
-            </button>
-          </form>
           {error && <div className="text-red-500 mt-4">{error}</div>}
-        </div>
+          <button
+            type="button"
+            onClick={handleUpdateRecipe}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          >
+            Оновити рецепт
+          </button>
+        </form>
       </div>
+    </div>
   );
 };
 
 export default ChangeRecipePage;
-

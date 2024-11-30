@@ -6,7 +6,8 @@ import SearchComponent from "../../components/SearchComponent.tsx";
 import RecipeTypeFilter from "../../components/RecipeTypeFilter.tsx";
 import DateFilterDropdown from "../../components/DateFilterDropdown.tsx";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import { Link } from "react-router-dom";
 
 // Інтерфейс для опису структури об'єкта рецепта
 interface Recipe {
@@ -40,20 +41,20 @@ const UserRecipesPage: React.FC = () => {
   const [maxCookingTime, setMaxCookingTime] = useState<string>("");
 
   const sortRecipes = useCallback(
-      (recipes: Recipe[]): Recipe[] => {
-        return recipes.sort((a, b) => {
-          if (sortOrder === "asc") {
-            return (
-                a.cooking_time - b.cooking_time || a.title.localeCompare(b.title)
-            );
-          } else {
-            return (
-                b.cooking_time - a.cooking_time || a.title.localeCompare(b.title)
-            );
-          }
-        });
-      },
-      [sortOrder]
+    (recipes: Recipe[]): Recipe[] => {
+      return recipes.sort((a, b) => {
+        if (sortOrder === "asc") {
+          return (
+            a.cooking_time - b.cooking_time || a.title.localeCompare(b.title)
+          );
+        } else {
+          return (
+            b.cooking_time - a.cooking_time || a.title.localeCompare(b.title)
+          );
+        }
+      });
+    },
+    [sortOrder]
   );
 
   const fetchRecipes = useCallback(async () => {
@@ -71,21 +72,22 @@ const UserRecipesPage: React.FC = () => {
 
     try {
       const response = await axios.get(
-          `http://localhost:8080/api/recipes-filters-person/${userId}`,
-          {
-            params: {
-              ingredient_name: ingredientName || "",
-              type_ids: selectedTypes.length > 0 ? selectedTypes.join(",") : undefined,
-              start_date: startDate || undefined,
-              end_date: endDate || undefined,
-              min_cooking_time: minCookingTime || undefined,
-              max_cooking_time: maxCookingTime || undefined,
-              sort_order: sortOrder,
-            },
-            headers: {
-              Authorization: token ? `Bearer ${token}` : "",
-            },
-          }
+        `http://localhost:8080/api/recipes-filters-person/${userId}`,
+        {
+          params: {
+            ingredient_name: ingredientName || "",
+            type_ids:
+              selectedTypes.length > 0 ? selectedTypes.join(",") : undefined,
+            start_date: startDate || undefined,
+            end_date: endDate || undefined,
+            min_cooking_time: minCookingTime || undefined,
+            max_cooking_time: maxCookingTime || undefined,
+            sort_order: sortOrder,
+          },
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
       );
 
       if (response.data.length === 0) {
@@ -123,13 +125,13 @@ const UserRecipesPage: React.FC = () => {
       try {
         if (selectedTypes.length > 0) {
           const response = await axios.get(
-              `http://localhost:8080/api/recipe-types`,
-              {
-                params: { ids: selectedTypes.join(",") },
-                headers: {
-                  Authorization: token ? `Bearer ${token}` : "",
-                },
-              }
+            `http://localhost:8080/api/recipe-types`,
+            {
+              params: { ids: selectedTypes.join(",") },
+              headers: {
+                Authorization: token ? `Bearer ${token}` : "",
+              },
+            }
           );
           setTypesDescriptions(response.data);
         } else {
@@ -145,19 +147,19 @@ const UserRecipesPage: React.FC = () => {
 
   const getTypesHeader = () => {
     return typesDescriptions
-        .filter((type) => selectedTypes.includes(type.id))
-        .map((type) => type.type_name)
-        .join(", ");
+      .filter((type) => selectedTypes.includes(type.id))
+      .map((type) => type.type_name)
+      .join(", ");
   };
 
   const getFilteredDescriptions = () => {
     return typesDescriptions
-        .filter((type) => selectedTypes.includes(type.id))
-        .map((type) => (
-            <p key={type.id} className="text-gray-600">
-              <strong>{type.type_name}:</strong> {type.description}
-            </p>
-        ));
+      .filter((type) => selectedTypes.includes(type.id))
+      .map((type) => (
+        <p key={type.id} className="text-gray-600">
+          <strong>{type.type_name}:</strong> {type.description}
+        </p>
+      ));
   };
 
   return (
@@ -166,7 +168,7 @@ const UserRecipesPage: React.FC = () => {
       <div className="mx-[15vw]">
         {/* Блок для компонентів фільтрації та пошуку */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-          <SearchComponent placeholder={"інградієнтом"}/>
+          <SearchComponent placeholder={"інградієнтом"} />
           <div className="ml-4 mt-4 sm:mt-0">
             <RecipeTypeFilter
               selectedTypes={selectedTypes}
@@ -249,7 +251,12 @@ const UserRecipesPage: React.FC = () => {
             </select>
           </div>
         </div>
-
+        <Link
+          to="/add-recipe"
+          className="flex items-center justify-center font-montserratRegular-normal text-almost-white bg-purple-700 p-4 w-15 m-7 rounded-3xl"
+        >
+          Додати рецепт
+        </Link>
         {/* Заголовок для списку рецептів */}
         <h1 className="text-relative-h3 font-normal font-montserratMedium p-4">
           {selectedTypes.length > 0

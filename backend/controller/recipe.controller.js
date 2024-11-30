@@ -3,15 +3,22 @@ const db = require("../db");
 class RecipeController {
   //? Створення рецепта
   async createRecipe(req, res) {
-    const { title, content, person_id, ingredients, type_id, cooking_time } =
-        req.body;
+    const {
+      title,
+      content,
+      person_id,
+      ingredients,
+      type_id,
+      cooking_time,
+      servings,
+    } = req.body;
 
     try {
       // Створюємо рецепт
       const newRecipe = await db.query(
-          `INSERT INTO recipes (title, content, person_id, type_id, cooking_time)
-           VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-          [title, content, person_id, type_id, cooking_time]
+        `INSERT INTO recipes (title, content, person_id, type_id, cooking_time, servings)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [title, content, person_id, type_id, cooking_time, servings]
       );
 
       const recipeId = newRecipe.rows[0].id;
@@ -19,9 +26,9 @@ class RecipeController {
       // Додаємо інгредієнти з кількістю
       for (let { id, quantity } of ingredients) {
         await db.query(
-            `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
+          `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
              VALUES ($1, $2, $3)`,
-            [recipeId, id, quantity || 1]
+          [recipeId, id, quantity || 1]
         );
       }
 
@@ -36,12 +43,12 @@ class RecipeController {
   async getAllRecipes(req, res) {
     try {
       const recipes = await db.query(
-          `SELECT r.*, rt.type_name, array_agg(i.name) AS ingredients
-           FROM recipes r
-                  LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
-                  LEFT JOIN ingredients i ON ri.ingredient_id = i.id
-                  LEFT JOIN recipe_types rt ON r.type_id = rt.id
-           GROUP BY r.id, rt.type_name`
+        `SELECT r.*, rt.type_name, array_agg(i.name) AS ingredients
+         FROM recipes r
+                LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+                LEFT JOIN ingredients i ON ri.ingredient_id = i.id
+                LEFT JOIN recipe_types rt ON r.type_id = rt.id
+         GROUP BY r.id, rt.type_name`
       );
 
       res.json(recipes.rows);
@@ -56,7 +63,7 @@ class RecipeController {
 
     try {
       const recipe = await db.query(
-          `SELECT r.*,
+        `SELECT r.*,
                   json_agg(
                       json_build_object(
                           'id', i.id,
@@ -73,7 +80,7 @@ class RecipeController {
                   LEFT JOIN recipe_types rt ON r.type_id = rt.id
            WHERE r.id = $1
            GROUP BY r.id, rt.type_name`,
-          [recipeId]
+        [recipeId]
       );
 
       if (recipe.rows.length === 0) {
@@ -96,19 +103,20 @@ class RecipeController {
       ingredients: newIngredients,
       type_id,
       cooking_time,
+      servings,
     } = req.body;
 
     try {
       if (!title || !content) {
         return res
-            .status(400)
-            .json({ error: "Назва та зміст не можуть бути пустими" });
+          .status(400)
+          .json({ error: "Назва та зміст не можуть бути пустими" });
       }
 
       const result = await db.query(
-          `UPDATE recipes SET title = $1, content = $2, type_id = $3, cooking_time = $4
-           WHERE id = $5 RETURNING *`,
-          [title, content, type_id, cooking_time, recipeId]
+        `UPDATE recipes SET title = $1, content = $2, type_id = $3, cooking_time = $4, servings = $5
+         WHERE id = $6 RETURNING *`,
+        [title, content, type_id, cooking_time, servings, recipeId]
       );
 
       if (result.rowCount === 0) {
@@ -123,9 +131,9 @@ class RecipeController {
       // Додаємо нові інгредієнти з кількістю
       for (let { id, quantity_recipe_ingredients } of newIngredients) {
         await db.query(
-            `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
+          `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
              VALUES ($1, $2, $3)`,
-            [recipeId, id, quantity_recipe_ingredients || 1]
+          [recipeId, id, quantity_recipe_ingredients || 1]
         );
       }
 
@@ -176,7 +184,7 @@ class RecipeController {
 
       if (start_date && end_date) {
         baseQuery += ` AND r.creation_date BETWEEN $${paramIndex} AND $${
-            paramIndex + 1
+          paramIndex + 1
         }`;
         params.push(start_date, end_date);
         paramIndex += 2;
@@ -208,7 +216,7 @@ class RecipeController {
 
       if (sort_order) {
         baseQuery += ` ORDER BY r.cooking_time ${
-            sort_order === "asc" ? "ASC" : "DESC"
+          sort_order === "asc" ? "ASC" : "DESC"
         }`;
       }
 
@@ -262,7 +270,7 @@ class RecipeController {
 
       if (start_date && end_date) {
         baseQuery += ` AND r.creation_date BETWEEN $${paramIndex} AND $${
-            paramIndex + 1
+          paramIndex + 1
         }`;
         params.push(start_date, end_date);
         paramIndex += 2;
@@ -292,7 +300,7 @@ class RecipeController {
 
       if (sort_order) {
         baseQuery += ` ORDER BY r.cooking_time ${
-            sort_order === "asc" ? "ASC" : "DESC"
+          sort_order === "asc" ? "ASC" : "DESC"
         }`;
       }
 
@@ -315,8 +323,8 @@ class RecipeController {
       ]);
 
       const result = await db.query(
-          `DELETE FROM recipes WHERE id = $1 RETURNING *`,
-          [recipeId]
+        `DELETE FROM recipes WHERE id = $1 RETURNING *`,
+        [recipeId]
       );
 
       if (result.rowCount === 0) {
@@ -333,7 +341,7 @@ class RecipeController {
   async getAllIngredients(req, res) {
     try {
       const ingredients = await db.query(
-          `SELECT i.*, um.unit_name
+        `SELECT i.*, um.unit_name
            FROM ingredients i
                   LEFT JOIN unit_measurement um ON i.id_unit_measurement = um.id`
       );
@@ -348,7 +356,7 @@ class RecipeController {
   async getRecipesStats(req, res) {
     try {
       const { rows: fastestRecipe } = await db.query(
-          `SELECT r.*, rt.type_name as "typeName"
+        `SELECT r.*, rt.type_name as "typeName"
            FROM recipes r
                   JOIN recipe_types rt ON r.type_id = rt.id
            --ORDER BY r.cooking_time ASC LIMIT 1
@@ -359,7 +367,7 @@ class RecipeController {
       );
 
       const { rows: slowestRecipe } = await db.query(
-          `SELECT r.*, rt.type_name as "typeName"
+        `SELECT r.*, rt.type_name as "typeName"
            FROM recipes r
                   JOIN recipe_types rt ON r.type_id = rt.id
            --ORDER BY r.cooking_time DESC LIMIT 1
@@ -370,7 +378,7 @@ class RecipeController {
       );
 
       const { rows: typeStats } = await db.query(
-          `SELECT rt.type_name as "typeName", COUNT(*) as count
+        `SELECT rt.type_name as "typeName", COUNT(*) as count
            FROM recipes r
              JOIN recipe_types rt ON r.type_id = rt.id
            GROUP BY rt.type_name`
