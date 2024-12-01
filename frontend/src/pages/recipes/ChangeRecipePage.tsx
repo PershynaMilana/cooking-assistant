@@ -25,6 +25,7 @@ interface Recipe {
   }[];
   type_id: number;
   cooking_time: number;
+  servings: string;
 }
 
 const ChangeRecipePage: React.FC = () => {
@@ -66,7 +67,6 @@ const ChangeRecipePage: React.FC = () => {
         ]);
 
       const recipeData: Recipe = recipeResponse.data;
-
       setTitle(recipeData.title);
       setContent(recipeData.content);
       setCookingTime(formatCookingTime(recipeData.cooking_time));
@@ -75,8 +75,12 @@ const ChangeRecipePage: React.FC = () => {
       setAllTypes(typesResponse.data);
       setSelectedIngredients(recipeData.ingredients);
       setSelectedTypeId(recipeData.type_id);
-    } catch (error) {
-      setError("Ошибка загрузки данных рецепта");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(`Ошибка загрузки данных рецепта, ${error.message}`);
+      } else {
+        setError("Неизвестная ошибка при загрузке данных.");
+      }
     }
   }, [id]);
 
@@ -110,7 +114,6 @@ const ChangeRecipePage: React.FC = () => {
   };
 
   const toggleIngredientSelection = (ingredient: Ingredient) => {
-    console.log(ingredient);
     setSelectedIngredients((prevSelected) => {
       const existing = prevSelected.find((i) => i.id === ingredient.id);
       if (existing) {

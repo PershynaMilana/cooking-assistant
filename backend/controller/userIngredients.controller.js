@@ -91,36 +91,6 @@ class UserIngredientsController {
   }
 
   //? Оновлення кількості інгредієнтів
-  // async updateIngredientQuantities(req, res) {
-  //   const userId = req.params.userId;
-  //   const { updatedIngredients } = req.body;
-
-  //   if (!Array.isArray(updatedIngredients)) {
-  //     return res.status(400).json({ error: "Некоректний формат даних" });
-  //   }
-
-  //   const client = await db.connect();
-  //   try {
-  //     await client.query("BEGIN");
-
-  //     for (const ingredient of updatedIngredients) {
-  //       await client.query(
-  //         `UPDATE person_ingredients
-  //            SET quantity_person_ingradient = $1
-  //            WHERE person_id = $2 AND ingredient_id = $3`,
-  //         [ingredient.quantity_person_ingradient, userId, ingredient.id]
-  //       );
-  //     }
-
-  //     await client.query("COMMIT");
-  //     res.json({ message: "Кількість інгредієнтів оновлено" });
-  //   } catch (error) {
-  //     await client.query("ROLLBACK");
-  //     res.status(500).json({ error: error.message });
-  //   } finally {
-  //     client.release();
-  //   }
-  // }
   async updateIngredientQuantities(req, res) {
     const userId = req.params.userId;
     const { updatedIngredients } = req.body;
@@ -138,7 +108,7 @@ class UserIngredientsController {
           `UPDATE person_ingredients
            SET 
              quantity_person_ingradient = $1,
-             purchase_date = NOW() -- Обновляем дату покупки на текущую
+             purchase_date = NOW() 
            WHERE person_id = $2 AND ingredient_id = $3`,
           [ingredient.quantity_person_ingradient, userId, ingredient.id]
         );

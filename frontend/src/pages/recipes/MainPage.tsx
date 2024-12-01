@@ -119,18 +119,18 @@ const MainPage: React.FC = () => {
   // Функція для завантаження описів типів рецептів
   useEffect(() => {
     const fetchTypesDescriptions = async () => {
-      const token = localStorage.getItem("authToken");  // Получаем токен из localStorage
+      const token = localStorage.getItem("authToken"); // Получаем токен из localStorage
 
       try {
         if (selectedTypes.length > 0) {
           const response = await axios.get(
-              `http://localhost:8080/api/recipe-types`,
-              {
-                params: { ids: selectedTypes.join(",") },
-                headers: {
-                  Authorization: token ? `Bearer ${token}` : "", // Добавляем токен в заголовок
-                },
-              }
+            `http://localhost:8080/api/recipe-types`,
+            {
+              params: { ids: selectedTypes.join(",") },
+              headers: {
+                Authorization: token ? `Bearer ${token}` : "", // Добавляем токен в заголовок
+              },
+            }
           );
           setTypesDescriptions(response.data);
         } else {
@@ -169,7 +169,7 @@ const MainPage: React.FC = () => {
       <div className="mx-[15vw]">
         {/* Блок для компонентів фільтрації та пошуку */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-          <SearchComponent placeholder={"інградієнтом"}/>
+          <SearchComponent placeholder={"інградієнтом"} />
           <div className="ml-4 mt-4 sm:mt-0">
             <RecipeTypeFilter
               selectedTypes={selectedTypes}

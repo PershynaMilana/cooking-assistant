@@ -3,55 +3,57 @@ import axios from "axios";
 import Chart from "react-apexcharts";
 import Header from "../../components/Header.tsx";
 
-// Опис інтерфейсу для статистики типів рецептів
+// Интерфейс для статистики типов рецептов
 interface Stat {
-  typeName: string; // Назва типу рецепту
-  count: number; // Кількість рецептів цього типу
+  typeName: string; // Название типа рецепта
+  count: number; // Количество рецептов этого типа
 }
 
-// Опис інтерфейсу для об'єкта рецепту
+// Интерфейс для объекта рецепта
 interface Recipe {
-  id: number; // Унікальний ідентифікатор рецепту
-  title: string; // Назва рецепту
-  cooking_time: number; // Час приготування в хвилинах
-  type_name: string; // Назва типу рецепту
+  id: number; // Уникальный идентификатор рецепта
+  title: string; // Название рецепта
+  cooking_time: number; // Время приготовления в минутах
+  type_name: string; // Название типа рецепта
+  ingredients: string[]; // Список ингредиентов
 }
 
 const StatsPage: React.FC = () => {
-  // Стани для збереження статистики, найшвидших і найдовших рецептів
   const [stats, setStats] = useState<Stat[]>([]);
   const [fastestRecipes, setFastestRecipes] = useState<Recipe[]>([]);
   const [slowestRecipes, setSlowestRecipes] = useState<Recipe[]>([]);
+  const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<
+    Recipe[]
+  >([]);
+  const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
+    Recipe[]
+  >([]);
 
-  // Використовуємо useEffect для завантаження даних при першому рендері
   useEffect(() => {
     const fetchStats = async () => {
       const token = localStorage.getItem("authToken");
       try {
-        // Запит на отримання даних про рецепти
         const response = await axios.get("http://localhost:8080/api/recipes", {
           headers: {
-            Authorization: token ? `Bearer ${token}` : "",  // Добавляем токен в заголовок
+            Authorization: token ? `Bearer ${token}` : "",
           },
         });
         const recipes: Recipe[] = response.data;
 
-        // Підрахунок кількості рецептів за типами
+        // Подсчёт количества рецептов по типам
         const typeCounts: { [key: string]: number } = {};
         recipes.forEach((recipe) => {
           typeCounts[recipe.type_name] =
             (typeCounts[recipe.type_name] || 0) + 1;
         });
 
-        // Форматування даних для відображення у вигляді статистики
         const formattedStats = Object.keys(typeCounts).map((typeName) => ({
           typeName,
           count: typeCounts[typeName],
         }));
-
         setStats(formattedStats);
 
-        // Знаходження найшвидших і найдовших рецептів
+        // Поиск рецептов по времени приготовления
         if (recipes.length > 0) {
           const minTime = Math.min(
             ...recipes.map((recipe) => recipe.cooking_time)
@@ -60,32 +62,46 @@ const StatsPage: React.FC = () => {
             ...recipes.map((recipe) => recipe.cooking_time)
           );
 
-          const fastest = recipes.filter(
-            (recipe) => recipe.cooking_time === minTime
+          setFastestRecipes(
+            recipes.filter((recipe) => recipe.cooking_time === minTime)
           );
-          const slowest = recipes.filter(
-            (recipe) => recipe.cooking_time === maxTime
+          setSlowestRecipes(
+            recipes.filter((recipe) => recipe.cooking_time === maxTime)
           );
 
-          setFastestRecipes(fastest);
-          setSlowestRecipes(slowest);
+          // Поиск рецептов по количеству ингредиентов
+          const maxIngredients = Math.max(
+            ...recipes.map((recipe) => recipe.ingredients.length)
+          );
+          const minIngredients = Math.min(
+            ...recipes.map((recipe) => recipe.ingredients.length)
+          );
+
+          setMostIngredientsRecipes(
+            recipes.filter(
+              (recipe) => recipe.ingredients.length === maxIngredients
+            )
+          );
+          setLeastIngredientsRecipes(
+            recipes.filter(
+              (recipe) => recipe.ingredients.length === minIngredients
+            )
+          );
         }
       } catch (error) {
-        // Обробка помилок при запиті даних
-        console.error("Помилка отримання статистики:", error);
+        console.error("Ошибка получения статистики:", error);
       }
     };
 
-    // Виклик функції для завантаження даних
     fetchStats();
   }, []);
 
-  // Налаштування для компоненту діаграми
-  const chartOptions = {
+  // Опции для диаграммы
+  const chartOptions: ApexCharts.ApexOptions = {
     chart: {
-      type: "pie" as const, // Тип діаграми — кругова
+      type: "pie",
     },
-    labels: stats.map((stat) => stat.typeName), // Мітки для кожного сегмента діаграми
+    labels: stats.map((stat) => stat.typeName),
     responsive: [
       {
         breakpoint: 480,
@@ -94,30 +110,28 @@ const StatsPage: React.FC = () => {
             width: 200,
           },
           legend: {
-            position: "bottom", // Легенда під діаграмою на маленьких екранах
+            position: "bottom",
           },
         },
       },
     ],
   };
 
-  // Серія даних для діаграми (кількість рецептів кожного типу)
+  // Данные для диаграммы
   const chartSeries = stats.map((stat) => stat.count);
 
   return (
     <div>
-      {/* Заголовок сторінки */}
       <Header />
       <div className="mx-[15vw] my-8">
         <div className="flex items-center justify-center mb-6">
           <h1 className="text-relative-h3 font-bold text-center bg-gradient-to-r from-dark-purple to-perfect-purple text-white p-4 rounded-md">
-            Статистика Рецептів
+            Статистика рецептів
           </h1>
         </div>
 
-        {/* Блок з діаграмою та списком описів */}
         <div className="flex justify-between">
-          {/* Діаграма */}
+          {/* Диаграмма */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
             <Chart
               options={chartOptions}
@@ -127,7 +141,7 @@ const StatsPage: React.FC = () => {
             />
           </div>
 
-          {/* Список типів рецептів та їх описів */}
+          {/* Список типов рецептов и информация */}
           <div className="ml-6 flex flex-col">
             <h2 className="text-h3 font-semibold mb-4">Опис типів рецептів</h2>
             <ul className="space-y-2">
@@ -142,18 +156,14 @@ const StatsPage: React.FC = () => {
               ))}
             </ul>
 
-            {/* Блок з інформацією про найшвидші та найдовші рецепти */}
             <div className="mt-4">
-              <h2 className="text-h3 font-semibold mb-2">
-                Швидкий і довгий рецепти
-              </h2>
+              <h2 className="text-h3 font-semibold mb-2">Деталі рецептів</h2>
               <div>
                 <strong>Найшвидші рецепти:</strong>
                 <ul>
                   {fastestRecipes.map((recipe) => (
                     <li key={recipe.id}>
-                      {recipe.title} ({Math.floor(recipe.cooking_time / 60)}{" "}
-                      годин {recipe.cooking_time % 60} хвилин)
+                      {recipe.title} ({recipe.cooking_time} хв.)
                     </li>
                   ))}
                 </ul>
@@ -163,8 +173,27 @@ const StatsPage: React.FC = () => {
                 <ul>
                   {slowestRecipes.map((recipe) => (
                     <li key={recipe.id}>
-                      {recipe.title} ({Math.floor(recipe.cooking_time / 60)}{" "}
-                      годин {recipe.cooking_time % 60} хвилин)
+                      {recipe.title} ({recipe.cooking_time} хв.)
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>Рецепти з найбільшою кількістю інгредієнтів:</strong>
+                <ul>
+                  {mostIngredientsRecipes.map((recipe) => (
+                    <li key={recipe.id}>
+                      {recipe.title} ({recipe.ingredients.length} инг.)
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>Рецепти з найменшою кількістю інгредієнтів:</strong>
+                <ul>
+                  {leastIngredientsRecipes.map((recipe) => (
+                    <li key={recipe.id}>
+                      {recipe.title} ({recipe.ingredients.length} инг.)
                     </li>
                   ))}
                 </ul>

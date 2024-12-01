@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Header.tsx";
+import { useNavigate } from "react-router-dom";
 
 interface Ingredient {
   id: number;
@@ -33,6 +34,7 @@ const IngredientsPage: React.FC = () => {
   const [updatedIngredients, setUpdatedIngredients] = useState<Ingredient[]>(
     []
   );
+  const navigate = useNavigate();
 
   // Fetch all ingredients
   useEffect(() => {
@@ -192,10 +194,29 @@ const IngredientsPage: React.FC = () => {
     const decodedToken: any = jwtDecode(token);
     const userId = decodedToken.id;
 
+    // Определяем ингредиенты с измененным количеством
+    const changedIngredients = updatedIngredients.filter(
+      (updatedIngredient) => {
+        const original = personIngredients.find(
+          (ingredient) => ingredient.id === updatedIngredient.id
+        );
+        return (
+          original &&
+          original.quantity_person_ingradient !==
+            updatedIngredient.quantity_person_ingradient
+        );
+      }
+    );
+
+    if (changedIngredients.length === 0) {
+      navigate("/ingredients");
+      console.log("Никакие данные не были изменены.");
+    }
+
     try {
       await axios.put(
         `http://localhost:8080/api/user-ingredients/update-quantities/${userId}`,
-        { updatedIngredients },
+        { updatedIngredients: changedIngredients },
         {
           headers: { Authorization: `Bearer ${token}` },
         }

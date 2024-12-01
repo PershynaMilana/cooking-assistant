@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "../../components/Header.tsx";
 import Modal from "../../components/Modal.tsx";
+import { jwtDecode } from "jwt-decode";
 
 interface Ingredient {
   name: string;
@@ -17,14 +18,28 @@ interface Recipe {
   type_name: string;
   cooking_time: number;
   creation_date: string;
-  servings: string; // Добавлено поле servings
+  servings: string;
+  person_id: number;
 }
+const getCurrentUserId = () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return null;
+
+  try {
+    const decoded: { id: number } = jwtDecode(token);
+    return decoded.id;
+  } catch (error) {
+    console.error("Ошибка декодирования токена:", error);
+    return null;
+  }
+};
 
 const RecipeDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const fetchRecipeDetails = useCallback(async () => {
@@ -48,6 +63,13 @@ const RecipeDetailsPage: React.FC = () => {
       }
     }
   }, [id]);
+
+  useEffect(() => {
+    const userId = getCurrentUserId();
+    setCurrentUserId(userId);
+    fetchRecipeDetails();
+  }, [fetchRecipeDetails]);
+  const isOwner = recipe?.person_id === currentUserId;
 
   const deleteRecipe = async () => {
     const token = localStorage.getItem("authToken");
@@ -161,7 +183,7 @@ const RecipeDetailsPage: React.FC = () => {
           {recipe.servings}
         </p>
 
-        <button
+        {/* <button
           onClick={handleOpenModal}
           className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
         >
@@ -172,7 +194,22 @@ const RecipeDetailsPage: React.FC = () => {
           <button className="bg-yellow-500 text-white py-2 px-4 ml-[1vw] rounded-full">
             Змінити рецепт
           </button>
-        </Link>
+        </Link> */}
+        {isOwner && (
+          <>
+            <button
+              onClick={handleOpenModal}
+              className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
+            >
+              Видалити рецепт
+            </button>
+            <Link to={`/change-recipe/${recipe.id}`}>
+              <button className="bg-yellow-500 text-white py-2 px-4 ml-[1vw] rounded-full">
+                Змінити рецепт
+              </button>
+            </Link>
+          </>
+        )}
       </div>
 
       <Modal
