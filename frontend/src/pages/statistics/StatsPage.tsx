@@ -2,20 +2,23 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Chart from "react-apexcharts";
 import Header from "../../components/Header.tsx";
+import {
+  PDFDownloadLink,
+} from "@react-pdf/renderer";
+import StatsReportSecond from "./StatsReportSecond.tsx";
+import StatsReport from "./StatsReport";
 
-// Интерфейс для статистики типов рецептов
 interface Stat {
-  typeName: string; // Название типа рецепта
-  count: number; // Количество рецептов этого типа
+  typeName: string;
+  count: number;
 }
 
-// Интерфейс для объекта рецепта
 interface Recipe {
-  id: number; // Уникальный идентификатор рецепта
-  title: string; // Название рецепта
-  cooking_time: number; // Время приготовления в минутах
-  type_name: string; // Название типа рецепта
-  ingredients: string[]; // Список ингредиентов
+  id: number;
+  title: string;
+  cooking_time: number;
+  type_name: string;
+  ingredients: string[];
 }
 
 const StatsPage: React.FC = () => {
@@ -28,6 +31,7 @@ const StatsPage: React.FC = () => {
   const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
     Recipe[]
   >([]);
+  const [reportTime, setReportTime] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -96,6 +100,7 @@ const StatsPage: React.FC = () => {
     fetchStats();
   }, []);
 
+
   // Опции для диаграммы
   const chartOptions: ApexCharts.ApexOptions = {
     chart: {
@@ -120,6 +125,10 @@ const StatsPage: React.FC = () => {
   // Данные для диаграммы
   const chartSeries = stats.map((stat) => stat.count);
 
+  const handleGenerateReport = () => {
+    setReportTime(new Date());
+  };
+
   return (
     <div>
       <Header />
@@ -132,27 +141,50 @@ const StatsPage: React.FC = () => {
 
         <div className="flex justify-between">
           {/* Диаграмма */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+          <div className="bg-white p-6 h-full rounded-xl shadow-lg border border-gray-200">
             <Chart
-              options={chartOptions}
-              series={chartSeries}
-              type="pie"
-              width="500"
+                options={chartOptions}
+                series={chartSeries}
+                type="pie"
+                width="500"
+                height="auto"
             />
+            <div className="flex my-5 flex-col space-y-4">
+              <PDFDownloadLink
+                  document={<StatsReport reportTime={reportTime || new Date()} stats={stats}/>}
+                  fileName="Statistics_Report.pdf"
+                  onClick={handleGenerateReport}
+                  className="bg-perfect-purple my-1 font-montserratRegular px-8 py-2 -mt-1 mr-[3vw] rounded-full"
+              >
+                Звіт статистики PDF
+
+              </PDFDownloadLink>
+
+              <PDFDownloadLink
+                  document={<StatsReportSecond reportTime={reportTime || new Date()}/>}
+                  fileName="Statistics_Second_Report.pdf"
+                  onClick={handleGenerateReport}
+                  className="bg-perfect-purple my-1 font-montserratRegular px-8 py-2 -mt-1 mr-[3vw] rounded-full"
+              >
+                Звіт статистики PDF варіант 2
+
+              </PDFDownloadLink>
+            </div>
           </div>
+
 
           {/* Список типов рецептов и информация */}
           <div className="ml-6 flex flex-col">
             <h2 className="text-h3 font-semibold mb-4">Опис типів рецептів</h2>
             <ul className="space-y-2">
               {stats.map((stat) => (
-                <li
-                  key={stat.typeName}
-                  className="flex justify-between bg-gray-100 p-2 rounded-md"
-                >
-                  <span className="font-medium">{stat.typeName}</span>
-                  <span className="text-gray-600">{stat.count}</span>
-                </li>
+                  <li
+                      key={stat.typeName}
+                      className="flex justify-between bg-gray-100 p-2 rounded-md"
+                  >
+                    <span className="font-medium">{stat.typeName}</span>
+                    <span className="text-gray-600">{stat.count}</span>
+                  </li>
               ))}
             </ul>
 
@@ -162,9 +194,9 @@ const StatsPage: React.FC = () => {
                 <strong>Найшвидші рецепти:</strong>
                 <ul>
                   {fastestRecipes.map((recipe) => (
-                    <li key={recipe.id}>
-                      {recipe.title} ({recipe.cooking_time} хв.)
-                    </li>
+                      <li key={recipe.id}>
+                        {recipe.title} ({recipe.cooking_time} хв.)
+                      </li>
                   ))}
                 </ul>
               </div>
@@ -172,9 +204,9 @@ const StatsPage: React.FC = () => {
                 <strong>Найдовші рецепти:</strong>
                 <ul>
                   {slowestRecipes.map((recipe) => (
-                    <li key={recipe.id}>
-                      {recipe.title} ({recipe.cooking_time} хв.)
-                    </li>
+                      <li key={recipe.id}>
+                        {recipe.title} ({recipe.cooking_time} хв.)
+                      </li>
                   ))}
                 </ul>
               </div>
@@ -182,9 +214,9 @@ const StatsPage: React.FC = () => {
                 <strong>Рецепти з найбільшою кількістю інгредієнтів:</strong>
                 <ul>
                   {mostIngredientsRecipes.map((recipe) => (
-                    <li key={recipe.id}>
-                      {recipe.title} ({recipe.ingredients.length} инг.)
-                    </li>
+                      <li key={recipe.id}>
+                        {recipe.title} ({recipe.ingredients.length} інг.)
+                      </li>
                   ))}
                 </ul>
               </div>
@@ -192,12 +224,14 @@ const StatsPage: React.FC = () => {
                 <strong>Рецепти з найменшою кількістю інгредієнтів:</strong>
                 <ul>
                   {leastIngredientsRecipes.map((recipe) => (
-                    <li key={recipe.id}>
-                      {recipe.title} ({recipe.ingredients.length} инг.)
-                    </li>
+                      <li key={recipe.id}>
+                        {recipe.title} ({recipe.ingredients.length} інг.)
+                      </li>
                   ))}
                 </ul>
               </div>
+
+
             </div>
           </div>
         </div>

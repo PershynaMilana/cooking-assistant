@@ -529,10 +529,53 @@ class RecipeController {
            GROUP BY rt.type_name`
       );
 
+      const { rows: recipesWithMostIngredients } = await db.query(
+          `SELECT r.*, COUNT(ri.ingredient_id) as ingredient_count
+           FROM recipes r
+                  JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+           GROUP BY r.id
+           HAVING COUNT(ri.ingredient_id) = (
+             SELECT MAX(ingredient_count)
+             FROM (
+                    SELECT COUNT(ri.ingredient_id) as ingredient_count
+                    FROM recipes r
+                           JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+                    GROUP BY r.id
+                  ) subquery
+           )`
+      );
+
+      const { rows: recipesWithLeastIngredients } = await db.query(
+          `SELECT r.*, COUNT(ri.ingredient_id) as ingredient_count
+           FROM recipes r
+                  JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+           GROUP BY r.id
+           HAVING COUNT(ri.ingredient_id) = (
+             SELECT MIN(ingredient_count)
+             FROM (
+                    SELECT COUNT(ri.ingredient_id) as ingredient_count
+                    FROM recipes r
+                           JOIN recipe_ingredients ri ON r.id = ri.recipe_id
+                    GROUP BY r.id
+                  ) subquery
+           )`
+      );
+
+      const { rows: averageCookingTimes } = await db.query(
+          `SELECT rt.type_name as "typeName", 
+              AVG(r.cooking_time) as "averageCookingTime"
+         FROM recipes r
+         JOIN recipe_types rt ON r.type_id = rt.id
+         GROUP BY rt.type_name`
+      );
+
       res.json({
-        fastestRecipe: fastestRecipe[0],
-        slowestRecipe: slowestRecipe[0],
+        fastestRecipe,
+        slowestRecipe,
         typeStats,
+        recipesWithMostIngredients,
+        recipesWithLeastIngredients,
+        averageCookingTimes
       });
     } catch (error) {
       res.status(500).json({ error: error.message });

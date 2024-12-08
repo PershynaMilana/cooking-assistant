@@ -22,4 +22,6 @@ router.delete("/menu/:id", authenticateToken, deleteMenu);
 //? Отримання меню користувача
 router.get("/menu-filters-person/:id", authenticateToken, searchPersonMenus);
 
+//? Отримання кількості меню по кожній категорії
+
 module.exports = router;

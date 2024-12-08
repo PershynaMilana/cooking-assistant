@@ -230,7 +230,7 @@ const getMenuWithRecipes = async (req, res) => {
     for (let recipe of recipeResult.rows) {
       const recipeId = recipe.recipe_id;
 
-      // Получение недостающих ингредиентов и единиц измерения для каждого рецепта
+      // получение недостающих ингредиентов и единиц измерения для каждого рецепта
       const missingIngredientsQuery = `
         SELECT
           i.name AS ingredient_name,
@@ -346,11 +346,12 @@ const searchPersonMenus = async (req, res) => {
   }
 };
 
+
 module.exports = {
   getAllMenus,
   deleteMenu,
   getMenuWithRecipes,
   createMenuWithRecipes,
   updateMenu,
-  searchPersonMenus,
+  searchPersonMenus
 };
