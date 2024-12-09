@@ -7,7 +7,6 @@ const userIngredientsRouter = require("./routes/userIngredients.routes");
 const menuRouter = require("./routes/menu.routes");
 const menuCategoryRouter = require("./routes/menuCategory.routes");
 
-
 const PORT = process.env.PORT || 8080;
 
 const app = express();
@@ -27,6 +26,5 @@ app.use("/api", typeRouter);
 app.use("/api", userIngredientsRouter);
 app.use("/api", menuRouter);
 app.use("/api", menuCategoryRouter);
-
 
 app.listen(PORT, () => console.log(`server listening on ${PORT}`));

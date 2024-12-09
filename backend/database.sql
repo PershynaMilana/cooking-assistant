@@ -263,95 +263,215 @@ ADD COLUMN seasonality VARCHAR(255),
 ADD COLUMN storage_condition VARCHAR(255);
 
 UPDATE ingredients
-SET allergens = 'Яйця', days_to_expire = 7, seasonality = 'Усі сезони', storage_condition = '+4 - +8°C'
-WHERE id = 1;
+SET
+  allergens = 'Яйця',
+  days_to_expire = 7,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 1;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = NULL, seasonality = 'Усі сезони', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 2;
+SET
+  allergens = 'Немає',
+  days_to_expire = NULL,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 2;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 30, seasonality = 'Літо, осінь', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 3;
+SET
+  allergens = 'Немає',
+  days_to_expire = 30,
+  seasonality = 'Літо, осінь',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 3;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 180, seasonality = 'Усі сезони', storage_condition = '+4 - +20°C'
-WHERE id = 4;
+SET
+  allergens = 'Немає',
+  days_to_expire = 180,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +20°C'
+WHERE
+  id = 4;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 90, seasonality = 'Осінь, зима', storage_condition = '+4 - +8°C'
-WHERE id = 5;
+SET
+  allergens = 'Немає',
+  days_to_expire = 90,
+  seasonality = 'Осінь, зима',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 5;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 60, seasonality = 'Осінь, зима', storage_condition = '+4 - +8°C'
-WHERE id = 6;
+SET
+  allergens = 'Немає',
+  days_to_expire = 60,
+  seasonality = 'Осінь, зима',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 6;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 120, seasonality = 'Усі сезони', storage_condition = '+4 - +8°C'
-WHERE id = 7;
+SET
+  allergens = 'Немає',
+  days_to_expire = 120,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 7;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 10, seasonality = 'Літо, осінь', storage_condition = '+4 - +8°C'
-WHERE id = 8;
+SET
+  allergens = 'Немає',
+  days_to_expire = 10,
+  seasonality = 'Літо, осінь',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 8;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 7, seasonality = 'Літо', storage_condition = '+4 - +8°C'
-WHERE id = 9;
+SET
+  allergens = 'Немає',
+  days_to_expire = 7,
+  seasonality = 'Літо',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 9;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = NULL, seasonality = 'Усі сезони', storage_condition = 'Кімнатна температура'
-WHERE id = 10;
+SET
+  allergens = 'Немає',
+  days_to_expire = NULL,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Кімнатна температура'
+WHERE
+  id = 10;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = NULL, seasonality = 'Усі сезони', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 11;
+SET
+  allergens = 'Немає',
+  days_to_expire = NULL,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 11;
 
 UPDATE ingredients
-SET allergens = 'Цитрусові', days_to_expire = 20, seasonality = 'Зима, весна', storage_condition = '+4 - +8°C'
-WHERE id = 12;
+SET
+  allergens = 'Цитрусові',
+  days_to_expire = 20,
+  seasonality = 'Зима, весна',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 12;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 7, seasonality = 'Літо', storage_condition = '+4 - +8°C'
-WHERE id = 13;
+SET
+  allergens = 'Немає',
+  days_to_expire = 7,
+  seasonality = 'Літо',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 13;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 180, seasonality = 'Усі сезони', storage_condition = '+4 - +8°C'
-WHERE id = 14;
+SET
+  allergens = 'Немає',
+  days_to_expire = 180,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 14;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 5, seasonality = 'Осінь', storage_condition = '+4 - +8°C'
-WHERE id = 15;
+SET
+  allergens = 'Немає',
+  days_to_expire = 5,
+  seasonality = 'Осінь',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 15;
 
 UPDATE ingredients
-SET allergens = 'Молочні', days_to_expire = 10, seasonality = 'Усі сезони', storage_condition = '+4 - +8°C'
-WHERE id = 16;
+SET
+  allergens = 'Молочні',
+  days_to_expire = 10,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 16;
 
 UPDATE ingredients
-SET allergens = 'Курятина', days_to_expire = 3, seasonality = 'Усі сезони', storage_condition = '+4 - +8°C'
-WHERE id = 17;
+SET
+  allergens = 'Курятина',
+  days_to_expire = 3,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 17;
 
 UPDATE ingredients
-SET allergens = 'Молочні', days_to_expire = 7, seasonality = 'Усі сезони', storage_condition = '+4 - +8°C'
-WHERE id = 18;
+SET
+  allergens = 'Молочні',
+  days_to_expire = 7,
+  seasonality = 'Усі сезони',
+  storage_condition = '+4 - +8°C'
+WHERE
+  id = 18;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = NULL, seasonality = 'Усі сезони', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 19;
+SET
+  allergens = 'Немає',
+  days_to_expire = NULL,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 19;
 
 UPDATE ingredients
-SET allergens = 'Глютен', days_to_expire = 180, seasonality = 'Усі сезони', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 20;
+SET
+  allergens = 'Глютен',
+  days_to_expire = 180,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 20;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = NULL, seasonality = 'Усі сезони', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 21;
+SET
+  allergens = 'Немає',
+  days_to_expire = NULL,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 21;
 
 UPDATE ingredients
-SET allergens = 'Немає', days_to_expire = 365, seasonality = 'Усі сезони', storage_condition = 'Сухе місце, кімнатна температура'
-WHERE id = 22;
+SET
+  allergens = 'Немає',
+  days_to_expire = 365,
+  seasonality = 'Усі сезони',
+  storage_condition = 'Сухе місце, кімнатна температура'
+WHERE
+  id = 22;
 
-ALTER TABLE recipes
-ADD servings VARCHAR(255);
+ALTER TABLE recipes ADD servings VARCHAR(255);
 
-ALTER TABLE person_ingredients
-ADD purchase_date DATE DEFAULT CURRENT_DATE;
+ALTER TABLE person_ingredients ADD purchase_date DATE DEFAULT CURRENT_DATE;
+
+--! 09.12 lublu
+CREATE TABLE
+  ingredient_purchases (
+    id SERIAL PRIMARY KEY,
+    person_id INTEGER NOT NULL,
+    ingredient_id INTEGER NOT NULL,
+    quantity DOUBLE PRECISION NOT NULL,
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+  );

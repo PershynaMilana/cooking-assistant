@@ -30,7 +30,6 @@ class UserIngredientsController {
   }
 
   //? Оновлення інгредієнтів користувача
-
   async updateUserIngredients(req, res) {
     const userId = req.query.userId || 1;
     const { ingredients } = req.body;
@@ -44,16 +43,21 @@ class UserIngredientsController {
       await client.query("BEGIN");
 
       for (const ingredient of ingredients) {
+        // Добавляем или обновляем ингредиенты в person_ingredients
         await client.query(
           `INSERT INTO person_ingredients (person_id, ingredient_id, quantity_person_ingradient, purchase_date)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (person_id, ingredient_id) DO NOTHING`,
-          [
-            userId,
-            ingredient.id,
-            ingredient.quantity_person_ingradient,
-            new Date(),
-          ]
+           VALUES ($1, $2, $3, NOW())
+           ON CONFLICT (person_id, ingredient_id) 
+           DO UPDATE SET quantity_person_ingradient = person_ingredients.quantity_person_ingradient + $3, 
+                         purchase_date = NOW()`,
+          [userId, ingredient.id, ingredient.quantity_person_ingradient]
+        );
+
+        // Сохраняем историю в ingredient_purchases
+        await client.query(
+          `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
+           VALUES ($1, $2, $3, NOW())`,
+          [userId, ingredient.id, ingredient.quantity_person_ingradient]
         );
       }
 
@@ -72,21 +76,36 @@ class UserIngredientsController {
     const userId = req.params.userId;
     const ingredientId = req.params.ingredientId;
 
+    const client = await db.connect();
     try {
-      const result = await db.query(
+      await client.query("BEGIN");
+
+      // Удаляем записи из истории покупок
+      await client.query(
+        `DELETE FROM ingredient_purchases WHERE person_id = $1 AND ingredient_id = $2`,
+        [userId, ingredientId]
+      );
+
+      // Удаляем сам ингредиент
+      const result = await client.query(
         `DELETE FROM person_ingredients WHERE person_id = $1 AND ingredient_id = $2`,
         [userId, ingredientId]
       );
 
       if (result.rowCount === 0) {
+        await client.query("ROLLBACK");
         return res
           .status(404)
           .json({ message: "Інгредієнт не знайдений для цього користувача" });
       }
 
-      res.json({ message: "Інгредієнт успішно видалено" });
+      await client.query("COMMIT");
+      res.json({ message: "Інгредієнт та його історія успішно видалені" });
     } catch (error) {
+      await client.query("ROLLBACK");
       res.status(500).json({ error: error.message });
+    } finally {
+      client.release();
     }
   }
 
@@ -104,23 +123,55 @@ class UserIngredientsController {
       await client.query("BEGIN");
 
       for (const ingredient of updatedIngredients) {
+        // Обновляем количество в person_ingredients
         await client.query(
           `UPDATE person_ingredients
-           SET 
-             quantity_person_ingradient = $1,
-             purchase_date = NOW() 
+           SET quantity_person_ingradient = $1, purchase_date = NOW()
            WHERE person_id = $2 AND ingredient_id = $3`,
           [ingredient.quantity_person_ingradient, userId, ingredient.id]
+        );
+
+        // Сохраняем историю в ingredient_purchases
+        await client.query(
+          `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
+           VALUES ($1, $2, $3, NOW())`,
+          [userId, ingredient.id, ingredient.quantity_person_ingradient]
         );
       }
 
       await client.query("COMMIT");
-      res.json({ message: "Кількість інгредієнтів та дата покупки оновлено" });
+      res.json({
+        message: "Кількість інгредієнтів та історія покупок оновлено",
+      });
     } catch (error) {
       await client.query("ROLLBACK");
       res.status(500).json({ error: error.message });
     } finally {
       client.release();
+    }
+  }
+
+  async getPurchaseHistory(req, res) {
+    const userId = req.params.userId;
+    const ingredientId = req.params.ingredientId;
+
+    try {
+      const result = await db.query(
+        `SELECT 
+           ip.id, 
+           ip.quantity, 
+           ip.purchase_date, 
+           um.unit_name
+         FROM ingredient_purchases ip
+         JOIN ingredients i ON ip.ingredient_id = i.id
+         JOIN unit_measurement um ON i.id_unit_measurement = um.id
+         WHERE ip.person_id = $1 AND ip.ingredient_id = $2
+         ORDER BY ip.purchase_date DESC`,
+        [userId, ingredientId]
+      );
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
   }
 }

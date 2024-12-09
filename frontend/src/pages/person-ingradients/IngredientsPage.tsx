@@ -3,6 +3,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Header.tsx";
 import { useNavigate } from "react-router-dom";
+import PurchaseHistoryModal from "../../components/PurchaseHistoryModal.tsx";
 
 interface Ingredient {
   id: number;
@@ -34,7 +35,21 @@ const IngredientsPage: React.FC = () => {
   const [updatedIngredients, setUpdatedIngredients] = useState<Ingredient[]>(
     []
   );
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [selectedHistoryIngredient, setSelectedHistoryIngredient] =
+    useState<Ingredient | null>(null);
+
   const navigate = useNavigate();
+
+  const openHistoryModal = (ingredient: Ingredient) => {
+    setSelectedHistoryIngredient(ingredient);
+    setIsHistoryModalOpen(true);
+  };
+
+  const closeHistoryModal = () => {
+    setSelectedHistoryIngredient(null);
+    setIsHistoryModalOpen(false);
+  };
 
   // Fetch all ingredients
   useEffect(() => {
@@ -249,6 +264,7 @@ const IngredientsPage: React.FC = () => {
     const userId = decodedToken.id;
 
     try {
+      // Удаление ингредиента и его истории
       await axios.delete(
         `http://localhost:8080/api/user-ingredients/${userId}/${selectedIngredientToDelete.id}`,
         {
@@ -257,21 +273,24 @@ const IngredientsPage: React.FC = () => {
           },
         }
       );
-      console.log(
-        `http://localhost:8080/api/user-ingredients/${userId}/${selectedIngredientToDelete.id}`
+
+      // Удаляем из локального состояния
+      setPersonIngredients((prev) =>
+        prev.filter((item) => item.id !== selectedIngredientToDelete.id)
       );
       setSelectedIngredients((prev) =>
         prev.filter((id) => id !== selectedIngredientToDelete.id)
       );
-      // оновлюємо список інградієнтів
-      await fetchSelectedIngredients();
+
+      console.log("Інгредієнт та історія успішно видалені.");
     } catch (error) {
-      console.error("Помилка видалення інгредієнта:", error);
+      console.error("Помилка видалення інгредієнта та історії:", error);
     }
 
     setIsModalOpen(false);
     setSelectedIngredientToDelete(null);
   };
+
   const isIngredientExpired = (ingredient: Ingredient): boolean => {
     if (!ingredient.purchase_date || !ingredient.days_to_expire) {
       // Если нет даты покупки или срока годности, считаем, что не просрочен
@@ -292,8 +311,10 @@ const IngredientsPage: React.FC = () => {
   return (
     <div>
       <Header />
-      <div className="w-10/12 mx-auto ">
-        <h1 className="text-3xl font-bold mb-6">Мої інгредієнти</h1>
+      <div className="w-11/12 mx-auto ">
+        <h1 className="text-3xl font-bold mb-6 justify-self-center m-4">
+          Мої інгредієнти
+        </h1>
 
         {/* Отображение текущих ингредиентов */}
         {!isEditingQuantity ? (
@@ -307,14 +328,13 @@ const IngredientsPage: React.FC = () => {
                 personIngredients.map((ingredient, index) => (
                   <li
                     key={ingredient.id || index}
-                    // className="bg-blue-200 rounded p-2 flex justify-between"
-                    className={`rounded p-2 flex justify-between ${
+                    className={`rounded p-2 flex justify-between items-center ${
                       isIngredientExpired(ingredient)
                         ? "bg-red-300"
                         : "bg-blue-200"
                     }`}
                   >
-                    <div className="flex items-center">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center">
                       <span className="font-medium">
                         {ingredient.ingredient_name}
                       </span>
@@ -355,12 +375,20 @@ const IngredientsPage: React.FC = () => {
                           : "Невідомо"}
                       </span>
                     </div>
-                    <button
-                      onClick={() => confirmDeleteIngredient(ingredient)}
-                      className="bg-red-500 text-white py-2 px-4 rounded-full"
-                    >
-                      Видалити
-                    </button>
+                    <div className="flex space-x-2 ml-auto">
+                      <button
+                        onClick={() => openHistoryModal(ingredient)}
+                        className="bg-amber-500 text-white py-2 px-4 rounded-full"
+                      >
+                        Детальніше
+                      </button>
+                      <button
+                        onClick={() => confirmDeleteIngredient(ingredient)}
+                        className="bg-red-500 text-white py-2 px-4 rounded-full"
+                      >
+                        Видалити
+                      </button>
+                    </div>
                   </li>
                 ))
               )}
@@ -479,6 +507,13 @@ const IngredientsPage: React.FC = () => {
           </div>
         )}
       </div>
+      {isHistoryModalOpen && selectedHistoryIngredient && (
+        <PurchaseHistoryModal
+          ingredientId={selectedHistoryIngredient.id}
+          ingredientName={selectedHistoryIngredient.ingredient_name || ""}
+          onClose={closeHistoryModal}
+        />
+      )}
     </div>
   );
 };
