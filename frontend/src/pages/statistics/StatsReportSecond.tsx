@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {Document, Font, Page, StyleSheet, Text, View} from "@react-pdf/renderer";
+import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import axios from "axios";
 import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
 
@@ -10,7 +10,6 @@ const formatDate = (date: Date) => {
     // @ts-ignore
     return date.toLocaleString('uk-UA', options);
 };
-
 
 const styles = StyleSheet.create({
     page: {
@@ -48,9 +47,13 @@ const styles = StyleSheet.create({
     date: {
         fontSize: 12,
         textAlign: 'right',
-        marginTop: -30,
+        marginTop: 10,  // Убираем отрицательный отступ и перемещаем дату вниз
         marginRight: 20,
     },
+    horizontalLine: {
+        borderBottom: '1px solid black',
+        marginVertical: 10,
+    }
 });
 
 interface Menu {
@@ -69,7 +72,6 @@ interface Recipe {
 interface StatsReportSecondProps {
     reportTime: Date;
 }
-
 
 const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => {
     const token = localStorage.getItem("authToken");
@@ -132,7 +134,6 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
                         averageCookingTime: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`,
                     };
                 });
-                console.log(formattedTimes)
                 setAverageCookingTimes(formattedTimes);
             } else {
                 setAverageCookingTimes([]);
@@ -152,22 +153,23 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
         }
     }, [token, fetchStats]);
 
-
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.section}>
                     <Text style={styles.title}>Звіт по статистиці</Text>
-                    <Text style={styles.date}>{formatDate(reportTime)}</Text>
                 </View>
+                
 
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Загальна кількість меню: {menusCount}</Text>
                 </View>
 
+
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Загальна кількість рецептів: {recipesCount}</Text>
                 </View>
+
 
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Середнє час приготування по типах рецептів:</Text>
@@ -178,6 +180,7 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
                     ))}
                 </View>
 
+
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Кількість меню по категоріях:</Text>
                     {menuCountByCategory.map((category) => (
@@ -187,21 +190,14 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
                     ))}
                 </View>
 
-                {error && (
-                    <View style={styles.section}>
-                        <Text style={styles.text}>Помилка: {error}</Text>
-                    </View>
-                )}
+                <View style={styles.horizontalLine} /> {/* Линия после статистики */}
 
-                {noMenus && (
-                    <View style={styles.section}>
-                        <Text style={styles.text}>Меню не знайдено</Text>
-                    </View>
-                )}
+                <View style={styles.section}>
+                    <Text style={styles.date}>{formatDate(reportTime)}</Text> {/* Дата теперь внизу */}
+                </View>
             </Page>
         </Document>
     );
 };
-
 
 export default StatsReportSecond;

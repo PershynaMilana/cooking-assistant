@@ -39,10 +39,15 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginBottom: 3,
     },
+    line: {
+        borderBottom: "1px solid black",
+        marginTop: 20,
+        marginBottom: 10, // Отступы для линии
+    },
     date: {
         fontSize: 12,
         textAlign: 'right',
-        marginTop: -30,
+        marginTop: 5, // Чтобы дата была сразу под линией
         marginRight: 20,
     },
     listItem: {
@@ -73,12 +78,8 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
     const [stats, setStats] = useState<Stat[]>([]);
     const [fastestRecipes, setFastestRecipes] = useState<Recipe[]>([]);
     const [slowestRecipes, setSlowestRecipes] = useState<Recipe[]>([]);
-    const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<
-        Recipe[]
-    >([]);
-    const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
-        Recipe[]
-    >([]);
+    const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<Recipe[]>([]);
+    const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<Recipe[]>([]);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -94,8 +95,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 // Подсчёт количества рецептов по типам
                 const typeCounts: { [key: string]: number } = {};
                 recipes.forEach((recipe) => {
-                    typeCounts[recipe.type_name] =
-                        (typeCounts[recipe.type_name] || 0) + 1;
+                    typeCounts[recipe.type_name] = (typeCounts[recipe.type_name] || 0) + 1;
                 });
 
                 const formattedStats = Object.keys(typeCounts).map((typeName) => ({
@@ -106,38 +106,18 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
 
                 // Поиск рецептов по времени приготовления
                 if (recipes.length > 0) {
-                    const minTime = Math.min(
-                        ...recipes.map((recipe) => recipe.cooking_time)
-                    );
-                    const maxTime = Math.max(
-                        ...recipes.map((recipe) => recipe.cooking_time)
-                    );
+                    const minTime = Math.min(...recipes.map((recipe) => recipe.cooking_time));
+                    const maxTime = Math.max(...recipes.map((recipe) => recipe.cooking_time));
 
-                    setFastestRecipes(
-                        recipes.filter((recipe) => recipe.cooking_time === minTime)
-                    );
-                    setSlowestRecipes(
-                        recipes.filter((recipe) => recipe.cooking_time === maxTime)
-                    );
+                    setFastestRecipes(recipes.filter((recipe) => recipe.cooking_time === minTime));
+                    setSlowestRecipes(recipes.filter((recipe) => recipe.cooking_time === maxTime));
 
                     // Поиск рецептов по количеству ингредиентов
-                    const maxIngredients = Math.max(
-                        ...recipes.map((recipe) => recipe.ingredients.length)
-                    );
-                    const minIngredients = Math.min(
-                        ...recipes.map((recipe) => recipe.ingredients.length)
-                    );
+                    const maxIngredients = Math.max(...recipes.map((recipe) => recipe.ingredients.length));
+                    const minIngredients = Math.min(...recipes.map((recipe) => recipe.ingredients.length));
 
-                    setMostIngredientsRecipes(
-                        recipes.filter(
-                            (recipe) => recipe.ingredients.length === maxIngredients
-                        )
-                    );
-                    setLeastIngredientsRecipes(
-                        recipes.filter(
-                            (recipe) => recipe.ingredients.length === minIngredients
-                        )
-                    );
+                    setMostIngredientsRecipes(recipes.filter((recipe) => recipe.ingredients.length === maxIngredients));
+                    setLeastIngredientsRecipes(recipes.filter((recipe) => recipe.ingredients.length === minIngredients));
                 }
             } catch (error) {
                 console.error("Ошибка получения статистики:", error);
@@ -146,14 +126,10 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
 
         fetchStats();
     }, []);
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
-                <View style={styles.section}>
-                    <Text style={styles.title}>Звіт по статистиці</Text>
-                    <Text style={styles.date}>{formatDate(reportTime)}</Text>
-                </View>
-
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Типи рецептів:</Text>
                     {stats.map((stat) => (
@@ -201,6 +177,13 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                             {recipe.title} ({recipe.ingredients.length} інг.)
                         </Text>
                     ))}
+                </View>
+
+                {/* Линия перед датой */}
+                <View style={styles.line} />
+
+                <View style={styles.section}>
+                    <Text style={styles.date}>{formatDate(reportTime)}</Text>
                 </View>
             </Page>
         </Document>

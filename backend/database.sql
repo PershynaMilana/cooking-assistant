@@ -464,14 +464,27 @@ ALTER TABLE recipes ADD servings VARCHAR(255);
 
 ALTER TABLE person_ingredients ADD purchase_date DATE DEFAULT CURRENT_DATE;
 
---! 09.12 lublu
+--! 09.12
 CREATE TABLE
-  ingredient_purchases (
-    id SERIAL PRIMARY KEY,
-    person_id INTEGER NOT NULL,
-    ingredient_id INTEGER NOT NULL,
-    quantity DOUBLE PRECISION NOT NULL,
-    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
-    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
-  );
+    ingredient_purchases (
+       id SERIAL PRIMARY KEY,
+       person_id INTEGER NOT NULL,
+       ingredient_id INTEGER NOT NULL,
+       quantity DOUBLE PRECISION NOT NULL,
+       purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
+       FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+);
+
+
+
+ALTER TABLE ingredient_purchases
+DROP CONSTRAINT IF EXISTS quantity;
+
+
+ALTER TABLE ingredient_purchases
+    ALTER COLUMN quantity SET DEFAULT 0;
+
+
+ALTER TABLE ingredient_purchases
+    ALTER COLUMN quantity SET NOT NULL;

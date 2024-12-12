@@ -31,6 +31,12 @@ router.put(
   userIngredientsController.updateIngredientQuantities
 );
 
+router.put(
+    "/user-ingredients/:userId/history/:purchaseId",
+    authenticateToken,
+    userIngredientsController.updatePurchaseQuantity
+);
+
 router.get(
   "/user-ingredients/:userId/history/:ingredientId",
   authenticateToken,
