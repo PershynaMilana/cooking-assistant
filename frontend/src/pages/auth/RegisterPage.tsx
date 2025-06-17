@@ -18,7 +18,7 @@ const RegisterPage: React.FC = () => {
 
     const validateName = (value: string) => {
         if (!/^[A-ZА-Я][a-zа-я]{1,}$/.test(value)) {
-            setNameError("Ім'я повинно починатися з великої літери та містити лише букви, не менше 2.");
+            setNameError("Name must start with a capital letter and contain only letters, at least 2 characters.");
         } else {
             setNameError(null);
         }
@@ -26,7 +26,7 @@ const RegisterPage: React.FC = () => {
 
     const validateSurname = (value: string) => {
         if (!/^[A-ZА-Я][a-zа-я]{1,}$/.test(value)) {
-            setSurnameError("Прізвище повинно починатися з великої літери та містити лише букви, не менше 2.");
+            setSurnameError("Surname must start with a capital letter and contain only letters, at least 2 characters.");
         } else {
             setSurnameError(null);
         }
@@ -34,7 +34,7 @@ const RegisterPage: React.FC = () => {
 
     const validateLogin = (value: string) => {
         if (value.length < 2) {
-            setLoginError("Ім'я користувача має бути не менше 2 символів.");
+            setLoginError("Username must be at least 2 characters.");
         } else {
             setLoginError(null);
         }
@@ -42,7 +42,7 @@ const RegisterPage: React.FC = () => {
 
     const validatePassword = (value: string) => {
         if (value.length < 6) {
-            setPasswordError("Пароль має бути не менше 6 символів.");
+            setPasswordError("Password must be at least 6 characters.");
         } else {
             setPasswordError(null);
         }
@@ -51,13 +51,13 @@ const RegisterPage: React.FC = () => {
     const handleRegister = async () => {
         setError(null);
 
-        // Перевірка на заповнення полів
+        // Check if all fields are filled
         if (!name || !surname || !login || !password) {
-            setError("Заповніть усі поля.");
+            setError("Please fill in all fields.");
             return;
         }
 
-        // Валідація перед відправкою
+        // Validation before sending
         validateName(name);
         validateSurname(surname);
         validateLogin(login);
@@ -77,7 +77,7 @@ const RegisterPage: React.FC = () => {
 
             navigate("/login");
         } catch (error) {
-            setError("Такий користувач вже існує.");
+            setError("This user already exists.");
         }
     };
 
@@ -87,13 +87,13 @@ const RegisterPage: React.FC = () => {
             <div className="mx-[35vw] flex flex-column items-center justify-center mt-[10vh]">
                 <form className="space-y-4 items-center w-full">
                     <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-                        Реєстрація
+                        Register
                     </h1>
 
-                    {/* Поле имени */}
+                    {/* Name field */}
                     <div>
                         <label className="block text-sm font-montserratRegular font-medium text-gray-700">
-                            Ім'я:
+                            Name:
                         </label>
                         <input
                             type="text"
@@ -103,15 +103,15 @@ const RegisterPage: React.FC = () => {
                                 validateName(e.target.value);
                             }}
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
-                            placeholder="Введіть ім'я"
+                            placeholder="Enter name"
                         />
                         {nameError && <div className="text-red-500">{nameError}</div>}
                     </div>
 
-                    {/* Поле фамилии */}
+                    {/* Surname field */}
                     <div>
                         <label className="block text-sm font-montserratRegular font-medium text-gray-700">
-                            Прізвище:
+                            Surname:
                         </label>
                         <input
                             type="text"
@@ -121,15 +121,15 @@ const RegisterPage: React.FC = () => {
                                 validateSurname(e.target.value);
                             }}
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
-                            placeholder="Введіть прізвище"
+                            placeholder="Enter surname"
                         />
                         {surnameError && <div className="text-red-500">{surnameError}</div>}
                     </div>
 
-                    {/* Поле логина */}
+                    {/* Username field */}
                     <div>
                         <label className="block text-sm font-montserratRegular font-medium text-gray-700">
-                            Ім'я користувача:
+                            Username:
                         </label>
                         <input
                             type="text"
@@ -139,15 +139,15 @@ const RegisterPage: React.FC = () => {
                                 validateLogin(e.target.value);
                             }}
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
-                            placeholder="Введіть ім'я користувача"
+                            placeholder="Enter username"
                         />
                         {loginError && <div className="text-red-500">{loginError}</div>}
                     </div>
 
-                    {/* Поле пароля */}
+                    {/* Password field */}
                     <div>
                         <label className="block text-sm font-montserratRegular font-medium text-gray-700">
-                            Пароль:
+                            Password:
                         </label>
                         <div className="relative">
                             <input
@@ -158,29 +158,29 @@ const RegisterPage: React.FC = () => {
                                     validatePassword(e.target.value);
                                 }}
                                 className="mt-1 block w-full p-2 font-montserratRegular border border-gray-300 rounded-md"
-                                placeholder="Введіть пароль"
+                                placeholder="Enter password"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute inset-y-0 right-2 flex items-center text-gray-500"
                             >
-                                {showPassword ? "Сховати" : "Показати"}
+                                {showPassword ? "Hide" : "Show"}
                             </button>
                         </div>
                         {passwordError && <div className="text-red-500">{passwordError}</div>}
                     </div>
 
-                    {/* Відображення загальної помилки */}
+                    {/* General error display */}
                     {error && <div className="text-red-500">{error}</div>}
 
-                    {/* Кнопка реєстрації */}
+                    {/* Register button */}
                     <button
                         type="button"
                         onClick={handleRegister}
                         className="bg-dark-purple w-full font-montserratRegular text-center text-white py-2 px-4 rounded-full"
                     >
-                        Зареєструватися
+                        Register
                     </button>
                 </form>
             </div>

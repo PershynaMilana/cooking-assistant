@@ -21,6 +21,7 @@ interface Recipe {
   servings: string;
   person_id: number;
 }
+
 const getCurrentUserId = () => {
   const token = localStorage.getItem("authToken");
   if (!token) return null;
@@ -29,7 +30,7 @@ const getCurrentUserId = () => {
     const decoded: { id: number } = jwtDecode(token);
     return decoded.id;
   } catch (error) {
-    console.error("Ошибка декодирования токена:", error);
+    console.error("Error decoding token:", error);
     return null;
   }
 };
@@ -51,7 +52,7 @@ const RecipeDetailsPage: React.FC = () => {
         },
       });
       if (!response.ok) {
-        throw new Error("Помилка при отриманні деталей рецепта");
+        throw new Error("Error fetching recipe details");
       }
       const data = await response.json();
       setRecipe(data);
@@ -59,7 +60,7 @@ const RecipeDetailsPage: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Невідома помилка");
+        setError("Unknown error");
       }
     }
   }, [id]);
@@ -69,6 +70,7 @@ const RecipeDetailsPage: React.FC = () => {
     setCurrentUserId(userId);
     fetchRecipeDetails();
   }, [fetchRecipeDetails]);
+
   const isOwner = recipe?.person_id === currentUserId;
 
   const deleteRecipe = async () => {
@@ -82,7 +84,7 @@ const RecipeDetailsPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Помилка при видаленні рецепта");
+        throw new Error("Error deleting recipe");
       }
 
       navigate("/main");
@@ -90,7 +92,7 @@ const RecipeDetailsPage: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Невідома помилка");
+        setError("Unknown error");
       }
     }
   };
@@ -115,111 +117,96 @@ const RecipeDetailsPage: React.FC = () => {
   const formatCookingTime = (timeInMinutes: number) => {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
-    const hourStr = hours > 0 ? `${hours} годин ` : "";
-    const minuteStr = `${minutes} хвилин`;
+    const hourStr = hours > 0 ? `${hours} hours ` : "";
+    const minuteStr = `${minutes} minutes`;
     return hourStr + minuteStr;
   };
 
   if (error) {
-    return <div className="text-red-500">Помилка: {error}</div>;
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   if (!recipe) {
-    return <div>Завантаження...</div>;
+    return <div>Loading...</div>;
   }
 
-  const formattedDate = new Date(recipe.creation_date).toLocaleDateString(
-    "uk-UA"
-  );
+  const formattedDate = new Date(recipe.creation_date).toLocaleDateString("en-GB");
 
   return (
-    <div>
-      <Header />
-      <div className="mx-[15vw]">
-        <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-          {recipe.title}
-        </h1>
+      <div>
+        <Header />
+        <div className="mx-[15vw]">
+          <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
+            {recipe.title}
+          </h1>
 
-        <h3 className="text-relative-ps text-lg font-semibold mt-4 font-montserratMedium">
-          <strong>Тип рецепту:</strong> {recipe.type_name}
-        </h3>
+          <h3 className="text-relative-ps text-lg font-semibold mt-4 font-montserratMedium">
+            <strong>Recipe type:</strong> {recipe.type_name}
+          </h3>
 
-        <p className="text-relative-ps my-[3vh] font-montserratMedium font-semibold ">
-          Кількість інгредієнтів - {recipe.ingredients.length} шт.
-        </p>
+          <p className="text-relative-ps my-[3vh] font-montserratMedium font-semibold ">
+            Ingredients count - {recipe.ingredients.length} items
+          </p>
 
-        <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
-          <strong>Опис:</strong>
-        </p>
-        <p className="text-relative-ps font-montserratRegular">
-          {recipe.content}
-        </p>
+          <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
+            <strong>Description:</strong>
+          </p>
+          <p className="text-relative-ps font-montserratRegular">
+            {recipe.content}
+          </p>
 
-        <h3 className="text-relative-ps text-lg font-semibold mt-4 font-montserratMedium">
-          Інгредієнти:
-        </h3>
-        <ul className="text-relative-ps list-disc font-montserratRegular pl-[3vw]">
-          {recipe.ingredients
-            .slice()
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((ingredient, index) => (
-              <li key={index}>
-                {ingredient.name} - {ingredient.quantity_recipe_ingredients}{" "}
-                {ingredient.unit_name}
-              </li>
-            ))}
-        </ul>
+          <h3 className="text-relative-ps text-lg font-semibold mt-4 font-montserratMedium">
+            Ingredients:
+          </h3>
+          <ul className="text-relative-ps list-disc font-montserratRegular pl-[3vw]">
+            {recipe.ingredients
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((ingredient, index) => (
+                    <li key={index}>
+                      {ingredient.name} - {ingredient.quantity_recipe_ingredients}{" "}
+                      {ingredient.unit_name}
+                    </li>
+                ))}
+          </ul>
 
-        <p className="text-relative-ps mt-4 font-montserratRegular">
-          <strong>Час приготування:</strong>{" "}
-          {formatCookingTime(recipe.cooking_time)}
-        </p>
-        <p className="text-relative-ps mt-4 font-montserratRegular">
-          <strong>Дата створення:</strong> {formattedDate}
-        </p>
+          <p className="text-relative-ps mt-4 font-montserratRegular">
+            <strong>Cooking time:</strong> {formatCookingTime(recipe.cooking_time)}
+          </p>
+          <p className="text-relative-ps mt-4 font-montserratRegular">
+            <strong>Creation date:</strong> {formattedDate}
+          </p>
 
-        <p className="text-relative-ps mt-4 font-montserratRegular">
-          <strong>Кількість порцій (на яку тару розраховано рецепт) :</strong>{" "}
-          {recipe.servings}
-        </p>
+          <p className="text-relative-ps mt-4 font-montserratRegular">
+            <strong>Servings (for which the recipe is calculated):</strong>{" "}
+            {recipe.servings}
+          </p>
 
-        {/* <button
-          onClick={handleOpenModal}
-          className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
-        >
-          Видалити рецепт
-        </button>
+          {isOwner && (
+              <>
+                <button
+                    onClick={handleOpenModal}
+                    className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
+                >
+                  Delete recipe
+                </button>
+                <Link to={`/change-recipe/${recipe.id}`}>
+                  <button className="bg-yellow-500 text-white py-2 px-4 ml-[1vw] rounded-full">
+                    Edit recipe
+                  </button>
+                </Link>
+              </>
+          )}
+        </div>
 
-        <Link to={`/change-recipe/${recipe.id}`}>
-          <button className="bg-yellow-500 text-white py-2 px-4 ml-[1vw] rounded-full">
-            Змінити рецепт
-          </button>
-        </Link> */}
-        {isOwner && (
-          <>
-            <button
-              onClick={handleOpenModal}
-              className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
-            >
-              Видалити рецепт
-            </button>
-            <Link to={`/change-recipe/${recipe.id}`}>
-              <button className="bg-yellow-500 text-white py-2 px-4 ml-[1vw] rounded-full">
-                Змінити рецепт
-              </button>
-            </Link>
-          </>
-        )}
+        <Modal
+            isOpen={isModalOpen}
+            title="Delete confirmation"
+            message="Are you sure you want to delete this recipe?"
+            onClose={handleCloseModal}
+            onConfirm={handleConfirmDelete}
+        />
       </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        title="Підтвердження видалення"
-        message="Ви дійсно хочете видалити цей рецепт?"
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmDelete}
-      />
-    </div>
   );
 };
 

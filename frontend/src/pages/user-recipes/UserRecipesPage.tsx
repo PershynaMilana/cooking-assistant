@@ -9,7 +9,6 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
 
-// Інтерфейс для опису структури об'єкта рецепта
 interface Recipe {
   id: number;
   title: string;
@@ -18,7 +17,6 @@ interface Recipe {
   cooking_time: number;
 }
 
-// Інтерфейс для опису структури об'єкта типу рецепта
 interface RecipeType {
   id: number;
   type_name: string;
@@ -100,7 +98,7 @@ const UserRecipesPage: React.FC = () => {
       if (axios.isAxiosError(error)) {
         setError(error.response?.data?.error || error.message);
       } else {
-        setError("Невідома помилка");
+        setError("Unknown error");
       }
     }
   }, [
@@ -138,7 +136,7 @@ const UserRecipesPage: React.FC = () => {
           setTypesDescriptions([]);
         }
       } catch (error) {
-        console.error("Ошибка при получении описаний типов рецептов.", error);
+        console.error("Error fetching recipe type descriptions.", error);
       }
     };
 
@@ -166,9 +164,9 @@ const UserRecipesPage: React.FC = () => {
     <div>
       <Header />
       <div className="mx-[15vw]">
-        {/* Блок для компонентів фільтрації та пошуку */}
+        {/* Filter and Search Block */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-          <SearchComponent placeholder={"інградієнтом"} />
+          <SearchComponent placeholder={"ingredient"} />
           <div className="ml-4 mt-4 sm:mt-0">
             <RecipeTypeFilter
               selectedTypes={selectedTypes}
@@ -177,7 +175,7 @@ const UserRecipesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Блок для фільтрації за датою та часом приготування */}
+        {/* Date and Cooking Time Filters */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
           <DateFilterDropdown
             startDate={startDate}
@@ -186,17 +184,17 @@ const UserRecipesPage: React.FC = () => {
             setEndDate={setEndDate}
           />
 
-          {/* Поля для введення мінімального та максимального часу приготування */}
+          {/* Min and Max Cooking Time */}
           <div className="flex items-center mb-2 sm:mb-0">
             <label htmlFor="minCookingTime" className="mr-2">
-              Мін. час готовки:
+              Min cooking time:
             </label>
             <input
               type="number"
               id="minCookingTime"
               value={minCookingTime}
               onChange={(e) => setMinCookingTime(e.target.value)}
-              placeholder="хвилини"
+              placeholder="min"
               className="border rounded p-2 w-20"
               min="0"
               onKeyDown={(e) => {
@@ -213,14 +211,14 @@ const UserRecipesPage: React.FC = () => {
 
           <div className="flex items-center mb-2 sm:mb-0">
             <label htmlFor="maxCookingTime" className="mr-2">
-              Макс. час готовки:
+              Max cooking time:
             </label>
             <input
               type="number"
               id="maxCookingTime"
               value={maxCookingTime}
               onChange={(e) => setMaxCookingTime(e.target.value)}
-              placeholder="хвилини"
+              placeholder="min"
               className="border rounded p-2 w-20"
               min="1"
               onKeyDown={(e) => {
@@ -235,10 +233,10 @@ const UserRecipesPage: React.FC = () => {
             />
           </div>
 
-          {/* Вибір порядку сортування рецептів */}
+          {/* Sort Order */}
           <div className="flex items-center mb-2 sm:mb-0">
             <label htmlFor="sortOrder" className="mr-2">
-              Сортувати за часом:
+              Sort by time:
             </label>
             <select
               id="sortOrder"
@@ -246,38 +244,41 @@ const UserRecipesPage: React.FC = () => {
               onChange={(e) => setSortOrder(e.target.value)}
               className="border rounded p-2"
             >
-              <option value="asc">Від швидких до довгих</option>
-              <option value="desc">Від довгих до швидких</option>
+              <option value="asc">From fast to slow</option>
+              <option value="desc">From slow to fast</option>
             </select>
           </div>
         </div>
+
+        {/* Add Recipe Button */}
         <Link
           to="/add-recipe"
           className="flex items-center justify-center font-montserratRegular-normal text-almost-white bg-purple-700 p-4 w-15 m-7 rounded-3xl"
         >
-          Додати рецепт
+          Add Recipe
         </Link>
-        {/* Заголовок для списку рецептів */}
+
+        {/* Recipes Header */}
         <h1 className="text-relative-h3 font-normal font-montserratMedium p-4">
           {selectedTypes.length > 0
-            ? `Рецепти: ${getTypesHeader()}`
-            : "Мої рецепти"}
+            ? `Recipes: ${getTypesHeader()}`
+            : "My Recipes"}
         </h1>
 
-        {/* Відображення описів типів, якщо вибрані */}
+        {/* Filtered Descriptions */}
         {selectedTypes.length > 0 && (
           <div className="mb-4">{getFilteredDescriptions()}</div>
         )}
 
-        {/* Відображення повідомлення, якщо рецептів немає */}
+        {/* No recipes message */}
         {noRecipes ? (
           <div className="text-center text-gray-600 mb-4">
             {selectedTypes.length > 0
-              ? "Не було створено таких рецептів."
-              : "Створіть свій перший рецепт!"}
+              ? "No recipes of this type found."
+              : "Create your first recipe!"}
           </div>
         ) : (
-          // Відображення списку рецептів
+          // Recipes list
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {recipes.map((recipe) => (
               <RecipeCard
@@ -292,8 +293,8 @@ const UserRecipesPage: React.FC = () => {
           </div>
         )}
 
-        {/* Відображення повідомлення про помилку */}
-        {error && <div className="text-red-500 mb-4">Помилка: {error}</div>}
+        {/* Error message */}
+        {error && <div className="text-red-500 mb-4">Error: {error}</div>}
       </div>
     </div>
   );

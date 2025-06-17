@@ -1,7 +1,7 @@
 const pool = require("../db");
 const db = require("../db");
 
-//? Отримання всіх меню
+//? Get all menus
 const getAllMenus = async (req, res) => {
   try {
     let { menu_name, category_ids } = req.query;
@@ -46,7 +46,7 @@ const getAllMenus = async (req, res) => {
   }
 };
 
-//? Створення меню
+//? Create menu
 const createMenuWithRecipes = async (req, res) => {
   const { menuTitle, menuContent, categoryId, personId, recipeIds } = req.body;
 
@@ -59,7 +59,7 @@ const createMenuWithRecipes = async (req, res) => {
   ) {
     return res
       .status(400)
-      .json({ message: "Недостаточно данных для создания меню" });
+      .json({ message: "Insufficient data to create menu" });
   }
 
   const client = await db.connect();
@@ -84,17 +84,17 @@ const createMenuWithRecipes = async (req, res) => {
     await Promise.all(recipeInsertPromises);
 
     await client.query("COMMIT");
-    res.status(201).json({ message: "Меню успешно создано", menuId });
+    res.status(201).json({ message: "Menu created successfully", menuId });
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Ошибка при создании меню с рецептами:", error);
-    res.status(500).json({ message: "Ошибка сервера" });
+    console.error("Error creating menu with recipes:", error);
+    res.status(500).json({ message: "Server error" });
   } finally {
     client.release();
   }
 };
 
-//? Оновлення меню
+//? Update menu
 const updateMenu = async (req, res) => {
   const { id } = req.params;
   const { menuTitle, menuContent, categoryId, recipeIds } = req.body;
@@ -108,7 +108,7 @@ const updateMenu = async (req, res) => {
   ) {
     return res
       .status(400)
-      .json({ message: "Недостаточно данных для обновления меню" });
+      .json({ message: "Insufficient data to update menu" });
   }
 
   const client = await pool.connect();
@@ -140,17 +140,17 @@ const updateMenu = async (req, res) => {
     await Promise.all(addRecipesPromises);
 
     await client.query("COMMIT");
-    res.status(200).json({ message: "Меню успешно обновлено" });
+    res.status(200).json({ message: "Menu updated successfully" });
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Ошибка при обновлении меню:", error);
-    res.status(500).json({ message: "Ошибка сервера" });
+    console.error("Error updating menu:", error);
+    res.status(500).json({ message: "Server error" });
   } finally {
     client.release();
   }
 };
 
-//? функція отримання рецептів
+//? Function to get recipes
 async function getRecipeWithIngredients(recipeId) {
   try {
     const recipe = await db.query(
@@ -165,7 +165,7 @@ async function getRecipeWithIngredients(recipeId) {
     );
 
     if (recipe.rows.length === 0) {
-      throw new Error("Рецепт не знайдено");
+      throw new Error("Recipe not found");
     }
 
     return recipe.rows[0];
@@ -174,7 +174,7 @@ async function getRecipeWithIngredients(recipeId) {
   }
 }
 
-//? Отримання меню по ID
+//? Get menu by ID
 const getMenuWithRecipes = async (req, res) => {
   const { id } = req.params;
 
@@ -183,7 +183,7 @@ const getMenuWithRecipes = async (req, res) => {
   }
 
   try {
-    // Получение информации о меню
+    // Get menu information
     const menuQuery = `
       SELECT
         m.menu_id AS id,
@@ -203,7 +203,7 @@ const getMenuWithRecipes = async (req, res) => {
 
     const menu = menuResult.rows[0];
 
-    // Получение всех рецептов меню
+    // Get all menu recipes
     const recipeQuery = `
       SELECT 
         r.id AS recipe_id, 
@@ -230,7 +230,7 @@ const getMenuWithRecipes = async (req, res) => {
     for (let recipe of recipeResult.rows) {
       const recipeId = recipe.recipe_id;
 
-      // получение недостающих ингредиентов и единиц измерения для каждого рецепта
+      // Get missing ingredients and units of measurement for each recipe
       const missingIngredientsQuery = `
         SELECT
           i.name AS ingredient_name,
@@ -267,7 +267,7 @@ const getMenuWithRecipes = async (req, res) => {
   }
 };
 
-//? Видалення меню
+//? Delete menu
 const deleteMenu = async (req, res) => {
   const { id } = req.params;
 
@@ -303,7 +303,7 @@ const deleteMenu = async (req, res) => {
   }
 };
 
-//? Отримання меню користувача
+//? Get user menus
 const searchPersonMenus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -346,12 +346,11 @@ const searchPersonMenus = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getAllMenus,
   deleteMenu,
   getMenuWithRecipes,
   createMenuWithRecipes,
   updateMenu,
-  searchPersonMenus
+  searchPersonMenus,
 };

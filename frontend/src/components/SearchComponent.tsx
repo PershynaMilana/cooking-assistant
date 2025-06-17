@@ -6,19 +6,19 @@ interface SearchComponentProps {
   placeholder: string;
 }
 
-const SearchComponent: React.FC<SearchComponentProps> = ({ placeholder = "Пошук за інгредієнтом" }) => {
+const SearchComponent: React.FC<SearchComponentProps> = ({ placeholder = "Search by ingredient" }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
 
-  //? встановлення початкового терміну пошуку з параметрів пошуку URL-адрес
+  //? Set initial search term from URL search parameters
   useEffect(() => {
     const initialSearchTerm = searchParams.get("ingredient_name") || "";
     setSearchTerm(initialSearchTerm);
   }, [searchParams]);
 
-  //? видалення пошуку коли натискаємо на головну
+  //? Clear search when navigating to home page
   useEffect(() => {
     if (location.pathname === "/") {
       setSearchTerm("");
@@ -48,28 +48,28 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ placeholder = "Пош
   };
 
   return (
-    <div className="flex items-center w-full bg-perfect-pink my-[3vh] rounded-full p-2 relative">
-      <div className="pr-3">
-        <img src={SearchIcon} alt="Search Icon" />
+      <div className="flex items-center w-full bg-perfect-pink my-[3vh] rounded-full p-2 relative">
+        <div className="pr-3">
+          <img src={SearchIcon} alt="Search Icon" />
+        </div>
+        <input
+            type="text"
+            value={searchTerm}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            placeholder={`Search by ${placeholder}`}
+            className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
+            ref={inputRef}
+        />
+        {searchTerm && (
+            <button
+                onClick={handleReset}
+                className="absolute right-4 text-almost-white bg-dark-purple rounded-full p-2 text-montserratMedium"
+            >
+              Reset Search
+            </button>
+        )}
       </div>
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={handleInputChange}
-        onKeyPress={handleKeyPress}
-        placeholder={`Пошук за ${placeholder}`}
-        className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
-        ref={inputRef}
-      />
-      {searchTerm && (
-        <button
-          onClick={handleReset}
-          className="absolute right-4 text-almost-white bg-dark-purple rounded-full p-2 text-montserratMedium"
-        >
-          Скинути Пошук
-        </button>
-      )}
-    </div>
   );
 };
 

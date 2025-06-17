@@ -21,6 +21,7 @@ interface MenuDetails {
     title: string;
     categoryname: string;
     menucontent: string;
+    personid?: number;
   };
   recipes: Recipe[];
 }
@@ -33,7 +34,7 @@ const getCurrentUserId = () => {
     const decoded: { id: number } = jwtDecode(token);
     return decoded.id;
   } catch (error) {
-    console.error("Ошибка декодирования токена:", error);
+    console.error("Error decoding token:", error);
     return null;
   }
 };
@@ -47,7 +48,7 @@ const MenuDetailsPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Функція для отримання деталей меню
+  // Function to fetch menu details
   const fetchMenuDetails = useCallback(async () => {
     const token = localStorage.getItem("authToken");
     try {
@@ -57,7 +58,7 @@ const MenuDetailsPage: React.FC = () => {
         },
       });
       if (!response.ok) {
-        throw new Error("Помилка при отриманні деталей меню");
+        throw new Error("Error fetching menu details");
       }
       const data = await response.json();
       setMenu(data);
@@ -65,14 +66,11 @@ const MenuDetailsPage: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Невідома помилка");
+        setError("Unknown error");
       }
     }
   }, [id]);
 
-  // useEffect(() => {
-  //   fetchMenuDetails();
-  // }, [fetchMenuDetails]);
   useEffect(() => {
     const userId = getCurrentUserId();
     setCurrentUserId(userId);
@@ -80,19 +78,18 @@ const MenuDetailsPage: React.FC = () => {
   }, [fetchMenuDetails]);
 
   if (error) {
-    return <div className="text-red-500">Помилка: {error}</div>;
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   if (!menu) {
-    return <div>Завантаження...</div>;
+    return <div>Loading...</div>;
   }
 
-  // Обробник для відкриття модального вікна
+  // Handlers for modal
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
-  // Обробник для закриття модального вікна
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -102,67 +99,70 @@ const MenuDetailsPage: React.FC = () => {
     handleCloseModal();
   };
 
+  // Group recipes by type
   const groupedRecipes = menu.recipes.reduce(
-    (groups: { [key: string]: Recipe[] }, recipe) => {
-      const { type_name } = recipe;
-      if (!groups[type_name]) {
-        groups[type_name] = [];
-      }
-      groups[type_name].push(recipe);
-      return groups;
-    },
-    {}
+      (groups: { [key: string]: Recipe[] }, recipe) => {
+        const { type_name } = recipe;
+        if (!groups[type_name]) {
+          groups[type_name] = [];
+        }
+        groups[type_name].push(recipe);
+        return groups;
+      },
+      {}
   );
 
+  // Delete menu
   const deleteMenu = async () => {
     const token = localStorage.getItem("authToken");
     try {
       const response = await fetch(
-        `http://localhost:8080/api/menu/${menu.menu.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
+          `http://localhost:8080/api/menu/${menu.menu.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+          }
       );
 
       if (!response.ok) {
-        throw new Error("Помилка при видаленні рецепта");
+        throw new Error("Error deleting menu");
       }
       navigate("/menu");
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Невідома помилка");
+        setError("Unknown error");
       }
     }
   };
 
+  // Calculate missing ingredients
   const getAllMissingIngredients = () => {
     if (!menu) return [];
     return menu.recipes
-      .flatMap((recipe) => recipe.missingIngredients || [])
-      .reduce(
-        (
-          acc: { [key: string]: { quantity: number; unit: string } },
-          ingredient
-        ) => {
-          const { ingredient_name, missing_quantity, unit_name } = ingredient;
+        .flatMap((recipe) => recipe.missingIngredients || [])
+        .reduce(
+            (
+                acc: { [key: string]: { quantity: number; unit: string } },
+                ingredient
+            ) => {
+              const { ingredient_name, missing_quantity, unit_name } = ingredient;
 
-          if (!acc[ingredient_name]) {
-            acc[ingredient_name] = {
-              quantity: missing_quantity,
-              unit: unit_name,
-            };
-          } else {
-            acc[ingredient_name].quantity += missing_quantity;
-          }
-          return acc;
-        },
-        {}
-      );
+              if (!acc[ingredient_name]) {
+                acc[ingredient_name] = {
+                  quantity: missing_quantity,
+                  unit: unit_name,
+                };
+              } else {
+                acc[ingredient_name].quantity += missing_quantity;
+              }
+              return acc;
+            },
+            {}
+        );
   };
 
   const missingIngredients = getAllMissingIngredients();
@@ -170,83 +170,89 @@ const MenuDetailsPage: React.FC = () => {
   const isOwner = menu.menu.personid === currentUserId;
 
   return (
-    <div>
-      <Header />
-      <div className="mx-[15vw] mb-[5vh]">
-        <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-          {menu.menu.title}
-        </h1>
-        <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
-          <strong>Категорія меню:</strong>{" "}
-        </p>
-        <p className="text-relative-ps font-montserratRegular">
-          {menu.menu.categoryname}
-        </p>
-        {/* Опис меню */}
-        <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
-          <strong>Опис меню:</strong>{" "}
-        </p>
-        <p className="text-relative-ps font-montserratRegular">
-          {menu.menu.menucontent}
-        </p>
+      <div>
+        <Header />
+        <div className="mx-[15vw] mb-[5vh]">
+          <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
+            {menu.menu.title}
+          </h1>
+          <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
+            <strong>Menu category:</strong>{" "}
+          </p>
+          <p className="text-relative-ps font-montserratRegular">
+            {menu.menu.categoryname}
+          </p>
 
-        <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
-          <strong>Рецепти:</strong>{" "}
-        </p>
-        {/* Відображення карток рецептів */}
-        {Object.keys(groupedRecipes).map((type) => (
-          <div key={type}>
-            <h2 className="text-xs-pxl font-monsterratRegular italic font-normal mt-4 mb-2">
-              {type}:
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-              {groupedRecipes[type].map((recipe) => (
-                <RecipeCard
-                  key={recipe.recipe_id} // Использование уникального ID рецепта
-                  id={recipe.recipe_id}
-                  title={recipe.title}
-                  typeName={recipe.type_name}
-                  cookingTime={recipe.cooking_time}
-                  creationDate={recipe.creation_date}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+          {/* Menu description */}
+          <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
+            <strong>Menu description:</strong>{" "}
+          </p>
+          <p className="text-relative-ps font-montserratRegular">
+            {menu.menu.menucontent}
+          </p>
 
-        <strong>Інгредієнти, яких невистачає:</strong>
-        <ul>
-          {Object.entries(missingIngredients).map(([ingredient, data]) => (
-            <li key={ingredient} className="text-relative-ps">
-              {ingredient}: {data.quantity} {data.unit}
-            </li>
+          {/* Recipes */}
+          <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
+            <strong>Recipes:</strong>{" "}
+          </p>
+
+          {Object.keys(groupedRecipes).map((type) => (
+              <div key={type}>
+                <h2 className="text-xs-pxl font-monsterratRegular italic font-normal mt-4 mb-2">
+                  {type}:
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                  {groupedRecipes[type].map((recipe) => (
+                      <RecipeCard
+                          key={recipe.recipe_id}
+                          id={recipe.recipe_id}
+                          title={recipe.title}
+                          typeName={recipe.type_name}
+                          cookingTime={recipe.cooking_time}
+                          creationDate={recipe.creation_date}
+                      />
+                  ))}
+                </div>
+              </div>
           ))}
-        </ul>
 
-        {isOwner && (
-          <>
-            <Link to={`/change-menu/${menu.menu.id}`}>
-              <button className="mt-6 mr-[1vw] bg-yellow-500 text-white py-2 px-4 rounded-full">
-                Змінити меню
-              </button>
-            </Link>
-            <button
-              onClick={handleOpenModal}
-              className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
-            >
-              Видалити меню
-            </button>
-          </>
-        )}
+          {/* Missing ingredients */}
+          <strong>Missing ingredients:</strong>
+          <ul>
+            {Object.entries(missingIngredients).map(([ingredient, data]) => (
+                <li key={ingredient} className="text-relative-ps">
+                  {ingredient}: {data.quantity} {data.unit}
+                </li>
+            ))}
+          </ul>
+
+          {/* Owner actions */}
+          {isOwner && (
+              <>
+                <Link to={`/change-menu/${menu.menu.id}`}>
+                  <button className="mt-6 mr-[1vw] bg-yellow-500 text-white py-2 px-4 rounded-full">
+                    Edit menu
+                  </button>
+                </Link>
+                <button
+                    onClick={handleOpenModal}
+                    className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
+                >
+                  Delete menu
+                </button>
+              </>
+          )}
+        </div>
+
+        {/* Modal */}
+        <Modal
+            isOpen={isModalOpen}
+            title="Confirm Deletion"
+            message="Are you sure you want to delete this menu?"
+            onClose={handleCloseModal}
+            onConfirm={handleConfirmDelete}
+        />
       </div>
-      <Modal
-        isOpen={isModalOpen}
-        title="Підтвердження видалення"
-        message="Ви дійсно хочете видалити це меню?"
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmDelete}
-      />
-    </div>
   );
 };
 

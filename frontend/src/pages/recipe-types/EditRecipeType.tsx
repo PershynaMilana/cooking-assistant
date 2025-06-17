@@ -18,53 +18,48 @@ const EditRecipeType: React.FC = () => {
     type_name?: string;
     description?: string;
   }>({});
-  const [isLoading, setIsLoading] = useState(true); // Стан для завантаження даних
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Використовуємо useCallback для оптимізації fetchRecipeType
   const fetchRecipeType = useCallback(async () => {
     const token = localStorage.getItem("authToken");
-    if (!id) return; // Перевіряємо, чи існує id
+    if (!id) return;
     try {
       const response = await axios.get<RecipeType>(
-        `http://localhost:8080/api/recipe-type/${id}`,
+          `http://localhost:8080/api/recipe-type/${id}`,
           {
             headers: {
-              Authorization: token ? `Bearer ${token}` : "",  // Добавляем токен в заголовок
+              Authorization: token ? `Bearer ${token}` : "",
             },
           }
       );
       setTypeData(response.data);
-      //? console.log(response.data); для логу дати рецепта, зараз не потрібно
-      setIsLoading(false); // Дані завантажені, знімаємо стан завантаження
+      setIsLoading(false);
     } catch (error) {
-      console.error("Помилка завантаження типу рецепта", error);
+      console.error("Error loading recipe type:", error);
       setIsLoading(false);
     }
   }, [id]);
 
-  // Використовуємо useEffect для завантаження даних
   useEffect(() => {
     fetchRecipeType();
-  }, [fetchRecipeType]); // Додаємо fetchRecipeType залежно
+  }, [fetchRecipeType]);
 
-  // Обробник зміни введення
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setTypeData((prevData) => ({ ...prevData, [name]: value }));
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  // Обробник відправки форми
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { type_name?: string; description?: string } = {};
     if (!typeData.type_name) {
-      newErrors.type_name = "Заповніть поле";
+      newErrors.type_name = "Please fill out this field.";
     }
     if (!typeData.description) {
-      newErrors.description = "Заповніть поле";
+      newErrors.description = "Please fill out this field.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -73,77 +68,75 @@ const EditRecipeType: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem("authToken");  // Получаем токен из localStorage
+      const token = localStorage.getItem("authToken");
 
-      // Надсилаємо запит на сервер з токеном в заголовку
       await axios.put(
           `http://localhost:8080/api/recipe-type/${id}`,
           typeData,
           {
             headers: {
-              Authorization: token ? `Bearer ${token}` : "",  // Добавляем токен в заголовок
+              Authorization: token ? `Bearer ${token}` : "",
             },
           }
       );
 
-     // alert("Тип рецепта успешно обновлен");
-      window.location.href = "/types";  // Перенаправление на страницу типов
+      // alert("Recipe type successfully updated");
+      window.location.href = "/types";
     } catch (error) {
-      console.error("Ошибка при обновлении типа рецепта:", error);  // Логирование ошибки
+      console.error("Error updating recipe type:", error);
     }
-
   };
 
   return (
-    <>
-      <Header />
-      <div className="mx-[15vw]">
-        <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-          Редагування типу рецепта
-        </h1>
-        {isLoading ? (
-          <p>Завантаження...</p>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label>
-                Назва:
-                <input
-                  type="text"
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  name="type_name"
-                  value={typeData.type_name}
-                  onChange={handleInputChange}
-                />
-              </label>
-              {errors.type_name && (
-                <div className="text-red-500">{errors.type_name}</div>
-              )}
-            </div>
-            <div>
-              <label>
-                Опис:
-                <textarea
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                  name="description"
-                  value={typeData.description}
-                  onChange={handleInputChange}
-                />
-              </label>
-              {errors.description && (
-                <div className="text-red-500">{errors.description}</div>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
-            >
-              Зберегти
-            </button>
-          </form>
-        )}
-      </div>
-    </>
+      <>
+        <Header />
+        <div className="mx-[15vw]">
+          <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
+            Edit Recipe Type
+          </h1>
+          {isLoading ? (
+              <p>Loading...</p>
+          ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label>
+                    Name:
+                    <input
+                        type="text"
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        name="type_name"
+                        value={typeData.type_name}
+                        onChange={handleInputChange}
+                    />
+                  </label>
+                  {errors.type_name && (
+                      <div className="text-red-500">{errors.type_name}</div>
+                  )}
+                </div>
+                <div>
+                  <label>
+                    Description:
+                    <textarea
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        name="description"
+                        value={typeData.description}
+                        onChange={handleInputChange}
+                    />
+                  </label>
+                  {errors.description && (
+                      <div className="text-red-500">{errors.description}</div>
+                  )}
+                </div>
+                <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                >
+                  Save
+                </button>
+              </form>
+          )}
+        </div>
+      </>
   );
 };
 

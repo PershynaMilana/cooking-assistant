@@ -29,7 +29,7 @@ const CreateMenuPage: React.FC = () => {
 
     const navigate = useNavigate();
 
-    // Получение списка категорий меню
+    // Fetch menu categories
     const fetchCategories = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -38,11 +38,11 @@ const CreateMenuPage: React.FC = () => {
             });
             setCategories(response.data);
         } catch (error: unknown) {
-            console.error("Ошибка при получении категорий:", error);
+            console.error("Error fetching categories:", error);
         }
     };
 
-    // Получение списка рецептов
+    // Fetch recipes
     const fetchRecipes = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -51,42 +51,42 @@ const CreateMenuPage: React.FC = () => {
             });
             setAllRecipes(response.data);
         } catch (error: unknown) {
-            console.error("Ошибка при получении рецептов:", error);
+            console.error("Error fetching recipes:", error);
         }
     };
 
     useEffect(() => {
-        fetchCategories(); // Загружаем категории меню
-        fetchRecipes(); // Загружаем рецепты
+        fetchCategories();
+        fetchRecipes();
     }, []);
 
-    // Валидация формы
+    // Form validation
     const validateForm = () => {
         let valid = true;
 
         if (!menuTitle.trim()) {
-            setMenuTitleError("Назва меню не може бути порожньою");
+            setMenuTitleError("Menu title cannot be empty.");
             valid = false;
         } else {
             setMenuTitleError(null);
         }
 
         if (!menuDescription.trim()) {
-            setMenuDescriptionError("Опис меню не може бути порожнім");
+            setMenuDescriptionError("Menu description cannot be empty.");
             valid = false;
         } else {
             setMenuDescriptionError(null);
         }
 
         if (!selectedCategory) {
-            setCategoryError("Виберіть категорію меню");
+            setCategoryError("Please select a menu category.");
             valid = false;
         } else {
             setCategoryError(null);
         }
 
         if (selectedRecipes.length === 0) {
-            setRecipesError("Виберіть хоча б один рецепт");
+            setRecipesError("Please select at least one recipe.");
             valid = false;
         } else {
             setRecipesError(null);
@@ -95,7 +95,7 @@ const CreateMenuPage: React.FC = () => {
         return valid;
     };
 
-    // Создание меню
+    // Create menu
     const handleCreateMenu = async () => {
         if (!validateForm()) return;
 
@@ -123,11 +123,11 @@ const CreateMenuPage: React.FC = () => {
 
             navigate("/menu");
         } catch (error: unknown) {
-            console.error("Ошибка при создании меню:", error);
+            console.error("Error creating menu:", error);
         }
     };
 
-    // Обработка кликов по рецептам
+    // Handle recipe selection
     const toggleRecipeSelection = (recipeId: number) => {
         setSelectedRecipes((prevSelected) => {
             if (prevSelected.includes(recipeId)) {
@@ -143,12 +143,12 @@ const CreateMenuPage: React.FC = () => {
             <Header />
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-                    Додати нове меню
+                    Add New Menu
                 </h1>
                 <form className="space-y-4">
-                    {/* Название меню */}
+                    {/* Menu title */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Назва меню</label>
+                        <label className="block text-sm font-medium text-gray-700">Menu title</label>
                         <input
                             type="text"
                             value={menuTitle}
@@ -158,9 +158,9 @@ const CreateMenuPage: React.FC = () => {
                         {menuTitleError && <div className="text-red-500 text-sm mt-1">{menuTitleError}</div>}
                     </div>
 
-                    {/* Описание меню */}
+                    {/* Menu description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Опис меню</label>
+                        <label className="block text-sm font-medium text-gray-700">Menu description</label>
                         <textarea
                             value={menuDescription}
                             onChange={(e) => setMenuDescription(e.target.value)}
@@ -170,16 +170,16 @@ const CreateMenuPage: React.FC = () => {
                         {menuDescriptionError && <div className="text-red-500 text-sm mt-1">{menuDescriptionError}</div>}
                     </div>
 
-                    {/* Категория меню */}
+                    {/* Menu category */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Категорія меню</label>
+                        <label className="block text-sm font-medium text-gray-700">Menu category</label>
                         <select
                             value={selectedCategory || ""}
                             onChange={(e) => setSelectedCategory(Number(e.target.value))}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         >
                             <option value="" disabled>
-                                Оберіть категорію меню
+                                Select a menu category
                             </option>
                             {categories.map((category) => (
                                 <option key={category.menu_category_id} value={category.menu_category_id}>
@@ -190,9 +190,9 @@ const CreateMenuPage: React.FC = () => {
                         {categoryError && <div className="text-red-500 text-sm mt-1">{categoryError}</div>}
                     </div>
 
-                    {/* Рецепты */}
+                    {/* Recipes */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Рецепти</label>
+                        <label className="block text-sm font-medium text-gray-700">Recipes</label>
                         <div className="flex flex-wrap gap-2">
                             {allRecipes.map((recipe) => (
                                 <button
@@ -210,14 +210,14 @@ const CreateMenuPage: React.FC = () => {
                         {recipesError && <div className="text-red-500 text-sm mt-1">{recipesError}</div>}
                     </div>
 
-                    {/* Кнопка создания меню */}
+                    {/* Create menu button */}
                     <div>
                         <button
                             type="button"
                             onClick={handleCreateMenu}
                             className="w-full py-2 bg-green-500 text-white rounded-md"
                         >
-                            Створити меню
+                            Create Menu
                         </button>
                     </div>
                 </form>

@@ -1,57 +1,57 @@
-import React, {useEffect, useState} from "react";
-import {Document, Page, Text, View, StyleSheet, Font} from "@react-pdf/renderer";
+import React, { useEffect, useState } from "react";
+import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
 import axios from "axios";
 
-Font.register({ family: 'Montserrat', src: montserrat });
+Font.register({ family: "Montserrat", src: montserrat });
 
 const formatDate = (date: Date) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    const options = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" };
     // @ts-ignore
-    return date.toLocaleString('uk-UA', options);
+    return date.toLocaleString("en-GB", options);
 };
 
 const styles = StyleSheet.create({
     page: {
-        fontFamily: 'Montserrat',
+        fontFamily: "Montserrat",
         flexDirection: "column",
         padding: 20,
     },
     section: {
-        fontFamily: 'Montserrat',
+        fontFamily: "Montserrat",
         marginBottom: 10,
     },
     title: {
-        fontFamily: 'Montserrat',
+        fontFamily: "Montserrat",
         fontSize: 20,
         marginBottom: 10,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     },
     subtitle: {
-        fontFamily: 'Montserrat',
+        fontFamily: "Montserrat",
         fontSize: 14,
         marginBottom: 5,
-        fontWeight: 'semibold',
+        fontWeight: "semibold",
         marginTop: 20,
     },
     text: {
-        fontFamily: 'Montserrat',
+        fontFamily: "Montserrat",
         fontSize: 12,
         marginBottom: 3,
     },
     line: {
         borderBottom: "1px solid black",
         marginTop: 20,
-        marginBottom: 10, // Отступы для линии
+        marginBottom: 10,
     },
     date: {
         fontSize: 12,
-        textAlign: 'right',
-        marginTop: 5, // Чтобы дата была сразу под линией
+        textAlign: "right",
+        marginTop: 5,
         marginRight: 20,
     },
     listItem: {
-        fontFamily: 'Montserrat',
+        fontFamily: "Montserrat",
         marginLeft: 10,
         fontSize: 12,
     },
@@ -61,17 +61,18 @@ interface StatsReportProps {
     reportTime: Date;
     stats: any[];
 }
+
 interface Stat {
-    typeName: string; // Название типа рецепта
-    count: number; // Количество рецептов этого типа
+    typeName: string;
+    count: number;
 }
 
 interface Recipe {
-    id: number; // Уникальный идентификатор рецепта
-    title: string; // Название рецепта
-    cooking_time: number; // Время приготовления в минутах
-    type_name: string; // Название типа рецепта
-    ingredients: string[]; // Список ингредиентов
+    id: number;
+    title: string;
+    cooking_time: number;
+    type_name: string;
+    ingredients: string[];
 }
 
 const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
@@ -92,7 +93,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 });
                 const recipes: Recipe[] = response.data;
 
-                // Подсчёт количества рецептов по типам
+                // Count recipes per type
                 const typeCounts: { [key: string]: number } = {};
                 recipes.forEach((recipe) => {
                     typeCounts[recipe.type_name] = (typeCounts[recipe.type_name] || 0) + 1;
@@ -104,7 +105,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 }));
                 setStats(formattedStats);
 
-                // Поиск рецептов по времени приготовления
+                // Find recipes by cooking time
                 if (recipes.length > 0) {
                     const minTime = Math.min(...recipes.map((recipe) => recipe.cooking_time));
                     const maxTime = Math.max(...recipes.map((recipe) => recipe.cooking_time));
@@ -112,7 +113,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                     setFastestRecipes(recipes.filter((recipe) => recipe.cooking_time === minTime));
                     setSlowestRecipes(recipes.filter((recipe) => recipe.cooking_time === maxTime));
 
-                    // Поиск рецептов по количеству ингредиентов
+                    // Find recipes by number of ingredients
                     const maxIngredients = Math.max(...recipes.map((recipe) => recipe.ingredients.length));
                     const minIngredients = Math.min(...recipes.map((recipe) => recipe.ingredients.length));
 
@@ -120,7 +121,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                     setLeastIngredientsRecipes(recipes.filter((recipe) => recipe.ingredients.length === minIngredients));
                 }
             } catch (error) {
-                console.error("Ошибка получения статистики:", error);
+                console.error("Error fetching statistics:", error);
             }
         };
 
@@ -131,7 +132,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Типи рецептів:</Text>
+                    <Text style={styles.subtitle}>Recipe Types:</Text>
                     {stats.map((stat) => (
                         <Text key={stat.typeName} style={styles.text}>
                             {stat.typeName}: {stat.count}
@@ -140,46 +141,42 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Найшвидші рецепти:</Text>
+                    <Text style={styles.subtitle}>Fastest Recipes:</Text>
                     {fastestRecipes.map((recipe) => (
                         <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.cooking_time} хв.)
+                            {recipe.title} ({recipe.cooking_time} min)
                         </Text>
                     ))}
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Найдовші рецепти:</Text>
+                    <Text style={styles.subtitle}>Slowest Recipes:</Text>
                     {slowestRecipes.map((recipe) => (
                         <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.cooking_time} хв.)
+                            {recipe.title} ({recipe.cooking_time} min)
                         </Text>
                     ))}
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>
-                        Рецепти з найбільшою кількістю інгредієнтів:
-                    </Text>
+                    <Text style={styles.subtitle}>Recipes with Most Ingredients:</Text>
                     {mostIngredientsRecipes.map((recipe) => (
                         <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.ingredients.length} інг.)
+                            {recipe.title} ({recipe.ingredients.length} ingredients)
                         </Text>
                     ))}
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>
-                        Рецепти з найменшою кількістю інгредієнтів:
-                    </Text>
+                    <Text style={styles.subtitle}>Recipes with Least Ingredients:</Text>
                     {leastIngredientsRecipes.map((recipe) => (
                         <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.ingredients.length} інг.)
+                            {recipe.title} ({recipe.ingredients.length} ingredients)
                         </Text>
                     ))}
                 </View>
 
-                {/* Линия перед датой */}
+                {/* Line before the date */}
                 <View style={styles.line} />
 
                 <View style={styles.section}>

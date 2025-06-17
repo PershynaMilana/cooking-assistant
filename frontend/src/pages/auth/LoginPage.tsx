@@ -14,7 +14,7 @@ const LoginPage: React.FC = () => {
         setError(null);
 
         if (!login || !password) {
-            setError("Заповніть всі поля.");
+            setError("Please fill in all fields.");
             return;
         }
 
@@ -24,13 +24,13 @@ const LoginPage: React.FC = () => {
                 password,
             });
 
-            console.log("http://localhost:8080/api/login", login, password)
+            console.log("http://localhost:8080/api/login", login, password);
 
             const { token } = response.data;
             localStorage.setItem("authToken", token);
             navigate("/main");
         } catch (error: unknown) {
-            setError("Неправильне ім'я користувача або пароль.");
+            setError("Incorrect username or password.");
         }
     };
 
@@ -40,27 +40,27 @@ const LoginPage: React.FC = () => {
             <div className="mx-[35vw] flex flex-column items-center justify-center mt-[15vh]">
                 <form className="space-y-4 items-center w-full">
                     <h1 className="text-relative-h3 items-center my-[7vh] font-kharkiv font-bold mb-4">
-                        Вхід
+                        Login
                     </h1>
 
-                    {/* Поле логина */}
+                    {/* Username field */}
                     <div>
                         <label className="block text-sm font-montserratRegular font-medium text-gray-700">
-                            Ім'я користувача:
+                            Username:
                         </label>
                         <input
                             type="text"
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
-                            placeholder="Введіть ім'я користувача"
+                            placeholder="Enter username"
                         />
                     </div>
 
-                    {/* Поле пароля */}
+                    {/* Password field */}
                     <div>
                         <label className="block text-sm font-montserratRegular font-medium text-gray-700">
-                            Пароль:
+                            Password:
                         </label>
                         <div className="relative">
                             <input
@@ -68,28 +68,28 @@ const LoginPage: React.FC = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="mt-1 font-montserratRegular block w-full p-2 border border-gray-300 rounded-md"
-                                placeholder="Введіть пароль"
+                                placeholder="Enter password"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600"
                             >
-                                {showPassword ? "Сховати" : "Показати"}
+                                {showPassword ? "Hide" : "Show"}
                             </button>
                         </div>
                     </div>
 
-                    {/* Отображение ошибки */}
+                    {/* Error display */}
                     {error && <div className="text-red-500">{error}</div>}
 
-                    {/* Кнопка входа */}
+                    {/* Login button */}
                     <button
                         type="button"
                         onClick={handleLogin}
                         className="bg-dark-purple w-full font-montserratRegular text-center text-white py-2 px-4 rounded-full"
                     >
-                        Увійти
+                        Log In
                     </button>
                 </form>
             </div>

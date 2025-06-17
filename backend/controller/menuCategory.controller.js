@@ -1,19 +1,19 @@
 const db = require("../db");
 
 class MenuCategoryController {
-  //? Отримання всіх категорій меню
+  //? Get all menu categories
   async getAllMenuCategories(req, res) {
     try {
       const query = "SELECT * FROM menu_category ORDER BY category_name";
       const result = await db.query(query);
       res.status(200).json(result.rows);
     } catch (error) {
-      console.error("Ошибка при получении категорий меню:", error);
-      res.status(500).json({ message: "Ошибка сервера" });
+      console.error("Error getting menu categories:", error);
+      res.status(500).json({ message: "Server error" });
     }
   }
 
-  //? Отримання категорій меню за ID
+  //? Get menu categories by ID
   async getMenusByCategories(req, res) {
     const { category_id } = req.query;
     try {
@@ -30,17 +30,17 @@ class MenuCategoryController {
       if (result.rows.length === 0) {
         return res
           .status(404)
-          .json({ message: "Меню не найдено для данной категории" });
+          .json({ message: "Menu not found for this category" });
       }
 
       res.status(200).json(result.rows);
     } catch (error) {
-      console.error("Ошибка при получении меню по категории:", error);
-      res.status(500).json({ message: "Ошибка сервера" });
+      console.error("Error getting menu by category:", error);
+      res.status(500).json({ message: "Server error" });
     }
   }
 
-  //? Отримання меню за категорією
+  //? Get menus by category
   async getMenusByCategories(req, res) {
     const { category_id } = req.query;
 
@@ -53,7 +53,7 @@ class MenuCategoryController {
         if (isNaN(categoryId)) {
           return res
             .status(400)
-            .json({ message: "Неверный формат category_id" });
+            .json({ message: "Invalid category_id format" });
         }
 
         query += " WHERE category_id = $1";
@@ -65,13 +65,13 @@ class MenuCategoryController {
       if (result.rows.length === 0) {
         return res
           .status(404)
-          .json({ message: "Меню не найдено для указанной категории" });
+          .json({ message: "Menu not found for specified category" });
       }
 
       res.status(200).json(result.rows);
     } catch (error) {
-      console.error("Ошибка при получении меню по категории:", error);
-      res.status(500).json({ message: "Ошибка сервера" });
+      console.error("Error getting menu by category:", error);
+      res.status(500).json({ message: "Server error" });
     }
   }
 }

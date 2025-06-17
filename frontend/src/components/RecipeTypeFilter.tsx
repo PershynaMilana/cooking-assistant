@@ -8,61 +8,61 @@ interface RecipeType {
 }
 
 interface RecipeTypeFilterProps {
-  selectedTypes: number[]; // Масив ідентифікаторів вибраних типів рецептів
-  onChange: (selectedTypes: number[]) => void; // Функція для обробки змін вибору типів
+  selectedTypes: number[]; // Array of selected recipe type IDs
+  onChange: (selectedTypes: number[]) => void; // Function to handle type selection changes
 }
 
 const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
-  selectedTypes,
-  onChange,
-}) => {
-  const [types, setTypes] = useState<RecipeType[]>([]); // Стан для зберігання типів рецептів
-  const [isOpen, setIsOpen] = useState(false); // Стан для відкриття/закриття списку фільтрів
-  const filterRef = useRef<HTMLDivElement>(null); // Створюємо ref для компонента
+                                                             selectedTypes,
+                                                             onChange,
+                                                           }) => {
+  const [types, setTypes] = useState<RecipeType[]>([]); // State to store recipe types
+  const [isOpen, setIsOpen] = useState(false); // State for opening/closing the filter dropdown
+  const filterRef = useRef<HTMLDivElement>(null); // Create ref for the component
 
-  //? Отримуємо список типів рецептів із бази даних
+  //? Fetch the list of recipe types from the database
   useEffect(() => {
     const fetchTypes = async () => {
-      const token = localStorage.getItem("authToken");  // Получаем токен из localStorage
+      const token = localStorage.getItem("authToken"); // Get token from localStorage
 
       try {
         const response = await axios.get(
             "http://localhost:8080/api/recipe-types",
             {
               headers: {
-                Authorization: token ? `Bearer ${token}` : "", // Добавляем токен в заголовок
+                Authorization: token ? `Bearer ${token}` : "", // Add token to header
               },
             }
         );
-        setTypes(response.data); // Обновляем состояние с типами рецептов
+        setTypes(response.data); // Update state with recipe types
       } catch (error) {
-        // Обработка ошибки при получении данных
-        console.error("Ошибка при получении типов рецептов:", error);
+        // Error handling
+        console.error("Error fetching recipe types:", error);
       }
     };
 
     fetchTypes();
   }, []);
 
-  //? Обробляємо зміну вибору типів
+  //? Handle type selection change
   const handleCheckboxChange = (id: number) => {
     let updatedSelectedTypes;
     if (selectedTypes.includes(id)) {
-      updatedSelectedTypes = selectedTypes.filter((typeId) => typeId !== id); // Видаляємо вибраний тип
+      updatedSelectedTypes = selectedTypes.filter((typeId) => typeId !== id); // Remove selected type
     } else {
-      updatedSelectedTypes = [...selectedTypes, id]; // Додаємо вибраний тип
+      updatedSelectedTypes = [...selectedTypes, id]; // Add selected type
     }
-    onChange(updatedSelectedTypes); // Передаємо оновлений список вибраних типів
+    onChange(updatedSelectedTypes); // Pass updated list of selected types
   };
 
-  //? Закриття фільтра при кліку поза ним
+  //? Close filter when clicking outside of it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        filterRef.current &&
-        !filterRef.current.contains(event.target as Node)
+          filterRef.current &&
+          !filterRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false); // Закриваємо фільтр, якщо клік був поза його межами
+        setIsOpen(false); // Close the filter if clicking outside
       }
     };
 
@@ -73,41 +73,41 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
     };
   }, [filterRef]);
 
-  //? Скидання фільтрів
+  //? Reset filters
   const resetFilters = () => {
-    onChange([]); // Скидаємо вибрані типи
-    setIsOpen(false); // Закриваємо список
+    onChange([]); // Reset selected types
+    setIsOpen(false); // Close the dropdown
   };
 
   return (
-    <div ref={filterRef} className="relative">
-      <button
-        className="bg-purple-600 text-white p-2 rounded-lg"
-        onClick={() => setIsOpen(!isOpen)} // Перемикаємо стан відкриття/закриття фільтра
-      >
-        Фільтрувати
-      </button>
-      {isOpen && (
-        <div className="absolute bg-white border rounded-lg p-4 mt-2 shadow-lg w-64 z-10">
-          {types.map((type) => (
-            <div key={type.id} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={selectedTypes.includes(type.id)} // Відмічаємо обрані типи
-                onChange={() => handleCheckboxChange(type.id)} // Обробляємо зміну вибору
-              />
-              <label className="ml-2">{type.type_name}</label>
+      <div ref={filterRef} className="relative">
+        <button
+            className="bg-purple-600 text-white p-2 rounded-lg"
+            onClick={() => setIsOpen(!isOpen)} // Toggle filter open/close state
+        >
+          Filter
+        </button>
+        {isOpen && (
+            <div className="absolute bg-white border rounded-lg p-4 mt-2 shadow-lg w-64 z-10">
+              {types.map((type) => (
+                  <div key={type.id} className="flex items-center">
+                    <input
+                        type="checkbox"
+                        checked={selectedTypes.includes(type.id)} // Mark selected types
+                        onChange={() => handleCheckboxChange(type.id)} // Handle selection change
+                    />
+                    <label className="ml-2">{type.type_name}</label>
+                  </div>
+              ))}
+              <button
+                  onClick={resetFilters}
+                  className="mt-2 text-purple-600 hover:underline"
+              >
+                Reset filters
+              </button>
             </div>
-          ))}
-          <button
-            onClick={resetFilters}
-            className="mt-2 text-purple-600 hover:underline"
-          >
-            Скинути фільтри
-          </button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
   );
 };
 

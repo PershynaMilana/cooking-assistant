@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {
-    exp: number; // Время истечения срока действия токена
+    exp: number; // Token expiration time
 }
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    // Проверка токена
+    // Token validation
     const checkToken = () => {
         const token = localStorage.getItem('token');
 
@@ -25,7 +25,7 @@ const useAuth = () => {
                     setIsAuthenticated(true);
                 }
             } catch (error) {
-                console.error('Ошибка при декодировании токена', error);
+                console.error('Error decoding token', error);
                 localStorage.removeItem('token');
                 setIsAuthenticated(false);
             }

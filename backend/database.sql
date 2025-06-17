@@ -1,75 +1,75 @@
 CREATE TABLE
-  person (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    surname VARCHAR(255),
-    login VARCHAR(255),
-    password VARCHAR(255)
-  );
+    person (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255),
+        surname VARCHAR(255),
+        login VARCHAR(255),
+        password VARCHAR(255)
+    );
 
 CREATE TABLE
-  ingredients (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL);
+    ingredients (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL);
 
 CREATE TABLE
-  recipes (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    person_id INTEGER NOT NULL,
-    FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE
-  );
+    recipes (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        person_id INTEGER NOT NULL,
+        FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE
+    );
 
 CREATE TABLE
-  recipe_ingredients (
-    recipe_id INTEGER,
-    ingredient_id INTEGER,
-    PRIMARY KEY (recipe_id, ingredient_id),
-    FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE,
-    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
-  );
+    recipe_ingredients (
+        recipe_id INTEGER,
+        ingredient_id INTEGER,
+        PRIMARY KEY (recipe_id, ingredient_id),
+        FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE,
+        FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+    );
 
 CREATE TABLE
-  recipe_types (
-    id SERIAL PRIMARY KEY,
-    type_name VARCHAR(255) NOT NULL,
-    description TEXT
-  );
+    recipe_types (
+        id SERIAL PRIMARY KEY,
+        type_name VARCHAR(255) NOT NULL,
+        description TEXT
+    );
 
 ALTER TABLE recipes
 ADD COLUMN type_id INTEGER,
 ADD FOREIGN KEY (type_id) REFERENCES recipe_types (id) ON DELETE SET NULL;
 
 INSERT INTO
-  recipe_types (type_name, description)
+    recipe_types (type_name, description)
 VALUES
-  (
-    'Перше',
-    '"Перше"  включає в себе різноманітні супи, бульйони та легкі закуски, які не лише розігрівають душу, але й пробуджують апетит.'
-  ),
-  (
-    'Друге',
-    'Друга страва — основа ситної трапези. Це м’ясні, рибні або овочеві страви, які наповнюють енергією і додають відчуття задоволення після їжі.'
-  ),
-  (
-    'Десерт',
-    'Десерт — це солодкий фінал кулінарної подорожі. Торти, пироги, тістечка та інші ласощі створюють незабутні миті насолоди для всіх любителів солодкого.'
-  ),
-  (
-    'Напій',
-    'Напої — це доповнення до будь-якої страви. Вони можуть бути гарячими, холодними, освіжаючими або бадьорими, підкреслюючи смаки і додаючи завершеності трапезі.'
-  );
+    (
+        'First course',
+        '"First course" includes various soups, broths, and light appetizers that not only warm the soul but also stimulate the appetite.'
+    ),
+    (
+        'Main course',
+        'The Main course is the foundation of a hearty meal. These are meat, fish, or vegetable dishes that provide energy and a feeling of satisfaction after eating.'
+    ),
+    (
+        'Dessert',
+        'Dessert is the sweet finale of a culinary journey. Cakes, pies, pastries, and other treats create unforgettable moments of pleasure for all sweet lovers.'
+    ),
+    (
+        'Drink',
+        'Drinks are a complement to any dish. They can be hot, cold, refreshing, or invigorating, enhancing flavors and adding completeness to the meal.'
+    );
 
 INSERT INTO
-  ingredients (name)
+    ingredients (name)
 VALUES
-  ('Картопля'),
-  ('Морква'),
-  ('Цибуля'),
-  ('Томат'),
-  ('Огірок'),
-  ('Вода'),
-  ('Чай'),
-  ('Лимон');
+    ('Potato'),
+    ('Carrot'),
+    ('Onion'),
+    ('Tomato'),
+    ('Cucumber'),
+    ('Water'),
+    ('Tea'),
+    ('Lemon');
 
 ALTER TABLE recipes
 ADD COLUMN creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
@@ -78,180 +78,183 @@ ALTER TABLE recipes
 ADD COLUMN cooking_time INTEGER;
 
 INSERT INTO
-  ingredients (name)
+    ingredients (name)
 VALUES
-  ('Базилік'),
-  ('Часник'),
-  ('Гриби'),
-  ('Сметана'),
-  ('Куряче філе'),
-  ('Молоко'),
-  ('Мед'),
-  ('Борошно'),
-  ('Цукор'),
-  ('Рис');
+    ('Basil'),
+    ('Garlic'),
+    ('Mushrooms'),
+    ('Sour cream'),
+    ('Chicken fillet'),
+    ('Milk'),
+    ('Honey'),
+    ('Flour'),
+    ('Sugar'),
+    ('Rice');
 
 CREATE TABLE
-  person_ingredients (
-    person_id INTEGER,
-    ingredient_id INTEGER,
-    PRIMARY KEY (person_id, ingredient_id),
-    FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
-    FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
-  );
+    person_ingredients (
+        person_id INTEGER,
+        ingredient_id INTEGER,
+        PRIMARY KEY (person_id, ingredient_id),
+        FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
+        FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+    );
 
 -- milka changes
 ALTER TABLE person
 ALTER COLUMN name
 SET
-  NOT NULL,
+    NOT NULL,
 ALTER COLUMN surname
 SET
-  NOT NULL,
+    NOT NULL,
 ALTER COLUMN login
 SET
-  NOT NULL,
+    NOT NULL,
 ALTER COLUMN password
 SET
-  NOT NULL,
-  ADD CONSTRAINT unique_login UNIQUE (login);
+    NOT NULL,
+    ADD CONSTRAINT unique_login UNIQUE (login);
 
 --! i lovvvveeee youuuu <3
 -- !!!!! kuisanchik <3
--- Создаем таблицу для единиц измерения
+-- Creating table for units of measurement
 CREATE TABLE
-  unit_measurement (
-    id SERIAL PRIMARY KEY,
-    unit_name VARCHAR(255) NOT NULL, -- Название единицы измерения
-    coefficient DOUBLE PRECISION -- Коэффициент перевода в граммы, NULL если неприменимо
-  );
+    unit_measurement (
+        id SERIAL PRIMARY KEY,
+        unit_name VARCHAR(255) NOT NULL, -- Name of the unit
+        coefficient DOUBLE PRECISION -- Conversion coefficient to grams, NULL if not applicable
+    );
 
--- Заполняем таблицу unit_measurement основными единицами измерения
+-- Filling unit_measurement table with basic units
 INSERT INTO
-  unit_measurement (unit_name, coefficient)
+    unit_measurement (unit_name, coefficient)
 VALUES
-  ('грам', 1), -- 1 грам = 1 грам
-  ('кілограм', 1000), -- 1 кг = 1000 грам
-  ('мілілітр', 1), -- 1 мл води = 1 грам (приблизно)
-  ('літр', 1000), -- 1 л води = 1000 грам (приблизно)
-  ('чайна ложка', 5), -- 1 чайна ложка = 5 грам (приблизно)
-  ('столова ложка', 15), -- 1 столова ложка = 15 грам (приблизно)
-  ('склянка', 250), -- 1 склянка = 250 грам (приблизно)
-  ('штука', NULL);
+    ('gr', 1),
+    ('kg', 1000),
+    ('ml', 1),
+    ('l', 1000),
+    ('teaspoon', 5),
+    ('tablespoon', 15),
+    ('cup', 250),
+    ('pcs', NULL);
 
--- "Штука" без переводу в грам
--- Добавляем новое поле в таблицу ingredients для хранения id_unit_measurement
--- Ставим значение по умолчанию 1 (граммы)
+-- "Piece" without conversion to grams
+-- Adding new field to ingredients to store id_unit_measurement
+-- Default value 1 (grams)
 ALTER TABLE ingredients
 ADD COLUMN id_unit_measurement INTEGER NOT NULL DEFAULT 1,
 ADD CONSTRAINT fk_unit_measurement FOREIGN KEY (id_unit_measurement) REFERENCES unit_measurement (id) ON DELETE RESTRICT;
 
--- Добавляем новое поле в таблицу recipe_ingredients для количества
--- Значение по умолчанию — 1
+-- Adding new field to recipe_ingredients for quantity
+-- Default value — 1
 ALTER TABLE recipe_ingredients
 ADD COLUMN quantity_recipe_ingredients DOUBLE PRECISION NOT NULL DEFAULT 1;
 
--- Пример обновления существующих данных:
--- Для определенных ингредиентов устанавливаем "штука"
-UPDATE ingredients
-SET
-  id_unit_measurement = (
-    SELECT
-      id
-    FROM
-      unit_measurement
-    WHERE
-      unit_name = 'штука'
-  )
-WHERE
-  name IN ('Картопля', 'Цибуля', 'Яйце', 'Лимон');
-
--- Добавляем уникальное ограничение на поле name в таблице ingredients
+-- Adding unique constraint on name field in ingredients
 ALTER TABLE ingredients ADD CONSTRAINT unique_name UNIQUE (name);
 
--- Добавляем новые ингредиенты в таблицу ingredients
+-- Adding new ingredients to ingredients table
 INSERT INTO
-  ingredients (name)
+    ingredients (name)
 VALUES
-  ('Сир'),
-  ('Перець'),
-  ('Паста'),
-  ('Оливкова олія') ON CONFLICT (name) DO NOTHING;
+    ('Cheese'),
+    ('Pepper'),
+    ('Pasta'),
+    ('Olive oil') ON CONFLICT (name) DO NOTHING;
 
--- Обновляем единицы измерения для существующих ингредиентов
+-- Updating unit measurements for existing ingredients
+--(piece)
 UPDATE ingredients
 SET
-  id_unit_measurement = 1
+    id_unit_measurement = 8
 WHERE
-  name IN (
-    'Томат',
-    'Сир',
-    'Базилік',
-    'Курка',
-    'Чеснок',
-    'Сіль',
-    'Перець',
-    'Паста',
-    'Оливкова олія',
-    'Морква',
-    'Огірок',
-    'Вода',
-    'Чай'
-  );
+    name IN (
+        'Potato',
+        'Onion',
+        'Lemon',
+        'Tomato',
+        'Cucumber',
+        'Garlic'
+    );
 
+--(gram)
 UPDATE ingredients
 SET
-  id_unit_measurement = 8
+    id_unit_measurement = 1
 WHERE
-  name IN ('Картопля', 'Цибуля', 'Лимон');
+    name IN (
+        'Carrot',
+        'Basil',
+        'Mushrooms',
+        'Chicken fillet',
+        'Flour',
+        'Sugar',
+        'Rice',
+        'Cheese',
+        'Pepper',
+        'Pasta',
+        'Tea'
+    );
 
--- Добавляем поле quantity_person_ingradient с типом INTEGER
+--(milliliter)
+UPDATE ingredients
+SET
+    id_unit_measurement = 3
+WHERE
+    name IN (
+        'Water',
+        'Milk',
+        'Sour cream',
+        'Honey',
+        'Olive oil'
+    );
+
+-- Adding field quantity_person_ingradient of type INTEGER
 ALTER TABLE person_ingredients
 ADD COLUMN quantity_person_ingradient INTEGER NOT NULL DEFAULT 1;
 
---*24.11
--- Таблица для хранения категорий меню (завтрак, обед, ужин)
 CREATE TABLE
-  menu_category (
-    menu_category_id SERIAL PRIMARY KEY,
-    category_name VARCHAR(50) NOT NULL,
-    category_description TEXT
-  );
+    menu_category (
+        menu_category_id SERIAL PRIMARY KEY,
+        category_name VARCHAR(50) NOT NULL,
+        category_description TEXT
+    );
 
--- Таблица для хранения самого меню
+-- Table for storing the menu itself
 CREATE TABLE
-  menu (
-    menu_id SERIAL PRIMARY KEY,
-    menu_title VARCHAR(100) NOT NULL,
-    menu_content TEXT,
-    category_id INT,
-    person_id INT,
-    FOREIGN KEY (category_id) REFERENCES menu_category (menu_category_id),
-    FOREIGN KEY (person_id) REFERENCES person (id) -- Заменить на корректное имя столбца
-  );
+    menu (
+        menu_id SERIAL PRIMARY KEY,
+        menu_title VARCHAR(100) NOT NULL,
+        menu_content TEXT,
+        category_id INT,
+        person_id INT,
+        FOREIGN KEY (category_id) REFERENCES menu_category (menu_category_id),
+        FOREIGN KEY (person_id) REFERENCES person (id) -- Replace with correct column name if needed
+    );
 
--- Связующая таблица для связи меню и рецептов
+-- Linking table between menu and recipes
 CREATE TABLE
-  menu_recipe (
-    menu_recipe_id SERIAL PRIMARY KEY,
-    menu_id INT,
-    recipe_id INT,
-    FOREIGN KEY (menu_id) REFERENCES menu (menu_id),
-    FOREIGN KEY (recipe_id) REFERENCES recipes (id)
-  );
+    menu_recipe (
+        menu_recipe_id SERIAL PRIMARY KEY,
+        menu_id INT,
+        recipe_id INT,
+        FOREIGN KEY (menu_id) REFERENCES menu (menu_id),
+        FOREIGN KEY (recipe_id) REFERENCES recipes (id)
+    );
 
 INSERT INTO
-  menu_category (category_name, category_description)
+    menu_category (category_name, category_description)
 VALUES
-  (
-    'Сніданок',
-    'Страви для ранкового прийому їжі, що заряджають енергією на весь день'
-  ),
-  ('Обід', 'Ситні страви для денного прийому їжі'),
-  (
-    'Вечеря',
-    'Легкі або поживні страви для вечірнього прийому їжі'
-  );
+    (
+        'Breakfast',
+        'Dishes for the morning meal that provide energy for the whole day.'
+    ),
+    ('Lunch', 'Hearty dishes for the midday meal'),
+    (
+        'Dinner',
+        'Light or nourishing dishes for the evening meal'
+    );
 
 ALTER TABLE menu_recipe ADD CONSTRAINT fk_menu_id FOREIGN KEY (menu_id) REFERENCES menu (menu_id) ON DELETE CASCADE;
 
@@ -262,229 +265,249 @@ ADD COLUMN days_to_expire INTEGER,
 ADD COLUMN seasonality VARCHAR(255),
 ADD COLUMN storage_condition VARCHAR(255);
 
+-- Example updates for ingredients:
 UPDATE ingredients
 SET
-  allergens = 'Яйця',
-  days_to_expire = 7,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 30,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 1;
+    id = 1;
 
+-- Potato
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = NULL,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'None',
+    days_to_expire = 14,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 2;
+    id = 2;
 
+-- Carrot
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 30,
-  seasonality = 'Літо, осінь',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'None',
+    days_to_expire = 30,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 3;
+    id = 3;
 
+-- Onion
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 180,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +20°C'
+    allergens = 'None',
+    days_to_expire = 7,
+    seasonality = 'Summer, Autumn',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 4;
+    id = 4;
 
+-- Tomato
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 90,
-  seasonality = 'Осінь, зима',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 7,
+    seasonality = 'Summer, Autumn',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 5;
+    id = 5;
 
+-- Cucumber
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 60,
-  seasonality = 'Осінь, зима',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 365,
+    seasonality = 'All seasons',
+    storage_condition = 'Room temperature'
 WHERE
-  id = 6;
+    id = 6;
 
+-- Water
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 120,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 730,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 7;
+    id = 7;
 
+-- Tea
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 10,
-  seasonality = 'Літо, осінь',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 21,
+    seasonality = 'Winter, Spring',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 8;
+    id = 8;
 
+-- Lemon
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 7,
-  seasonality = 'Літо',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 7,
+    seasonality = 'Summer',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 9;
+    id = 9;
 
+-- Basil
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = NULL,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Кімнатна температура'
+    allergens = 'None',
+    days_to_expire = 60,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 10;
+    id = 10;
 
+-- Garlic
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = NULL,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'None',
+    days_to_expire = 7,
+    seasonality = 'All seasons',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 11;
+    id = 11;
 
+-- Mushrooms
 UPDATE ingredients
 SET
-  allergens = 'Цитрусові',
-  days_to_expire = 20,
-  seasonality = 'Зима, весна',
-  storage_condition = '+4 - +8°C'
+    allergens = 'Dairy',
+    days_to_expire = 14,
+    seasonality = 'All seasons',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 12;
+    id = 12;
 
+-- Sour cream
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 7,
-  seasonality = 'Літо',
-  storage_condition = '+4 - +8°C'
+    allergens = 'Poultry',
+    days_to_expire = 2,
+    seasonality = 'All seasons',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 13;
+    id = 13;
 
+-- Chicken fillet
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 180,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +8°C'
+    allergens = 'Dairy',
+    days_to_expire = 7,
+    seasonality = 'All seasons',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 14;
+    id = 14;
 
+-- Milk
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 5,
-  seasonality = 'Осінь',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 1095,
+    seasonality = 'All seasons',
+    storage_condition = 'Room temperature'
 WHERE
-  id = 15;
+    id = 15;
 
+-- Honey
 UPDATE ingredients
 SET
-  allergens = 'Молочні',
-  days_to_expire = 10,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +8°C'
+    allergens = 'Gluten',
+    days_to_expire = 365,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 16;
+    id = 16;
 
+-- Flour
 UPDATE ingredients
 SET
-  allergens = 'Курятина',
-  days_to_expire = 3,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 1825,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 17;
+    id = 17;
 
+-- Sugar
 UPDATE ingredients
 SET
-  allergens = 'Молочні',
-  days_to_expire = 7,
-  seasonality = 'Усі сезони',
-  storage_condition = '+4 - +8°C'
+    allergens = 'None',
+    days_to_expire = 730,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 18;
+    id = 18;
 
+-- Rice
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = NULL,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'Dairy',
+    days_to_expire = 30,
+    seasonality = 'All seasons',
+    storage_condition = '+4 - +8°C'
 WHERE
-  id = 19;
+    id = 19;
 
+-- Cheese
 UPDATE ingredients
 SET
-  allergens = 'Глютен',
-  days_to_expire = 180,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'None',
+    days_to_expire = 1095,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 20;
+    id = 20;
 
+-- Pepper
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = NULL,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'Gluten',
+    days_to_expire = 730,
+    seasonality = 'All seasons',
+    storage_condition = 'Dry place, room temperature'
 WHERE
-  id = 21;
+    id = 21;
 
+-- Pasta
 UPDATE ingredients
 SET
-  allergens = 'Немає',
-  days_to_expire = 365,
-  seasonality = 'Усі сезони',
-  storage_condition = 'Сухе місце, кімнатна температура'
+    allergens = 'None',
+    days_to_expire = 730,
+    seasonality = 'All seasons',
+    storage_condition = 'Dark place, room temperature'
 WHERE
-  id = 22;
+    id = 22;
 
 ALTER TABLE recipes ADD servings VARCHAR(255);
 
 ALTER TABLE person_ingredients ADD purchase_date DATE DEFAULT CURRENT_DATE;
 
---! 09.12
 CREATE TABLE
     ingredient_purchases (
-       id SERIAL PRIMARY KEY,
-       person_id INTEGER NOT NULL,
-       ingredient_id INTEGER NOT NULL,
-       quantity DOUBLE PRECISION NOT NULL,
-       purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
-       FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
-);
-
-
+        id SERIAL PRIMARY KEY,
+        person_id INTEGER NOT NULL,
+        ingredient_id INTEGER NOT NULL,
+        quantity DOUBLE PRECISION NOT NULL,
+        purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (person_id) REFERENCES person (id) ON DELETE CASCADE,
+        FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+    );
 
 ALTER TABLE ingredient_purchases
 DROP CONSTRAINT IF EXISTS quantity;
 
+ALTER TABLE ingredient_purchases
+ALTER COLUMN quantity
+SET DEFAULT 0;
 
 ALTER TABLE ingredient_purchases
-    ALTER COLUMN quantity SET DEFAULT 0;
-
-
-ALTER TABLE ingredient_purchases
-    ALTER COLUMN quantity SET NOT NULL;
+ALTER COLUMN quantity
+SET
+    NOT NULL;

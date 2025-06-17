@@ -29,7 +29,7 @@ const UpdateMenuPage: React.FC = () => {
     const [recipesError, setRecipesError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    // Загрузка данных меню для редактирования
+    // Load menu data for editing
     const fetchMenuDetails = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -44,12 +44,12 @@ const UpdateMenuPage: React.FC = () => {
 
             setSelectedRecipes(recipes.map((recipe: { id: any; }) => recipe.id) || []);
         } catch (error: unknown) {
-            console.error("Ошибка при получении данных меню:", error);
-            setError("Не удалось загрузить данные меню. Попробуйте позже.");
+            console.error("Error fetching menu data:", error);
+            setError("Failed to load menu data. Please try again later.");
         }
     };
 
-    // Загрузка категорий и рецептов
+    // Load categories and recipes
     const fetchCategoriesAndRecipes = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -62,13 +62,13 @@ const UpdateMenuPage: React.FC = () => {
                 }),
             ]);
 
-            console.log(categoriesResponse.data)
+            console.log(categoriesResponse.data);
 
             setCategories(categoriesResponse.data);
             setAllRecipes(recipesResponse.data);
         } catch (error: unknown) {
-            console.error("Ошибка при загрузке данных категорий или рецептов:", error);
-            setError("Не удалось загрузить категории или рецепты.");
+            console.error("Error loading categories or recipes:", error);
+            setError("Failed to load categories or recipes.");
         }
     };
 
@@ -81,33 +81,33 @@ const UpdateMenuPage: React.FC = () => {
         fetchData();
     }, [id]);
 
-    // Валидация формы
+    // Form validation
     const validateForm = () => {
         let valid = true;
 
         if (!menuTitle.trim()) {
-            setMenuTitleError("Назва меню не може бути порожньою");
+            setMenuTitleError("Menu title cannot be empty.");
             valid = false;
         } else {
             setMenuTitleError(null);
         }
 
         if (!menuDescription.trim()) {
-            setMenuDescriptionError("Опис меню не може бути порожнім");
+            setMenuDescriptionError("Menu description cannot be empty.");
             valid = false;
         } else {
             setMenuDescriptionError(null);
         }
 
         if (!selectedCategory) {
-            setCategoryError("Виберіть категорію меню");
+            setCategoryError("Please select a menu category.");
             valid = false;
         } else {
             setCategoryError(null);
         }
 
         if (selectedRecipes.length === 0) {
-            setRecipesError("Виберіть хоча б один рецепт");
+            setRecipesError("Please select at least one recipe.");
             valid = false;
         } else {
             setRecipesError(null);
@@ -116,13 +116,13 @@ const UpdateMenuPage: React.FC = () => {
         return valid;
     };
 
-    // Обновление меню
+    // Update menu
     const handleUpdateMenu = async () => {
         if (!validateForm()) return;
 
         const token = localStorage.getItem("authToken");
         if (!token) {
-            console.error("Токен аутентификации не найден.");
+            console.error("Authentication token not found.");
             return;
         }
 
@@ -141,12 +141,12 @@ const UpdateMenuPage: React.FC = () => {
 
             navigate("/menu");
         } catch (error: unknown) {
-            console.error("Ошибка при обновлении меню:", error);
-            setError("Не удалось обновить меню. Попробуйте позже.");
+            console.error("Error updating menu:", error);
+            setError("Failed to update menu. Please try again later.");
         }
     };
 
-    // Обработка выбора рецептов
+    // Handle recipe selection
     const toggleRecipeSelection = (recipeId: number) => {
         setSelectedRecipes((prevSelected) =>
             prevSelected.includes(recipeId)
@@ -155,9 +155,9 @@ const UpdateMenuPage: React.FC = () => {
         );
     };
 
-    // UI при загрузке данных
+    // UI while loading data
     if (loading) {
-        return <div>Загрузка данных...</div>;
+        return <div>Loading data...</div>;
     }
 
     return (
@@ -165,12 +165,12 @@ const UpdateMenuPage: React.FC = () => {
             <Header />
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-                    Редагувати меню
+                    Edit Menu
                 </h1>
                 <form className="space-y-4">
-                    {/* Название меню */}
+                    {/* Menu title */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Назва меню</label>
+                        <label className="block text-sm font-medium text-gray-700">Menu title</label>
                         <input
                             type="text"
                             value={menuTitle}
@@ -183,9 +183,9 @@ const UpdateMenuPage: React.FC = () => {
                         {menuTitleError && <div className="text-red-500 text-sm">{menuTitleError}</div>}
                     </div>
 
-                    {/* Описание меню */}
+                    {/* Menu description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Опис меню</label>
+                        <label className="block text-sm font-medium text-gray-700">Menu description</label>
                         <textarea
                             value={menuDescription}
                             onChange={(e) => {
@@ -198,9 +198,9 @@ const UpdateMenuPage: React.FC = () => {
                         {menuDescriptionError && <div className="text-red-500 text-sm">{menuDescriptionError}</div>}
                     </div>
 
-                    {/* Категория меню */}
+                    {/* Menu category */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Категорія меню</label>
+                        <label className="block text-sm font-medium text-gray-700">Menu category</label>
                         <select
                             value={selectedCategory || ""}
                             onChange={(e) => {
@@ -210,7 +210,7 @@ const UpdateMenuPage: React.FC = () => {
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         >
                             <option value="" disabled>
-                                Оберіть категорію меню
+                                Select a menu category
                             </option>
                             {categories.map((category) => (
                                 <option key={category.menu_category_id} value={category.menu_category_id}>
@@ -221,9 +221,9 @@ const UpdateMenuPage: React.FC = () => {
                         {categoryError && <div className="text-red-500 text-sm">{categoryError}</div>}
                     </div>
 
-                    {/* Рецепты */}
+                    {/* Recipes */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Рецепти</label>
+                        <label className="block text-sm font-medium text-gray-700">Recipes</label>
                         <div className="flex flex-wrap gap-2">
                             {allRecipes.map((recipe) => (
                                 <button
@@ -243,14 +243,14 @@ const UpdateMenuPage: React.FC = () => {
                         {recipesError && <div className="text-red-500 text-sm">{recipesError}</div>}
                     </div>
 
-                    {/* Кнопка для обновления меню */}
+                    {/* Update menu button */}
                     <div>
                         <button
                             type="button"
                             onClick={handleUpdateMenu}
                             className="w-full py-2 px-4 bg-green-500 text-white rounded-full"
                         >
-                            Оновити меню
+                            Update Menu
                         </button>
                     </div>
                 </form>
