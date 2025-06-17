@@ -1,7 +1,7 @@
 const db = require("../db");
 
 class UserIngredientsController {
-  //? Отримання інгредієнтів користувача
+  //? Get user ingredients
   async getUserIngredients(req, res) {
     const userId = req.query.userId || 1;
 
@@ -16,7 +16,7 @@ class UserIngredientsController {
          i.days_to_expire,
          i.seasonality,
          i.storage_condition,
-         pi.purchase_date -- Добавляем поле purchase_date
+         pi.purchase_date -- Add purchase_date field
        FROM person_ingredients pi
        JOIN ingredients i ON pi.ingredient_id = i.id
        JOIN unit_measurement um ON i.id_unit_measurement = um.id
@@ -29,13 +29,13 @@ class UserIngredientsController {
     }
   }
 
-  //? Оновлення інгредієнтів користувача
+  //? Update user ingredients
   async updateUserIngredients(req, res) {
     const userId = req.query.userId || 1;
     const { ingredients } = req.body;
 
     if (!Array.isArray(ingredients)) {
-      return res.status(400).json({ error: "Некоректний формат даних" });
+      return res.status(400).json({ error: "Incorrect data format" });
     }
 
     const client = await db.connect();
@@ -43,7 +43,7 @@ class UserIngredientsController {
       await client.query("BEGIN");
 
       for (const ingredient of ingredients) {
-        // Добавляем или обновляем ингредиенты в person_ingredients
+        // Add or update ingredients in person_ingredients
         await client.query(
           `INSERT INTO person_ingredients (person_id, ingredient_id, quantity_person_ingradient, purchase_date)
            VALUES ($1, $2, $3, NOW())
@@ -53,7 +53,7 @@ class UserIngredientsController {
           [userId, ingredient.id, ingredient.quantity_person_ingradient]
         );
 
-        // Сохраняем историю в ingredient_purchases
+        // Save history in ingredient_purchases
         await client.query(
           `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
            VALUES ($1, $2, $3, NOW())`,
@@ -62,7 +62,7 @@ class UserIngredientsController {
       }
 
       await client.query("COMMIT");
-      res.status(200).json({ message: "Інгредієнти оновлено успішно" });
+      res.status(200).json({ message: "Ingredients updated successfully" });
     } catch (error) {
       await client.query("ROLLBACK");
       res.status(500).json({ error: error.message });
@@ -71,7 +71,7 @@ class UserIngredientsController {
     }
   }
 
-  //? Видалення інгредієнта користувача
+  //? Delete user ingredient
   async deleteUserIngredient(req, res) {
     const userId = req.params.userId;
     const ingredientId = req.params.ingredientId;
@@ -80,13 +80,13 @@ class UserIngredientsController {
     try {
       await client.query("BEGIN");
 
-      // Удаляем записи из истории покупок
+      // Delete records from purchase history
       await client.query(
         `DELETE FROM ingredient_purchases WHERE person_id = $1 AND ingredient_id = $2`,
         [userId, ingredientId]
       );
 
-      // Удаляем сам ингредиент
+      // Delete the ingredient itself
       const result = await client.query(
         `DELETE FROM person_ingredients WHERE person_id = $1 AND ingredient_id = $2`,
         [userId, ingredientId]
@@ -96,11 +96,11 @@ class UserIngredientsController {
         await client.query("ROLLBACK");
         return res
           .status(404)
-          .json({ message: "Інгредієнт не знайдений для цього користувача" });
+          .json({ message: "Ingredient not found for this user" });
       }
 
       await client.query("COMMIT");
-      res.json({ message: "Інгредієнт та його історія успішно видалені" });
+      res.json({ message: "Ingredient and its history successfully deleted" });
     } catch (error) {
       await client.query("ROLLBACK");
       res.status(500).json({ error: error.message });
@@ -109,13 +109,13 @@ class UserIngredientsController {
     }
   }
 
-  //? Оновлення кількості інгредієнтів
+  //? Update ingredient quantities
   async updateIngredientQuantities(req, res) {
     const userId = req.params.userId;
     const { updatedIngredients } = req.body;
 
     if (!Array.isArray(updatedIngredients)) {
-      return res.status(400).json({ error: "Некорректный формат данных" });
+      return res.status(400).json({ error: "Incorrect data format" });
     }
 
     const client = await db.connect();
@@ -123,38 +123,39 @@ class UserIngredientsController {
       await client.query("BEGIN");
 
       for (const ingredient of updatedIngredients) {
-        // Получаем текущее количество
+        // Get current quantity
         const { rows } = await client.query(
-            `SELECT quantity_person_ingradient
+          `SELECT quantity_person_ingradient
              FROM person_ingredients
              WHERE person_id = $1 AND ingredient_id = $2`,
-            [userId, ingredient.id]
+          [userId, ingredient.id]
         );
 
         const currentQuantity = rows[0]?.quantity_person_ingradient || 0;
-        const addedQuantity = ingredient.quantity_person_ingradient - currentQuantity;
+        const addedQuantity =
+          ingredient.quantity_person_ingradient - currentQuantity;
 
         if (addedQuantity > 0) {
-          // Обновляем общее количество
+          // Update total quantity
           await client.query(
-              `UPDATE person_ingredients
+            `UPDATE person_ingredients
            SET quantity_person_ingradient = $1, purchase_date = NOW()
            WHERE person_id = $2 AND ingredient_id = $3`,
-              [ingredient.quantity_person_ingradient, userId, ingredient.id]
+            [ingredient.quantity_person_ingradient, userId, ingredient.id]
           );
 
-          // Сохраняем только добавленное количество в историю покупок
+          // Save only added quantity to purchase history
           await client.query(
-              `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
+            `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
            VALUES ($1, $2, $3, NOW())`,
-              [userId, ingredient.id, addedQuantity]
+            [userId, ingredient.id, addedQuantity]
           );
         }
       }
 
       await client.query("COMMIT");
       res.json({
-        message: "Количество ингредиентов и история покупок обновлены",
+        message: "Ingredient quantities and purchase history updated",
       });
     } catch (error) {
       await client.query("ROLLBACK");
@@ -164,65 +165,64 @@ class UserIngredientsController {
     }
   }
 
-
   async updatePurchaseQuantity(req, res) {
     const { userId, purchaseId } = req.params;
     const { quantity } = req.body;
 
     if (quantity === undefined) {
-      return res.status(400).json({ error: "Кількість не може бути порожньою." });
+      return res.status(400).json({ error: "Quantity cannot be empty." });
     }
 
     try {
-      // Проверяем, что покупка существует и принадлежит пользователю
+      // Check that the purchase exists and belongs to the user
       const purchase = await db.query(
-          `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
-          [purchaseId, userId]
+        `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
+        [purchaseId, userId]
       );
 
       if (purchase.rows.length === 0) {
-        return res.status(404).json({ error: "Покупка не знайдена." });
+        return res.status(404).json({ error: "Purchase not found." });
       }
 
-      // Обновляем количество
+      // Update quantity
       await db.query(
-          `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
-          [quantity, purchaseId]
+        `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
+        [quantity, purchaseId]
       );
 
-      // Пересчитываем общее количество ингредиента
+      // Recalculate total ingredient quantity
       const ingredientId = purchase.rows[0].ingredient_id;
       const totalQuantityResult = await db.query(
-          `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1`,
-          [ingredientId]
+        `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1`,
+        [ingredientId]
       );
 
       const totalQuantity = totalQuantityResult.rows[0].total_quantity || 0;
 
-      // Обновляем общее количество в таблице person_ingredients
+      // Update total quantity in person_ingredients table
       await db.query(
-          `UPDATE person_ingredients
+        `UPDATE person_ingredients
            SET quantity_person_ingradient = $1
            WHERE person_id = $2 AND ingredient_id = $3`,
-          [totalQuantity, userId, ingredientId]
+        [totalQuantity, userId, ingredientId]
       );
 
-      res.status(200).json({ message: "Кількість покупки оновлена успішно." });
+      res
+        .status(200)
+        .json({ message: "Purchase quantity updated successfully." });
     } catch (error) {
-      console.error("Помилка при оновленні кількості покупки:", error);
-      res.status(500).json({ error: "Помилка сервера." });
+      console.error("Error updating purchase quantity:", error);
+      res.status(500).json({ error: "Server error." });
     }
   }
 
+  async getPurchaseHistory(req, res) {
+    const userId = req.params.userId;
+    const ingredientId = req.params.ingredientId;
 
-
-    async getPurchaseHistory(req, res) {
-        const userId = req.params.userId;
-        const ingredientId = req.params.ingredientId;
-
-        try {
-            const result = await db.query(
-                `SELECT
+    try {
+      const result = await db.query(
+        `SELECT
                      ip.id,
                      ip.quantity,
                      ip.purchase_date,
@@ -233,18 +233,14 @@ class UserIngredientsController {
                           JOIN unit_measurement um ON i.id_unit_measurement = um.id
                  WHERE ip.person_id = $1 AND ip.ingredient_id = $2
                  ORDER BY ip.purchase_date ASC`,
-                [userId, ingredientId]
-            );
+        [userId, ingredientId]
+      );
 
-            console.log(result.rows);
-            res.json(result.rows);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-
-
+  }
 }
 
 module.exports = new UserIngredientsController();

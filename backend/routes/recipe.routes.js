@@ -3,31 +3,31 @@ const router = new Router();
 const recipeController = require("../controller/recipe.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 
-//? Створення рецепта
+//? Creating recipe
 router.post("/recipe", authenticateToken, recipeController.createRecipe);
 
-//? Отримання всіх рецептів
+//? Get all recipes
 router.get("/recipes", authenticateToken, recipeController.getAllRecipes);
 
-//? Отримання рецепта за ID
+//? Get recipe by id
 router.get("/recipe/:id", authenticateToken, recipeController.getRecipeWithIngredients);
 
-//? Отримання всіх інгредієнтів
+//? Get all ingredients
 router.get("/ingredients", authenticateToken, recipeController.getAllIngredients);
 
-//? Зміна рецепта за ID
+//? Updating recipe by id
 router.put("/recipe/:id", authenticateToken, recipeController.updateRecipe);
 
-//? Видалення рецепта за ID
+//? del recipe by id
 router.delete("/recipe/:id", authenticateToken, recipeController.deleteRecipe);
 
-//? Фільтрація рецептів за типами та датами
+//? filter
 router.get("/recipes-by-filters", authenticateToken, recipeController.searchRecipes);
 
-//? Фільтрації рецептів за типами та датами та за користувачем
+//? filter by date, user
 router.get("/recipes-filters-person/:id", authenticateToken, recipeController.searchPersonRecipes);
 
-//? Отримання статистики
+//? getting stats
 router.get("/recipes-stats", authenticateToken, recipeController.getRecipesStats);
 
 module.exports = router;

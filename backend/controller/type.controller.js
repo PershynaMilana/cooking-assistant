@@ -1,8 +1,7 @@
 const db = require("../db");
 
 class TypeController {
-
-  //? Створення нового типу рецепта
+  //? Create new recipe type
   async createRecipeType(req, res) {
     const { type_name, description } = req.body;
 
@@ -17,7 +16,7 @@ class TypeController {
     }
   }
 
-  //? Отримання всіх типів рецептів
+  //? Get all recipe types
   async getAllRecipeTypes(req, res) {
     try {
       const recipeTypes = await db.query(`SELECT * FROM recipe_types`);
@@ -27,7 +26,7 @@ class TypeController {
     }
   }
 
-  //? Оновлення типу рецепта
+  //? Update recipe type
   async updateRecipeType(req, res) {
     const { id } = req.params;
     const { type_name, description } = req.body;
@@ -39,7 +38,7 @@ class TypeController {
       );
 
       if (updatedType.rowCount === 0) {
-        return res.status(404).json({ error: "Тип рецепта не знайдено" });
+        return res.status(404).json({ error: "Recipe type not found" });
       }
 
       res.json(updatedType.rows[0]);
@@ -48,7 +47,7 @@ class TypeController {
     }
   }
 
-  //? Видалення типу рецепта
+  //? Delete recipe type
   async deleteRecipeType(req, res) {
     const { id } = req.params;
 
@@ -65,18 +64,18 @@ class TypeController {
       );
 
       if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Тип рецепта не знайдено" });
+        return res.status(404).json({ error: "Recipe type not found" });
       }
 
       res.json({
-        message: "Тип рецепта та всі пов'язані рецепти успішно видалено",
+        message: "Recipe type and all related recipes successfully deleted",
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
 
-  //? Отримання типа рецепта по ID
+  //? Get recipe type by ID
   async getRecipeTypeById(req, res) {
     const typeId = req.params.id;
 
@@ -87,7 +86,7 @@ class TypeController {
       );
 
       if (recipeType.rows.length === 0) {
-        return res.status(404).json({ error: "Тип рецепта не знайдено" });
+        return res.status(404).json({ error: "Recipe type not found" });
       }
 
       res.json(recipeType.rows[0]);

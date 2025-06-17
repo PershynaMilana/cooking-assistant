@@ -4,13 +4,21 @@ const authenticateToken = require("../middleware/jwtMiddleware");
 
 const router = express.Router();
 
-//? Отримання всіх категорій меню
-router.get("/menu-categories", authenticateToken, MenuCategoryController.getAllMenuCategories);
+//? Getting All menu categories
+router.get(
+  "/menu-categories",
+  authenticateToken,
+  MenuCategoryController.getAllMenuCategories
+);
 
-//? Отримання категорій меню за ID
+//? Gettin cat by id
 // router.get("/menu-categories/:id", authenticateToken, MenuCategoryController.getMenuCategoryById);
 
-//? Отримання меню за категорією
-router.get("/menu", authenticateToken, MenuCategoryController.getMenusByCategories);
+//? Menu by cat
+router.get(
+  "/menu",
+  authenticateToken,
+  MenuCategoryController.getMenusByCategories
+);
 
 module.exports = router;

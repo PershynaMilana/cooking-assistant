@@ -1,27 +1,32 @@
 const express = require("express");
-const { getAllMenus, createMenuWithRecipes, getMenuWithRecipes, deleteMenu, updateMenu, searchPersonMenus } = require("../controller/menu.controller");
+const {
+  getAllMenus,
+  createMenuWithRecipes,
+  getMenuWithRecipes,
+  deleteMenu,
+  updateMenu,
+  searchPersonMenus,
+} = require("../controller/menu.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 
 const router = express.Router();
 
-//? Отримання всіх меню
+//? Getting all menus
 router.get("/menu", authenticateToken, getAllMenus);
 
-//? Створення меню
+//? Create menu+
 router.post("/create-menu", authenticateToken, createMenuWithRecipes);
 
-//? Отримання меню по ID
+//? Delite menu by id
 router.get("/menu/:id", authenticateToken, getMenuWithRecipes);
 
-//? Оновлення меню
+//? Update menu
 router.put("/menu/:id", authenticateToken, updateMenu);
 
-//? Видалення меню
+//? Delete menu
 router.delete("/menu/:id", authenticateToken, deleteMenu);
 
-//? Отримання меню користувача
+//? Getting Menu by person
 router.get("/menu-filters-person/:id", authenticateToken, searchPersonMenus);
-
-//? Отримання кількості меню по кожній категорії
 
 module.exports = router;

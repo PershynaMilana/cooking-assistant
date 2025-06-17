@@ -2,42 +2,6 @@ const db = require("../db");
 
 class RecipeController {
   //? Create recipe
-  // async createRecipe(req, res) {
-  //   const {
-  //     title,
-  //     content,
-  //     person_id,
-  //     ingredients,
-  //     type_id,
-  //     cooking_time,
-  //     servings,
-  //   } = req.body;
-
-  //   try {
-  //     // Create recipe
-  //     const newRecipe = await db.query(
-  //       `INSERT INTO recipes (title, content, person_id, type_id, cooking_time, servings)
-  //        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-  //       [title, content, person_id, type_id, cooking_time, servings]
-  //     );
-
-  //     const recipeId = newRecipe.rows[0].id;
-
-  //     // Add ingredients with quantity
-  //     for (let { id, quantity } of ingredients) {
-  //       await db.query(
-  //         `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
-  //            VALUES ($1, $2, $3)`,
-  //         [recipeId, id, quantity || 1]
-  //       );
-  //     }
-
-  //     res.json(newRecipe.rows[0]);
-  //   } catch (error) {
-  //     console.error("Error creating recipe:", error);
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // }
   async createRecipe(req, res) {
     const {
       title,
@@ -145,54 +109,6 @@ class RecipeController {
   }
 
   //? Update recipe by ID
-  // async updateRecipe(req, res) {
-  //   const recipeId = req.params.id;
-  //   const {
-  //     title,
-  //     content,
-  //     ingredients: newIngredients,
-  //     type_id,
-  //     cooking_time,
-  //     servings,
-  //   } = req.body;
-
-  //   try {
-  //     if (!title || !content) {
-  //       return res
-  //         .status(400)
-  //         .json({ error: "Title and content cannot be empty" });
-  //     }
-
-  //     const result = await db.query(
-  //       `UPDATE recipes SET title = $1, content = $2, type_id = $3, cooking_time = $4, servings = $5
-  //        WHERE id = $6 RETURNING *`,
-  //       [title, content, type_id, cooking_time, servings, recipeId]
-  //     );
-
-  //     if (result.rowCount === 0) {
-  //       return res.status(404).json({ error: "Recipe not found" });
-  //     }
-
-  //     // Delete old ingredients
-  //     await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
-  //       recipeId,
-  //     ]);
-
-  //     // Add new ingredients with quantity
-  //     for (let { id, quantity_recipe_ingredients } of newIngredients) {
-  //       await db.query(
-  //         `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
-  //            VALUES ($1, $2, $3)`,
-  //         [recipeId, id, quantity_recipe_ingredients || 1]
-  //       );
-  //     }
-
-  //     res.json(result.rows[0]);
-  //   } catch (error) {
-  //     console.error("Error updating recipe:", error);
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // }
   async updateRecipe(req, res) {
     const recipeId = req.params.id;
     const {
@@ -425,28 +341,6 @@ class RecipeController {
   }
 
   //? Delete recipe by ID
-  // async deleteRecipe(req, res) {
-  //   const recipeId = req.params.id;
-
-  //   try {
-  //     await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
-  //       recipeId,
-  //     ]);
-
-  //     const result = await db.query(
-  //       `DELETE FROM recipes WHERE id = $1 RETURNING *`,
-  //       [recipeId]
-  //     );
-
-  //     if (result.rowCount === 0) {
-  //       return res.status(404).json({ error: "Recipe not found" });
-  //     }
-
-  //     res.json({ message: "Recipe successfully deleted" });
-  //   } catch (error) {
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // }
   async deleteRecipe(req, res) {
     const recipeId = req.params.id;
 

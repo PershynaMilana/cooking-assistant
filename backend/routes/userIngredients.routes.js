@@ -3,28 +3,28 @@ const router = new Router();
 const userIngredientsController = require("../controller/userIngredients.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 
-//? Отримати інгредієнти користувача
+//? Get user ingredients
 router.get(
   "/user-ingredients/:id",
   authenticateToken,
   userIngredientsController.getUserIngredients
 );
 
-//? Оновити інгредієнти користувача
+//? Update user ingredients
 router.put(
   "/user-ingredients/:id",
   authenticateToken,
   userIngredientsController.updateUserIngredients
 );
 
-//? Видалити інгредієнт у конкретного користувача
+//? Delete ingredient for specific user
 router.delete(
   "/user-ingredients/:userId/:ingredientId",
   authenticateToken,
   userIngredientsController.deleteUserIngredient
 );
 
-//? Оновити кількість інгредієнтів
+//? Update ingredient quantities
 router.put(
   "/user-ingredients/update-quantities/:userId",
   authenticateToken,
