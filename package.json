@@ -1,5 +1,19 @@
 {
+  "name": "cooking-assistant",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm --prefix backend install && npm --prefix frontend install",
+    "start": "concurrently -n backend,frontend -c blue,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev": "concurrently -n backend,frontend -c blue,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "start:backend": "npm --prefix backend run dev",
+    "start:frontend": "npm --prefix frontend run dev",
+    "patch": "npm version patch --no-git-tag-version",
+    "minor": "npm version minor --no-git-tag-version",
+    "major": "npm version major --no-git-tag-version"
+  },
   "devDependencies": {
+    "concurrently": "^9.0.1",
     "typescript": "^5.8.3"
   }
 }
