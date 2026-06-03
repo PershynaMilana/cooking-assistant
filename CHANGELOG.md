@@ -22,6 +22,20 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.4 - 2026-06-03
+
+Backend:
+- Added ESLint (flat config) and a lint script. Existing dead/duplicate code is silenced with
+  eslint-disable comments for now and left for a later cleanup.
+- Reformatted all backend files with Prettier (4-space indent). No behavior change.
+
+Project:
+- Added Prettier with a shared config (.prettierrc, .prettierignore) and format / format:check
+  scripts. Only the backend is formatted; the frontend is not touched yet.
+- Started committing lockfiles and tool configs: removed package-lock.json and eslint.config.js
+  from .gitignore so installs are reproducible and CI can run npm ci.
+
+
 ## 1.3 - 2026-06-03
 
 Documentation and versioning cleanup. No product code changed.
