@@ -1,33 +1,39 @@
-# 🍳 Cooking Assistant — Backend
+# Cooking Assistant - Backend
 
-Express + PostgreSQL API server for the [Cooking Assistant](../README.md) platform. Listens on port `8080` and serves the [frontend](../frontend/README.md) at `http://localhost:5173` (CORS-restricted).
+Express + PostgreSQL API for the [Cooking Assistant](../README.md) platform. Listens on port 8080 and
+serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-restricted).
 
-## 🛠️ Tech Stack
+## Tech stack
 
-- **Node.js** + **Express 4** — HTTP server
-- **PostgreSQL** via `pg` (connection pool, raw SQL, no ORM)
-- **jsonwebtoken** + **bcrypt** — auth & password hashing
-- **dotenv** — env loading
-- **nodemon** — dev auto-reload
+- Node.js + Express 4 - HTTP server
+- PostgreSQL via `pg` (connection pool, raw SQL, no ORM)
+- jsonwebtoken + bcrypt - auth and password hashing
+- dotenv - env loading
+- nodemon - dev auto-reload
 
-## 🚀 Running locally
+## Running locally
 
-> Prefer the **root** of the monorepo: `npm install && npm start` from there boots backend + frontend together. See [the root README](../README.md). Use the commands below only when you want to work on the backend in isolation.
+Prefer the root of the monorepo: `npm install && npm start` boots backend + frontend together. Use the
+commands below only to work on the backend alone.
 
 ```bash
 npm install
-npm run dev      # nodemon -> http://localhost:8080  (auto-reload)
-npm start        # plain node, no auto-reload (production-style)
+npm run dev      # nodemon -> http://localhost:8080 (auto-reload)
+npm start        # plain node, no auto-reload
 ```
 
-## ⚙️ Required configuration
+## Configuration
 
-### 1. `backend/.env`
-This file is **gitignored** — it is not in the repo. Copy the template and fill in real values:
+### 1. backend/.env
+
+This file is gitignored and not in the repo. Copy the template and fill in real values:
+
 ```bash
 cp .env.example .env     # PowerShell: Copy-Item .env.example .env
 ```
-[`.env.example`](.env.example) lists every key:
+
+[.env.example](.env.example) lists every key:
+
 ```
 JWT_SECRET_KEY=your_long_random_secret_here
 DB_USER=postgres
@@ -38,16 +44,17 @@ DB_NAME=cooking_helper_final
 PORT=8080
 ```
 
-`JWT_SECRET_KEY` is used by:
-- [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) — verifies tokens on every protected route
-- [controller/user.controller.js](controller/user.controller.js) — signs tokens at login
+`JWT_SECRET_KEY` is used by [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) (verifies tokens)
+and [controller/user.controller.js](controller/user.controller.js) (signs them at login). Without it,
+login throws and every protected route returns 403.
 
-Without it, login throws and every protected route returns 403.
+When you add a new env key, add it (without a value) to [.env.example](.env.example) too.
 
-> ⚠️ Whenever you add a new env key, add it (without a value) to [`.env.example`](.env.example) too, so the template stays complete.
+### 2. PostgreSQL connection - [db.js](db.js)
 
-### 2. PostgreSQL connection — [db.js](db.js)
-Credentials are read from the `DB_*` environment variables above, with the historical hardcoded values kept as **fallback defaults**:
+Credentials are read from the `DB_*` variables above, with the historical hardcoded values as fallback
+defaults:
+
 ```js
 {
   user:     process.env.DB_USER     || "postgres",
@@ -57,30 +64,33 @@ Credentials are read from the `DB_*` environment variables above, with the histo
   database: process.env.DB_NAME     || "cooking_helper_final",
 }
 ```
-Set the `DB_*` keys in [`.env`](.env.example) if your Postgres differs from the defaults — no need to edit [db.js](db.js).
 
-### 3. Database schema — [database.sql](database.sql)
-Run this once against an empty PostgreSQL database to create tables and seed reference data (recipe types, units, menu categories, sample ingredients).
+Set the `DB_*` keys in `.env` if your Postgres differs - no need to edit [db.js](db.js).
 
-⚠️ **Not idempotent** — the file represents the historical migration sequence (mixed `CREATE TABLE`, `ALTER TABLE`, `INSERT`). Running it twice on the same DB will fail.
+### 3. Database schema - [database.sql](database.sql)
 
-### 4. CORS — [index.js](index.js)
-Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a different origin, update `corsOptions` here.
+Run once against an empty database to create tables and seed reference data. It is NOT idempotent (it
+mixes CREATE TABLE, ALTER TABLE, and INSERT) - running it twice will fail.
 
-## 📁 Structure
+### 4. CORS - [index.js](index.js)
+
+Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a different origin, update
+`corsOptions` there.
+
+## Structure
 
 ```
 backend/
-├── index.js              # express bootstrap, mounts /api routers, listens on 8080
-├── db.js                 # pg.Pool connection
-├── database.sql          # full schema + seed data (run once)
-├── .env.example          # env template (tracked) — copy to .env
-├── .env                  # JWT_SECRET_KEY + DB_* + PORT (you create — gitignored)
+├── index.js              express bootstrap, mounts /api routers, listens on 8080
+├── db.js                 pg.Pool connection (reads DB_* env)
+├── database.sql          full schema + seed data (run once)
+├── .env.example          env template (tracked) - copy to .env
+├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
 ├── middleware/
-│   └── jwtMiddleware.js  # authenticateToken — verifies Bearer JWT, attaches req.user
+│   └── jwtMiddleware.js  authenticateToken - verifies Bearer JWT, attaches req.user
 │
-├── routes/               # thin route -> controller mapping, all under /api
+├── routes/               thin route -> controller mapping, all under /api
 │   ├── user.routes.js
 │   ├── recipe.routes.js
 │   ├── type.routes.js
@@ -88,7 +98,7 @@ backend/
 │   ├── menu.routes.js
 │   └── menuCategory.routes.js
 │
-└── controller/           # business logic + raw SQL
+└── controller/           business logic + raw SQL
     ├── user.controller.js
     ├── recipe.controller.js
     ├── type.controller.js
@@ -97,29 +107,33 @@ backend/
     └── menuCategory.controller.js
 ```
 
-## 🏛️ Architecture — route -> controller -> SQL
+## Architecture - route -> controller -> SQL
 
 Deliberately thin pipeline, no ORM, no service layer, no repository layer.
 
-1. **[index.js](index.js)** wires CORS, JSON parsing, and mounts six routers under `/api`.
-2. **[routes/](routes/)** files are shims — `METHOD /path` -> controller method, almost always wrapped in `authenticateToken`. Only `/register` and `/login` are public.
-3. **[controller/](controller/)** files are class instances exported as singletons (`module.exports = new XController()`). Methods write SQL directly through the shared `pg.Pool` from [db.js](db.js).
+1. [index.js](index.js) wires CORS, JSON parsing, and mounts six routers under `/api`.
+2. [routes/](routes/) files are shims: `METHOD /path` -> controller method, almost always wrapped in
+   `authenticateToken`. Only `/register` and `/login` are public.
+3. [controller/](controller/) files are class instances exported as singletons
+   (`module.exports = new XController()`). Methods write SQL directly through the shared `pg.Pool`.
 
-To add a feature:
-1. Write the SQL inside a controller method.
-2. Register the route in the appropriate `routes/*.js`.
-3. If it's a new domain entirely, create a new router file and mount it in [index.js](index.js).
+To add a feature: write the SQL in a controller method, register the route in the right `routes/*.js`,
+and if it is a new domain, create a router and mount it in [index.js](index.js).
 
-## 🔐 Auth flow
+## Auth flow
 
-1. `POST /api/login` -> [controller/user.controller.js](controller/user.controller.js) verifies password via `bcrypt.compare`, signs a JWT with payload `{ id }` and `expiresIn: "24h"`.
-2. Client sends `Authorization: Bearer <token>` on subsequent requests.
-3. [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) verifies with `JWT_SECRET_KEY`, attaches `req.user`, calls `next()`.
-4. Downstream controllers read `req.user.id` (or accept `person_id` in the body — both patterns exist; prefer `req.user.id` for new code).
+1. `POST /api/login` verifies the password via `bcrypt.compare` and signs a JWT with payload `{ id }`
+   and `expiresIn: "24h"`.
+2. Client sends `Authorization: Bearer <token>` on later requests.
+3. [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) verifies with `JWT_SECRET_KEY`, attaches
+   `req.user`, calls `next()`.
+4. Controllers read `req.user.id` (some also accept `person_id` in the body - both patterns exist;
+   prefer `req.user.id` for new code).
 
-## 🔌 API Reference
+## API reference
 
-All endpoints under `/api`. Everything except `/register` and `/login` requires `Authorization: Bearer <token>`.
+All endpoints under `/api`. Everything except `/register` and `/login` requires
+`Authorization: Bearer <token>`.
 
 ### Auth ([routes/user.routes.js](routes/user.routes.js))
 | Method | Path | Purpose |
@@ -173,60 +187,41 @@ All endpoints under `/api`. Everything except `/register` and `/login` requires 
 ### Menu categories ([routes/menuCategory.routes.js](routes/menuCategory.routes.js))
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET | `/menu-categories` | List Breakfast / Lunch / Dinner |
+| GET | `/menu-categories` | List categories |
 
-## 🗄️ Data model
+## Data model
 
 Full schema in [database.sql](database.sql). Big picture:
 
-- `person` ↔ `recipes` via `person_id` (recipe owner)
-- `recipes` ↔ `ingredients` through `recipe_ingredients` (with `quantity_recipe_ingredients`)
+- `person` to `recipes` via `person_id` (recipe owner)
+- `recipes` to `ingredients` through `recipe_ingredients` (with `quantity_recipe_ingredients`)
 - `recipes.type_id` -> `recipe_types`
-- `person` ↔ `ingredients` through `person_ingredients` (the pantry, with `quantity_person_ingradient` *(sic — typo, leave it)*) and `ingredient_purchases` (history log)
-- `ingredients.id_unit_measurement` -> `unit_measurement` (gr, kg, ml, l, teaspoon, tablespoon, cup, pcs)
+- `person` to `ingredients` through `person_ingredients` (the pantry, with `quantity_person_ingradient`
+  - typo in the real column name, leave it) and `ingredient_purchases` (history log)
+- `ingredients.id_unit_measurement` -> `unit_measurement`
 - `ingredients` carries metadata: `allergens`, `days_to_expire`, `seasonality`, `storage_condition`
-- `menu` (per-user, with `category_id` -> `menu_category`) ↔ `recipes` through `menu_recipe`
+- `menu` (per-user, with `category_id` -> `menu_category`) to `recipes` through `menu_recipe`
 
-The "ingredients you're missing for a planned menu" query joins `menu_recipe` -> `recipe_ingredients` -> `ingredients` and subtracts the user's `person_ingredients`.
+The "ingredients you are missing for a menu" query joins `menu_recipe` -> `recipe_ingredients` ->
+`ingredients` and subtracts the user's `person_ingredients`.
 
-## 🎨 Conventions
+## Conventions
 
-- **CommonJS** (`require` / `module.exports`) — keep it that way; do not introduce ESM.
-- Controllers are class instances exported as singletons — match the pattern.
-- Comments often use `//?` (route description) and `//!` (change marker / TODO). Match this style when editing those files.
-- Raw SQL with `$1`, `$2`, … parameters via `db.query(text, values)` — never string-concatenate user input.
+- CommonJS (`require` / `module.exports`) - do not introduce ESM.
+- Controllers are class instances exported as singletons - match the pattern.
+- Comments use `//?` (route description) and `//!` (change marker / TODO). Match this style.
+- Raw SQL with `$1`, `$2`, ... parameters via `db.query(text, values)` - never string-concatenate
+  user input.
 
-## 📈 Versioning & changelog
+## Versioning
 
-The backend has its **own** version, independent of the frontend. Bump it only when you change backend code; keep the changelog up to date.
+The whole project shares one version and one changelog at the repo root. This package's version in
+[package.json](package.json) marks the last release in which the backend changed. See the
+[root README](../README.md#versioning-and-changelog) and [root CHANGELOG.md](../CHANGELOG.md).
 
-```bash
-# from backend/
-npm run patch    # 1.0.0 -> 1.0.1  (bug fixes)
-npm run minor    # 1.0.1 -> 1.1.0  (new endpoint, new field, additive)
-npm run major    # 1.1.0 -> 2.0.0  (breaking API/schema change)
-```
+## Related
 
-These scripts wrap `npm version <level> --no-git-tag-version` so you never accidentally trigger npm's auto-commit/tag.
-
-After bumping, open [`CHANGELOG.md`](CHANGELOG.md), move your entries from `## [Unreleased]` into a new `## [x.y.z] — YYYY-MM-DD` section, then commit:
-
-```bash
-git add backend/package.json backend/package-lock.json backend/CHANGELOG.md
-git commit -m "backend: 1.0.0 -> 1.1.0 — add /api/recipe-search-by-time"
-git tag backend-v1.1.0
-```
-
-**SemVer rules of thumb for this codebase:**
-- `PATCH` — bug fix in a controller, SQL tweak that doesn't change response shape, fixed validation.
-- `MINOR` — new endpoint, new optional field on a response, new column added (backward-compatible migration).
-- `MAJOR` — removed/renamed endpoint, changed response shape, changed required request body, breaking schema migration.
-
-See the full project workflow in the [root README](../README.md#versioning--changelogs).
-
-## 🔗 Related
-
-- [Root README](../README.md) — project overview & monorepo scripts
-- [Frontend README](../frontend/README.md) — React client
-- [CHANGELOG.md](CHANGELOG.md) — backend version history
-- [CLAUDE.md](../CLAUDE.md) — architecture notes for AI tooling
+- [Root README](../README.md) - project overview and monorepo scripts
+- [Frontend README](../frontend/README.md) - React client
+- [CHANGELOG.md](../CHANGELOG.md) - project changelog
+- [CLAUDE.md](../CLAUDE.md) - notes for AI tooling
