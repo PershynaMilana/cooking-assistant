@@ -6,9 +6,9 @@ const router = express.Router();
 
 //? Getting All menu categories
 router.get(
-  "/menu-categories",
-  authenticateToken,
-  MenuCategoryController.getAllMenuCategories
+    "/menu-categories",
+    authenticateToken,
+    MenuCategoryController.getAllMenuCategories,
 );
 
 //? Gettin cat by id
@@ -16,9 +16,9 @@ router.get(
 
 //? Menu by cat
 router.get(
-  "/menu",
-  authenticateToken,
-  MenuCategoryController.getMenusByCategories
+    "/menu",
+    authenticateToken,
+    MenuCategoryController.getMenusByCategories,
 );
 
 module.exports = router;
