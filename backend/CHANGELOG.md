@@ -6,6 +6,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-06-03
+
+### Security
+- **`backend/.env` is no longer tracked by git** — removed from version control (`git rm --cached`) and added to `.gitignore`, so the `JWT_SECRET_KEY` is no longer committed. Your local `.env` keeps working unchanged; a fresh clone no longer ships the secret.
+
+### Added
+- **[`.env.example`](.env.example)** — template listing every required environment variable (`JWT_SECRET_KEY`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `PORT`). On a fresh checkout, copy it to `.env` and fill in real values.
+
+### Changed
+- **Database credentials are now read from environment variables** in [`db.js`](db.js) (`DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME`) instead of being hardcoded. The previous hardcoded values remain as fallback defaults, so existing setups need no changes.
+
 ## [1.1.0] — 2026-04-26
 
 🛠️ Tooling and documentation pass — **no API or schema changes**. Existing endpoints, request/response shapes, and database structure are untouched. Safe to upgrade without any client work.
@@ -41,5 +52,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - [`database.sql`](database.sql) is **not idempotent** — run once on an empty database.
 
 [Unreleased]: https://github.com/PershynaMilana/cooking-assistant/compare/backend-v1.1.0...HEAD
+[1.2.0]: https://github.com/PershynaMilana/cooking-assistant/compare/backend-v1.1.0...HEAD
 [1.1.0]: https://github.com/PershynaMilana/cooking-assistant/compare/backend-v1.0.0...backend-v1.1.0
 [1.0.0]: https://github.com/PershynaMilana/cooking-assistant/releases/tag/backend-v1.0.0

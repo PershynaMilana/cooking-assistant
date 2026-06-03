@@ -23,29 +23,41 @@ npm start        # plain node, no auto-reload (production-style)
 ## ⚙️ Required configuration
 
 ### 1. `backend/.env`
-Create this file (it is gitignored):
+This file is **gitignored** — it is not in the repo. Copy the template and fill in real values:
+```bash
+cp .env.example .env     # PowerShell: Copy-Item .env.example .env
+```
+[`.env.example`](.env.example) lists every key:
 ```
 JWT_SECRET_KEY=your_long_random_secret_here
+DB_USER=postgres
+DB_PASSWORD=12345678
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=cooking_helper_final
+PORT=8080
 ```
 
-Used by:
+`JWT_SECRET_KEY` is used by:
 - [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) — verifies tokens on every protected route
 - [controller/user.controller.js](controller/user.controller.js) — signs tokens at login
 
 Without it, login throws and every protected route returns 403.
 
+> ⚠️ Whenever you add a new env key, add it (without a value) to [`.env.example`](.env.example) too, so the template stays complete.
+
 ### 2. PostgreSQL connection — [db.js](db.js)
-Credentials are **hardcoded**, not env-driven. Defaults:
+Credentials are read from the `DB_*` environment variables above, with the historical hardcoded values kept as **fallback defaults**:
 ```js
 {
-  user: "postgres",
-  password: "12345678",
-  host: "localhost",
-  port: 5432,
-  database: "cooking_helper_final",
+  user:     process.env.DB_USER     || "postgres",
+  password: process.env.DB_PASSWORD || "12345678",
+  host:     process.env.DB_HOST     || "localhost",
+  port:     process.env.DB_PORT     || 5432,
+  database: process.env.DB_NAME     || "cooking_helper_final",
 }
 ```
-Edit [db.js](db.js) directly if any of these differ for you.
+Set the `DB_*` keys in [`.env`](.env.example) if your Postgres differs from the defaults — no need to edit [db.js](db.js).
 
 ### 3. Database schema — [database.sql](database.sql)
 Run this once against an empty PostgreSQL database to create tables and seed reference data (recipe types, units, menu categories, sample ingredients).
@@ -62,7 +74,8 @@ backend/
 ├── index.js              # express bootstrap, mounts /api routers, listens on 8080
 ├── db.js                 # pg.Pool connection
 ├── database.sql          # full schema + seed data (run once)
-├── .env                  # JWT_SECRET_KEY (you create — gitignored)
+├── .env.example          # env template (tracked) — copy to .env
+├── .env                  # JWT_SECRET_KEY + DB_* + PORT (you create — gitignored)
 │
 ├── middleware/
 │   └── jwtMiddleware.js  # authenticateToken — verifies Bearer JWT, attaches req.user

@@ -96,10 +96,13 @@ cd cooking-assistant
 # 2. Set up the database
 #    - Create a Postgres database called "cooking_helper_final"
 #    - Run backend/database.sql against it (in pgAdmin or psql) ONCE
-#    - If your Postgres credentials differ from postgres/12345678, edit backend/db.js
+#    - If your Postgres credentials differ from postgres/12345678,
+#      set DB_USER / DB_PASSWORD / DB_HOST / DB_PORT / DB_NAME in backend/.env (step 3)
 
-# 3. Create backend/.env with a JWT secret
-echo "JWT_SECRET_KEY=$(node -e 'console.log(require(\"crypto\").randomBytes(32).toString(\"hex\"))')" > backend/.env
+# 3. Create backend/.env from the template and set a JWT secret
+cp backend/.env.example backend/.env     # PowerShell: Copy-Item backend/.env.example backend/.env
+#    then fill in JWT_SECRET_KEY (and DB_* if your Postgres differs). Generate a secret with:
+#    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 # 4. Install everything (root postinstall fans out to backend + frontend)
 npm install
