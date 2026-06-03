@@ -1,57 +1,71 @@
 # Changelog
 
-All notable product-level changes are tracked here. Per-package details live in [`backend/CHANGELOG.md`](backend/CHANGELOG.md) and [`frontend/CHANGELOG.md`](frontend/CHANGELOG.md).
+One changelog for the whole project (backend + frontend).
 
-This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+How versioning works here:
 
-## [Unreleased]
+The app has one shared version, kept in the root package.json, and it goes up by one each release.
+A release bumps backend/package.json and/or frontend/package.json up to that shared number, but only
+for the side it actually changed. The untouched side keeps its old number, so a package version just
+means "the last release this package changed in" and may skip numbers. It is not strict SemVer.
 
-## [1.1.0] — 2026-04-26
+Each version below lists what changed under Backend / Frontend / Project. A side that was not touched
+in a release has no line.
 
-🛠️ **Monorepo tooling, versioning workflow, and full documentation pass.** Product code (backend API + frontend UI) is unchanged — both stay on `1.0.0`. This release is purely about developer experience around the monorepo.
+Why we moved to this:
 
-### Added
-- **Root orchestration scripts** — `npm install` at the root now installs all three packages via a `postinstall` hook; `npm start` (and its `npm run dev` alias) boots backend + frontend together via [`concurrently`](https://www.npmjs.com/package/concurrently) with colored prefixes; `npm run start:backend` / `start:frontend` to run each side in isolation.
-- **Independent per-package versioning** — `backend/`, `frontend/`, and root each track their own version. Each `package.json` exposes short `npm run patch` / `minor` / `major` scripts that wrap `npm version <level> --no-git-tag-version`.
-- **Three CHANGELOG.md files** following [Keep a Changelog](https://keepachangelog.com/) — root (this file, release-level summary), [`backend/CHANGELOG.md`](backend/CHANGELOG.md), [`frontend/CHANGELOG.md`](frontend/CHANGELOG.md). Initial `[1.0.0]` entries documented retroactively.
-- **[CLAUDE.md](CLAUDE.md)** — architectural notes and conventions for AI coding tooling, including the auth token storage gotcha, the route -> controller -> SQL pipeline, and changelog discipline.
-- **Backend [README.md](backend/README.md)** — created from scratch with full API reference (~30 endpoints across 6 domains), env/config requirements, auth flow, data model, and conventions.
-- **Frontend [README.md](frontend/README.md)** — replaced the default Vite template with project-specific docs: page structure, routes table, ⚠️ auth token gotcha, conventions, known oddities.
-- **Root [README.md](README.md)** — rewritten as a welcoming entry point: project description, feature table, quick start TL;DR, structure with cross-links, scripts cheat sheet, versioning workflow.
+Before, the repo had three separate versions (root, backend, frontend) and three changelogs plus git
+tags. For a two-app project that was more bookkeeping than it was worth, so we dropped the per-package
+changelogs and the tags and now track everything here against one shared version.
 
-### Changed
-- Stopped tracking `.idea/` editor files — added to `.gitignore` and untracked from the index.
-- Added `.claude/` to `.gitignore` to keep local AI-tool state out of the repo.
 
-### Tooling notes
-- Root and sub-package versions are deliberately **not** synced — bumping the frontend does not bump the backend.
-- Tag conventions: `v1.1.0` for root releases, `frontend-v1.x.y` and `backend-v1.x.y` for per-package releases.
+## Unreleased
 
-## [1.0.0] — 2026-04-26
 
-🎉 **Initial public release.**
+## 1.3 - 2026-06-03
 
-A working full-stack cooking-management platform — register, build a pantry, write recipes, plan menus with auto-generated shopping lists, and export cooking analytics to PDF.
+Documentation and versioning cleanup. No product code changed.
 
-### Added
-- **Authentication** — registration + login with bcrypt-hashed passwords and JWT (24h expiry).
-- **Recipe management** — full CRUD, ingredients with quantities & units, cooking time, servings, type filtering.
-- **Recipe types** — Breakfast / Lunch / Dinner-style categorization, fully manageable from the UI.
-- **Smart pantry** — per-user ingredient inventory with quantities, purchase dates, expiration windows, allergens, seasonality, and storage conditions.
-- **Purchase history** — append-only audit log of every ingredient purchase, queryable per ingredient.
-- **Menu planning** — bundle multiple recipes into Breakfast / Lunch / Dinner menus.
-- **Smart "missing ingredients" detection** — when planning a menu, the app subtracts your pantry and tells you what to buy.
-- **Analytics + PDF export** — recipe statistics page with charts (`apexcharts`) and downloadable PDF reports (`@react-pdf/renderer`, `jspdf`).
-- **Filtering** — by type, ingredients, cooking time, creation date — across the community feed or a single user's recipes.
-- **Monorepo orchestration** — single `npm install` + `npm start` from the root boots backend and frontend together via `concurrently`.
+Project:
+- Switched to one shared version and this single changelog. Removed the backend and frontend
+  changelogs and stopped using git tags.
 
-### Tech
-- Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, ApexCharts.
-- Backend: Node.js, Express 4, PostgreSQL via `pg`, JWT, bcrypt.
-- Database: PostgreSQL 14+, schema and seed in [`backend/database.sql`](backend/database.sql).
+Backend:
+- Simplified the README: removed emoji and decorative formatting, trimmed to the essentials.
 
-See [`backend/CHANGELOG.md`](backend/CHANGELOG.md) and [`frontend/CHANGELOG.md`](frontend/CHANGELOG.md) for per-package details.
+Frontend:
+- Simplified the README the same way.
 
-[Unreleased]: https://github.com/PershynaMilana/cooking-assistant/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/PershynaMilana/cooking-assistant/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/PershynaMilana/cooking-assistant/releases/tag/v1.0.0
+
+## 1.2 - 2026-06-03
+
+Backend:
+- Database credentials now come from environment variables (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT,
+  DB_NAME) instead of being hardcoded in db.js. The old values stay as fallback defaults, so existing
+  setups keep working.
+- Added backend/.env.example listing every variable to set.
+- Stopped tracking backend/.env in git, so the JWT secret is no longer committed. On a fresh checkout,
+  copy .env.example to .env and fill it in.
+
+
+## 1.1 - 2026-04-26
+
+Monorepo tooling and documentation. No product code changed.
+
+Project:
+- One npm install at the root now installs both apps, and npm start runs them together.
+- Added the first READMEs and project notes.
+
+
+## 1.0 - 2026-04-26
+
+First release. A working full-stack cooking app.
+
+Backend:
+- Express API on port 8080 with JWT login (24h) and bcrypt passwords, PostgreSQL via pg.
+- Recipes, recipe types, per-user pantry with purchase history, menu planning with missing-ingredient
+  detection, and stats. Around 30 endpoints. Schema and seed data in backend/database.sql.
+
+Frontend:
+- React + TypeScript + Vite app with Tailwind and React Router.
+- Auth, recipe/menu/pantry/type management, and a statistics page with charts and PDF export.
