@@ -1,11 +1,11 @@
 const express = require("express");
 const {
-  getAllMenus,
-  createMenuWithRecipes,
-  getMenuWithRecipes,
-  deleteMenu,
-  updateMenu,
-  searchPersonMenus,
+    getAllMenus,
+    createMenuWithRecipes,
+    getMenuWithRecipes,
+    deleteMenu,
+    updateMenu,
+    searchPersonMenus,
 } = require("../controller/menu.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 
