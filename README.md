@@ -22,7 +22,7 @@ git clone <repository-url>
 cd cooking-assistant
 
 # 2. Database
-#    - create a database named "cooking_helper_final"
+#    - create a database named "cooking_helper"
 #    - run backend/database.sql against it once (it is NOT idempotent)
 
 # 3. Backend env

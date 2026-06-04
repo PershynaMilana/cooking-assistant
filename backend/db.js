@@ -6,7 +6,7 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD || "12345678",
     host: process.env.DB_HOST || "localhost",
     port: process.env.DB_PORT || 5432,
-    database: process.env.DB_NAME || "cooking_helper_final",
+    database: process.env.DB_NAME || "cooking_helper",
 });
 
 module.exports = pool;

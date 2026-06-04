@@ -2,52 +2,69 @@ const Router = require("express");
 const router = new Router();
 const recipeController = require("../controller/recipe.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
 //? Creating recipe
-router.post("/recipe", authenticateToken, recipeController.createRecipe);
+router.post(
+    "/recipe",
+    authenticateToken,
+    asyncHandler(recipeController.createRecipe),
+);
 
 //? Get all recipes
-router.get("/recipes", authenticateToken, recipeController.getAllRecipes);
+router.get(
+    "/recipes",
+    authenticateToken,
+    asyncHandler(recipeController.getAllRecipes),
+);
 
 //? Get recipe by id
 router.get(
     "/recipe/:id",
     authenticateToken,
-    recipeController.getRecipeWithIngredients,
+    asyncHandler(recipeController.getRecipeWithIngredients),
 );
 
 //? Get all ingredients
 router.get(
     "/ingredients",
     authenticateToken,
-    recipeController.getAllIngredients,
+    asyncHandler(recipeController.getAllIngredients),
 );
 
 //? Updating recipe by id
-router.put("/recipe/:id", authenticateToken, recipeController.updateRecipe);
+router.put(
+    "/recipe/:id",
+    authenticateToken,
+    asyncHandler(recipeController.updateRecipe),
+);
 
 //? del recipe by id
-router.delete("/recipe/:id", authenticateToken, recipeController.deleteRecipe);
+router.delete(
+    "/recipe/:id",
+    authenticateToken,
+    asyncHandler(recipeController.deleteRecipe),
+);
 
 //? filter
 router.get(
     "/recipes-by-filters",
     authenticateToken,
-    recipeController.searchRecipes,
+    asyncHandler(recipeController.searchRecipes),
 );
 
 //? filter by date, user
 router.get(
     "/recipes-filters-person/:id",
     authenticateToken,
-    recipeController.searchPersonRecipes,
+    asyncHandler(recipeController.searchPersonRecipes),
 );
 
 //? getting stats
 router.get(
     "/recipes-stats",
     authenticateToken,
-    recipeController.getRecipesStats,
+    asyncHandler(recipeController.getRecipesStats),
 );
 
 module.exports = router;
