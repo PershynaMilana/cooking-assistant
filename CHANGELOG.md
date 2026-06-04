@@ -22,6 +22,13 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.6 - 2026-06-04
+
+Project:
+- Normalized line endings to LF across the repo via .gitattributes (* text=auto eol=lf), so files
+  check out the same on every OS and prettier format:check stays stable on Windows and elsewhere.
+
+
 ## 1.5 - 2026-06-04
 
 Backend:
