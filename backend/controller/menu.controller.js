@@ -3,15 +3,14 @@ const db = require("../db");
 
 //? Get all menus
 const getAllMenus = async (req, res) => {
-    try {
-        let { menu_name, category_ids } = req.query;
+    let { menu_name, category_ids } = req.query;
 
-        if (menu_name) {
-            menu_name = decodeURIComponent(menu_name);
-            console.log("Decoded menu_name:", menu_name);
-        }
+    if (menu_name) {
+        menu_name = decodeURIComponent(menu_name);
+        console.log("Decoded menu_name:", menu_name);
+    }
 
-        let query = `
+    let query = `
       SELECT
         m.menu_id AS id,
         m.menu_title AS title,
@@ -21,29 +20,25 @@ const getAllMenus = async (req, res) => {
              LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
     `;
 
-        const queryParams = [];
+    const queryParams = [];
 
-        if (menu_name) {
-            query += ` WHERE m.menu_title ILIKE $${queryParams.length + 1}`;
-            queryParams.push(`%${menu_name}%`);
-        }
-
-        if (category_ids) {
-            const categoryArray = category_ids.split(",").map(Number);
-            if (menu_name) {
-                query += ` AND m.category_id = ANY($${queryParams.length + 1})`;
-            } else {
-                query += ` WHERE m.category_id = ANY($${queryParams.length + 1})`;
-            }
-            queryParams.push(categoryArray);
-        }
-
-        const result = await pool.query(query, queryParams);
-        res.status(200).json(result.rows);
-    } catch (error) {
-        console.error("Error fetching menus:", error);
-        res.status(500).json({ message: "Server error" });
+    if (menu_name) {
+        query += ` WHERE m.menu_title ILIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${menu_name}%`);
     }
+
+    if (category_ids) {
+        const categoryArray = category_ids.split(",").map(Number);
+        if (menu_name) {
+            query += ` AND m.category_id = ANY($${queryParams.length + 1})`;
+        } else {
+            query += ` WHERE m.category_id = ANY($${queryParams.length + 1})`;
+        }
+        queryParams.push(categoryArray);
+    }
+
+    const result = await pool.query(query, queryParams);
+    res.status(200).json(result.rows);
 };
 
 //? Create menu
@@ -88,8 +83,7 @@ const createMenuWithRecipes = async (req, res) => {
         res.status(201).json({ message: "Menu created successfully", menuId });
     } catch (error) {
         await client.query("ROLLBACK");
-        console.error("Error creating menu with recipes:", error);
-        res.status(500).json({ message: "Server error" });
+        throw error;
     } finally {
         client.release();
     }
@@ -144,8 +138,7 @@ const updateMenu = async (req, res) => {
         res.status(200).json({ message: "Menu updated successfully" });
     } catch (error) {
         await client.query("ROLLBACK");
-        console.error("Error updating menu:", error);
-        res.status(500).json({ message: "Server error" });
+        throw error;
     } finally {
         client.release();
     }
@@ -185,9 +178,8 @@ const getMenuWithRecipes = async (req, res) => {
         return res.status(400).json({ message: "Menu ID is required" });
     }
 
-    try {
-        // Get menu information
-        const menuQuery = `
+    // Get menu information
+    const menuQuery = `
       SELECT
         m.menu_id AS id,
         m.menu_title AS title,
@@ -198,16 +190,16 @@ const getMenuWithRecipes = async (req, res) => {
       LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
       WHERE m.menu_id = $1
     `;
-        const menuResult = await pool.query(menuQuery, [id]);
+    const menuResult = await pool.query(menuQuery, [id]);
 
-        if (menuResult.rows.length === 0) {
-            return res.status(404).json({ message: "Menu not found" });
-        }
+    if (menuResult.rows.length === 0) {
+        return res.status(404).json({ message: "Menu not found" });
+    }
 
-        const menu = menuResult.rows[0];
+    const menu = menuResult.rows[0];
 
-        // Get all menu recipes
-        const recipeQuery = `
+    // Get all menu recipes
+    const recipeQuery = `
       SELECT 
         r.id AS recipe_id, 
         r.title, 
@@ -227,14 +219,14 @@ const getMenuWithRecipes = async (req, res) => {
       WHERE mr.menu_id = $1
       GROUP BY r.id, rt.type_name
     `;
-        const recipeResult = await pool.query(recipeQuery, [id]);
+    const recipeResult = await pool.query(recipeQuery, [id]);
 
-        const recipesWithDetails = [];
-        for (let recipe of recipeResult.rows) {
-            const recipeId = recipe.recipe_id;
+    const recipesWithDetails = [];
+    for (let recipe of recipeResult.rows) {
+        const recipeId = recipe.recipe_id;
 
-            // Get missing ingredients and units of measurement for each recipe
-            const missingIngredientsQuery = `
+        // Get missing ingredients and units of measurement for each recipe
+        const missingIngredientsQuery = `
         SELECT
           i.name AS ingredient_name,
           GREATEST(ri.quantity_recipe_ingredients - COALESCE(pi.quantity_person_ingradient, 0), 0) AS missing_quantity,
@@ -251,23 +243,19 @@ const getMenuWithRecipes = async (req, res) => {
         GROUP BY i.name, ri.quantity_recipe_ingredients, pi.quantity_person_ingradient, u.unit_name, u.coefficient
         HAVING GREATEST(ri.quantity_recipe_ingredients - COALESCE(pi.quantity_person_ingradient, 0), 0) > 0
       `;
-            const missingIngredientsResult = await pool.query(
-                missingIngredientsQuery,
-                [menu.personid, recipeId],
-            );
+        const missingIngredientsResult = await pool.query(
+            missingIngredientsQuery,
+            [menu.personid, recipeId],
+        );
 
-            const recipeDetails = {
-                ...recipe,
-                missingIngredients: missingIngredientsResult.rows,
-            };
-            recipesWithDetails.push(recipeDetails);
-        }
-
-        res.status(200).json({ menu, recipes: recipesWithDetails });
-    } catch (error) {
-        console.error("Error fetching menu with missing ingredients:", error);
-        res.status(500).json({ message: "Server error" });
+        const recipeDetails = {
+            ...recipe,
+            missingIngredients: missingIngredientsResult.rows,
+        };
+        recipesWithDetails.push(recipeDetails);
     }
+
+    res.status(200).json({ menu, recipes: recipesWithDetails });
 };
 
 //? Delete menu
@@ -300,8 +288,7 @@ const deleteMenu = async (req, res) => {
         res.status(200).json({ message: "Menu deleted successfully" });
     } catch (error) {
         await client.query("ROLLBACK");
-        console.error("Error deleting menu:", error);
-        res.status(500).json({ message: "Server error" });
+        throw error;
     } finally {
         client.release();
     }
@@ -309,16 +296,15 @@ const deleteMenu = async (req, res) => {
 
 //? Get user menus
 const searchPersonMenus = async (req, res) => {
-    try {
-        const { id } = req.params;
-        let { menu_name, category_ids } = req.query;
+    const { id } = req.params;
+    let { menu_name, category_ids } = req.query;
 
-        if (menu_name) {
-            menu_name = decodeURIComponent(menu_name);
-            console.log("Decoded menu_name:", menu_name);
-        }
+    if (menu_name) {
+        menu_name = decodeURIComponent(menu_name);
+        console.log("Decoded menu_name:", menu_name);
+    }
 
-        let query = `
+    let query = `
       SELECT
         m.menu_id AS id,
         m.menu_title AS title,
@@ -326,28 +312,24 @@ const searchPersonMenus = async (req, res) => {
         m.menu_content AS menuContent
       FROM menu m
       LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
-      WHERE m.person_id = $1  
+      WHERE m.person_id = $1
     `;
 
-        const queryParams = [id];
+    const queryParams = [id];
 
-        if (menu_name) {
-            query += ` AND m.menu_title ILIKE $${queryParams.length + 1}`;
-            queryParams.push(`%${menu_name}%`);
-        }
-
-        if (category_ids) {
-            const categoryArray = category_ids.split(",").map(Number);
-            query += ` AND m.category_id = ANY($${queryParams.length + 1})`;
-            queryParams.push(categoryArray);
-        }
-
-        const result = await pool.query(query, queryParams);
-        res.status(200).json(result.rows);
-    } catch (error) {
-        console.error("Error fetching menus:", error);
-        res.status(500).json({ message: "Server error" });
+    if (menu_name) {
+        query += ` AND m.menu_title ILIKE $${queryParams.length + 1}`;
+        queryParams.push(`%${menu_name}%`);
     }
+
+    if (category_ids) {
+        const categoryArray = category_ids.split(",").map(Number);
+        query += ` AND m.category_id = ANY($${queryParams.length + 1})`;
+        queryParams.push(categoryArray);
+    }
+
+    const result = await pool.query(query, queryParams);
+    res.status(200).json(result.rows);
 };
 
 module.exports = {

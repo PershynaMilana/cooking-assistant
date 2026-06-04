@@ -83,7 +83,7 @@ Hard rules:
 
 ## Required configuration
 
-1. PostgreSQL connection in [backend/db.js](backend/db.js) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper_final`) when unset.
+1. PostgreSQL connection in [backend/db.js](backend/db.js) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset.
 2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read by [backend/middleware/jwtMiddleware.js](backend/middleware/jwtMiddleware.js) and [backend/controller/user.controller.js](backend/controller/user.controller.js)) plus the `DB_*` keys and `PORT`. Without `JWT_SECRET_KEY`, login throws and every protected route 403s. When you add a new env key, add it (without a value) to `.env.example` too.
 3. CORS in [backend/index.js](backend/index.js) is locked to `origin: "http://localhost:5173"`. If you change the frontend port or run from a different origin, update it here.
 4. Database seeding: run all of [backend/database.sql](backend/database.sql) once on a fresh DB. The file is NOT idempotent - it mixes `CREATE TABLE`, `ALTER TABLE`, and `INSERT` statements representing the historical migration history, and re-running it on a populated DB will error.

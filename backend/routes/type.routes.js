@@ -2,40 +2,41 @@ const Router = require("express");
 const router = new Router();
 const typeController = require("../controller/type.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
+const asyncHandler = require("../middleware/asyncHandler");
 
 //? Get all recipe types
 router.get(
     "/recipe-types",
     authenticateToken,
-    typeController.getAllRecipeTypes,
+    asyncHandler(typeController.getAllRecipeTypes),
 );
 
 //? Create new recipe type
 router.post(
     "/recipe-types",
     authenticateToken,
-    typeController.createRecipeType,
+    asyncHandler(typeController.createRecipeType),
 );
 
 //? Update recipe type
 router.put(
     "/recipe-type/:id",
     authenticateToken,
-    typeController.updateRecipeType,
+    asyncHandler(typeController.updateRecipeType),
 );
 
 //? Delete recipe type
 router.delete(
     "/recipe-type/:id",
     authenticateToken,
-    typeController.deleteRecipeType,
+    asyncHandler(typeController.deleteRecipeType),
 );
 
 //? Get recipe type by ID
 router.get(
     "/recipe-type/:id",
     authenticateToken,
-    typeController.getRecipeTypeById,
+    asyncHandler(typeController.getRecipeTypeById),
 );
 
 module.exports = router;

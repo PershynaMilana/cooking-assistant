@@ -5,9 +5,8 @@ class UserIngredientsController {
     async getUserIngredients(req, res) {
         const userId = req.query.userId || 1;
 
-        try {
-            const ingredients = await db.query(
-                `SELECT
+        const ingredients = await db.query(
+            `SELECT
          pi.ingredient_id,
          i.name AS ingredient_name,
          pi.quantity_person_ingradient,
@@ -21,12 +20,9 @@ class UserIngredientsController {
        JOIN ingredients i ON pi.ingredient_id = i.id
        JOIN unit_measurement um ON i.id_unit_measurement = um.id
        WHERE pi.person_id = $1`,
-                [userId],
-            );
-            res.json(ingredients.rows);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
+            [userId],
+        );
+        res.json(ingredients.rows);
     }
 
     //? Update user ingredients
@@ -75,7 +71,7 @@ class UserIngredientsController {
             });
         } catch (error) {
             await client.query("ROLLBACK");
-            res.status(500).json({ error: error.message });
+            throw error;
         } finally {
             client.release();
         }
@@ -115,7 +111,7 @@ class UserIngredientsController {
             });
         } catch (error) {
             await client.query("ROLLBACK");
-            res.status(500).json({ error: error.message });
+            throw error;
         } finally {
             client.release();
         }
@@ -176,7 +172,7 @@ class UserIngredientsController {
             });
         } catch (error) {
             await client.query("ROLLBACK");
-            res.status(500).json({ error: error.message });
+            throw error;
         } finally {
             client.release();
         }
@@ -190,57 +186,50 @@ class UserIngredientsController {
             return res.status(400).json({ error: "Quantity cannot be empty." });
         }
 
-        try {
-            // Check that the purchase exists and belongs to the user
-            const purchase = await db.query(
-                `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
-                [purchaseId, userId],
-            );
+        // Check that the purchase exists and belongs to the user
+        const purchase = await db.query(
+            `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
+            [purchaseId, userId],
+        );
 
-            if (purchase.rows.length === 0) {
-                return res.status(404).json({ error: "Purchase not found." });
-            }
+        if (purchase.rows.length === 0) {
+            return res.status(404).json({ error: "Purchase not found." });
+        }
 
-            // Update quantity
-            await db.query(
-                `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
-                [quantity, purchaseId],
-            );
+        // Update quantity
+        await db.query(
+            `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
+            [quantity, purchaseId],
+        );
 
-            // Recalculate total ingredient quantity
-            const ingredientId = purchase.rows[0].ingredient_id;
-            const totalQuantityResult = await db.query(
-                `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1`,
-                [ingredientId],
-            );
+        // Recalculate total ingredient quantity
+        const ingredientId = purchase.rows[0].ingredient_id;
+        const totalQuantityResult = await db.query(
+            `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1`,
+            [ingredientId],
+        );
 
-            const totalQuantity =
-                totalQuantityResult.rows[0].total_quantity || 0;
+        const totalQuantity = totalQuantityResult.rows[0].total_quantity || 0;
 
-            // Update total quantity in person_ingredients table
-            await db.query(
-                `UPDATE person_ingredients
+        // Update total quantity in person_ingredients table
+        await db.query(
+            `UPDATE person_ingredients
            SET quantity_person_ingradient = $1
            WHERE person_id = $2 AND ingredient_id = $3`,
-                [totalQuantity, userId, ingredientId],
-            );
+            [totalQuantity, userId, ingredientId],
+        );
 
-            res.status(200).json({
-                message: "Purchase quantity updated successfully.",
-            });
-        } catch (error) {
-            console.error("Error updating purchase quantity:", error);
-            res.status(500).json({ error: "Server error." });
-        }
+        res.status(200).json({
+            message: "Purchase quantity updated successfully.",
+        });
     }
 
     async getPurchaseHistory(req, res) {
         const userId = req.params.userId;
         const ingredientId = req.params.ingredientId;
 
-        try {
-            const result = await db.query(
-                `SELECT
+        const result = await db.query(
+            `SELECT
                      ip.id,
                      ip.quantity,
                      ip.purchase_date,
@@ -251,13 +240,10 @@ class UserIngredientsController {
                           JOIN unit_measurement um ON i.id_unit_measurement = um.id
                  WHERE ip.person_id = $1 AND ip.ingredient_id = $2
                  ORDER BY ip.purchase_date ASC`,
-                [userId, ingredientId],
-            );
+            [userId, ingredientId],
+        );
 
-            res.json(result.rows);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
+        res.json(result.rows);
     }
 }
 

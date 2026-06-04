@@ -22,6 +22,19 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.5 - 2026-06-04
+
+Backend:
+- Reworked error handling. Every endpoint now runs through one shared error middleware that returns
+  failures as { error: <message> } with a 500 status and logs them in one place, instead of each
+  handler catching its own errors. Database transactions still roll back on failure.
+- Menu and menu-category screens now show the real error text when something goes wrong. They used
+  to return a generic "Server error" the frontend could not read; their responses now match the
+  rest of the API.
+- Changed the default database name from cooking_helper_final to cooking_helper. This only affects
+  setups that rely on the fallback default; if you set DB_NAME in .env, nothing changes.
+
+
 ## 1.4 - 2026-06-03
 
 Backend:
