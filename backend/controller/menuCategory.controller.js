@@ -1,14 +1,14 @@
 const db = require("../db");
 
 class MenuCategoryController {
-    //? Get all menu categories
+    // get all menu categories
     async getAllMenuCategories(req, res) {
         const query = "SELECT * FROM menu_category ORDER BY category_name";
         const result = await db.query(query);
         res.status(200).json(result.rows);
     }
 
-    //? Get menu categories by ID
+    // get menu categories by ID
     async getMenusByCategories(req, res) {
         const { category_id } = req.query;
         try {
@@ -35,7 +35,7 @@ class MenuCategoryController {
         }
     }
 
-    //? Get menus by category
+    // get menus by category
     // eslint-disable-next-line no-dupe-class-members
     async getMenusByCategories(req, res) {
         const { category_id } = req.query;

@@ -29,7 +29,7 @@ const UpdateMenuPage: React.FC = () => {
     const [recipesError, setRecipesError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    // Load menu data for editing
+    // load menu data for editing
     const fetchMenuDetails = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -49,7 +49,7 @@ const UpdateMenuPage: React.FC = () => {
         }
     };
 
-    // Load categories and recipes
+    // load categories and recipes
     const fetchCategoriesAndRecipes = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -81,7 +81,7 @@ const UpdateMenuPage: React.FC = () => {
         fetchData();
     }, [id]);
 
-    // Form validation
+    // form validation
     const validateForm = () => {
         let valid = true;
 
@@ -116,7 +116,7 @@ const UpdateMenuPage: React.FC = () => {
         return valid;
     };
 
-    // Update menu
+    // update menu
     const handleUpdateMenu = async () => {
         if (!validateForm()) return;
 
@@ -146,7 +146,7 @@ const UpdateMenuPage: React.FC = () => {
         }
     };
 
-    // Handle recipe selection
+    // handle recipe selection
     const toggleRecipeSelection = (recipeId: number) => {
         setSelectedRecipes((prevSelected) =>
             prevSelected.includes(recipeId)

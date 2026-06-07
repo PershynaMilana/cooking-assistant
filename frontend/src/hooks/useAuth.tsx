@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {
-    exp: number; // Token expiration time
+    exp: number; // token expiration time
 }
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    // Token validation
+    // token validation
     const checkToken = () => {
         const token = localStorage.getItem('token');
 

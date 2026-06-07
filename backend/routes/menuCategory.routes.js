@@ -5,17 +5,17 @@ const asyncHandler = require("../middleware/asyncHandler");
 
 const router = express.Router();
 
-//? Getting All menu categories
+// getting all menu categories
 router.get(
     "/menu-categories",
     authenticateToken,
     asyncHandler(MenuCategoryController.getAllMenuCategories),
 );
 
-//? Gettin cat by id
+// gettin cat by id
 // router.get("/menu-categories/:id", authenticateToken, MenuCategoryController.getMenuCategoryById);
 
-//? Menu by cat
+// menu by cat
 router.get(
     "/menu",
     authenticateToken,

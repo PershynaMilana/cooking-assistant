@@ -8,7 +8,7 @@ interface MenuCategory {
 interface MenuCategoryFilterProps {
   categories: MenuCategory[];
   selectedCategories: number[];
-  onChange: React.Dispatch<React.SetStateAction<number[]>>; // Added for proper typing
+  onChange: React.Dispatch<React.SetStateAction<number[]>>; // added for proper typing
 }
 
 const MenuCategoryFilter: React.FC<MenuCategoryFilterProps> = ({
@@ -22,12 +22,12 @@ const MenuCategoryFilter: React.FC<MenuCategoryFilterProps> = ({
   const handleCheckboxChange = (id: number) => {
     let updatedSelectedCategories;
     if (selectedCategories.includes(id)) {
-      // Remove selected type if it's already in the list
+      // remove selected type if it's already in the list
       updatedSelectedCategories = selectedCategories.filter(
           (categoryId) => categoryId !== id
       );
     } else {
-      // Add selected type if it's not in the list
+      // add selected type if it's not in the list
       updatedSelectedCategories = [...selectedCategories, id];
     }
     onChange(updatedSelectedCategories);

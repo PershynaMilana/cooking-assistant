@@ -29,7 +29,7 @@ const CreateMenuPage: React.FC = () => {
 
     const navigate = useNavigate();
 
-    // Fetch menu categories
+    // fetch menu categories
     const fetchCategories = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -42,7 +42,7 @@ const CreateMenuPage: React.FC = () => {
         }
     };
 
-    // Fetch recipes
+    // fetch recipes
     const fetchRecipes = async () => {
         const token = localStorage.getItem("authToken");
         try {
@@ -60,7 +60,7 @@ const CreateMenuPage: React.FC = () => {
         fetchRecipes();
     }, []);
 
-    // Form validation
+    // form validation
     const validateForm = () => {
         let valid = true;
 
@@ -95,7 +95,7 @@ const CreateMenuPage: React.FC = () => {
         return valid;
     };
 
-    // Create menu
+    // create menu
     const handleCreateMenu = async () => {
         if (!validateForm()) return;
 
@@ -127,7 +127,7 @@ const CreateMenuPage: React.FC = () => {
         }
     };
 
-    // Handle recipe selection
+    // handle recipe selection
     const toggleRecipeSelection = (recipeId: number) => {
         setSelectedRecipes((prevSelected) => {
             if (prevSelected.includes(recipeId)) {

@@ -12,26 +12,26 @@ const asyncHandler = require("../middleware/asyncHandler");
 
 const router = express.Router();
 
-//? Getting all menus
+// getting all menus
 router.get("/menu", authenticateToken, asyncHandler(getAllMenus));
 
-//? Create menu+
+// create menu+
 router.post(
     "/create-menu",
     authenticateToken,
     asyncHandler(createMenuWithRecipes),
 );
 
-//? Delite menu by id
+// delite menu by id
 router.get("/menu/:id", authenticateToken, asyncHandler(getMenuWithRecipes));
 
-//? Update menu
+// update menu
 router.put("/menu/:id", authenticateToken, asyncHandler(updateMenu));
 
-//? Delete menu
+// delete menu
 router.delete("/menu/:id", authenticateToken, asyncHandler(deleteMenu));
 
-//? Getting Menu by person
+// getting menu by person
 router.get(
     "/menu-filters-person/:id",
     authenticateToken,

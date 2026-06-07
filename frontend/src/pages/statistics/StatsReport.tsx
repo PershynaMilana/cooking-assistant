@@ -93,7 +93,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 });
                 const recipes: Recipe[] = response.data;
 
-                // Count recipes per type
+                // count recipes per type
                 const typeCounts: { [key: string]: number } = {};
                 recipes.forEach((recipe) => {
                     typeCounts[recipe.type_name] = (typeCounts[recipe.type_name] || 0) + 1;
@@ -105,7 +105,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 }));
                 setStats(formattedStats);
 
-                // Find recipes by cooking time
+                // find recipes by cooking time
                 if (recipes.length > 0) {
                     const minTime = Math.min(...recipes.map((recipe) => recipe.cooking_time));
                     const maxTime = Math.max(...recipes.map((recipe) => recipe.cooking_time));
@@ -113,7 +113,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                     setFastestRecipes(recipes.filter((recipe) => recipe.cooking_time === minTime));
                     setSlowestRecipes(recipes.filter((recipe) => recipe.cooking_time === maxTime));
 
-                    // Find recipes by number of ingredients
+                    // find recipes by number of ingredients
                     const maxIngredients = Math.max(...recipes.map((recipe) => recipe.ingredients.length));
                     const minIngredients = Math.min(...recipes.map((recipe) => recipe.ingredients.length));
 

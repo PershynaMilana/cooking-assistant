@@ -86,7 +86,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
           { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Update local state
+      // update local state
       setPurchaseHistory((prev) =>
           prev.map((purchase) =>
               purchase.id === id ? { ...purchase, quantity: newQuantity } : purchase

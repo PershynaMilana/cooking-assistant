@@ -48,7 +48,7 @@ const MenuDetailsPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Function to fetch menu details
+  // function to fetch menu details
   const fetchMenuDetails = useCallback(async () => {
     const token = localStorage.getItem("authToken");
     try {
@@ -85,7 +85,7 @@ const MenuDetailsPage: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  // Handlers for modal
+  // handlers for modal
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -99,7 +99,7 @@ const MenuDetailsPage: React.FC = () => {
     handleCloseModal();
   };
 
-  // Group recipes by type
+  // group recipes by type
   const groupedRecipes = menu.recipes.reduce(
       (groups: { [key: string]: Recipe[] }, recipe) => {
         const { type_name } = recipe;
@@ -112,7 +112,7 @@ const MenuDetailsPage: React.FC = () => {
       {}
   );
 
-  // Delete menu
+  // delete menu
   const deleteMenu = async () => {
     const token = localStorage.getItem("authToken");
     try {
@@ -139,7 +139,7 @@ const MenuDetailsPage: React.FC = () => {
     }
   };
 
-  // Calculate missing ingredients
+  // calculate missing ingredients
   const getAllMissingIngredients = () => {
     if (!menu) return [];
     return menu.recipes

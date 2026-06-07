@@ -1,7 +1,7 @@
 const db = require("../db");
 
 class RecipeController {
-    //? Create recipe
+    // create recipe
     async createRecipe(req, res) {
         const {
             title,
@@ -13,14 +13,14 @@ class RecipeController {
             servings,
         } = req.body;
 
-        // Check for ingredients presence
+        // check for ingredients presence
         if (!Array.isArray(ingredients) || ingredients.length === 0) {
             return res
                 .status(400)
                 .json({ error: "Ingredients cannot be empty" });
         }
 
-        // Check that all ingredients have id
+        // check that all ingredients have id
         for (let ingredient of ingredients) {
             if (!ingredient.id) {
                 return res
@@ -29,7 +29,7 @@ class RecipeController {
             }
         }
 
-        // Create recipe
+        // create recipe
         const newRecipe = await db.query(
             `INSERT INTO recipes (title, content, person_id, type_id, cooking_time, servings)
          VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -38,7 +38,7 @@ class RecipeController {
 
         const recipeId = newRecipe.rows[0].id;
 
-        // Add ingredients with quantity
+        // add ingredients with quantity
         for (let { id, quantity } of ingredients) {
             await db.query(
                 `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
@@ -50,7 +50,7 @@ class RecipeController {
         res.json(newRecipe.rows[0]);
     }
 
-    //? Get all recipes
+    // get all recipes
     async getAllRecipes(req, res) {
         const recipes = await db.query(
             `SELECT r.*, rt.type_name, array_agg(i.name) AS ingredients
@@ -64,7 +64,7 @@ class RecipeController {
         res.json(recipes.rows);
     }
 
-    //? Get recipe by ID
+    // get recipe by ID
     async getRecipeWithIngredients(req, res) {
         const recipeId = req.params.id;
 
@@ -96,7 +96,7 @@ class RecipeController {
         res.json(recipe.rows[0]);
     }
 
-    //? Update recipe by ID
+    // update recipe by ID
     async updateRecipe(req, res) {
         const recipeId = req.params.id;
         const {
@@ -114,14 +114,14 @@ class RecipeController {
                 .json({ error: "Title and content cannot be empty" });
         }
 
-        // Check for ingredients presence
+        // check for ingredients presence
         if (!Array.isArray(newIngredients) || newIngredients.length === 0) {
             return res
                 .status(400)
                 .json({ error: "Ingredients cannot be empty" });
         }
 
-        // Check that all ingredients have id
+        // check that all ingredients have id
         for (let ingredient of newIngredients) {
             if (!ingredient.id) {
                 return res
@@ -140,12 +140,12 @@ class RecipeController {
             return res.status(404).json({ error: "Recipe not found" });
         }
 
-        // Delete old ingredients
+        // delete old ingredients
         await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
             recipeId,
         ]);
 
-        // Add new ingredients with quantity
+        // add new ingredients with quantity
         for (let { id, quantity_recipe_ingredients } of newIngredients) {
             await db.query(
                 `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
@@ -156,7 +156,7 @@ class RecipeController {
 
         res.json(result.rows[0]);
     }
-    //? Filter recipes by ingredients, types, dates and cooking time
+    // filter recipes by ingredients, types, dates and cooking time
     async searchRecipes(req, res) {
         const {
             ingredient_name,
@@ -209,14 +209,14 @@ class RecipeController {
             paramIndex++;
         }
 
-        // Add minimum cooking time filter
+        // add minimum cooking time filter
         if (min_cooking_time) {
             baseQuery += ` AND r.cooking_time >= $${paramIndex}`;
             params.push(Number(min_cooking_time));
             paramIndex++;
         }
 
-        // Add maximum cooking time filter
+        // add maximum cooking time filter
         if (max_cooking_time) {
             baseQuery += ` AND r.cooking_time <= $${paramIndex}`;
             params.push(Number(max_cooking_time));
@@ -234,7 +234,7 @@ class RecipeController {
         res.json(recipes.rows);
     }
 
-    //? Filter recipes by ingredients, types, dates, cooking time and person_id
+    // filter recipes by ingredients, types, dates, cooking time and person_id
     async searchPersonRecipes(req, res) {
         const {
             ingredient_name,
@@ -313,21 +313,21 @@ class RecipeController {
         res.json(recipes.rows);
     }
 
-    //? Delete recipe by ID
+    // delete recipe by ID
     async deleteRecipe(req, res) {
         const recipeId = req.params.id;
 
-        // Delete all menu relations
+        // delete all menu relations
         await db.query(`DELETE FROM menu_recipe WHERE recipe_id = $1`, [
             recipeId,
         ]);
 
-        // Delete all ingredients related to the recipe
+        // delete all ingredients related to the recipe
         await db.query(`DELETE FROM recipe_ingredients WHERE recipe_id = $1`, [
             recipeId,
         ]);
 
-        // Delete the recipe itself
+        // delete the recipe itself
         const result = await db.query(
             `DELETE FROM recipes WHERE id = $1 RETURNING *`,
             [recipeId],
@@ -340,7 +340,7 @@ class RecipeController {
         res.json({ message: "Recipe successfully deleted" });
     }
 
-    //? Get all ingredients
+    // get all ingredients
     async getAllIngredients(req, res) {
         const ingredients = await db.query(
             `SELECT i.*, um.unit_name
@@ -350,7 +350,7 @@ class RecipeController {
         res.json(ingredients.rows);
     }
 
-    //? Get fastest and slowest recipe, as well as statistics by types
+    // get fastest and slowest recipe, as well as statistics by types
     async getRecipesStats(req, res) {
         const { rows: fastestRecipe } = await db.query(
             `SELECT r.*, rt.type_name as "typeName"

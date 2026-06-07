@@ -7,7 +7,7 @@ import RecipeTypeFilter from "../../components/RecipeTypeFilter.tsx";
 import DateFilterDropdown from "../../components/DateFilterDropdown.tsx";
 import axios from "axios";
 
-// Interface describing the structure of a recipe object
+// interface describing the structure of a recipe object
 interface Recipe {
   id: number;
   title: string;
@@ -16,7 +16,7 @@ interface Recipe {
   cooking_time: number;
 }
 
-// Interface describing the structure of a recipe type object
+// interface describing the structure of a recipe type object
 interface RecipeType {
   id: number;
   type_name: string;
@@ -24,7 +24,7 @@ interface RecipeType {
 }
 
 const MainPage: React.FC = () => {
-  // States for storing recipes list, selected types, type descriptions, etc.
+  // states for storing recipes list, selected types, type descriptions, etc.
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
   const [typesDescriptions, setTypesDescriptions] = useState<RecipeType[]>([]);
@@ -34,7 +34,7 @@ const MainPage: React.FC = () => {
   const ingredientName = searchParams.get("ingredient_name");
   const token = localStorage.getItem("authToken");
 
-  // States for date and cooking time filters
+  // states for date and cooking time filters
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("asc");
@@ -42,7 +42,7 @@ const MainPage: React.FC = () => {
   const [minCookingTime, setMinCookingTime] = useState<string>("");
   const [maxCookingTime, setMaxCookingTime] = useState<string>("");
 
-  // Function to sort recipes by cooking time and title
+  // function to sort recipes by cooking time and title
   const sortRecipes = useCallback(
     (recipes: Recipe[]): Recipe[] => {
       return recipes.sort((a, b) => {
@@ -60,7 +60,7 @@ const MainPage: React.FC = () => {
     [sortOrder]
   );
 
-  // Function to fetch recipes from server with filters
+  // function to fetch recipes from server with filters
   const fetchRecipes = useCallback(async () => {
     setError(null);
     setNoRecipes(false);
@@ -109,12 +109,12 @@ const MainPage: React.FC = () => {
     sortRecipes,
   ]);
 
-  // Fetch recipes on first render or filters change
+  // fetch recipes on first render or filters change
   useEffect(() => {
     fetchRecipes();
   }, [fetchRecipes]);
 
-  // Fetch recipe type descriptions
+  // fetch recipe type descriptions
   useEffect(() => {
     const fetchTypesDescriptions = async () => {
       const token = localStorage.getItem("authToken");
@@ -142,7 +142,7 @@ const MainPage: React.FC = () => {
     fetchTypesDescriptions();
   }, [selectedTypes]);
 
-  // Function to generate header from selected recipe types
+  // function to generate header from selected recipe types
   const getTypesHeader = () => {
     return typesDescriptions
       .filter((type) => selectedTypes.includes(type.id))
@@ -150,7 +150,7 @@ const MainPage: React.FC = () => {
       .join(", ");
   };
 
-  // Function to display selected recipe type descriptions
+  // function to display selected recipe type descriptions
   const getFilteredDescriptions = () => {
     return typesDescriptions
       .filter((type) => selectedTypes.includes(type.id))
@@ -272,7 +272,7 @@ const MainPage: React.FC = () => {
               : "Create your first recipe!"}
           </div>
         ) : (
-          // Recipes grid
+          // recipes grid
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {recipes.map((recipe) => (
               <RecipeCard

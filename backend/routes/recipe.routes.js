@@ -4,63 +4,63 @@ const recipeController = require("../controller/recipe.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-//? Creating recipe
+// creating recipe
 router.post(
     "/recipe",
     authenticateToken,
     asyncHandler(recipeController.createRecipe),
 );
 
-//? Get all recipes
+// get all recipes
 router.get(
     "/recipes",
     authenticateToken,
     asyncHandler(recipeController.getAllRecipes),
 );
 
-//? Get recipe by id
+// get recipe by id
 router.get(
     "/recipe/:id",
     authenticateToken,
     asyncHandler(recipeController.getRecipeWithIngredients),
 );
 
-//? Get all ingredients
+// get all ingredients
 router.get(
     "/ingredients",
     authenticateToken,
     asyncHandler(recipeController.getAllIngredients),
 );
 
-//? Updating recipe by id
+// updating recipe by id
 router.put(
     "/recipe/:id",
     authenticateToken,
     asyncHandler(recipeController.updateRecipe),
 );
 
-//? del recipe by id
+// del recipe by id
 router.delete(
     "/recipe/:id",
     authenticateToken,
     asyncHandler(recipeController.deleteRecipe),
 );
 
-//? filter
+// filter
 router.get(
     "/recipes-by-filters",
     authenticateToken,
     asyncHandler(recipeController.searchRecipes),
 );
 
-//? filter by date, user
+// filter by date, user
 router.get(
     "/recipes-filters-person/:id",
     authenticateToken,
     asyncHandler(recipeController.searchPersonRecipes),
 );
 
-//? getting stats
+// getting stats
 router.get(
     "/recipes-stats",
     authenticateToken,
