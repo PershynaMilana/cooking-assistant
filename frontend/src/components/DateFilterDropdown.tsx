@@ -31,48 +31,48 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Validate dates
+  // validate dates
   const validateDates = (start: string, end: string) => {
     console.log("Validating dates", { start, end });
     setDateError(null);
 
-    // Check if start date is after end date
+    // check if start date is after end date
     if (start && end && new Date(start) > new Date(end)) {
       setDateError("Start date cannot be later than end date.");
       return;
     }
 
-    // Check if selected dates are not in the future
+    // check if selected dates are not in the future
     const today = new Date();
     if ((start && new Date(start) > today) || (end && new Date(end) > today)) {
       setDateError("Please select a valid date range.");
     }
   };
 
-  // Handle start date change
+  // handle start date change
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setStartDate(e.target.value);
     validateDates(e.target.value, endDate);
   };
 
-  // Handle end date change
+  // handle end date change
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEndDate(e.target.value);
     validateDates(startDate, e.target.value);
   };
 
-  // Validate dates when dropdown is opened
+  // validate dates when dropdown is opened
   useEffect(() => {
     if (isOpen) {
       validateDates(startDate, endDate);
     }
   }, [isOpen, startDate, endDate]);
 
-  // Reset filters
+  // reset filters
   const resetFilters = () => {
     setStartDate("");
     setEndDate("");
-    setDateError(null); // Clear error message when resetting filters
+    setDateError(null); // clear error message when resetting filters
     setIsOpen(false);
   };
 

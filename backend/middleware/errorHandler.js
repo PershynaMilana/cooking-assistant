@@ -1,5 +1,5 @@
-//? Single place that turns a thrown error into an HTTP response.
-//? Keeps the { error } body shape the rest of the API already uses.
+// single place that turns a thrown error into an HTTP response.
+// keeps the { error } body shape the rest of the API already uses.
 const errorHandler = (err, req, res, _next) => {
     console.error(err);
 

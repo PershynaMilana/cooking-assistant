@@ -131,7 +131,7 @@ The "missing ingredients for a menu" feature works by joining `menu_recipe` -> `
 
 ## Conventions in this codebase
 
-- Comments often use the `//?` and `//!` prefixes (route descriptions, change markers). Match this style when editing those files.
+- Comments are plain `//` with a single space and a lowercase first letter (acronyms / proper nouns like JWT, SQL, URL, Express keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed - don't reintroduce them.
 - Backend uses CommonJS (`require`/`module.exports`); frontend uses ESM + TS. Don't mix them.
 - The frontend has minor inconsistencies (typo `person-ingradients` folder, the dead `useAuth` hook). Don't "clean these up" as part of an unrelated change - they're load-bearing for existing imports.
 - Commit lockfiles and tool configs. `package-lock.json` (root/backend/frontend) and `eslint.config.js` are tracked - committing them keeps installs reproducible and lets CI run `npm ci`. (They used to be gitignored; that rule was removed.)

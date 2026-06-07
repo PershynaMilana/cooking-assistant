@@ -51,13 +51,13 @@ const RegisterPage: React.FC = () => {
     const handleRegister = async () => {
         setError(null);
 
-        // Check if all fields are filled
+        // check if all fields are filled
         if (!name || !surname || !login || !password) {
             setError("Please fill in all fields.");
             return;
         }
 
-        // Validation before sending
+        // validation before sending
         validateName(name);
         validateSurname(surname);
         validateLogin(login);

@@ -1,7 +1,7 @@
 const db = require("../db");
 
 class UserIngredientsController {
-    //? Get user ingredients
+    // get user ingredients
     async getUserIngredients(req, res) {
         const userId = req.query.userId || 1;
 
@@ -25,7 +25,7 @@ class UserIngredientsController {
         res.json(ingredients.rows);
     }
 
-    //? Update user ingredients
+    // update user ingredients
     async updateUserIngredients(req, res) {
         const userId = req.query.userId || 1;
         const { ingredients } = req.body;
@@ -39,7 +39,7 @@ class UserIngredientsController {
             await client.query("BEGIN");
 
             for (const ingredient of ingredients) {
-                // Add or update ingredients in person_ingredients
+                // add or update ingredients in person_ingredients
                 await client.query(
                     `INSERT INTO person_ingredients (person_id, ingredient_id, quantity_person_ingradient, purchase_date)
            VALUES ($1, $2, $3, NOW())
@@ -53,7 +53,7 @@ class UserIngredientsController {
                     ],
                 );
 
-                // Save history in ingredient_purchases
+                // save history in ingredient_purchases
                 await client.query(
                     `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
            VALUES ($1, $2, $3, NOW())`,
@@ -77,7 +77,7 @@ class UserIngredientsController {
         }
     }
 
-    //? Delete user ingredient
+    // delete user ingredient
     async deleteUserIngredient(req, res) {
         const userId = req.params.userId;
         const ingredientId = req.params.ingredientId;
@@ -86,13 +86,13 @@ class UserIngredientsController {
         try {
             await client.query("BEGIN");
 
-            // Delete records from purchase history
+            // delete records from purchase history
             await client.query(
                 `DELETE FROM ingredient_purchases WHERE person_id = $1 AND ingredient_id = $2`,
                 [userId, ingredientId],
             );
 
-            // Delete the ingredient itself
+            // delete the ingredient itself
             const result = await client.query(
                 `DELETE FROM person_ingredients WHERE person_id = $1 AND ingredient_id = $2`,
                 [userId, ingredientId],
@@ -117,7 +117,7 @@ class UserIngredientsController {
         }
     }
 
-    //? Update ingredient quantities
+    // update ingredient quantities
     async updateIngredientQuantities(req, res) {
         const userId = req.params.userId;
         const { updatedIngredients } = req.body;
@@ -131,7 +131,7 @@ class UserIngredientsController {
             await client.query("BEGIN");
 
             for (const ingredient of updatedIngredients) {
-                // Get current quantity
+                // get current quantity
                 const { rows } = await client.query(
                     `SELECT quantity_person_ingradient
              FROM person_ingredients
@@ -145,7 +145,7 @@ class UserIngredientsController {
                     ingredient.quantity_person_ingradient - currentQuantity;
 
                 if (addedQuantity > 0) {
-                    // Update total quantity
+                    // update total quantity
                     await client.query(
                         `UPDATE person_ingredients
            SET quantity_person_ingradient = $1, purchase_date = NOW()
@@ -157,7 +157,7 @@ class UserIngredientsController {
                         ],
                     );
 
-                    // Save only added quantity to purchase history
+                    // save only added quantity to purchase history
                     await client.query(
                         `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
            VALUES ($1, $2, $3, NOW())`,
@@ -186,7 +186,7 @@ class UserIngredientsController {
             return res.status(400).json({ error: "Quantity cannot be empty." });
         }
 
-        // Check that the purchase exists and belongs to the user
+        // check that the purchase exists and belongs to the user
         const purchase = await db.query(
             `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
             [purchaseId, userId],
@@ -196,13 +196,13 @@ class UserIngredientsController {
             return res.status(404).json({ error: "Purchase not found." });
         }
 
-        // Update quantity
+        // update quantity
         await db.query(
             `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
             [quantity, purchaseId],
         );
 
-        // Recalculate total ingredient quantity
+        // recalculate total ingredient quantity
         const ingredientId = purchase.rows[0].ingredient_id;
         const totalQuantityResult = await db.query(
             `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1`,
@@ -211,7 +211,7 @@ class UserIngredientsController {
 
         const totalQuantity = totalQuantityResult.rows[0].total_quantity || 0;
 
-        // Update total quantity in person_ingredients table
+        // update total quantity in person_ingredients table
         await db.query(
             `UPDATE person_ingredients
            SET quantity_person_ingradient = $1

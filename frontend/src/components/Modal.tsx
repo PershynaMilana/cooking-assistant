@@ -1,11 +1,11 @@
 import React from "react";
 
 interface ModalProps {
-  isOpen: boolean; // Modal open state
-  title: string; // Modal title
-  message: string; // Message displayed in the modal
-  onClose: () => void; // Function to close the modal
-  onConfirm: () => void; // Function to confirm the action
+  isOpen: boolean; // modal open state
+  title: string; // modal title
+  message: string; // message displayed in the modal
+  onClose: () => void; // function to close the modal
+  onConfirm: () => void; // function to confirm the action
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -16,19 +16,19 @@ const Modal: React.FC<ModalProps> = ({
                                        onConfirm,
                                      }) => {
   if (!isOpen) {
-    return null; // If modal is not open, render nothing
+    return null; // if modal is not open, render nothing
   }
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onClose(); // Close modal if clicking on overlay
+      onClose(); // close modal if clicking on overlay
     }
   };
 
   return (
       <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={handleOverlayClick} // Click handler for overlay
+          onClick={handleOverlayClick} // click handler for overlay
       >
         <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
           <h2 className="text-lg font-semibold font-montserratRegular mb-4 text-center">{title}</h2>{" "}

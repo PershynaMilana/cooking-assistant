@@ -22,6 +22,15 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.7 - 2026-06-07
+
+Project:
+- Unified the comment style across the whole codebase (backend and frontend): removed the //? and //!
+  prefixes, switched to plain // comments with a single space and a lowercase first letter (acronyms
+  and proper nouns like JWT, SQL, URL, Express keep their case). Comments only - no code or behavior
+  changed.
+
+
 ## 1.6 - 2026-06-04
 
 Project:

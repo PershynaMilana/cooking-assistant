@@ -1,7 +1,7 @@
 const pool = require("../db");
 const db = require("../db");
 
-//? Get all menus
+// get all menus
 const getAllMenus = async (req, res) => {
     let { menu_name, category_ids } = req.query;
 
@@ -41,7 +41,7 @@ const getAllMenus = async (req, res) => {
     res.status(200).json(result.rows);
 };
 
-//? Create menu
+// create menu
 const createMenuWithRecipes = async (req, res) => {
     const { menuTitle, menuContent, categoryId, personId, recipeIds } =
         req.body;
@@ -89,7 +89,7 @@ const createMenuWithRecipes = async (req, res) => {
     }
 };
 
-//? Update menu
+// update menu
 const updateMenu = async (req, res) => {
     const { id } = req.params;
     const { menuTitle, menuContent, categoryId, recipeIds } = req.body;
@@ -144,7 +144,7 @@ const updateMenu = async (req, res) => {
     }
 };
 
-//? Function to get recipes
+// function to get recipes
 // eslint-disable-next-line no-unused-vars
 async function getRecipeWithIngredients(recipeId) {
     try {
@@ -170,7 +170,7 @@ async function getRecipeWithIngredients(recipeId) {
     }
 }
 
-//? Get menu by ID
+// get menu by ID
 const getMenuWithRecipes = async (req, res) => {
     const { id } = req.params;
 
@@ -178,7 +178,7 @@ const getMenuWithRecipes = async (req, res) => {
         return res.status(400).json({ message: "Menu ID is required" });
     }
 
-    // Get menu information
+    // get menu information
     const menuQuery = `
       SELECT
         m.menu_id AS id,
@@ -198,7 +198,7 @@ const getMenuWithRecipes = async (req, res) => {
 
     const menu = menuResult.rows[0];
 
-    // Get all menu recipes
+    // get all menu recipes
     const recipeQuery = `
       SELECT 
         r.id AS recipe_id, 
@@ -225,7 +225,7 @@ const getMenuWithRecipes = async (req, res) => {
     for (let recipe of recipeResult.rows) {
         const recipeId = recipe.recipe_id;
 
-        // Get missing ingredients and units of measurement for each recipe
+        // get missing ingredients and units of measurement for each recipe
         const missingIngredientsQuery = `
         SELECT
           i.name AS ingredient_name,
@@ -258,7 +258,7 @@ const getMenuWithRecipes = async (req, res) => {
     res.status(200).json({ menu, recipes: recipesWithDetails });
 };
 
-//? Delete menu
+// delete menu
 const deleteMenu = async (req, res) => {
     const { id } = req.params;
 
@@ -294,7 +294,7 @@ const deleteMenu = async (req, res) => {
     }
 };
 
-//? Get user menus
+// get user menus
 const searchPersonMenus = async (req, res) => {
     const { id } = req.params;
     let { menu_name, category_ids } = req.query;

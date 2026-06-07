@@ -4,13 +4,13 @@ const userController = require("../controller/user.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-//? registration
+// registration
 router.post("/register", asyncHandler(userController.registerUser));
 
-//? login
+// login
 router.post("/login", asyncHandler(userController.loginUser));
 
-//? get users
+// get users
 router.get("/user", authenticateToken, asyncHandler(userController.getUsers));
 
 module.exports = router;

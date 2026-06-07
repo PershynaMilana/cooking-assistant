@@ -209,7 +209,7 @@ The "ingredients you are missing for a menu" query joins `menu_recipe` -> `recip
 
 - CommonJS (`require` / `module.exports`) - do not introduce ESM.
 - Controllers are class instances exported as singletons - match the pattern.
-- Comments use `//?` (route description) and `//!` (change marker / TODO). Match this style.
+- Comments are plain `//` with a single space and a lowercase first letter (acronyms keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed.
 - Raw SQL with `$1`, `$2`, ... parameters via `db.query(text, values)` - never string-concatenate
   user input.
 

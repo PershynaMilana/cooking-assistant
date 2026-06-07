@@ -12,13 +12,13 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ placeholder = "Search
   const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
 
-  //? Set initial search term from URL search parameters
+  // set initial search term from URL search parameters
   useEffect(() => {
     const initialSearchTerm = searchParams.get("ingredient_name") || "";
     setSearchTerm(initialSearchTerm);
   }, [searchParams]);
 
-  //? Clear search when navigating to home page
+  // clear search when navigating to home page
   useEffect(() => {
     if (location.pathname === "/") {
       setSearchTerm("");

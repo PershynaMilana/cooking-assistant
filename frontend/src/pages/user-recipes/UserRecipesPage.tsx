@@ -278,7 +278,7 @@ const UserRecipesPage: React.FC = () => {
               : "Create your first recipe!"}
           </div>
         ) : (
-          // Recipes list
+          // recipes list
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {recipes.map((recipe) => (
               <RecipeCard

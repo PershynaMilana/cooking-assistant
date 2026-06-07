@@ -4,28 +4,28 @@ const userIngredientsController = require("../controller/userIngredients.control
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-//? Get user ingredients
+// get user ingredients
 router.get(
     "/user-ingredients/:id",
     authenticateToken,
     asyncHandler(userIngredientsController.getUserIngredients),
 );
 
-//? Update user ingredients
+// update user ingredients
 router.put(
     "/user-ingredients/:id",
     authenticateToken,
     asyncHandler(userIngredientsController.updateUserIngredients),
 );
 
-//? Delete ingredient for specific user
+// delete ingredient for specific user
 router.delete(
     "/user-ingredients/:userId/:ingredientId",
     authenticateToken,
     asyncHandler(userIngredientsController.deleteUserIngredient),
 );
 
-//? Update ingredient quantities
+// update ingredient quantities
 router.put(
     "/user-ingredients/update-quantities/:userId",
     authenticateToken,

@@ -48,7 +48,7 @@ const MenuPage: React.FC = () => {
         },
       });
 
-      // Process fetched data
+      // process fetched data
       if (response.data.length === 0) {
         setNoMenus(true);
       } else {

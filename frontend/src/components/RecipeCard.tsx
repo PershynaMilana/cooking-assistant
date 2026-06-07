@@ -18,11 +18,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                                                }) => {
   const formattedDate = new Date(creationDate).toLocaleDateString("uk-UA");
 
-  // Time formatting function
+  // time formatting function
   const formatCookingTime = (timeInMinutes: number) => {
     const hours = Math.floor(timeInMinutes / 60);
     const minutes = timeInMinutes % 60;
-    return `${hours} hr : ${minutes.toString().padStart(2, "0")} min`; // Format as hr:min
+    return `${hours} hr : ${minutes.toString().padStart(2, "0")} min`; // format as hr:min
   };
 
   return (

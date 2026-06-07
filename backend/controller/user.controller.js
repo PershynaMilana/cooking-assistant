@@ -8,7 +8,7 @@ const generateToken = (id) => {
 };
 
 class UserController {
-    //? register new user
+    // register new user
     async registerUser(req, res) {
         const { name, surname, login, password } = req.body;
 
@@ -24,7 +24,7 @@ class UserController {
         res.status(201).json(newUser.rows[0]);
     }
 
-    //? login existing user
+    // login existing user
     async loginUser(req, res) {
         const { login, password } = req.body;
 
@@ -52,7 +52,7 @@ class UserController {
         res.json({ token });
     }
 
-    //? get all users
+    // get all users
     async getUsers(req, res) {
         const users = await db.query(`SELECT * FROM person`);
         res.json(users.rows);

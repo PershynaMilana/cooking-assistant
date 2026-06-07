@@ -1,7 +1,7 @@
 const db = require("../db");
 
 class TypeController {
-    //? Create new recipe type
+    // create new recipe type
     async createRecipeType(req, res) {
         const { type_name, description } = req.body;
 
@@ -12,13 +12,13 @@ class TypeController {
         res.json(newType.rows[0]);
     }
 
-    //? Get all recipe types
+    // get all recipe types
     async getAllRecipeTypes(req, res) {
         const recipeTypes = await db.query(`SELECT * FROM recipe_types`);
         res.json(recipeTypes.rows);
     }
 
-    //? Update recipe type
+    // update recipe type
     async updateRecipeType(req, res) {
         const { id } = req.params;
         const { type_name, description } = req.body;
@@ -35,7 +35,7 @@ class TypeController {
         res.json(updatedType.rows[0]);
     }
 
-    //? Delete recipe type
+    // delete recipe type
     async deleteRecipeType(req, res) {
         const { id } = req.params;
 
@@ -59,7 +59,7 @@ class TypeController {
         });
     }
 
-    //? Get recipe type by ID
+    // get recipe type by ID
     async getRecipeTypeById(req, res) {
         const typeId = req.params.id;
 

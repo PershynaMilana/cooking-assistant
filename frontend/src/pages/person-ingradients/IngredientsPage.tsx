@@ -365,7 +365,7 @@ const IngredientsPage: React.FC = () => {
                     )}
                   </ul>
               ) : (
-                  // New ingredient selection mode
+                  // new ingredient selection mode
                   <div className="flex flex-wrap gap-2 mt-4">
                     {allIngredients
                         .filter(
