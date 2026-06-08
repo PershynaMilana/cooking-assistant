@@ -22,6 +22,13 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.8 - 2026-06-08
+
+Backend:
+- The server now identifies the logged-in user from the auth token instead of the user id sent by the
+  client (security hardening). No visible change for normal use.
+
+
 ## 1.7 - 2026-06-07
 
 Project:
