@@ -3,15 +3,9 @@ const db = require("../db");
 class RecipeController {
     // create recipe
     async createRecipe(req, res) {
-        const {
-            title,
-            content,
-            person_id,
-            ingredients,
-            type_id,
-            cooking_time,
-            servings,
-        } = req.body;
+        const { title, content, ingredients, type_id, cooking_time, servings } =
+            req.body;
+        const person_id = req.user.id;
 
         // check for ingredients presence
         if (!Array.isArray(ingredients) || ingredients.length === 0) {
@@ -246,7 +240,7 @@ class RecipeController {
             sort_order,
         } = req.query;
 
-        const { id: person_id } = req.params;
+        const person_id = req.user.id;
 
         let baseQuery = `
         SELECT r.id, r.title, r.content, r.person_id, r.type_id, r.creation_date, r.cooking_time,

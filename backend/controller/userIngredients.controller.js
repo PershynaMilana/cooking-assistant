@@ -3,7 +3,7 @@ const db = require("../db");
 class UserIngredientsController {
     // get user ingredients
     async getUserIngredients(req, res) {
-        const userId = req.query.userId || 1;
+        const userId = req.user.id;
 
         const ingredients = await db.query(
             `SELECT
@@ -27,7 +27,7 @@ class UserIngredientsController {
 
     // update user ingredients
     async updateUserIngredients(req, res) {
-        const userId = req.query.userId || 1;
+        const userId = req.user.id;
         const { ingredients } = req.body;
 
         if (!Array.isArray(ingredients)) {
@@ -79,7 +79,7 @@ class UserIngredientsController {
 
     // delete user ingredient
     async deleteUserIngredient(req, res) {
-        const userId = req.params.userId;
+        const userId = req.user.id;
         const ingredientId = req.params.ingredientId;
 
         const client = await db.connect();
@@ -119,7 +119,7 @@ class UserIngredientsController {
 
     // update ingredient quantities
     async updateIngredientQuantities(req, res) {
-        const userId = req.params.userId;
+        const userId = req.user.id;
         const { updatedIngredients } = req.body;
 
         if (!Array.isArray(updatedIngredients)) {
@@ -179,7 +179,8 @@ class UserIngredientsController {
     }
 
     async updatePurchaseQuantity(req, res) {
-        const { userId, purchaseId } = req.params;
+        const { purchaseId } = req.params;
+        const userId = req.user.id;
         const { quantity } = req.body;
 
         if (quantity === undefined) {
@@ -225,7 +226,7 @@ class UserIngredientsController {
     }
 
     async getPurchaseHistory(req, res) {
-        const userId = req.params.userId;
+        const userId = req.user.id;
         const ingredientId = req.params.ingredientId;
 
         const result = await db.query(

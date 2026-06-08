@@ -43,16 +43,12 @@ const getAllMenus = async (req, res) => {
 
 // create menu
 const createMenuWithRecipes = async (req, res) => {
-    const { menuTitle, menuContent, categoryId, personId, recipeIds } =
-        req.body;
+    const { menuTitle, menuContent, categoryId, recipeIds } = req.body;
+    const personId = req.user.id;
+    const hasInsufficientData =
+        !menuTitle || !categoryId || !recipeIds || recipeIds.length === 0;
 
-    if (
-        !menuTitle ||
-        !categoryId ||
-        !personId ||
-        !recipeIds ||
-        recipeIds.length === 0
-    ) {
+    if (hasInsufficientData) {
         return res
             .status(400)
             .json({ message: "Insufficient data to create menu" });
@@ -296,7 +292,7 @@ const deleteMenu = async (req, res) => {
 
 // get user menus
 const searchPersonMenus = async (req, res) => {
-    const { id } = req.params;
+    const id = req.user.id;
     let { menu_name, category_ids } = req.query;
 
     if (menu_name) {
