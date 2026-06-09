@@ -22,6 +22,15 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.10 - 2026-06-09
+
+Backend:
+- Fixed: editing a purchase record no longer inflates your pantry stock with other users' purchases of
+  the same ingredient. The recalculated amount now counts only your own purchases. The whole update now
+  runs in a single transaction, so a mid-operation failure no longer leaves the purchase and the pantry
+  total out of sync.
+
+
 ## 1.9 - 2026-06-09
 
 Backend:
