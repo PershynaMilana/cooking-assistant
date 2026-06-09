@@ -144,36 +144,49 @@ class PgPantryRepository extends PantryRepository {
     }
 
     async updatePurchaseQuantity(userId, purchaseId, quantity) {
-        const purchase = await this.pool.query(
-            `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
-            [purchaseId, userId],
-        );
+        const client = await this.pool.connect();
+        try {
+            await client.query("BEGIN");
 
-        if (purchase.rows.length === 0) {
-            return null;
-        }
+            const purchase = await client.query(
+                `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
+                [purchaseId, userId],
+            );
 
-        await this.pool.query(
-            `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
-            [quantity, purchaseId],
-        );
+            if (purchase.rows.length === 0) {
+                await client.query("ROLLBACK");
+                return null;
+            }
 
-        const ingredientId = purchase.rows[0].ingredient_id;
-        const totalQuantityResult = await this.pool.query(
-            `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1`,
-            [ingredientId],
-        );
+            await client.query(
+                `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
+                [quantity, purchaseId],
+            );
 
-        const totalQuantity = totalQuantityResult.rows[0].total_quantity || 0;
+            const ingredientId = purchase.rows[0].ingredient_id;
+            const totalQuantityResult = await client.query(
+                `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1 AND person_id = $2`,
+                [ingredientId, userId],
+            );
 
-        await this.pool.query(
-            `UPDATE person_ingredients
+            const totalQuantity =
+                totalQuantityResult.rows[0].total_quantity || 0;
+
+            await client.query(
+                `UPDATE person_ingredients
            SET quantity_person_ingradient = $1
            WHERE person_id = $2 AND ingredient_id = $3`,
-            [totalQuantity, userId, ingredientId],
-        );
+                [totalQuantity, userId, ingredientId],
+            );
 
-        return true;
+            await client.query("COMMIT");
+            return true;
+        } catch (error) {
+            await client.query("ROLLBACK");
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 
     async findPurchaseHistory(userId, ingredientId) {
