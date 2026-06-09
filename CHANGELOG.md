@@ -22,6 +22,13 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.11 - 2026-06-09
+
+Project:
+- Added GitHub Actions CI: runs the backend lint and the Prettier format check on every pull request to
+  main and on pushes to main and release/** branches.
+
+
 ## 1.10 - 2026-06-09
 
 Backend:
