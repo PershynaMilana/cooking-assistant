@@ -1,41 +1,47 @@
 const express = require("express");
-const {
-    getAllMenus,
-    createMenuWithRecipes,
-    getMenuWithRecipes,
-    deleteMenu,
-    updateMenu,
-    searchPersonMenus,
-} = require("../controller/menu.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-const router = express.Router();
+module.exports = (menuController) => {
+    const router = express.Router();
 
-// getting all menus
-router.get("/menu", authenticateToken, asyncHandler(getAllMenus));
+    // getting all menus
+    router.get("/menu", authenticateToken, asyncHandler(menuController.getAll));
 
-// create menu+
-router.post(
-    "/create-menu",
-    authenticateToken,
-    asyncHandler(createMenuWithRecipes),
-);
+    // create menu+
+    router.post(
+        "/create-menu",
+        authenticateToken,
+        asyncHandler(menuController.create),
+    );
 
-// delite menu by id
-router.get("/menu/:id", authenticateToken, asyncHandler(getMenuWithRecipes));
+    // delite menu by id
+    router.get(
+        "/menu/:id",
+        authenticateToken,
+        asyncHandler(menuController.getById),
+    );
 
-// update menu
-router.put("/menu/:id", authenticateToken, asyncHandler(updateMenu));
+    // update menu
+    router.put(
+        "/menu/:id",
+        authenticateToken,
+        asyncHandler(menuController.update),
+    );
 
-// delete menu
-router.delete("/menu/:id", authenticateToken, asyncHandler(deleteMenu));
+    // delete menu
+    router.delete(
+        "/menu/:id",
+        authenticateToken,
+        asyncHandler(menuController.remove),
+    );
 
-// getting menu by person
-router.get(
-    "/menu-filters-person/:id",
-    authenticateToken,
-    asyncHandler(searchPersonMenus),
-);
+    // getting menu by person
+    router.get(
+        "/menu-filters-person/:id",
+        authenticateToken,
+        asyncHandler(menuController.searchByPerson),
+    );
 
-module.exports = router;
+    return router;
+};

@@ -1,70 +1,72 @@
 const Router = require("express");
-const router = new Router();
-const recipeController = require("../controller/recipe.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-// creating recipe
-router.post(
-    "/recipe",
-    authenticateToken,
-    asyncHandler(recipeController.createRecipe),
-);
+module.exports = (recipeController) => {
+    const router = new Router();
 
-// get all recipes
-router.get(
-    "/recipes",
-    authenticateToken,
-    asyncHandler(recipeController.getAllRecipes),
-);
+    // creating recipe
+    router.post(
+        "/recipe",
+        authenticateToken,
+        asyncHandler(recipeController.createRecipe),
+    );
 
-// get recipe by id
-router.get(
-    "/recipe/:id",
-    authenticateToken,
-    asyncHandler(recipeController.getRecipeWithIngredients),
-);
+    // get all recipes
+    router.get(
+        "/recipes",
+        authenticateToken,
+        asyncHandler(recipeController.getAllRecipes),
+    );
 
-// get all ingredients
-router.get(
-    "/ingredients",
-    authenticateToken,
-    asyncHandler(recipeController.getAllIngredients),
-);
+    // get recipe by id
+    router.get(
+        "/recipe/:id",
+        authenticateToken,
+        asyncHandler(recipeController.getRecipeWithIngredients),
+    );
 
-// updating recipe by id
-router.put(
-    "/recipe/:id",
-    authenticateToken,
-    asyncHandler(recipeController.updateRecipe),
-);
+    // get all ingredients
+    router.get(
+        "/ingredients",
+        authenticateToken,
+        asyncHandler(recipeController.getAllIngredients),
+    );
 
-// del recipe by id
-router.delete(
-    "/recipe/:id",
-    authenticateToken,
-    asyncHandler(recipeController.deleteRecipe),
-);
+    // updating recipe by id
+    router.put(
+        "/recipe/:id",
+        authenticateToken,
+        asyncHandler(recipeController.updateRecipe),
+    );
 
-// filter
-router.get(
-    "/recipes-by-filters",
-    authenticateToken,
-    asyncHandler(recipeController.searchRecipes),
-);
+    // del recipe by id
+    router.delete(
+        "/recipe/:id",
+        authenticateToken,
+        asyncHandler(recipeController.deleteRecipe),
+    );
 
-// filter by date, user
-router.get(
-    "/recipes-filters-person/:id",
-    authenticateToken,
-    asyncHandler(recipeController.searchPersonRecipes),
-);
+    // filter
+    router.get(
+        "/recipes-by-filters",
+        authenticateToken,
+        asyncHandler(recipeController.searchRecipes),
+    );
 
-// getting stats
-router.get(
-    "/recipes-stats",
-    authenticateToken,
-    asyncHandler(recipeController.getRecipesStats),
-);
+    // filter by date, user
+    router.get(
+        "/recipes-filters-person/:id",
+        authenticateToken,
+        asyncHandler(recipeController.searchPersonRecipes),
+    );
 
-module.exports = router;
+    // getting stats
+    router.get(
+        "/recipes-stats",
+        authenticateToken,
+        asyncHandler(recipeController.getRecipesStats),
+    );
+
+    return router;
+};

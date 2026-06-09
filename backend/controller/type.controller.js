@@ -1,79 +1,55 @@
-const db = require("../db");
+class RecipeTypeController {
+    constructor({
+        getAllRecipeTypes,
+        getRecipeTypeById,
+        createRecipeType,
+        updateRecipeType,
+        deleteRecipeType,
+    }) {
+        this.getAllRecipeTypesUseCase = getAllRecipeTypes;
+        this.getRecipeTypeByIdUseCase = getRecipeTypeById;
+        this.createRecipeTypeUseCase = createRecipeType;
+        this.updateRecipeTypeUseCase = updateRecipeType;
+        this.deleteRecipeTypeUseCase = deleteRecipeType;
+    }
 
-class TypeController {
-    // create new recipe type
-    async createRecipeType(req, res) {
+    getAll = async (_req, res) => {
+        const types = await this.getAllRecipeTypesUseCase.execute();
+        res.json(types);
+    };
+
+    getById = async (req, res) => {
+        const type = await this.getRecipeTypeByIdUseCase.execute(req.params.id);
+        res.json(type);
+    };
+
+    create = async (req, res) => {
         const { type_name, description } = req.body;
+        const created = await this.createRecipeTypeUseCase.execute({
+            type_name,
+            description,
+        });
+        res.json(created);
+    };
 
-        const newType = await db.query(
-            `INSERT INTO recipe_types (type_name, description) VALUES ($1, $2) RETURNING *`,
-            [type_name, description],
-        );
-        res.json(newType.rows[0]);
-    }
-
-    // get all recipe types
-    async getAllRecipeTypes(req, res) {
-        const recipeTypes = await db.query(`SELECT * FROM recipe_types`);
-        res.json(recipeTypes.rows);
-    }
-
-    // update recipe type
-    async updateRecipeType(req, res) {
-        const { id } = req.params;
+    update = async (req, res) => {
         const { type_name, description } = req.body;
-
-        const updatedType = await db.query(
-            `UPDATE recipe_types SET type_name = $1, description = $2 WHERE id = $3 RETURNING *`,
-            [type_name, description, id],
+        const updated = await this.updateRecipeTypeUseCase.execute(
+            req.params.id,
+            {
+                type_name,
+                description,
+            },
         );
+        res.json(updated);
+    };
 
-        if (updatedType.rowCount === 0) {
-            return res.status(404).json({ error: "Recipe type not found" });
-        }
-
-        res.json(updatedType.rows[0]);
-    }
-
-    // delete recipe type
-    async deleteRecipeType(req, res) {
-        const { id } = req.params;
-
-        await db.query(
-            "DELETE FROM recipe_ingredients WHERE recipe_id IN (SELECT id FROM recipes WHERE type_id = $1)",
-            [id],
-        );
-        await db.query("DELETE FROM recipes WHERE type_id = $1", [id]);
-
-        const result = await db.query(
-            "DELETE FROM recipe_types WHERE id = $1 RETURNING *",
-            [id],
-        );
-
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: "Recipe type not found" });
-        }
-
+    remove = async (req, res) => {
+        await this.deleteRecipeTypeUseCase.execute(req.params.id);
         res.json({
             message: "Recipe type and all related recipes successfully deleted",
         });
-    }
-
-    // get recipe type by ID
-    async getRecipeTypeById(req, res) {
-        const typeId = req.params.id;
-
-        const recipeType = await db.query(
-            `SELECT * FROM recipe_types WHERE id = $1`,
-            [typeId],
-        );
-
-        if (recipeType.rows.length === 0) {
-            return res.status(404).json({ error: "Recipe type not found" });
-        }
-
-        res.json(recipeType.rows[0]);
-    }
+    };
 }
 
-module.exports = new TypeController();
+module.exports = RecipeTypeController;

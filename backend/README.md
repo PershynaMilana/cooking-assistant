@@ -45,8 +45,8 @@ PORT=8080
 ```
 
 `JWT_SECRET_KEY` is used by [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) (verifies tokens)
-and [controller/user.controller.js](controller/user.controller.js) (signs them at login). Without it,
-login throws and every protected route returns 403.
+and [infrastructure/security/JwtTokenService.js](infrastructure/security/JwtTokenService.js) (signs them at
+login). Without it, login throws and every protected route returns 403.
 
 When you add a new env key, add it (without a value) to [.env.example](.env.example) too.
 
@@ -81,54 +81,66 @@ Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a diff
 
 ```
 backend/
-├── index.js              express bootstrap, mounts /api routers, listens on 8080
+├── index.js              express bootstrap; builds routers from the composition root, listens on 8080
+├── composition-root.js   dependency injection: pool -> repositories -> services -> use cases -> controllers
 ├── db.js                 pg.Pool connection (reads DB_* env)
 ├── database.sql          full schema + seed data (run once)
 ├── .env.example          env template (tracked) - copy to .env
 ├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
+├── domain/               innermost layer (no framework/db deps)
+│   ├── entities/         domain objects
+│   ├── errors/           AppError + NotFoundError / ValidationError / UnauthorizedError (carry HTTP status)
+│   └── repositories/     repository interfaces (abstract base classes)
+│
+├── application/
+│   ├── ports/            service interfaces: PasswordHasher, TokenService
+│   └── use-cases/        one class per operation (recipes/, recipe-types/, menus/, menu-categories/, pantry/, users/)
+│
+├── infrastructure/
+│   ├── persistence/pg/   concrete pg repositories - ALL SQL lives here
+│   └── security/         BcryptPasswordHasher, JwtTokenService
+│
 ├── middleware/
-│   └── jwtMiddleware.js  authenticateToken - verifies Bearer JWT, attaches req.user
+│   ├── jwtMiddleware.js  authenticateToken - verifies Bearer JWT, attaches req.user
+│   ├── asyncHandler.js   wraps async handlers, forwards rejections to the error middleware
+│   └── errorHandler.js   turns thrown errors into { error } responses (mounted last)
 │
-├── routes/               thin route -> controller mapping, all under /api
-│   ├── user.routes.js
-│   ├── recipe.routes.js
-│   ├── type.routes.js
-│   ├── userIngredients.routes.js
-│   ├── menu.routes.js
-│   └── menuCategory.routes.js
+├── routes/               route factories (controller) => router, all under /api
+│   └── *.routes.js
 │
-└── controller/           business logic + raw SQL
-    ├── user.controller.js
-    ├── recipe.controller.js
-    ├── type.controller.js
-    ├── userIngredients.controller.js
-    ├── menu.controller.js
-    └── menuCategory.controller.js
+└── controller/           thin HTTP adapters (DI classes) that call use cases
+    └── *.controller.js
 ```
 
-## Architecture - route -> controller -> SQL
+## Architecture - clean (layered)
 
-Deliberately thin pipeline, no ORM, no service layer, no repository layer.
+Dependencies point inward (Dependency Rule). The graph is built once in
+[composition-root.js](composition-root.js) and consumed by [index.js](index.js).
 
-1. [index.js](index.js) wires CORS, JSON parsing, and mounts six routers under `/api`.
-2. [routes/](routes/) files are shims: `METHOD /path` -> controller method, almost always wrapped in
-   `authenticateToken`. Only `/register` and `/login` are public.
-3. [controller/](controller/) files are class instances exported as singletons
-   (`module.exports = new XController()`). Methods write SQL directly through the shared `pg.Pool`.
+- **routes/** - factory functions `(controller) => router`; map `METHOD /path` to a controller handler,
+  wrap it in `asyncHandler`, guard with `authenticateToken` (except `/register` and `/login`).
+- **controller/** - thin classes; a handler reads `req`, calls a use case, sends the response. No try/catch.
+- **application/use-cases/** - one class per operation with `execute(...)`: input validation + orchestration;
+  throw domain errors; depend on repository/service interfaces only. Service ports in **application/ports/**.
+- **domain/** - repository interfaces, entities, and `errors/AppError.js` (errors carry an HTTP `status`).
+- **infrastructure/persistence/pg/** - concrete repositories; ALL SQL; constructor takes the `pg.Pool`.
+  **infrastructure/security/** - bcrypt + jwt adapters.
 
-To add a feature: write the SQL in a controller method, register the route in the right `routes/*.js`,
-and if it is a new domain, create a router and mount it in [index.js](index.js).
+Errors: a use case throws a domain error -> `asyncHandler` -> `errorHandler` replies `{ error: <msg> }`
+with `err.status || 500`. Transactions live inside a single repository method (see menu/pantry repos).
+
+To add a feature: add SQL to a `Pg*Repository` (and its interface), add a use case, call it from a
+controller handler, and wire the new pieces in [composition-root.js](composition-root.js).
 
 ## Auth flow
 
-1. `POST /api/login` verifies the password via `bcrypt.compare` and signs a JWT with payload `{ id }`
-   and `expiresIn: "24h"`.
+1. `POST /api/login` verifies the password via `BcryptPasswordHasher` and signs a JWT (payload `{ id }`,
+   `expiresIn: "24h"`) via `JwtTokenService`.
 2. Client sends `Authorization: Bearer <token>` on later requests.
 3. [middleware/jwtMiddleware.js](middleware/jwtMiddleware.js) verifies with `JWT_SECRET_KEY`, attaches
    `req.user`, calls `next()`.
-4. Controllers read `req.user.id` (some also accept `person_id` in the body - both patterns exist;
-   prefer `req.user.id` for new code).
+4. The current user's id always comes from `req.user.id` (never from the request body/params).
 
 ## API reference
 
@@ -208,7 +220,8 @@ The "ingredients you are missing for a menu" query joins `menu_recipe` -> `recip
 ## Conventions
 
 - CommonJS (`require` / `module.exports`) - do not introduce ESM.
-- Controllers are class instances exported as singletons - match the pattern.
+- Controllers, use cases, and repositories are classes wired via the composition root (constructor DI).
+  Repositories implement an interface from `domain/repositories/` and hold all SQL - match the pattern.
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed.
 - Raw SQL with `$1`, `$2`, ... parameters via `db.query(text, values)` - never string-concatenate
   user input.

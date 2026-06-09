@@ -1,16 +1,22 @@
 const Router = require("express");
-const router = new Router();
-const userController = require("../controller/user.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-// registration
-router.post("/register", asyncHandler(userController.registerUser));
+module.exports = (userController) => {
+    const router = new Router();
 
-// login
-router.post("/login", asyncHandler(userController.loginUser));
+    // registration
+    router.post("/register", asyncHandler(userController.registerUser));
 
-// get users
-router.get("/user", authenticateToken, asyncHandler(userController.getUsers));
+    // login
+    router.post("/login", asyncHandler(userController.loginUser));
 
-module.exports = router;
+    // get users
+    router.get(
+        "/user",
+        authenticateToken,
+        asyncHandler(userController.getUsers),
+    );
+
+    return router;
+};

@@ -1,47 +1,49 @@
 const Router = require("express");
-const router = new Router();
-const userIngredientsController = require("../controller/userIngredients.controller");
 const authenticateToken = require("../middleware/jwtMiddleware");
 const asyncHandler = require("../middleware/asyncHandler");
 
-// get user ingredients
-router.get(
-    "/user-ingredients/:id",
-    authenticateToken,
-    asyncHandler(userIngredientsController.getUserIngredients),
-);
+module.exports = (userIngredientsController) => {
+    const router = new Router();
 
-// update user ingredients
-router.put(
-    "/user-ingredients/:id",
-    authenticateToken,
-    asyncHandler(userIngredientsController.updateUserIngredients),
-);
+    // get user ingredients
+    router.get(
+        "/user-ingredients/:id",
+        authenticateToken,
+        asyncHandler(userIngredientsController.getUserIngredients),
+    );
 
-// delete ingredient for specific user
-router.delete(
-    "/user-ingredients/:userId/:ingredientId",
-    authenticateToken,
-    asyncHandler(userIngredientsController.deleteUserIngredient),
-);
+    // update user ingredients
+    router.put(
+        "/user-ingredients/:id",
+        authenticateToken,
+        asyncHandler(userIngredientsController.updateUserIngredients),
+    );
 
-// update ingredient quantities
-router.put(
-    "/user-ingredients/update-quantities/:userId",
-    authenticateToken,
-    asyncHandler(userIngredientsController.updateIngredientQuantities),
-);
+    // delete ingredient for specific user
+    router.delete(
+        "/user-ingredients/:userId/:ingredientId",
+        authenticateToken,
+        asyncHandler(userIngredientsController.deleteUserIngredient),
+    );
 
-router.put(
-    "/user-ingredients/:userId/history/:purchaseId",
-    authenticateToken,
-    asyncHandler(userIngredientsController.updatePurchaseQuantity),
-);
+    // update ingredient quantities
+    router.put(
+        "/user-ingredients/update-quantities/:userId",
+        authenticateToken,
+        asyncHandler(userIngredientsController.updateIngredientQuantities),
+    );
 
-router.get(
-    "/user-ingredients/:userId/history/:ingredientId",
-    authenticateToken,
-    asyncHandler(userIngredientsController.getPurchaseHistory),
-);
+    router.put(
+        "/user-ingredients/:userId/history/:purchaseId",
+        authenticateToken,
+        asyncHandler(userIngredientsController.updatePurchaseQuantity),
+    );
 
-module.exports = router;
+    router.get(
+        "/user-ingredients/:userId/history/:ingredientId",
+        authenticateToken,
+        asyncHandler(userIngredientsController.getPurchaseHistory),
+    );
+
+    return router;
+};

@@ -22,6 +22,22 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.9 - 2026-06-09
+
+Backend:
+- Reworked the backend into a layered (clean) architecture: domain entities, use cases, repository
+  interfaces with a PostgreSQL implementation, and dependency injection via a composition root.
+  Controllers are now thin HTTP adapters. SQL queries, response shapes, and status codes are
+  preserved, aside from the security and reliability fixes noted below.
+- Error responses are now uniformly { error: ... } across all endpoints (menu and menu-category errors
+  previously returned { message: ... }).
+- Security: the registration response and the users list no longer include the password hash.
+- Recipe create/update/delete and recipe-type deletion are now atomic — each is wrapped in a single
+  transaction, so a mid-operation failure no longer leaves partial data behind.
+- Removed leftover dead code (a duplicate menu-category handler, an unused menu helper, a commented-out
+  route, and an unreachable menus-by-category endpoint).
+
+
 ## 1.8 - 2026-06-08
 
 Backend:

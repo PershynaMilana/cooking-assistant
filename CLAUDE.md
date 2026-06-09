@@ -90,7 +90,7 @@ Hard rules:
 
 ## Architecture
 
-### Backend - controller / route / middleware
+### Backend - clean (layered) architecture
 
 Express bootstrap in [backend/index.js](backend/index.js) mounts six routers under `/api`:
 
@@ -101,11 +101,19 @@ Express bootstrap in [backend/index.js](backend/index.js) mounts six routers und
 - `menu.routes` -> menu CRUD + per-user filter
 - `menuCategory.routes` -> menu category list, menus by category
 
-Each route file is a thin shim that maps `METHOD /path` -> controller method and (almost always) wraps it with `authenticateToken`. Only `/register` and `/login` are public.
+The backend is organised in layers with dependencies pointing inward (Dependency Rule). Wiring is built once in [backend/composition-root.js](backend/composition-root.js) and consumed by `index.js`.
 
-Controllers are class instances exported as singletons (`module.exports = new XController()`) and write SQL directly via the shared `pool` from [backend/db.js](backend/db.js) - there is no ORM, no repository layer, no service layer. When adding a feature: add SQL in the controller, add a route in `routes/`, mount it in `index.js` if it's a new router.
+- **Routes** ([backend/routes/](backend/routes/)) are factory functions `(controller) => router`. They map `METHOD /path` -> a controller handler, wrap it with `asyncHandler`, and (almost always) guard it with `authenticateToken`. Only `/register` and `/login` are public.
+- **Controllers** ([backend/controller/](backend/controller/)) are thin HTTP adapters: classes whose handlers are arrow-function properties (so `this` is bound). A handler reads input from `req` (params/body/query/`req.user.id`), calls a use case, sends the response. No try/catch - errors propagate to the error middleware.
+- **Use cases** ([backend/application/use-cases/](backend/application/use-cases/)) - one class per operation with `async execute(...)`. They hold input validation + orchestration, throw domain errors, and depend on repository/service *interfaces*, never on `pg` or express. Service ports are in [backend/application/ports/](backend/application/ports/) (`PasswordHasher`, `TokenService`).
+- **Domain** ([backend/domain/](backend/domain/)) - repository interfaces (abstract base classes), entities, and error types in [backend/domain/errors/AppError.js](backend/domain/errors/AppError.js) (`AppError` carries an HTTP `status`; `NotFoundError`/`ValidationError`/`UnauthorizedError`).
+- **Infrastructure** ([backend/infrastructure/](backend/infrastructure/)) - concrete `pg` repositories under `persistence/pg/` (ALL SQL lives here) and security adapters under `security/` (`BcryptPasswordHasher`, `JwtTokenService`). Each repository takes the shared `pool` from [backend/db.js](backend/db.js) via its constructor.
 
-Auth flow: [backend/controller/user.controller.js](backend/controller/user.controller.js) signs a JWT with payload `{ id }` and `expiresIn: "24h"`. [backend/middleware/jwtMiddleware.js](backend/middleware/jwtMiddleware.js) reads `Authorization: Bearer <token>`, verifies, and attaches `req.user`. Controllers downstream pull `req.user.id` (or accept `person_id` from the body - both patterns exist in this codebase).
+Errors: a use case `throw`s a domain error; `asyncHandler` forwards it; the single `errorHandler` ([backend/middleware/errorHandler.js](backend/middleware/errorHandler.js)) replies `{ error: <message> }` with `err.status || 500`. Every error body is `{ error: ... }`.
+
+When adding a feature: add SQL to the relevant `Pg*Repository` (and its interface), add a use case, call it from a controller handler, and wire the new pieces in the composition root. Transactions (`BEGIN/COMMIT/ROLLBACK`) live inside a single repository method (see the menu/pantry repos).
+
+Auth flow: login signs a JWT with payload `{ id }` and `expiresIn: "24h"` via [backend/infrastructure/security/JwtTokenService.js](backend/infrastructure/security/JwtTokenService.js). [backend/middleware/jwtMiddleware.js](backend/middleware/jwtMiddleware.js) reads `Authorization: Bearer <token>`, verifies, and attaches `req.user`. The current user's id always comes from `req.user.id` (never from the request body/params).
 
 ### Frontend - pages, routing, auth
 
@@ -133,5 +141,10 @@ The "missing ingredients for a menu" feature works by joining `menu_recipe` -> `
 
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms / proper nouns like JWT, SQL, URL, Express keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed - don't reintroduce them.
 - Backend uses CommonJS (`require`/`module.exports`); frontend uses ESM + TS. Don't mix them.
+- Backend layering rules (keep the style uniform):
+  - In a controller, every injected use case is a field named `<operation>UseCase` (e.g. `this.createRecipeUseCase`), called from the matching arrow-function handler. Uniform naming, and it never clashes with a handler name.
+  - Add a `domain/entities/` class only when it enforces an invariant. The write use case builds it through a named factory (`Recipe.forCreation(...)` / `Recipe.forUpdate(...)`) that throws a `ValidationError`, then passes the entity to the repository. Do NOT create empty data-holder entities, and do NOT route reads through entities (queries return repository rows as-is, so response shapes stay identical).
+  - One route path = exactly one handler. Don't register a second router on a path another router already owns - the later one is unreachable dead code (mount order is in `index.js`).
+  - All SQL lives in `infrastructure/persistence/pg/*` repositories that implement an interface from `domain/repositories/`; multi-step transactions (`BEGIN/COMMIT/ROLLBACK`) stay inside a single repository method.
 - The frontend has minor inconsistencies (typo `person-ingradients` folder, the dead `useAuth` hook). Don't "clean these up" as part of an unrelated change - they're load-bearing for existing imports.
 - Commit lockfiles and tool configs. `package-lock.json` (root/backend/frontend) and `eslint.config.js` are tracked - committing them keeps installs reproducible and lets CI run `npm ci`. (They used to be gitignored; that rule was removed.)

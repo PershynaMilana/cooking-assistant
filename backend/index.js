@@ -1,12 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const userRouter = require("./routes/user.routes");
-const recipeRouter = require("./routes/recipe.routes");
-const typeRouter = require("./routes/type.routes");
-const userIngredientsRouter = require("./routes/userIngredients.routes");
-const menuRouter = require("./routes/menu.routes");
-const menuCategoryRouter = require("./routes/menuCategory.routes");
+const controllers = require("./composition-root");
+const createUserRouter = require("./routes/user.routes");
+const createRecipeRouter = require("./routes/recipe.routes");
+const createTypeRouter = require("./routes/type.routes");
+const createUserIngredientsRouter = require("./routes/userIngredients.routes");
+const createMenuRouter = require("./routes/menu.routes");
+const createMenuCategoryRouter = require("./routes/menuCategory.routes");
 const errorHandler = require("./middleware/errorHandler");
 
 const PORT = process.env.PORT || 8080;
@@ -22,12 +23,15 @@ const corsOptions = {
 app.use(cors(corsOptions)); // apply CORS for all routes
 app.use(express.json());
 
-app.use("/api", userRouter);
-app.use("/api", recipeRouter);
-app.use("/api", typeRouter);
-app.use("/api", userIngredientsRouter);
-app.use("/api", menuRouter);
-app.use("/api", menuCategoryRouter);
+app.use("/api", createUserRouter(controllers.userController));
+app.use("/api", createRecipeRouter(controllers.recipeController));
+app.use("/api", createTypeRouter(controllers.recipeTypeController));
+app.use(
+    "/api",
+    createUserIngredientsRouter(controllers.userIngredientsController),
+);
+app.use("/api", createMenuRouter(controllers.menuController));
+app.use("/api", createMenuCategoryRouter(controllers.menuCategoryController));
 
 app.use(errorHandler); // must be last - turns thrown errors into { error } responses
 
