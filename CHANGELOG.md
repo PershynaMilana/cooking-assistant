@@ -22,6 +22,14 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.14 - 2026-06-10
+
+Project:
+- CI now runs once per change instead of twice: the workflow no longer triggers on pushes to
+  release/** branches (pull requests already cover them), so a release-branch PR shows three checks
+  (format, lint, test) instead of six.
+
+
 ## 1.13 - 2026-06-10
 
 Backend:
