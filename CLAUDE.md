@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Two-app monorepo (no workspaces - each side has its own `package.json`):
 
-- [backend/](backend/) - Node.js + Express 4 + TypeScript + PostgreSQL (`pg`) API on port `8080`
+- [backend/](backend/) - Node.js + Express 4 + TypeScript + PostgreSQL (`pg`) API on port `8080`; source lives under [backend/src/](backend/src/)
 - [frontend/](frontend/) - React 18 + TypeScript + Vite on port `5173` (Tailwind CSS, React Router v6)
 - [backend/database.sql](backend/database.sql) - full schema and seed data (run once against an empty DB)
 - Root [package.json](package.json) is an orchestration shim: it pulls in `concurrently` and exposes scripts that drive both sub-packages. It also holds the single shared project version (see [Versioning](#versioning) below).
@@ -29,7 +29,7 @@ Per-app, if you need it directly:
 Backend ([backend/](backend/)):
 ```bash
 npm run dev        # tsx watch -> http://localhost:8080
-npm start          # tsx index.ts, no auto-reload
+npm start          # tsx src/index.ts, no auto-reload
 npm run typecheck  # tsc --noEmit
 npm run lint       # eslint .
 npm run test       # jest via ts-jest
@@ -49,7 +49,7 @@ Backend test conventions (match these when adding tests):
 - Unit tests only - no DB, no Express. Use cases and domain entities are tested with fake repositories/ports built from `jest.fn()`; mock only what is necessary.
 - Co-located in `__tests__/` next to the unit, named `<Unit>.test.ts`. One `describe` per unit (use case or entity).
 - Test names start with "should": `it("should ...")`.
-- Assert domain errors with the custom matcher `expect(err).toBeAppError(Class, message, status)` ([backend/jest.setup.ts](backend/jest.setup.ts)); capture thrown errors with `catchError` / `catchSyncError` ([backend/test/helpers/assertions.ts](backend/test/helpers/assertions.ts)).
+- Assert domain errors with the custom matcher `expect(err).toBeAppError(Class, message, status)` ([backend/src/test/jest.setup.ts](backend/src/test/jest.setup.ts)); capture thrown errors with `catchError` / `catchSyncError` ([backend/src/test/helpers/assertions.ts](backend/src/test/helpers/assertions.ts)).
 
 ## Versioning
 
@@ -100,16 +100,16 @@ git push origin release/X.Y  # push branch (no -u flag)
 
 ## Required configuration
 
-1. PostgreSQL connection in [backend/config/env.ts](backend/config/env.ts) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset. [backend/db.ts](backend/db.ts) consumes that typed config.
-2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/config/env.ts](backend/config/env.ts) by JWT auth code) plus the `DB_*` keys and `PORT`. Without `JWT_SECRET_KEY`, login throws and every protected route 403s. When you add a new env key, add it (without a value) to `.env.example` too.
-3. CORS in [backend/index.ts](backend/index.ts) is locked to `origin: "http://localhost:5173"`. If you change the frontend port or run from a different origin, update it here.
+1. PostgreSQL connection in [backend/src/config/env.ts](backend/src/config/env.ts) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset. [backend/src/db.ts](backend/src/db.ts) consumes that typed config.
+2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/src/config/env.ts](backend/src/config/env.ts) by JWT auth code) plus the `DB_*` keys and `PORT`. Without `JWT_SECRET_KEY`, login throws and every protected route 403s. When you add a new env key, add it (without a value) to `.env.example` too.
+3. CORS in [backend/src/index.ts](backend/src/index.ts) is locked to `origin: "http://localhost:5173"`. If you change the frontend port or run from a different origin, update it here.
 4. Database seeding: run all of [backend/database.sql](backend/database.sql) once on a fresh DB. The file is NOT idempotent - it mixes `CREATE TABLE`, `ALTER TABLE`, and `INSERT` statements representing the historical migration history, and re-running it on a populated DB will error.
 
 ## Architecture
 
 ### Backend - clean (layered) architecture
 
-Express bootstrap in [backend/index.ts](backend/index.ts) mounts six routers under `/api`:
+Express bootstrap in [backend/src/index.ts](backend/src/index.ts) mounts six routers under `/api`:
 
 - `user.routes` -> register, login, get users
 - `recipe.routes` -> recipe CRUD, ingredient list, filters, stats
@@ -118,20 +118,20 @@ Express bootstrap in [backend/index.ts](backend/index.ts) mounts six routers und
 - `menu.routes` -> menu CRUD + per-user filter
 - `menuCategory.routes` -> menu category list, menus by category
 
-The backend is organised in layers with dependencies pointing inward (Dependency Rule). Wiring is built once in [backend/composition-root.ts](backend/composition-root.ts) and consumed by `index.ts`.
+The backend is organised in layers with dependencies pointing inward (Dependency Rule). Wiring is built once in [backend/src/composition-root.ts](backend/src/composition-root.ts) and consumed by `index.ts`.
 
-- **Routes** ([backend/routes/](backend/routes/)) are factory functions `(controller) => router`. They map `METHOD /path` -> a controller handler, wrap it with `asyncHandler`, and (almost always) guard it with `authenticateToken`. Only `/register` and `/login` are public.
-- **Controllers** ([backend/controller/](backend/controller/)) are thin HTTP adapters: classes whose handlers are arrow-function properties (so `this` is bound). A handler reads input from `req` (params/body/query/`req.user.id`), calls a use case, sends the response. No try/catch - errors propagate to the error middleware.
-- **Use cases** ([backend/application/use-cases/](backend/application/use-cases/)) - one class per operation with `async execute(...)`. They hold input validation + orchestration, throw domain errors, and depend on repository/service TypeScript `interface`s, never on `pg` or express. Service ports are in [backend/application/ports/](backend/application/ports/) (`PasswordHasher`, `TokenService`).
-- **Domain** ([backend/domain/](backend/domain/)) - repository TypeScript `interface`s, entities, and error types in [backend/domain/errors/AppError.ts](backend/domain/errors/AppError.ts) (`AppError` carries an HTTP `status`; `NotFoundError`/`ValidationError`/`UnauthorizedError`).
-- **Infrastructure** ([backend/infrastructure/](backend/infrastructure/)) - concrete `pg` repositories under `persistence/pg/` (ALL SQL lives here) and security adapters under `security/` (`BcryptPasswordHasher`, `JwtTokenService`). Adapters `implements` the relevant interface and each repository takes the shared `pool` from [backend/db.ts](backend/db.ts) via its constructor.
-- **Config and ambient types**: [backend/config/env.ts](backend/config/env.ts) is the single typed environment loader. [backend/types/](backend/types/) is only for ambient `.d.ts` declarations such as `express.d.ts` and `env.d.ts`; regular DTO/domain types live beside their layer as normal `.ts` exports.
+- **Routes** ([backend/src/routes/](backend/src/routes/)) are factory functions `(controller) => router`. They map `METHOD /path` -> a controller handler, wrap it with `asyncHandler`, and (almost always) guard it with `authenticateToken`. Only `/register` and `/login` are public.
+- **Controllers** ([backend/src/controller/](backend/src/controller/)) are thin HTTP adapters: classes whose handlers are arrow-function properties (so `this` is bound). A handler reads input from `req` (params/body/query/`req.user.id`), calls a use case, sends the response. No try/catch - errors propagate to the error middleware.
+- **Use cases** ([backend/src/application/use-cases/](backend/src/application/use-cases/)) - one class per operation with `async execute(...)`. They hold input validation + orchestration, throw domain errors, and depend on repository/service TypeScript `interface`s, never on `pg` or express. Service ports are in [backend/src/application/ports/](backend/src/application/ports/) (`PasswordHasher`, `TokenService`).
+- **Domain** ([backend/src/domain/](backend/src/domain/)) - repository TypeScript `interface`s, entities, and error types in [backend/src/domain/errors/AppError.ts](backend/src/domain/errors/AppError.ts) (`AppError` carries an HTTP `status`; `NotFoundError`/`ValidationError`/`UnauthorizedError`).
+- **Infrastructure** ([backend/src/infrastructure/](backend/src/infrastructure/)) - concrete `pg` repositories under `persistence/pg/` (ALL SQL lives here) and security adapters under `security/` (`BcryptPasswordHasher`, `JwtTokenService`). Adapters `implements` the relevant interface and each repository takes the shared `pool` from [backend/src/db.ts](backend/src/db.ts) via its constructor.
+- **Config and ambient types**: [backend/src/config/env.ts](backend/src/config/env.ts) is the single typed environment loader. [backend/src/types/](backend/src/types/) is only for ambient `.d.ts` declarations such as `express.d.ts` and `env.d.ts`; regular DTO/domain types live beside their layer as normal `.ts` exports.
 
-Errors: a use case `throw`s a domain error; `asyncHandler` forwards it; the single `errorHandler` ([backend/middleware/errorHandler.ts](backend/middleware/errorHandler.ts)) replies `{ error: <message> }` with `err.status || 500`. Every error body is `{ error: ... }`.
+Errors: a use case `throw`s a domain error; `asyncHandler` forwards it; the single `errorHandler` ([backend/src/middleware/errorHandler.ts](backend/src/middleware/errorHandler.ts)) replies `{ error: <message> }` with `err.status || 500`. Every error body is `{ error: ... }`.
 
 When adding a feature: add SQL to the relevant `Pg*Repository` (and its interface), add a use case, call it from a controller handler, and wire the new pieces in the composition root. Transactions (`BEGIN/COMMIT/ROLLBACK`) live inside a single repository method (see the menu/pantry repos).
 
-Auth flow: login signs a JWT with payload `{ id }` and `expiresIn: "24h"` via [backend/infrastructure/security/JwtTokenService.ts](backend/infrastructure/security/JwtTokenService.ts). [backend/middleware/jwtMiddleware.ts](backend/middleware/jwtMiddleware.ts) reads `Authorization: Bearer <token>`, verifies, and attaches `req.user`. The current user's id always comes from `req.user.id` (never from the request body/params).
+Auth flow: login signs a JWT with payload `{ id }` and `expiresIn: "24h"` via [backend/src/infrastructure/security/JwtTokenService.ts](backend/src/infrastructure/security/JwtTokenService.ts). [backend/src/middleware/jwtMiddleware.ts](backend/src/middleware/jwtMiddleware.ts) reads `Authorization: Bearer <token>`, verifies, and attaches `req.user`. The current user's id always comes from `req.user.id` (never from the request body/params).
 
 ### Frontend - pages, routing, auth
 
@@ -158,13 +158,13 @@ The "missing ingredients for a menu" feature works by joining `menu_recipe` -> `
 ## Conventions in this codebase
 
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms / proper nouns like JWT, SQL, URL, Express keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed - don't reintroduce them.
-- Backend source is TypeScript with ESM-style `import`/`export`, executed by `tsx` with CommonJS runtime semantics (`module: "CommonJS"` in [backend/tsconfig.json](backend/tsconfig.json)). Do not add new `require`/`module.exports` in backend source files; ESLint config files stay CommonJS `.js`.
+- Backend source is TypeScript with ESM-style `import`/`export`, executed by `tsx` with CommonJS runtime semantics (`module: "CommonJS"` in [backend/tsconfig.json](backend/tsconfig.json)). Do not add new `require`/`module.exports` in backend source files; root tooling configs such as ESLint and Jest stay CommonJS `.js`.
 - Backend layering rules (keep the style uniform):
   - In a controller, every injected use case is a field named `<operation>UseCase` (e.g. `this.createRecipeUseCase`), called from the matching arrow-function handler. Uniform naming, and it never clashes with a handler name.
   - Add a `domain/entities/` class only when it enforces an invariant. The write use case builds it through a named factory (`Recipe.forCreation(...)` / `Recipe.forUpdate(...)`) that throws a `ValidationError`, then passes the entity to the repository. Do NOT create empty data-holder entities, and do NOT route reads through entities (queries return repository rows as-is, so response shapes stay identical).
   - One route path = exactly one handler. Don't register a second router on a path another router already owns - the later one is unreachable dead code (mount order is in `index.ts`).
   - All SQL lives in `infrastructure/persistence/pg/*` repositories that implement an interface from `domain/repositories/`; multi-step transactions (`BEGIN/COMMIT/ROLLBACK`) stay inside a single repository method.
-  - Type placement follows the layer: use inline types for one file, co-located `<area>.types.ts` for shared DTO/filter shapes inside a folder, and exported entity/repository types from their own modules. Do not turn `backend/types/` into a general type bucket.
-- Backend path aliases are intentionally not configured yet. Keep relative imports for now; aliases are planned for release 1.18.
+  - Type placement follows the layer: use inline types for one file, co-located `<area>.types.ts` for shared DTO/filter shapes inside a folder, and exported entity/repository types from their own modules. Do not turn `backend/src/types/` into a general type bucket.
+- Backend path aliases are configured in [backend/tsconfig.json](backend/tsconfig.json): `@domain/*`, `@application/*`, `@infrastructure/*`, `@controller/*`, `@routes/*`, `@middleware/*`, `@config/*`, and `@test/*`. Do not introduce `../` imports under `backend/src/`; cross-folder imports use aliases, while true same-folder neighbors stay relative with `./`. `tsx` resolves the aliases at runtime, and Jest maps them through `pathsToModuleNameMapper` in [backend/jest.config.js](backend/jest.config.js).
 - The frontend has minor inconsistencies (typo `person-ingradients` folder, the dead `useAuth` hook). Don't "clean these up" as part of an unrelated change - they're load-bearing for existing imports.
 - Commit lockfiles and tool configs. `package-lock.json` (root/backend/frontend) and `eslint.config.js` are tracked - committing them keeps installs reproducible and lets CI run `npm ci`. (They used to be gitignored; that rule was removed.)

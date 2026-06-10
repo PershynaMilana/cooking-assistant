@@ -5,7 +5,18 @@
         "moduleResolution": "Node",
         "ignoreDeprecations": "6.0",
         "lib": ["ES2022"],
-        "rootDir": ".",
+        "rootDir": "src",
+        "baseUrl": ".",
+        "paths": {
+            "@domain/*": ["src/domain/*"],
+            "@application/*": ["src/application/*"],
+            "@infrastructure/*": ["src/infrastructure/*"],
+            "@controller/*": ["src/controller/*"],
+            "@routes/*": ["src/routes/*"],
+            "@middleware/*": ["src/middleware/*"],
+            "@config/*": ["src/config/*"],
+            "@test/*": ["src/test/*"]
+        },
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
@@ -14,6 +25,6 @@
         "noEmit": true,
         "types": ["node", "jest"]
     },
-    "include": ["**/*.ts"],
+    "include": ["src/**/*.ts"],
     "exclude": ["node_modules", "coverage"]
 }

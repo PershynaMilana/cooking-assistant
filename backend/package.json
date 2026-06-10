@@ -1,13 +1,13 @@
 {
   "name": "cooking-assistant",
-  "version": "1.17.0",
-  "main": "index.ts",
+  "version": "1.18.0",
+  "main": "src/index.ts",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "tsx index.ts",
-    "dev": "tsx watch index.ts",
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:coverage": "jest --coverage",
