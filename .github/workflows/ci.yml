@@ -36,6 +36,17 @@ jobs:
       - name: Lint backend
         run: npm --prefix backend run lint
 
+  sonarjs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: backend/package-lock.json
+          install: npm --prefix backend ci
+      - name: Run backend SonarJS lint
+        run: npm --prefix backend run lint:sonarjs
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -46,5 +57,4 @@ jobs:
           install: npm --prefix backend ci
       - name: Test backend with coverage
         run: npm --prefix backend run test:coverage
-
-  # sonarcloud job to be added later (needs a SonarCloud project + SONAR_TOKEN secret)
+  # SonarCloud can still be added later if the project gets SONAR_TOKEN and a hosted quality gate.

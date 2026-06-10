@@ -35,7 +35,7 @@ module.exports = [
         languageOptions: { globals: { ...globals.jest } },
     },
     {
-        files: ["eslint.config.js"],
+        files: ["eslint.config.js", "eslint.sonarjs.config.js"],
         rules: {
             // The ESLint config intentionally loads dev-only tooling in this private app.
             "n/no-unpublished-require": "off",

@@ -14,6 +14,8 @@ const PORT = process.env.PORT || 8080;
 
 const app = express();
 
+app.disable("x-powered-by"); // do not advertise the framework in response headers
+
 const corsOptions = {
     origin: "http://localhost:5173", // access for frontend requests
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
