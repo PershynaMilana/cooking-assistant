@@ -15,4 +15,8 @@ module.exports = [
             "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
         },
     },
+    {
+        files: ["**/*.test.js", "jest.setup.js"],
+        languageOptions: { globals: { ...globals.jest } },
+    },
 ];

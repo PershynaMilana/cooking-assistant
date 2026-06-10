@@ -40,7 +40,13 @@ npm run preview  # serve production build
 npm run lint     # eslint .
 ```
 
-There is no test suite in either app. Do not invent one when answering "how do I run tests".
+The backend has a Jest unit-test suite (`npm --prefix backend test`, or `test:coverage`). The frontend has no tests yet.
+
+Backend test conventions (match these when adding tests):
+- Unit tests only - no DB, no Express. Use cases and domain entities are tested with fake repositories/ports built from `jest.fn()`; mock only what is necessary.
+- Co-located in `__tests__/` next to the unit, named `<Unit>.test.js`. One `describe` per unit (use case or entity).
+- Test names start with "should": `it("should ...")`.
+- Assert domain errors with the custom matcher `expect(err).toBeAppError(Class, message, status)` ([backend/jest.setup.js](backend/jest.setup.js)); capture thrown errors with `catchError` / `catchSyncError` ([backend/test/helpers/assertions.js](backend/test/helpers/assertions.js)).
 
 ## Versioning
 

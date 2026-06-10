@@ -1,0 +1,29 @@
+{
+    "rootDir": ".",
+    "roots": [
+        "<rootDir>/application",
+        "<rootDir>/domain",
+        "<rootDir>/test"
+    ],
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "testEnvironment": "node",
+    "clearMocks": true,
+    "restoreMocks": true,
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "collectCoverageFrom": [
+        "application/use-cases/**/*.js",
+        "domain/entities/**/*.js",
+        "domain/errors/**/*.js",
+        "!**/__tests__/**"
+    ],
+    "coverageDirectory": "<rootDir>/coverage",
+    "coverageProvider": "v8",
+    "coverageThreshold": {
+        "global": {
+            "branches": 80,
+            "functions": 80,
+            "lines": 80,
+            "statements": 80
+        }
+    }
+}
