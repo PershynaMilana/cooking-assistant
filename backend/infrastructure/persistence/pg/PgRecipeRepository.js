@@ -27,7 +27,7 @@ class PgRecipeRepository extends RecipeRepository {
 
             const recipeId = newRecipe.rows[0].id;
 
-            for (let { id, quantity } of ingredients) {
+            for (const { id, quantity } of ingredients) {
                 await client.query(
                     `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
              VALUES ($1, $2, $3)`,
@@ -114,7 +114,7 @@ class PgRecipeRepository extends RecipeRepository {
                 [recipeId],
             );
 
-            for (let { id, quantity_recipe_ingredients } of newIngredients) {
+            for (const { id, quantity_recipe_ingredients } of newIngredients) {
                 await client.query(
                     `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
              VALUES ($1, $2, $3)`,
