@@ -22,6 +22,15 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.13 - 2026-06-10
+
+Backend:
+- Tightened the backend ESLint setup: added eslint-plugin-n for Node correctness,
+  eslint-plugin-promise for async correctness, eslint-plugin-jest for the test files,
+  eslint-config-prettier to avoid formatter conflicts, and stricter core rules (eqeqeq, no-var,
+  prefer-const, curly, no-throw-literal). Declared engines.node ">=20".
+
+
 ## 1.12 - 2026-06-09
 
 Backend:

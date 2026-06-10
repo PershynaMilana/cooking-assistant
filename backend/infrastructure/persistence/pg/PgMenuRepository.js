@@ -158,7 +158,7 @@ class PgMenuRepository extends MenuRepository {
         const recipeResult = await this.pool.query(recipeQuery, [id]);
 
         const recipesWithDetails = [];
-        for (let recipe of recipeResult.rows) {
+        for (const recipe of recipeResult.rows) {
             const recipeId = recipe.recipe_id;
 
             const missingIngredientsQuery = `
