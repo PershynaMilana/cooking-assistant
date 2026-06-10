@@ -87,6 +87,14 @@ Hard rules:
 - Do NOT commit directly to `main`. Branch from `main`, named after the release (for example `release/1.4`), commit there, push, and open a PR for review.
 - Never `git push` without explicit user permission.
 
+Preferred git commands (use these exact forms):
+```
+git switch main          # switch to existing branch
+git switch -c release/X.Y   # create and switch to new branch
+git add .                # stage all changes
+git push origin release/X.Y  # push branch (no -u flag)
+```
+
 ## Required configuration
 
 1. PostgreSQL connection in [backend/db.js](backend/db.js) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset.
