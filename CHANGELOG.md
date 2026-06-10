@@ -22,6 +22,14 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.16 - 2026-06-10
+
+Project:
+- Added Husky git hooks: pre-commit runs the full local quality gate (lint-staged auto-formats staged
+  backend .js files with Prettier, then runs backend ESLint, SonarJS lint, and tests with coverage)
+  so broken code can never be committed; pre-push blocks accidental direct pushes to main.
+
+
 ## 1.15 - 2026-06-10
 
 Backend:

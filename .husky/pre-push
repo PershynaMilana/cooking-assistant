@@ -1,0 +1,12 @@
+set -e
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ]; then
+  echo "Error: direct push to main is not allowed. Use a release/X.Y branch and open a PR."
+  exit 1
+fi
+
+npm run format:check
+npm --prefix backend run lint
+npm --prefix backend run lint:sonarjs
+npm --prefix backend run test:coverage
