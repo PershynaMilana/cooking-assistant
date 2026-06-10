@@ -22,6 +22,17 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.17 - 2026-06-10
+
+Backend:
+- Migrated the backend to TypeScript. The whole API is now statically type-checked, with no change to
+  endpoints, response shapes, or status codes. The Jest suite (now ts-jest) was the safety net.
+
+Project:
+- Backend now runs via tsx (no build step); CI gained a typecheck job and the pre-commit hook runs it
+  too, so type errors are caught before a commit. Prettier/lint-staged now target backend .ts files.
+
+
 ## 1.16 - 2026-06-10
 
 Project:

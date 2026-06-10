@@ -1,19 +1,13 @@
-const globals = require("globals");
+const tseslint = require("typescript-eslint");
 const sonarjs = require("eslint-plugin-sonarjs");
 
 module.exports = [
     { ignores: ["node_modules", "coverage"] },
     sonarjs.configs.recommended,
     {
-        files: ["**/*.js"],
+        files: ["**/*.ts"],
         languageOptions: {
-            ecmaVersion: 2022,
-            sourceType: "commonjs",
-            globals: { ...globals.node },
+            parser: tseslint.parser,
         },
-    },
-    {
-        files: ["**/*.test.js", "jest.setup.js"],
-        languageOptions: { globals: { ...globals.jest } },
     },
 ];

@@ -1,4 +1,5 @@
 npx lint-staged
+npm --prefix backend run typecheck
 npm --prefix backend run lint
 npm --prefix backend run lint:sonarjs
 npm --prefix backend run test:coverage

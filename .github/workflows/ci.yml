@@ -36,6 +36,17 @@ jobs:
       - name: Lint backend
         run: npm --prefix backend run lint
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: backend/package-lock.json
+          install: npm --prefix backend ci
+      - name: Typecheck backend
+        run: npm --prefix backend run typecheck
+
   sonarjs:
     runs-on: ubuntu-latest
     steps:

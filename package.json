@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "private": true,
   "scripts": {
     "prepare": "husky",
@@ -9,14 +9,14 @@
     "dev": "concurrently -n backend,frontend -c blue,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "start:backend": "npm --prefix backend run dev",
     "start:frontend": "npm --prefix frontend run dev",
-    "format": "prettier --write \"backend/**/*.js\"",
-    "format:check": "prettier --check \"backend/**/*.js\"",
+    "format": "prettier --write \"backend/**/*.ts\"",
+    "format:check": "prettier --check \"backend/**/*.ts\"",
     "patch": "npm version patch --no-git-tag-version",
     "minor": "npm version minor --no-git-tag-version",
     "major": "npm version major --no-git-tag-version"
   },
   "lint-staged": {
-    "backend/**/*.js": [
+    "backend/**/*.ts": [
       "prettier --write"
     ]
   },
