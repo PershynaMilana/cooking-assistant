@@ -22,6 +22,14 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.12 - 2026-06-09
+
+Backend:
+- Added a Jest unit-test suite covering the backend use cases and domain entities with no database
+  required. CI now runs coverage-enforced tests on every push and pull request, with an 80% minimum
+  threshold for the backend business-logic unit-test scope.
+
+
 ## 1.11 - 2026-06-09
 
 Project:

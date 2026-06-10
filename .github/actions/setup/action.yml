@@ -1,0 +1,21 @@
+name: Setup Node and install deps
+description: Set up Node 20 with npm caching and install dependencies
+
+inputs:
+  cache-dependency-path:
+    description: Lockfile path used for the npm cache
+    required: true
+  install:
+    description: Install command to run
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: npm
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+    - run: ${{ inputs.install }}
+      shell: bash
