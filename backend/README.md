@@ -44,13 +44,13 @@ DB_NAME=cooking_helper
 PORT=8080
 ```
 
-`JWT_SECRET_KEY` is used by [middleware/jwtMiddleware.ts](middleware/jwtMiddleware.ts) (verifies tokens)
-and [infrastructure/security/JwtTokenService.ts](infrastructure/security/JwtTokenService.ts) (signs them at
-login). Without it, login throws and every protected route returns 403.
+`JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
+tokens) and [src/infrastructure/security/JwtTokenService.ts](src/infrastructure/security/JwtTokenService.ts)
+(signs them at login). Without it, login throws and every protected route returns 403.
 
 When you add a new env key, add it (without a value) to [.env.example](.env.example) too.
 
-### 2. PostgreSQL connection - [config/env.ts](config/env.ts) and [db.ts](db.ts)
+### 2. PostgreSQL connection - [src/config/env.ts](src/config/env.ts) and [src/db.ts](src/db.ts)
 
 Credentials are read from the `DB_*` variables above, with the historical hardcoded values as fallback
 defaults:
@@ -65,14 +65,14 @@ defaults:
 }
 ```
 
-Set the `DB_*` keys in `.env` if your Postgres differs - no need to edit [db.ts](db.ts).
+Set the `DB_*` keys in `.env` if your Postgres differs - no need to edit [src/db.ts](src/db.ts).
 
 ### 3. Database schema - [database.sql](database.sql)
 
 Run once against an empty database to create tables and seed reference data. It is NOT idempotent (it
 mixes CREATE TABLE, ALTER TABLE, and INSERT) - running it twice will fail.
 
-### 4. CORS - [index.ts](index.ts)
+### 4. CORS - [src/index.ts](src/index.ts)
 
 Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a different origin, update
 `corsOptions` there.
@@ -81,43 +81,53 @@ Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a diff
 
 ```
 backend/
-├── index.ts              express bootstrap; builds routers from the composition root, listens on 8080
-├── composition-root.ts   dependency injection: pool -> repositories -> services -> use cases -> controllers
-├── db.ts                 pg.Pool connection (reads DB_* env via config/env.ts)
-├── config/env.ts         typed env loading and JWT secret guard
+├── package.json          scripts and backend package metadata
+├── tsconfig.json         TypeScript config and path aliases
+├── jest.config.js        Jest + ts-jest config
+├── eslint.config.js      regular ESLint config
+├── eslint.sonarjs.config.js
 ├── database.sql          full schema + seed data (run once)
 ├── .env.example          env template (tracked) - copy to .env
 ├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
-├── domain/               innermost layer (no framework/db deps)
-│   ├── entities/         domain objects
-│   ├── errors/           AppError + NotFoundError / ValidationError / UnauthorizedError (carry HTTP status)
-│   └── repositories/     repository interfaces (TypeScript interface)
-│
-├── application/
-│   ├── ports/            service interfaces: PasswordHasher, TokenService
-│   └── use-cases/        one class per operation (recipes/, recipe-types/, menus/, menu-categories/, pantry/, users/)
-│
-├── infrastructure/
-│   ├── persistence/pg/   concrete pg repositories - ALL SQL lives here
-│   └── security/         BcryptPasswordHasher, JwtTokenService
-│
-├── middleware/
-│   ├── jwtMiddleware.ts  authenticateToken - verifies Bearer JWT, attaches req.user
-│   ├── asyncHandler.ts   wraps async handlers, forwards rejections to the error middleware
-│   └── errorHandler.ts   turns thrown errors into { error } responses (mounted last)
-│
-├── routes/               route factories (controller) => router, all under /api
-│   └── *.routes.ts
-│
-└── controller/           thin HTTP adapters (DI classes) that call use cases
-    └── *.controller.ts
+└── src/
+    ├── index.ts              express bootstrap; builds routers from the composition root, listens on 8080
+    ├── composition-root.ts   dependency injection: pool -> repositories -> services -> use cases -> controllers
+    ├── db.ts                 pg.Pool connection (reads DB_* env via config/env.ts)
+    ├── config/env.ts         typed env loading and JWT secret guard
+    │
+    ├── domain/               innermost layer (no framework/db deps)
+    │   ├── entities/         domain objects
+    │   ├── errors/           AppError + NotFoundError / ValidationError / UnauthorizedError (carry HTTP status)
+    │   └── repositories/     repository interfaces (TypeScript interface)
+    │
+    ├── application/
+    │   ├── ports/            service interfaces: PasswordHasher, TokenService
+    │   └── use-cases/        one class per operation (recipes/, recipe-types/, menus/, menu-categories/, pantry/, users/)
+    │
+    ├── infrastructure/
+    │   ├── persistence/pg/   concrete pg repositories - ALL SQL lives here
+    │   └── security/         BcryptPasswordHasher, JwtTokenService
+    │
+    ├── middleware/
+    │   ├── jwtMiddleware.ts  authenticateToken - verifies Bearer JWT, attaches req.user
+    │   ├── asyncHandler.ts   wraps async handlers, forwards rejections to the error middleware
+    │   └── errorHandler.ts   turns thrown errors into { error } responses (mounted last)
+    │
+    ├── routes/               route factories (controller) => router, all under /api
+    │   └── *.routes.ts
+    │
+    ├── controller/           thin HTTP adapters (DI classes) that call use cases
+    │   └── *.controller.ts
+    │
+    ├── types/                ambient .d.ts files
+    └── test/                 Jest setup and helpers
 ```
 
 ## Architecture - clean (layered)
 
 Dependencies point inward (Dependency Rule). The graph is built once in
-[composition-root.ts](composition-root.ts) and consumed by [index.ts](index.ts).
+[src/composition-root.ts](src/composition-root.ts) and consumed by [src/index.ts](src/index.ts).
 
 - **routes/** - factory functions `(controller) => router`; map `METHOD /path` to a controller handler,
   wrap it in `asyncHandler`, guard with `authenticateToken` (except `/register` and `/login`).
@@ -132,15 +142,15 @@ Errors: a use case throws a domain error -> `asyncHandler` -> `errorHandler` rep
 with `err.status || 500`. Transactions live inside a single repository method (see menu/pantry repos).
 
 To add a feature: add SQL to a `Pg*Repository` (and its interface), add a use case, call it from a
-controller handler, and wire the new pieces in [composition-root.ts](composition-root.ts).
+controller handler, and wire the new pieces in [src/composition-root.ts](src/composition-root.ts).
 
 ## Auth flow
 
 1. `POST /api/login` verifies the password via `BcryptPasswordHasher` and signs a JWT (payload `{ id }`,
    `expiresIn: "24h"`) via `JwtTokenService`.
 2. Client sends `Authorization: Bearer <token>` on later requests.
-3. [middleware/jwtMiddleware.ts](middleware/jwtMiddleware.ts) verifies with `JWT_SECRET_KEY`, attaches
-   `req.user`, calls `next()`.
+3. [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) verifies with `JWT_SECRET_KEY`,
+   attaches `req.user`, calls `next()`.
 4. The current user's id always comes from `req.user.id` (never from the request body/params).
 
 ## API reference
@@ -148,14 +158,14 @@ controller handler, and wire the new pieces in [composition-root.ts](composition
 All endpoints under `/api`. Everything except `/register` and `/login` requires
 `Authorization: Bearer <token>`.
 
-### Auth ([routes/user.routes.ts](routes/user.routes.ts))
+### Auth ([src/routes/user.routes.ts](src/routes/user.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | POST | `/register` | Create a user (`name`, `surname`, `login`, `password`) |
 | POST | `/login` | Authenticate, returns `{ token }` |
 | GET | `/user` | List all users |
 
-### Recipes ([routes/recipe.routes.ts](routes/recipe.routes.ts))
+### Recipes ([src/routes/recipe.routes.ts](src/routes/recipe.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | POST | `/recipe` | Create a recipe with ingredients |
@@ -168,7 +178,7 @@ All endpoints under `/api`. Everything except `/register` and `/login` requires
 | GET | `/recipes-filters-person/:id` | Filter a user's recipes |
 | GET | `/recipes-stats` | Aggregated stats for the analytics page |
 
-### Recipe types ([routes/type.routes.ts](routes/type.routes.ts))
+### Recipe types ([src/routes/type.routes.ts](src/routes/type.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/recipe-types` | List all |
@@ -177,7 +187,7 @@ All endpoints under `/api`. Everything except `/register` and `/login` requires
 | PUT | `/recipe-type/:id` | Update |
 | DELETE | `/recipe-type/:id` | Delete |
 
-### User pantry ([routes/userIngredients.routes.ts](routes/userIngredients.routes.ts))
+### User pantry ([src/routes/userIngredients.routes.ts](src/routes/userIngredients.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/user-ingredients/:id` | Get a user's pantry |
@@ -187,7 +197,7 @@ All endpoints under `/api`. Everything except `/register` and `/login` requires
 | GET | `/user-ingredients/:userId/history/:ingredientId` | Purchase history |
 | PUT | `/user-ingredients/:userId/history/:purchaseId` | Update a purchase entry |
 
-### Menus ([routes/menu.routes.ts](routes/menu.routes.ts))
+### Menus ([src/routes/menu.routes.ts](src/routes/menu.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/menu` | All menus (also accepts category filter) |
@@ -197,7 +207,7 @@ All endpoints under `/api`. Everything except `/register` and `/login` requires
 | DELETE | `/menu/:id` | Delete a menu |
 | GET | `/menu-filters-person/:id` | A user's menus |
 
-### Menu categories ([routes/menuCategory.routes.ts](routes/menuCategory.routes.ts))
+### Menu categories ([src/routes/menuCategory.routes.ts](src/routes/menuCategory.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/menu-categories` | List categories |
@@ -222,7 +232,11 @@ The "ingredients you are missing for a menu" query joins `menu_recipe` -> `recip
 
 - Source uses TypeScript `import` / `export`; runtime semantics stay CommonJS through `tsx`.
 - Controllers, use cases, and repositories are classes wired via the composition root (constructor DI).
-  Repositories implement an interface from `domain/repositories/` and hold all SQL - match the pattern.
+  Repositories implement an interface from `src/domain/repositories/` and hold all SQL - match the
+  pattern.
+- Cross-folder backend imports use path aliases from [tsconfig.json](tsconfig.json): `@domain/*`,
+  `@application/*`, `@infrastructure/*`, `@controller/*`, `@routes/*`, `@middleware/*`, `@config/*`,
+  and `@test/*`. Keep true same-folder imports relative with `./`.
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed.
 - Raw SQL with `$1`, `$2`, ... parameters via `db.query(text, values)` - never string-concatenate
   user input.

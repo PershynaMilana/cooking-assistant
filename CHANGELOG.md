@@ -22,6 +22,15 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.18 - 2026-06-10
+
+Backend:
+- Reorganized the backend so all source lives under backend/src/, with only tooling configs at the
+  package root, and introduced path aliases (@domain/*, @application/*, @infrastructure/*,
+  @controller/*, @routes/*, @middleware/*, @config/*, @test/*) so imports no longer use ../../.. chains.
+  Pure structural change - no API or behavior change.
+
+
 ## 1.17 - 2026-06-10
 
 Backend:

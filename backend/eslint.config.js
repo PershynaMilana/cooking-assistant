@@ -28,7 +28,7 @@ module.exports = [
         ...jest.configs["flat/recommended"],
     },
     {
-        files: ["eslint.config.js", "eslint.sonarjs.config.js"],
+        files: ["eslint.config.js", "eslint.sonarjs.config.js", "jest.config.js"],
         languageOptions: {
             globals: {
                 require: "readonly",
@@ -40,13 +40,13 @@ module.exports = [
         },
     },
     {
-        files: ["jest.setup.ts"],
+        files: ["**/jest.setup.ts"],
         rules: {
             "@typescript-eslint/no-namespace": "off",
         },
     },
     {
-        files: ["middleware/asyncHandler.ts"],
+        files: ["**/asyncHandler.ts"],
         rules: {
             // Express uses next as the async rejection callback here.
             "promise/no-callback-in-promise": "off",
