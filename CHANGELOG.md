@@ -22,6 +22,20 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.15 - 2026-06-10
+
+Backend:
+- Added eslint-plugin-sonarjs (recommended config) to the backend lint, bringing SonarSource
+  code-smell and bug-detection rules locally - no SonarCloud account required.
+- Security: disabled the X-Powered-By response header (flagged by sonarjs), so the API no longer
+  advertises that it runs on Express.
+
+Project:
+- Added a separate local SonarJS lint path: a dedicated backend ESLint config, a `lint:sonarjs`
+  backend script, and a CI check, so pull requests show SonarJS separately from the regular backend
+  ESLint job.
+
+
 ## 1.14 - 2026-06-10
 
 Project:
