@@ -21,6 +21,7 @@ module.exports = [
             "prefer-const": "error",
             curly: ["error", "all"],
             "no-throw-literal": "error",
+            "no-console": "error",
         },
     },
     {

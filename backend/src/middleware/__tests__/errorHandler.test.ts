@@ -12,10 +12,6 @@ function makeResponse(headersSent = false) {
 }
 
 describe("errorHandler", () => {
-    beforeEach(() => {
-        jest.spyOn(console, "error").mockImplementation(() => undefined);
-    });
-
     it("should respond with the AppError status and message", () => {
         const err = new NotFoundError("Recipe not found");
         const req = {} as Request;

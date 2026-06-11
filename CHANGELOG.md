@@ -22,6 +22,15 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.21 - 2026-06-11
+
+Backend:
+- Hardened the server for production: security headers via helmet, rate limiting on the login and
+  register endpoints, an explicit request body size limit, a /api/health check, structured logging
+  with pino (replacing console), and graceful shutdown that drains the server and closes the database
+  pool on SIGTERM/SIGINT.
+
+
 ## 1.20 - 2026-06-11
 
 Backend:

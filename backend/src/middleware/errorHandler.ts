@@ -1,5 +1,6 @@
 import type { ErrorRequestHandler } from "express";
 
+import { logger } from "@config/logger";
 import { AppError } from "@domain/errors/AppError";
 
 function getErrorStatus(err: unknown): number {
@@ -29,7 +30,7 @@ function getErrorMessage(err: unknown): string {
 }
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-    console.error(err);
+    logger.error(err);
 
     if (res.headersSent) {
         return _next(err);
