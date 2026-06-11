@@ -32,6 +32,7 @@ const envSchema = z.object({
     DB_HOST: envStringSchema("localhost"),
     DB_PORT: envNumberSchema(5432),
     DB_NAME: envStringSchema("cooking_helper"),
+    CORS_ORIGIN: envStringSchema("http://localhost:5173"),
     JWT_SECRET_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
     LOG_LEVEL: z
         .preprocess(
@@ -72,6 +73,7 @@ export const config = {
         port: env.DB_PORT,
         database: env.DB_NAME,
     },
+    corsOrigin: env.CORS_ORIGIN,
     logLevel: env.LOG_LEVEL ?? "info",
 };
 

@@ -96,7 +96,7 @@ open a PR for review. No git tags.
 ## Tech stack
 
 - Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, jwt-decode, ApexCharts, @react-pdf/renderer, jsPDF
-- Backend: Node.js, Express 4, `pg`, `jsonwebtoken`, `bcrypt`, `dotenv`, `nodemon`
+- Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `zod`, `helmet`, `pino`, `tsx`
 - Database: PostgreSQL 14+
 
 There is no test suite. Changes are validated by running both apps locally and clicking through.

@@ -22,6 +22,16 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.24 - 2026-06-11
+
+Backend:
+- Switched password hashing from bcrypt to the API-compatible bcryptjs (same hash format, so existing
+  passwords keep working). This removes bcrypt's vulnerable native build tooling and brings the whole
+  project to zero dependency advisories.
+- Made the allowed CORS origin configurable through the `CORS_ORIGIN` environment variable (defaulting to
+  `http://localhost:5173`), so a deployed frontend no longer needs a code change.
+
+
 ## 1.23 - 2026-06-11
 
 Backend:
