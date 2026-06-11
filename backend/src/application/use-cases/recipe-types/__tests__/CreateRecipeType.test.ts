@@ -1,4 +1,6 @@
 import CreateRecipeType from "@application/use-cases/recipe-types/CreateRecipeType";
+import { ValidationError } from "@domain/errors/AppError";
+import { catchError } from "@test/helpers/assertions";
 
 describe("CreateRecipeType", () => {
     const makeDeps = () => ({
@@ -25,5 +27,24 @@ describe("CreateRecipeType", () => {
             description: "Warm bowls",
         });
         expect(result).toEqual(createdType);
+    });
+
+    it("should throw a 400 ValidationError when type_name is missing", async () => {
+        const deps = makeDeps();
+        const useCase = new CreateRecipeType(deps.recipeTypeRepository);
+
+        const error = await catchError(
+            useCase.execute({ description: "Warm bowls" } as {
+                type_name: string;
+                description: string;
+            }),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "type_name: Type name is required",
+            400,
+        );
+        expect(deps.recipeTypeRepository.create).not.toHaveBeenCalled();
     });
 });

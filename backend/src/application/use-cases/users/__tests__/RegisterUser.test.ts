@@ -1,4 +1,6 @@
 import RegisterUser from "@application/use-cases/users/RegisterUser";
+import { ValidationError } from "@domain/errors/AppError";
+import { catchError } from "@test/helpers/assertions";
 
 describe("RegisterUser", () => {
     const makeDeps = () => ({
@@ -36,5 +38,30 @@ describe("RegisterUser", () => {
             password: "hashed-secret",
         });
         expect(result).toEqual(createdUser);
+    });
+
+    it("should throw a 400 ValidationError when password is too short", async () => {
+        const deps = makeDeps();
+        const useCase = new RegisterUser(
+            deps.userRepository,
+            deps.passwordHasher,
+        );
+
+        const error = await catchError(
+            useCase.execute({
+                name: "Bob",
+                surname: "Cook",
+                login: "bob",
+                password: "",
+            }),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "password: Password must be at least 6 characters",
+            400,
+        );
+        expect(deps.passwordHasher.hash).not.toHaveBeenCalled();
+        expect(deps.userRepository.create).not.toHaveBeenCalled();
     });
 });

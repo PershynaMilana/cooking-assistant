@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.21.0",
+  "version": "1.22.0",
   "main": "src/index.ts",
   "engines": {
     "node": ">=20"
@@ -31,7 +31,8 @@
     "jsonwebtoken": "^9.0.2",
     "pino": "^9.5.0",
     "pino-http": "^10.3.0",
-    "pg": "^8.13.0"
+    "pg": "^8.13.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

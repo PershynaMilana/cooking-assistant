@@ -2,6 +2,8 @@ import type {
     NewUser,
     UserRepository,
 } from "@domain/repositories/UserRepository";
+import { validate } from "@application/validation/validate";
+import { registerUserSchema } from "@application/validation/user.schemas";
 import type { PasswordHasher } from "@application/ports/PasswordHasher";
 
 export default class RegisterUser {
@@ -10,17 +12,13 @@ export default class RegisterUser {
         private passwordHasher: Pick<PasswordHasher, "hash">,
     ) {}
 
-    async execute({
-        name,
-        surname,
-        login,
-        password,
-    }: NewUser): Promise<unknown> {
-        const hashedPassword = await this.passwordHasher.hash(password);
+    async execute(input: NewUser): Promise<unknown> {
+        const data = validate(registerUserSchema, input);
+        const hashedPassword = await this.passwordHasher.hash(data.password);
         return this.userRepository.create({
-            name,
-            surname,
-            login,
+            name: data.name,
+            surname: data.surname,
+            login: data.login,
             password: hashedPassword,
         });
     }

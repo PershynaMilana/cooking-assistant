@@ -31,7 +31,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            message: "No token, access denied",
+            error: "No token, access denied",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -47,7 +47,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            message: "Token is invalid or expired",
+            error: "Token is invalid or expired",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -68,7 +68,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            message: "Token is invalid or expired",
+            error: "Token is invalid or expired",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -86,7 +86,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            message: "Token is invalid or expired",
+            error: "Token is invalid or expired",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -121,7 +121,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            message: "Token is invalid or expired",
+            error: "Token is invalid or expired",
         });
         expect(next).not.toHaveBeenCalled();
     });

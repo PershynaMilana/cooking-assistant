@@ -10,6 +10,7 @@ serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-rest
 - jsonwebtoken + bcrypt - auth and password hashing
 - helmet + express-rate-limit - security headers and brute-force guard on auth
 - pino + pino-http - structured app and request logging
+- zod - request and environment validation
 - tsx - TypeScript runtime and dev auto-reload
 
 ## Running locally
@@ -50,7 +51,8 @@ LOG_LEVEL=info
 `JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
 tokens) and [src/infrastructure/security/JwtTokenService.ts](src/infrastructure/security/JwtTokenService.ts)
 (signs them at login). Without it, login throws and every protected route returns 403.
-`LOG_LEVEL` controls the pino logger level and defaults to `info` when unset.
+The rest of the env is validated with zod on startup; invalid ports or logger levels fail fast with a
+clear configuration error. `LOG_LEVEL` controls the pino logger level and defaults to `info` when unset.
 
 When you add a new env key, add it (without a value) to [.env.example](.env.example) too.
 
@@ -141,15 +143,20 @@ routers, and then the error handler in that order.
 - **routes/** - factory functions `(controller) => router`; map `METHOD /path` directly to a
   controller handler, guard with `authenticateToken` (except `/health`, `/register`, and `/login`).
 - **controller/** - thin classes; a handler reads `req`, calls a use case, sends the response. No try/catch.
+- **application/validation/** - zod request schemas and the shared `validate()` helper. Schemas describe
+  request shape only (types, required scalars, formats, ranges, array item shape).
 - **application/use-cases/** - one class per operation with `execute(...)`: input validation + orchestration;
   throw domain errors; depend on repository/service interfaces only. Service ports in **application/ports/**.
 - **domain/** - repository interfaces, entities, and `errors/AppError.ts` (errors carry an HTTP `status`).
+  Entities such as `Recipe` and `Menu` keep domain invariants like non-empty ingredient/recipe lists, so
+  each validation rule lives in one layer only.
 - **infrastructure/persistence/pg/** - concrete repositories; ALL SQL; constructor takes the `pg.Pool`.
   **infrastructure/security/** - bcrypt + jwt adapters.
 
 Errors: a use case throws a domain error -> Express 5 forwards the rejected promise -> `errorHandler`
-logs through pino and replies `{ error: <msg> }` with `err.status || 500`. Transactions live inside a single repository
-method (see menu/pantry repos).
+logs through pino and replies `{ error: <msg> }` with `err.status || 500`. Every error body uses
+`{ error }`, including auth failures and the JSON 404 for unknown routes. Transactions live inside a
+single repository method (see menu/pantry repos).
 
 To add a feature: add SQL to a `Pg*Repository` (and its interface), add a use case, call it from a
 controller handler, and wire the new pieces in [src/composition-root.ts](src/composition-root.ts).

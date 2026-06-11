@@ -1,4 +1,6 @@
-import { NotFoundError, ValidationError } from "@domain/errors/AppError";
+import { NotFoundError } from "@domain/errors/AppError";
+import { idSchema } from "@application/validation/common.schemas";
+import { validate } from "@application/validation/validate";
 import type { MenuRepository } from "@domain/repositories/MenuRepository";
 
 export default class GetMenuById {
@@ -7,11 +9,8 @@ export default class GetMenuById {
     ) {}
 
     async execute(id: string | number | null): Promise<unknown> {
-        if (!id) {
-            throw new ValidationError("Menu ID is required");
-        }
-
-        const menu = await this.menuRepository.findByIdWithRecipes(id);
+        const menuId = validate(idSchema, id);
+        const menu = await this.menuRepository.findByIdWithRecipes(menuId);
         if (!menu) {
             throw new NotFoundError("Menu not found");
         }

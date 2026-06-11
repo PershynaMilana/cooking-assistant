@@ -57,7 +57,7 @@ describe("user ingredient routes", () => {
         });
         expect(deps.pantryRepository.deleteIngredient).toHaveBeenCalledWith(
             7,
-            "3",
+            3,
         );
     });
 
@@ -93,7 +93,7 @@ describe("user ingredient routes", () => {
         });
         expect(
             deps.pantryRepository.updatePurchaseQuantity,
-        ).toHaveBeenCalledWith(7, "11", 4);
+        ).toHaveBeenCalledWith(7, 11, 4);
     });
 
     it("should return purchase history", async () => {
@@ -109,7 +109,7 @@ describe("user ingredient routes", () => {
         expect(res.body).toEqual(history);
         expect(deps.pantryRepository.findPurchaseHistory).toHaveBeenCalledWith(
             7,
-            "3",
+            3,
         );
     });
 

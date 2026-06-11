@@ -15,7 +15,7 @@ describe("DeleteMenu", () => {
 
         const error = await catchError(useCase.execute(null));
 
-        expect(error).toBeAppError(ValidationError, "Menu ID is required", 400);
+        expect(error).toBeAppError(ValidationError, "ID is required", 400);
         expect(menuRepository.deleteById).not.toHaveBeenCalled();
     });
 
