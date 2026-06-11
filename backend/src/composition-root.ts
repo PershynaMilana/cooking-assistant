@@ -4,6 +4,8 @@ import GetPurchaseHistory from "@application/use-cases/pantry/GetPurchaseHistory
 import GetUserIngredients from "@application/use-cases/pantry/GetUserIngredients";
 import UpdateIngredientQuantities from "@application/use-cases/pantry/UpdateIngredientQuantities";
 import UpdatePurchaseQuantity from "@application/use-cases/pantry/UpdatePurchaseQuantity";
+import type { PasswordHasher } from "@application/ports/PasswordHasher";
+import type { TokenService } from "@application/ports/TokenService";
 import GetAllMenuCategories from "@application/use-cases/menu-categories/GetAllMenuCategories";
 import CreateMenu from "@application/use-cases/menus/CreateMenu";
 import DeleteMenu from "@application/use-cases/menus/DeleteMenu";
@@ -34,6 +36,12 @@ import RecipeController from "@controller/recipe.controller";
 import RecipeTypeController from "@controller/type.controller";
 import UserIngredientsController from "@controller/userIngredients.controller";
 import UserController from "@controller/user.controller";
+import type { MenuCategoryRepository } from "@domain/repositories/MenuCategoryRepository";
+import type { MenuRepository } from "@domain/repositories/MenuRepository";
+import type { PantryRepository } from "@domain/repositories/PantryRepository";
+import type { RecipeRepository } from "@domain/repositories/RecipeRepository";
+import type { RecipeTypeRepository } from "@domain/repositories/RecipeTypeRepository";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import pool from "./db";
 import PgMenuCategoryRepository from "@infrastructure/persistence/pg/PgMenuCategoryRepository";
 import PgMenuRepository from "@infrastructure/persistence/pg/PgMenuRepository";
@@ -43,6 +51,96 @@ import PgRecipeTypeRepository from "@infrastructure/persistence/pg/PgRecipeTypeR
 import PgUserRepository from "@infrastructure/persistence/pg/PgUserRepository";
 import BcryptPasswordHasher from "@infrastructure/security/BcryptPasswordHasher";
 import JwtTokenService from "@infrastructure/security/JwtTokenService";
+
+export interface RepositoryDeps {
+    recipeRepository: RecipeRepository;
+    recipeTypeRepository: RecipeTypeRepository;
+    menuRepository: MenuRepository;
+    menuCategoryRepository: MenuCategoryRepository;
+    pantryRepository: PantryRepository;
+    userRepository: UserRepository;
+    passwordHasher: PasswordHasher;
+    tokenService: TokenService;
+}
+
+export interface Controllers {
+    userController: UserController;
+    recipeController: RecipeController;
+    recipeTypeController: RecipeTypeController;
+    userIngredientsController: UserIngredientsController;
+    menuController: MenuController;
+    menuCategoryController: MenuCategoryController;
+}
+
+export function buildControllers({
+    recipeRepository,
+    recipeTypeRepository,
+    menuRepository,
+    menuCategoryRepository,
+    pantryRepository,
+    userRepository,
+    passwordHasher,
+    tokenService,
+}: RepositoryDeps): Controllers {
+    const recipeTypeController = new RecipeTypeController({
+        getAllRecipeTypes: new GetAllRecipeTypes(recipeTypeRepository),
+        getRecipeTypeById: new GetRecipeTypeById(recipeTypeRepository),
+        createRecipeType: new CreateRecipeType(recipeTypeRepository),
+        updateRecipeType: new UpdateRecipeType(recipeTypeRepository),
+        deleteRecipeType: new DeleteRecipeType(recipeTypeRepository),
+    });
+
+    const recipeController = new RecipeController({
+        createRecipe: new CreateRecipe(recipeRepository),
+        getAllRecipes: new GetAllRecipes(recipeRepository),
+        getRecipeById: new GetRecipeById(recipeRepository),
+        updateRecipe: new UpdateRecipe(recipeRepository),
+        deleteRecipe: new DeleteRecipe(recipeRepository),
+        searchRecipes: new SearchRecipes(recipeRepository),
+        searchPersonRecipes: new SearchPersonRecipes(recipeRepository),
+        getRecipeStats: new GetRecipeStats(recipeRepository),
+        getAllIngredients: new GetAllIngredients(recipeRepository),
+    });
+
+    const menuController = new MenuController({
+        getAllMenus: new GetAllMenus(menuRepository),
+        createMenu: new CreateMenu(menuRepository),
+        getMenuById: new GetMenuById(menuRepository),
+        updateMenu: new UpdateMenu(menuRepository),
+        deleteMenu: new DeleteMenu(menuRepository),
+        searchPersonMenus: new SearchPersonMenus(menuRepository),
+    });
+
+    const menuCategoryController = new MenuCategoryController({
+        getAllMenuCategories: new GetAllMenuCategories(menuCategoryRepository),
+    });
+
+    const userIngredientsController = new UserIngredientsController({
+        getUserIngredients: new GetUserIngredients(pantryRepository),
+        addUserIngredients: new AddUserIngredients(pantryRepository),
+        deleteUserIngredient: new DeleteUserIngredient(pantryRepository),
+        updateIngredientQuantities: new UpdateIngredientQuantities(
+            pantryRepository,
+        ),
+        updatePurchaseQuantity: new UpdatePurchaseQuantity(pantryRepository),
+        getPurchaseHistory: new GetPurchaseHistory(pantryRepository),
+    });
+
+    const userController = new UserController({
+        registerUser: new RegisterUser(userRepository, passwordHasher),
+        loginUser: new LoginUser(userRepository, passwordHasher, tokenService),
+        getUsers: new GetUsers(userRepository),
+    });
+
+    return {
+        userController,
+        recipeController,
+        recipeTypeController,
+        userIngredientsController,
+        menuController,
+        menuCategoryController,
+    };
+}
 
 const recipeTypeRepository = new PgRecipeTypeRepository(pool);
 const recipeRepository = new PgRecipeRepository(pool);
@@ -54,63 +152,15 @@ const userRepository = new PgUserRepository(pool);
 const passwordHasher = new BcryptPasswordHasher();
 const tokenService = new JwtTokenService();
 
-const recipeTypeController = new RecipeTypeController({
-    getAllRecipeTypes: new GetAllRecipeTypes(recipeTypeRepository),
-    getRecipeTypeById: new GetRecipeTypeById(recipeTypeRepository),
-    createRecipeType: new CreateRecipeType(recipeTypeRepository),
-    updateRecipeType: new UpdateRecipeType(recipeTypeRepository),
-    deleteRecipeType: new DeleteRecipeType(recipeTypeRepository),
+const controllers = buildControllers({
+    recipeRepository,
+    recipeTypeRepository,
+    menuRepository,
+    menuCategoryRepository,
+    pantryRepository,
+    userRepository,
+    passwordHasher,
+    tokenService,
 });
-
-const recipeController = new RecipeController({
-    createRecipe: new CreateRecipe(recipeRepository),
-    getAllRecipes: new GetAllRecipes(recipeRepository),
-    getRecipeById: new GetRecipeById(recipeRepository),
-    updateRecipe: new UpdateRecipe(recipeRepository),
-    deleteRecipe: new DeleteRecipe(recipeRepository),
-    searchRecipes: new SearchRecipes(recipeRepository),
-    searchPersonRecipes: new SearchPersonRecipes(recipeRepository),
-    getRecipeStats: new GetRecipeStats(recipeRepository),
-    getAllIngredients: new GetAllIngredients(recipeRepository),
-});
-
-const menuController = new MenuController({
-    getAllMenus: new GetAllMenus(menuRepository),
-    createMenu: new CreateMenu(menuRepository),
-    getMenuById: new GetMenuById(menuRepository),
-    updateMenu: new UpdateMenu(menuRepository),
-    deleteMenu: new DeleteMenu(menuRepository),
-    searchPersonMenus: new SearchPersonMenus(menuRepository),
-});
-
-const menuCategoryController = new MenuCategoryController({
-    getAllMenuCategories: new GetAllMenuCategories(menuCategoryRepository),
-});
-
-const userIngredientsController = new UserIngredientsController({
-    getUserIngredients: new GetUserIngredients(pantryRepository),
-    addUserIngredients: new AddUserIngredients(pantryRepository),
-    deleteUserIngredient: new DeleteUserIngredient(pantryRepository),
-    updateIngredientQuantities: new UpdateIngredientQuantities(
-        pantryRepository,
-    ),
-    updatePurchaseQuantity: new UpdatePurchaseQuantity(pantryRepository),
-    getPurchaseHistory: new GetPurchaseHistory(pantryRepository),
-});
-
-const userController = new UserController({
-    registerUser: new RegisterUser(userRepository, passwordHasher),
-    loginUser: new LoginUser(userRepository, passwordHasher, tokenService),
-    getUsers: new GetUsers(userRepository),
-});
-
-const controllers = {
-    userController,
-    recipeController,
-    recipeTypeController,
-    userIngredientsController,
-    menuController,
-    menuCategoryController,
-};
 
 export default controllers;

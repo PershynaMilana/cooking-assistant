@@ -72,10 +72,10 @@ Set the `DB_*` keys in `.env` if your Postgres differs - no need to edit [src/db
 Run once against an empty database to create tables and seed reference data. It is NOT idempotent (it
 mixes CREATE TABLE, ALTER TABLE, and INSERT) - running it twice will fail.
 
-### 4. CORS - [src/index.ts](src/index.ts)
+### 4. CORS - [src/app.ts](src/app.ts)
 
 Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a different origin, update
-`corsOptions` there.
+the app factory there.
 
 ## Structure
 
@@ -91,8 +91,9 @@ backend/
 ├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
 └── src/
-    ├── index.ts              express bootstrap; builds routers from the composition root, listens on 8080
-    ├── composition-root.ts   dependency injection: pool -> repositories -> services -> use cases -> controllers
+    ├── app.ts                createApp(controllers); mounts middleware and routers without listening
+    ├── index.ts              runtime entry; builds the real app from the composition root, listens on 8080
+    ├── composition-root.ts   dependency injection: buildControllers(deps), plus real pg wiring
     ├── db.ts                 pg.Pool connection (reads DB_* env via config/env.ts)
     ├── config/env.ts         typed env loading and JWT secret guard
     │
@@ -121,13 +122,14 @@ backend/
     │   └── *.controller.ts
     │
     ├── types/                ambient .d.ts files
-    └── test/                 Jest setup and helpers
+    └── test/                 Jest setup, fake deps/test app helpers, and HTTP integration tests
 ```
 
 ## Architecture - clean (layered)
 
-Dependencies point inward (Dependency Rule). The graph is built once in
-[src/composition-root.ts](src/composition-root.ts) and consumed by [src/index.ts](src/index.ts).
+Dependencies point inward (Dependency Rule). The real graph is built in
+[src/composition-root.ts](src/composition-root.ts) and consumed by [src/index.ts](src/index.ts). Tests can
+reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](src/app.ts).
 
 - **routes/** - factory functions `(controller) => router`; map `METHOD /path` to a controller handler,
   wrap it in `asyncHandler`, guard with `authenticateToken` (except `/register` and `/login`).
@@ -143,6 +145,13 @@ with `err.status || 500`. Transactions live inside a single repository method (s
 
 To add a feature: add SQL to a `Pg*Repository` (and its interface), add a use case, call it from a
 controller handler, and wire the new pieces in [src/composition-root.ts](src/composition-root.ts).
+
+## Tests
+
+Run `npm test` or `npm run test:coverage` from this folder. Unit tests are co-located in `__tests__/`:
+use cases/entities use fake repositories, and middleware tests call `req`/`res`/`next` directly. HTTP
+integration tests live in [src/test/integration/](src/test/integration/) and use supertest with
+`buildTestApp`. Pg-repository tests are deferred until a future real-DB suite with Testcontainers.
 
 ## Auth flow
 

@@ -1,0 +1,128 @@
+import request from "supertest";
+
+import { buildTestApp, authHeader } from "../helpers/testApp";
+
+describe("user ingredient routes", () => {
+    it("should return 401 without a token", async () => {
+        const { app } = buildTestApp();
+
+        const res = await request(app).get("/api/user-ingredients/7");
+
+        expect(res.status).toBe(401);
+    });
+
+    it("should return user ingredients for the authenticated user", async () => {
+        const { app, deps } = buildTestApp();
+        const ingredients = [{ ingredient_id: 3, ingredient_name: "tomato" }];
+        deps.pantryRepository.findByUser.mockResolvedValue(ingredients);
+
+        const res = await request(app)
+            .get("/api/user-ingredients/999")
+            .set("Authorization", authHeader(7));
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual(ingredients);
+        expect(deps.pantryRepository.findByUser).toHaveBeenCalledWith(7);
+    });
+
+    it("should update user ingredients", async () => {
+        const { app, deps } = buildTestApp();
+        deps.pantryRepository.addIngredients.mockResolvedValue(undefined);
+
+        const res = await request(app)
+            .put("/api/user-ingredients/999")
+            .set("Authorization", authHeader(7))
+            .send({ ingredients: [{ id: 3, quantity_person_ingradient: 2 }] });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({
+            message: "Ingredients updated successfully",
+        });
+        expect(deps.pantryRepository.addIngredients).toHaveBeenCalledWith(7, [
+            { id: 3, quantity_person_ingradient: 2 },
+        ]);
+    });
+
+    it("should delete a user ingredient", async () => {
+        const { app, deps } = buildTestApp();
+        deps.pantryRepository.deleteIngredient.mockResolvedValue(true);
+
+        const res = await request(app)
+            .delete("/api/user-ingredients/999/3")
+            .set("Authorization", authHeader(7));
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({
+            message: "Ingredient and its history successfully deleted",
+        });
+        expect(deps.pantryRepository.deleteIngredient).toHaveBeenCalledWith(
+            7,
+            "3",
+        );
+    });
+
+    it("should update ingredient quantities", async () => {
+        const { app, deps } = buildTestApp();
+        deps.pantryRepository.updateQuantities.mockResolvedValue(undefined);
+
+        const res = await request(app)
+            .put("/api/user-ingredients/update-quantities/999")
+            .set("Authorization", authHeader(7))
+            .send({
+                updatedIngredients: [{ id: 3, quantity_person_ingradient: 4 }],
+            });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({
+            message: "Ingredient quantities and purchase history updated",
+        });
+    });
+
+    it("should update a purchase quantity", async () => {
+        const { app, deps } = buildTestApp();
+        deps.pantryRepository.updatePurchaseQuantity.mockResolvedValue(true);
+
+        const res = await request(app)
+            .put("/api/user-ingredients/999/history/11")
+            .set("Authorization", authHeader(7))
+            .send({ quantity: 4 });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({
+            message: "Purchase quantity updated successfully.",
+        });
+        expect(
+            deps.pantryRepository.updatePurchaseQuantity,
+        ).toHaveBeenCalledWith(7, "11", 4);
+    });
+
+    it("should return purchase history", async () => {
+        const { app, deps } = buildTestApp();
+        const history = [{ id: 11, quantity: 2 }];
+        deps.pantryRepository.findPurchaseHistory.mockResolvedValue(history);
+
+        const res = await request(app)
+            .get("/api/user-ingredients/999/history/3")
+            .set("Authorization", authHeader(7));
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual(history);
+        expect(deps.pantryRepository.findPurchaseHistory).toHaveBeenCalledWith(
+            7,
+            "3",
+        );
+    });
+
+    it("should map a missing purchase to an error response", async () => {
+        const { app, deps } = buildTestApp();
+        deps.pantryRepository.updatePurchaseQuantity.mockResolvedValue(null);
+
+        const res = await request(app)
+            .put("/api/user-ingredients/999/history/99")
+            .set("Authorization", authHeader(7))
+            .send({ quantity: 4 });
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: "Purchase not found." });
+    });
+});
