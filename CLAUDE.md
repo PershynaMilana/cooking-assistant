@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Two-app monorepo (no workspaces - each side has its own `package.json`):
 
-- [backend/](backend/) - Node.js + Express 4 + TypeScript + PostgreSQL (`pg`) API on port `8080`; source lives under [backend/src/](backend/src/)
+- [backend/](backend/) - Node.js + Express 5 + TypeScript + PostgreSQL (`pg`) API on port `8080`; source lives under [backend/src/](backend/src/)
 - [frontend/](frontend/) - React 18 + TypeScript + Vite on port `5173` (Tailwind CSS, React Router v6)
 - [backend/database.sql](backend/database.sql) - full schema and seed data (run once against an empty DB)
 - Root [package.json](package.json) is an orchestration shim: it pulls in `concurrently` and exposes scripts that drive both sub-packages. It also holds the single shared project version (see [Versioning](#versioning) below).
@@ -123,14 +123,14 @@ Express app creation in [backend/src/app.ts](backend/src/app.ts) mounts six rout
 
 The backend is organised in layers with dependencies pointing inward (Dependency Rule). Wiring is built once in [backend/src/composition-root.ts](backend/src/composition-root.ts): `buildControllers(deps)` is reusable for tests, and the default export uses the real Pg repositories/services.
 
-- **Routes** ([backend/src/routes/](backend/src/routes/)) are factory functions `(controller) => router`. They map `METHOD /path` -> a controller handler, wrap it with `asyncHandler`, and (almost always) guard it with `authenticateToken`. Only `/register` and `/login` are public.
+- **Routes** ([backend/src/routes/](backend/src/routes/)) are factory functions `(controller) => router`. They map `METHOD /path` directly to a controller handler and (almost always) guard it with `authenticateToken`. Only `/register` and `/login` are public. Express 5 forwards rejected promises from async handlers to the error middleware.
 - **Controllers** ([backend/src/controller/](backend/src/controller/)) are thin HTTP adapters: classes whose handlers are arrow-function properties (so `this` is bound). A handler reads input from `req` (params/body/query/`req.user.id`), calls a use case, sends the response. No try/catch - errors propagate to the error middleware.
 - **Use cases** ([backend/src/application/use-cases/](backend/src/application/use-cases/)) - one class per operation with `async execute(...)`. They hold input validation + orchestration, throw domain errors, and depend on repository/service TypeScript `interface`s, never on `pg` or express. Service ports are in [backend/src/application/ports/](backend/src/application/ports/) (`PasswordHasher`, `TokenService`).
 - **Domain** ([backend/src/domain/](backend/src/domain/)) - repository TypeScript `interface`s, entities, and error types in [backend/src/domain/errors/AppError.ts](backend/src/domain/errors/AppError.ts) (`AppError` carries an HTTP `status`; `NotFoundError`/`ValidationError`/`UnauthorizedError`).
 - **Infrastructure** ([backend/src/infrastructure/](backend/src/infrastructure/)) - concrete `pg` repositories under `persistence/pg/` (ALL SQL lives here) and security adapters under `security/` (`BcryptPasswordHasher`, `JwtTokenService`). Adapters `implements` the relevant interface and each repository takes the shared `pool` from [backend/src/db.ts](backend/src/db.ts) via its constructor.
 - **Config and ambient types**: [backend/src/config/env.ts](backend/src/config/env.ts) is the single typed environment loader. [backend/src/types/](backend/src/types/) is only for ambient `.d.ts` declarations such as `express.d.ts` and `env.d.ts`; regular DTO/domain types live beside their layer as normal `.ts` exports.
 
-Errors: a use case `throw`s a domain error; `asyncHandler` forwards it; the single `errorHandler` ([backend/src/middleware/errorHandler.ts](backend/src/middleware/errorHandler.ts)) replies `{ error: <message> }` with `err.status || 500`. Every error body is `{ error: ... }`.
+Errors: a use case `throw`s a domain error; Express 5 forwards the rejected promise to the single `errorHandler` ([backend/src/middleware/errorHandler.ts](backend/src/middleware/errorHandler.ts)), which replies `{ error: <message> }` with `err.status || 500`. Every error body is `{ error: ... }`.
 
 When adding a feature: add SQL to the relevant `Pg*Repository` (and its interface), add a use case, call it from a controller handler, and wire the new pieces in the composition root. Transactions (`BEGIN/COMMIT/ROLLBACK`) live inside a single repository method (see the menu/pantry repos).
 

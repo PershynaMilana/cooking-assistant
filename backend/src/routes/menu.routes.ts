@@ -1,7 +1,6 @@
 import express, { type Router } from "express";
 
 import type MenuController from "@controller/menu.controller";
-import asyncHandler from "@middleware/asyncHandler";
 import authenticateToken from "@middleware/jwtMiddleware";
 
 export default function createMenuRouter(
@@ -10,41 +9,25 @@ export default function createMenuRouter(
     const router = express.Router();
 
     // getting all menus
-    router.get("/menu", authenticateToken, asyncHandler(menuController.getAll));
+    router.get("/menu", authenticateToken, menuController.getAll);
 
     // create menu+
-    router.post(
-        "/create-menu",
-        authenticateToken,
-        asyncHandler(menuController.create),
-    );
+    router.post("/create-menu", authenticateToken, menuController.create);
 
     // delite menu by id
-    router.get(
-        "/menu/:id",
-        authenticateToken,
-        asyncHandler(menuController.getById),
-    );
+    router.get("/menu/:id", authenticateToken, menuController.getById);
 
     // update menu
-    router.put(
-        "/menu/:id",
-        authenticateToken,
-        asyncHandler(menuController.update),
-    );
+    router.put("/menu/:id", authenticateToken, menuController.update);
 
     // delete menu
-    router.delete(
-        "/menu/:id",
-        authenticateToken,
-        asyncHandler(menuController.remove),
-    );
+    router.delete("/menu/:id", authenticateToken, menuController.remove);
 
     // getting menu by person
     router.get(
         "/menu-filters-person/:id",
         authenticateToken,
-        asyncHandler(menuController.searchByPerson),
+        menuController.searchByPerson,
     );
 
     return router;

@@ -1,7 +1,6 @@
 import express, { type Router } from "express";
 
 import type UserIngredientsController from "@controller/userIngredients.controller";
-import asyncHandler from "@middleware/asyncHandler";
 import authenticateToken from "@middleware/jwtMiddleware";
 
 export default function createUserIngredientsRouter(
@@ -13,40 +12,40 @@ export default function createUserIngredientsRouter(
     router.get(
         "/user-ingredients/:id",
         authenticateToken,
-        asyncHandler(userIngredientsController.getUserIngredients),
+        userIngredientsController.getUserIngredients,
     );
 
     // update user ingredients
     router.put(
         "/user-ingredients/:id",
         authenticateToken,
-        asyncHandler(userIngredientsController.updateUserIngredients),
+        userIngredientsController.updateUserIngredients,
     );
 
     // delete ingredient for specific user
     router.delete(
         "/user-ingredients/:userId/:ingredientId",
         authenticateToken,
-        asyncHandler(userIngredientsController.deleteUserIngredient),
+        userIngredientsController.deleteUserIngredient,
     );
 
     // update ingredient quantities
     router.put(
         "/user-ingredients/update-quantities/:userId",
         authenticateToken,
-        asyncHandler(userIngredientsController.updateIngredientQuantities),
+        userIngredientsController.updateIngredientQuantities,
     );
 
     router.put(
         "/user-ingredients/:userId/history/:purchaseId",
         authenticateToken,
-        asyncHandler(userIngredientsController.updatePurchaseQuantity),
+        userIngredientsController.updatePurchaseQuantity,
     );
 
     router.get(
         "/user-ingredients/:userId/history/:ingredientId",
         authenticateToken,
-        asyncHandler(userIngredientsController.getPurchaseHistory),
+        userIngredientsController.getPurchaseHistory,
     );
 
     return router;
