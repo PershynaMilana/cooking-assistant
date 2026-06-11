@@ -22,6 +22,13 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.20 - 2026-06-11
+
+Backend:
+- Upgraded the backend to Express 5. Async route handlers now rely on the framework's built-in
+  promise-rejection forwarding, so the manual asyncHandler wrapper was removed. No API or behavior change.
+
+
 ## 1.19 - 2026-06-10
 
 Backend:

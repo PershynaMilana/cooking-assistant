@@ -5,7 +5,7 @@ serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-rest
 
 ## Tech stack
 
-- Node.js + TypeScript + Express 4 - HTTP server
+- Node.js + TypeScript + Express 5 - HTTP server
 - PostgreSQL via `pg` (connection pool, raw SQL, no ORM)
 - jsonwebtoken + bcrypt - auth and password hashing
 - tsx - TypeScript runtime and dev auto-reload
@@ -112,7 +112,6 @@ backend/
     │
     ├── middleware/
     │   ├── jwtMiddleware.ts  authenticateToken - verifies Bearer JWT, attaches req.user
-    │   ├── asyncHandler.ts   wraps async handlers, forwards rejections to the error middleware
     │   └── errorHandler.ts   turns thrown errors into { error } responses (mounted last)
     │
     ├── routes/               route factories (controller) => router, all under /api
@@ -131,8 +130,8 @@ Dependencies point inward (Dependency Rule). The real graph is built in
 [src/composition-root.ts](src/composition-root.ts) and consumed by [src/index.ts](src/index.ts). Tests can
 reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](src/app.ts).
 
-- **routes/** - factory functions `(controller) => router`; map `METHOD /path` to a controller handler,
-  wrap it in `asyncHandler`, guard with `authenticateToken` (except `/register` and `/login`).
+- **routes/** - factory functions `(controller) => router`; map `METHOD /path` directly to a
+  controller handler, guard with `authenticateToken` (except `/register` and `/login`).
 - **controller/** - thin classes; a handler reads `req`, calls a use case, sends the response. No try/catch.
 - **application/use-cases/** - one class per operation with `execute(...)`: input validation + orchestration;
   throw domain errors; depend on repository/service interfaces only. Service ports in **application/ports/**.
@@ -140,8 +139,9 @@ reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](sr
 - **infrastructure/persistence/pg/** - concrete repositories; ALL SQL; constructor takes the `pg.Pool`.
   **infrastructure/security/** - bcrypt + jwt adapters.
 
-Errors: a use case throws a domain error -> `asyncHandler` -> `errorHandler` replies `{ error: <msg> }`
-with `err.status || 500`. Transactions live inside a single repository method (see menu/pantry repos).
+Errors: a use case throws a domain error -> Express 5 forwards the rejected promise -> `errorHandler`
+replies `{ error: <msg> }` with `err.status || 500`. Transactions live inside a single repository
+method (see menu/pantry repos).
 
 To add a feature: add SQL to a `Pg*Repository` (and its interface), add a use case, call it from a
 controller handler, and wire the new pieces in [src/composition-root.ts](src/composition-root.ts).

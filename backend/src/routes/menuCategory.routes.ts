@@ -1,7 +1,6 @@
 import express, { type Router } from "express";
 
 import type MenuCategoryController from "@controller/menuCategory.controller";
-import asyncHandler from "@middleware/asyncHandler";
 import authenticateToken from "@middleware/jwtMiddleware";
 
 export default function createMenuCategoryRouter(
@@ -13,7 +12,7 @@ export default function createMenuCategoryRouter(
     router.get(
         "/menu-categories",
         authenticateToken,
-        asyncHandler(menuCategoryController.getAll),
+        menuCategoryController.getAll,
     );
 
     return router;

@@ -1,7 +1,6 @@
 import express, { type Router } from "express";
 
 import type UserController from "@controller/user.controller";
-import asyncHandler from "@middleware/asyncHandler";
 import authenticateToken from "@middleware/jwtMiddleware";
 
 export default function createUserRouter(
@@ -10,17 +9,13 @@ export default function createUserRouter(
     const router = express.Router();
 
     // registration
-    router.post("/register", asyncHandler(userController.registerUser));
+    router.post("/register", userController.registerUser);
 
     // login
-    router.post("/login", asyncHandler(userController.loginUser));
+    router.post("/login", userController.loginUser);
 
     // get users
-    router.get(
-        "/user",
-        authenticateToken,
-        asyncHandler(userController.getUsers),
-    );
+    router.get("/user", authenticateToken, userController.getUsers);
 
     return router;
 }
