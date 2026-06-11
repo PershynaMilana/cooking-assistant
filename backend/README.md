@@ -8,6 +8,8 @@ serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-rest
 - Node.js + TypeScript + Express 5 - HTTP server
 - PostgreSQL via `pg` (connection pool, raw SQL, no ORM)
 - jsonwebtoken + bcrypt - auth and password hashing
+- helmet + express-rate-limit - security headers and brute-force guard on auth
+- pino + pino-http - structured app and request logging
 - tsx - TypeScript runtime and dev auto-reload
 
 ## Running locally
@@ -42,11 +44,13 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=cooking_helper
 PORT=8080
+LOG_LEVEL=info
 ```
 
 `JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
 tokens) and [src/infrastructure/security/JwtTokenService.ts](src/infrastructure/security/JwtTokenService.ts)
 (signs them at login). Without it, login throws and every protected route returns 403.
+`LOG_LEVEL` controls the pino logger level and defaults to `info` when unset.
 
 When you add a new env key, add it (without a value) to [.env.example](.env.example) too.
 
@@ -91,11 +95,12 @@ backend/
 ├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
 └── src/
-    ├── app.ts                createApp(controllers); mounts middleware and routers without listening
-    ├── index.ts              runtime entry; builds the real app from the composition root, listens on 8080
+    ├── app.ts                createApp(controllers); mounts middleware, health, and routers without listening
+    ├── index.ts              runtime entry; listens on 8080 and shuts down server + pg pool cleanly
     ├── composition-root.ts   dependency injection: buildControllers(deps), plus real pg wiring
     ├── db.ts                 pg.Pool connection (reads DB_* env via config/env.ts)
     ├── config/env.ts         typed env loading and JWT secret guard
+    ├── config/logger.ts      shared pino logger, LOG_LEVEL-aware and silent in tests
     │
     ├── domain/               innermost layer (no framework/db deps)
     │   ├── entities/         domain objects
@@ -112,6 +117,7 @@ backend/
     │
     ├── middleware/
     │   ├── jwtMiddleware.ts  authenticateToken - verifies Bearer JWT, attaches req.user
+    │   ├── rateLimit.ts      authLimiter - rate limits register/login outside tests
     │   └── errorHandler.ts   turns thrown errors into { error } responses (mounted last)
     │
     ├── routes/               route factories (controller) => router, all under /api
@@ -128,10 +134,12 @@ backend/
 
 Dependencies point inward (Dependency Rule). The real graph is built in
 [src/composition-root.ts](src/composition-root.ts) and consumed by [src/index.ts](src/index.ts). Tests can
-reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](src/app.ts).
+reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](src/app.ts). The app factory
+mounts `helmet`, pino request logging, CORS, the 100kb JSON body parser, the public health check, domain
+routers, and then the error handler in that order.
 
 - **routes/** - factory functions `(controller) => router`; map `METHOD /path` directly to a
-  controller handler, guard with `authenticateToken` (except `/register` and `/login`).
+  controller handler, guard with `authenticateToken` (except `/health`, `/register`, and `/login`).
 - **controller/** - thin classes; a handler reads `req`, calls a use case, sends the response. No try/catch.
 - **application/use-cases/** - one class per operation with `execute(...)`: input validation + orchestration;
   throw domain errors; depend on repository/service interfaces only. Service ports in **application/ports/**.
@@ -140,7 +148,7 @@ reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](sr
   **infrastructure/security/** - bcrypt + jwt adapters.
 
 Errors: a use case throws a domain error -> Express 5 forwards the rejected promise -> `errorHandler`
-replies `{ error: <msg> }` with `err.status || 500`. Transactions live inside a single repository
+logs through pino and replies `{ error: <msg> }` with `err.status || 500`. Transactions live inside a single repository
 method (see menu/pantry repos).
 
 To add a feature: add SQL to a `Pg*Repository` (and its interface), add a use case, call it from a
@@ -164,8 +172,13 @@ integration tests live in [src/test/integration/](src/test/integration/) and use
 
 ## API reference
 
-All endpoints under `/api`. Everything except `/register` and `/login` requires
+All endpoints under `/api`. Everything except `/health`, `/register`, and `/login` requires
 `Authorization: Bearer <token>`.
+
+### Health ([src/routes/health.routes.ts](src/routes/health.routes.ts))
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/health` | Liveness check, returns `{ status: "ok" }` |
 
 ### Auth ([src/routes/user.routes.ts](src/routes/user.routes.ts))
 | Method | Path | Purpose |
