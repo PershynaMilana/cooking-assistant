@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "private": true,
   "scripts": {
     "prepare": "husky",
@@ -9,6 +9,8 @@
     "dev": "concurrently -n backend,frontend -c blue,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "start:backend": "npm --prefix backend run dev",
     "start:frontend": "npm --prefix frontend run dev",
+    "migrate": "npm --prefix backend run migrate",
+    "seed": "npm --prefix backend run seed",
     "format": "prettier --write \"backend/**/*.ts\"",
     "format:check": "prettier --check \"backend/**/*.ts\"",
     "patch": "npm version patch --no-git-tag-version",
@@ -19,6 +21,9 @@
     "backend/**/*.ts": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "shell-quote": "^1.8.4"
   },
   "devDependencies": {
     "concurrently": "^9.0.1",
