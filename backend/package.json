@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "main": "src/index.ts",
   "engines": {
     "node": ">=20"
@@ -13,6 +13,11 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:sonarjs": "eslint . --config eslint.sonarjs.config.js",
+    "migrate": "tsx src/scripts/migrate.ts",
+    "migrate:up": "tsx src/scripts/migrate.ts up",
+    "migrate:down": "tsx src/scripts/migrate.ts down",
+    "migrate:create": "node-pg-migrate create -j sql -m migrations",
+    "seed": "tsx src/scripts/seed.ts",
     "patch": "npm version patch --no-git-tag-version",
     "minor": "npm version minor --no-git-tag-version",
     "major": "npm version major --no-git-tag-version"
@@ -29,9 +34,10 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-pg-migrate": "^8.0.4",
+    "pg": "^8.13.0",
     "pino": "^9.5.0",
     "pino-http": "^10.3.0",
-    "pg": "^8.13.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {

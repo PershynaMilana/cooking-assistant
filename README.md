@@ -21,9 +21,9 @@ You need Node 18+, PostgreSQL 14+, and a Postgres client (pgAdmin / DBeaver / ps
 git clone <repository-url>
 cd cooking-assistant
 
-# 2. Database
-#    - create a database named "cooking_helper"
-#    - run backend/database.sql against it once (it is NOT idempotent)
+# 2. Database - create an EMPTY database named "cooking_helper"
+#    pgAdmin:  right-click Databases -> Create -> Database -> "cooking_helper"
+#    or psql:  psql -U postgres -c "CREATE DATABASE cooking_helper;"
 
 # 3. Backend env
 cp backend/.env.example backend/.env     # PowerShell: Copy-Item backend/.env.example backend/.env
@@ -33,11 +33,20 @@ cp backend/.env.example backend/.env     # PowerShell: Copy-Item backend/.env.ex
 # 4. Install (root postinstall installs backend + frontend too)
 npm install
 
-# 5. Run both apps
+# 5. Build the schema and load starter data
+npm run migrate     # create all tables (node-pg-migrate)
+npm run seed        # load reference + sample data (idempotent)
+
+# 6. Run both apps
 npm start
 ```
 
 Open http://localhost:5173, register, and you are in.
+
+> **Already have a `cooking_helper` from the old `database.sql` setup?** Don't run a plain `npm run migrate` on
+> it (the tables already exist - it would error). Instead adopt the migrations once, without touching your data:
+> `npm run migrate -- up --fake`. Full database guide (schema changes, seeding, rollbacks) is in
+> [backend/README.md](backend/README.md).
 
 ## Layout
 

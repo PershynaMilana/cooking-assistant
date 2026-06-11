@@ -8,7 +8,7 @@ Two-app monorepo (no workspaces - each side has its own `package.json`):
 
 - [backend/](backend/) - Node.js + Express 5 + TypeScript + PostgreSQL (`pg`) API on port `8080`; helmet, express-rate-limit, pino, and zod provide operational hardening and input validation; source lives under [backend/src/](backend/src/)
 - [frontend/](frontend/) - React 18 + TypeScript + Vite on port `5173` (Tailwind CSS, React Router v6)
-- [backend/database.sql](backend/database.sql) - full schema and seed data (run once against an empty DB)
+- Database schema is managed by `node-pg-migrate`: SQL migrations live in [backend/migrations/](backend/migrations/) (the initial one captures the full current schema) and reference/sample data is loaded by [backend/src/scripts/seed.ts](backend/src/scripts/seed.ts).
 - Root [package.json](package.json) is an orchestration shim: it pulls in `concurrently` and exposes scripts that drive both sub-packages. It also holds the single shared project version (see [Versioning](#versioning) below).
 - [CHANGELOG.md](CHANGELOG.md) at the root is the single changelog for the whole project.
 
@@ -33,6 +33,8 @@ npm start          # tsx src/index.ts, no auto-reload
 npm run typecheck  # tsc --noEmit
 npm run lint       # eslint .
 npm run test       # jest via ts-jest
+npm run migrate    # node-pg-migrate: apply all pending migrations (up); `migrate down` rolls back one
+npm run seed       # load reference + sample data (idempotent)
 ```
 
 Frontend ([frontend/](frontend/)):
@@ -106,7 +108,33 @@ git push origin release/X.Y  # push branch (no -u flag)
 1. PostgreSQL connection in [backend/src/config/env.ts](backend/src/config/env.ts) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset. Env values are parsed with zod on startup, so invalid ports or logger levels fail fast with a clear configuration error. `JWT_SECRET_KEY` stays optional at startup and is still checked lazily by JWT code. [backend/src/db.ts](backend/src/db.ts) consumes that typed config.
 2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/src/config/env.ts](backend/src/config/env.ts) by JWT auth code) plus the `DB_*` keys, `PORT`, and optional `LOG_LEVEL` for pino. Without `JWT_SECRET_KEY`, login throws and every protected route 403s. Tests set `JWT_SECRET_KEY` to `test-secret` in [backend/src/test/jest.setup.ts](backend/src/test/jest.setup.ts). When you add a new env key, add it (without a value) to `.env.example` too.
 3. CORS in [backend/src/app.ts](backend/src/app.ts) is locked to `origin: "http://localhost:5173"`. If you change the frontend port or run from a different origin, update it here.
-4. Database seeding: run all of [backend/database.sql](backend/database.sql) once on a fresh DB. The file is NOT idempotent - it mixes `CREATE TABLE`, `ALTER TABLE`, and `INSERT` statements representing the historical migration history, and re-running it on a populated DB will error.
+4. Database setup uses `node-pg-migrate` (configured to reuse the same `config.db` as the app, so there is no separate `DATABASE_URL`). On a fresh DB run `npm run migrate` (or `migrate up`) then `npm run seed` from the root or `backend/`. `seed` is idempotent (guards against existing rows), so it is safe to re-run. A DB that already has the schema from the legacy `database.sql` adopts the migrations without re-creating anything via `npm run migrate -- up --fake` (marks the initial migration as applied; data is untouched). New migrations are scaffolded with `npm --prefix backend run migrate:create <name>` (SQL files with `-- Up Migration` / `-- Down Migration` markers). The legacy `database.sql` has been removed - migrations are the only source of truth for the schema (its old content lives in git history if ever needed).
+
+## Database workflow
+
+Three kinds of database change, and they are NOT the same thing - pick by what you are changing:
+
+1. **Runtime data** (a user creates a recipe, adds a pantry ingredient, etc.) - just flows in through the normal API/repository `INSERT`s while the app runs. No migration, no seed, nothing to edit. This is the vast majority of writes.
+2. **Seed / starter reference data** (the unit_measurement / recipe_types / menu_category rows and the sample ingredients that every fresh DB should start with) - lives in [backend/src/scripts/seed.ts](backend/src/scripts/seed.ts).
+3. **Schema change** (a new table, column, constraint, or index - the *shape* of the DB) - a new migration in [backend/migrations/](backend/migrations/).
+
+**To add a new starter ingredient (e.g. a 23rd one):** add one row to the ingredients `VALUES` list in [backend/src/scripts/seed.ts](backend/src/scripts/seed.ts) (name, unit, allergens, days_to_expire, seasonality, storage_condition), then run `npm run seed`. Seed is idempotent (`ON CONFLICT (name) DO NOTHING`), so on an existing DB it inserts only the new row and leaves the other 22 alone. Commit the seed change. Do NOT write a migration for this - ingredients are rows, not schema.
+
+**To make a schema change (the only time you write a migration):**
+1. `npm --prefix backend run migrate:create <short-name>` - scaffolds `migrations/<timestamp>_<short-name>.sql` with empty `-- Up Migration` / `-- Down Migration` sections.
+2. Fill in `Up` (the change, e.g. `ALTER TABLE ingredients ADD COLUMN calories INTEGER;`) and `Down` (the exact reverse, e.g. `ALTER TABLE ingredients DROP COLUMN calories;`).
+3. `npm run migrate` - applies only the new file (already-run migrations are recorded in the `pgmigrations` table and skipped). `npm run migrate down` rolls back the last one via its `Down` section.
+4. Update the code that uses the new shape (the relevant `Pg*Repository` SQL/types, and a zod schema if it is request input), then commit the migration file together with that code.
+
+The timestamp prefix on a migration filename only sets apply order (later timestamp = runs later); never rename or reorder existing migration files once they have been applied anywhere.
+
+**How it is wired (read before adding any DB feature):**
+- Migrations are plain SQL files in [backend/migrations/](backend/migrations/), one file per change, using node-pg-migrate's `-- Up Migration` / `-- Down Migration` markers (the `migrate:create` script scaffolds them; `migration-file-language` is `sql`). node-pg-migrate records applied migrations in a `pgmigrations` table and skips them next run. No `pgm.*` JS DSL - keep migrations as raw SQL.
+- The runner and seed are tsx scripts in [backend/src/scripts/](backend/src/scripts/) (`migrate.ts`, `seed.ts`), placed under `src/` so they are typechecked and linted (they are excluded from coverage by the `collectCoverageFrom` allowlist). `migrate.ts` calls node-pg-migrate's programmatic `runner({ databaseUrl: config.db, ... })` and parses `up`/`down`/`--fake` from `argv`; `seed.ts` opens its own short-lived `new Pool(config.db)`. Both reuse `config.db` from [backend/src/config/env.ts](backend/src/config/env.ts) - the same `DB_*` source as `db.ts`; there is deliberately NO separate `DATABASE_URL`. Both log through the pino `logger` (the global `no-console` rule applies) and set `process.exitCode = 1` on failure.
+- node-pg-migrate exposes its types through an `exports` map that the project's `moduleResolution: "Node"` does not read, so [backend/src/types/node-pg-migrate.d.ts](backend/src/types/node-pg-migrate.d.ts) re-exports them for tsc only (tsx resolves the real module at runtime). Leave that shim in place.
+- `seed.ts` must stay idempotent so re-running it never duplicates or errors: tables with a unique constraint use `INSERT ... ON CONFLICT (...) DO NOTHING` (e.g. `ingredients.name`); reference tables without one (`unit_measurement`, `recipe_types`, `menu_category`) use `INSERT ... SELECT ... WHERE NOT EXISTS`. Seed the sample ingredients with all columns in one statement, looking the unit id up by `unit_name` (a subquery/JOIN) - never id-based `UPDATE`s.
+- The initial migration is the full current schema (not a replay of historical ALTERs). It intentionally cleaned up two bits of cruft from the old `database.sql` while keeping behaviour identical: the duplicate `menu_recipe.menu_id` foreign key became one `ON DELETE CASCADE`, and `ingredient_purchases.quantity` is `NOT NULL DEFAULT 0` directly. Keep the misspelled column name `quantity_person_ingradient` (it is the real column).
+- Two setup paths: a fresh/empty DB runs `npm run migrate` + `npm run seed`; a DB that already had the schema from the old `database.sql` is adopted once with `npm run migrate -- up --fake` (marks the initial migration applied without running it - data untouched). All scripts work from the repo root or `backend/`.
 
 ## Architecture
 
@@ -151,7 +179,7 @@ Pages are organized by domain folder under [frontend/src/pages/](frontend/src/pa
 
 ### Database model highlights
 
-Key tables and joins (see [backend/database.sql](backend/database.sql) for the full picture):
+Key tables and joins (see the initial migration [backend/migrations/1781185648364_initial-schema.sql](backend/migrations/1781185648364_initial-schema.sql) for the full schema):
 - `person` (users) <-> `recipes` via `person_id`
 - `recipes` <-> `ingredients` through `recipe_ingredients` (with `quantity_recipe_ingredients`)
 - `recipes.type_id` -> `recipe_types`

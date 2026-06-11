@@ -11,6 +11,7 @@ serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-rest
 - helmet + express-rate-limit - security headers and brute-force guard on auth
 - pino + pino-http - structured app and request logging
 - zod - request and environment validation
+- node-pg-migrate - versioned SQL schema migrations
 - tsx - TypeScript runtime and dev auto-reload
 
 ## Running locally
@@ -73,10 +74,88 @@ defaults:
 
 Set the `DB_*` keys in `.env` if your Postgres differs - no need to edit [src/db.ts](src/db.ts).
 
-### 3. Database schema - [database.sql](database.sql)
+### 3. Database - [migrations/](migrations/) + [src/scripts/seed.ts](src/scripts/seed.ts)
 
-Run once against an empty database to create tables and seed reference data. It is NOT idempotent (it
-mixes CREATE TABLE, ALTER TABLE, and INSERT) - running it twice will fail.
+The schema is owned by `node-pg-migrate`. The migrate/seed scripts reuse the app's own DB config
+([src/config/env.ts](src/config/env.ts) → the `DB_*` env vars), so there is no separate `DATABASE_URL` to keep
+in sync. `node-pg-migrate` creates the **tables inside** a database - it does not create the database itself, so
+the database has to exist first.
+
+Pick the path that matches your situation:
+
+#### A. Fresh / empty database (new machine, prod, a teammate cloning the repo)
+
+1. Create an empty database named `cooking_helper`. Any one of these:
+   - **pgAdmin**: right-click *Databases* → *Create* → *Database* → name it `cooking_helper`.
+   - **psql**: `psql -U postgres -c "CREATE DATABASE cooking_helper;"`
+   - **createdb** (only works if the Postgres `bin/` folder is on your PATH, otherwise use the full path to it):
+     `createdb -U postgres cooking_helper`
+2. `npm run migrate` - builds every table from the files in [migrations/](migrations/).
+3. `npm run seed` - loads reference + sample data (units, recipe types, menu categories, sample ingredients).
+
+#### B. A database that already has the schema (the original `database.sql` setup, from before migrations)
+
+Do **not** run a plain `npm run migrate` - it would fail because the tables already exist. Adopt the migrations
+once, without touching any data:
+
+```bash
+npm run migrate -- up --fake
+```
+
+This records the initial migration as "already applied" (it writes one row to the `pgmigrations` tracking
+table) but runs no SQL, so existing rows are untouched. After this one-time step the database is in sync with
+the migrations and you treat it like any other. (The `--` is needed only because `--fake` is a flag; bare words
+such as `down` are forwarded without it.)
+
+#### Day to day: which change goes where
+
+Structure and data are different things - this is the part people trip on:
+
+| What you are doing | Where it goes |
+| --- | --- |
+| A user creates a recipe / adds a pantry ingredient through the running app | Nowhere - it is runtime data via the normal API. No migration, no seed. |
+| A new **starter ingredient** that every fresh DB should ship with | A row in `seed.ts`, then `npm run seed` |
+| A new table / column / constraint / index (the **shape** of the DB) | A new migration |
+
+**Add a starter ingredient (e.g. a 23rd):** add one row to the ingredients `VALUES` list in
+[src/scripts/seed.ts](src/scripts/seed.ts) - the columns are `(name, unit, allergens, days_to_expire,
+seasonality, storage_condition)` - then `npm run seed`. Seed is idempotent (`ON CONFLICT (name) DO NOTHING`), so
+on an existing DB it inserts only the new row and leaves the rest alone. Commit `seed.ts`. Do **not** write a
+migration - ingredients are rows, not schema.
+
+**Make a schema change (the only time you write a migration):**
+
+1. `npm run migrate:create add-calories-to-ingredients` - scaffolds
+   `migrations/<timestamp>_add-calories-to-ingredients.sql` with empty `-- Up Migration` / `-- Down Migration`
+   sections.
+2. Fill `Up` with the change and `Down` with the exact reverse:
+   ```sql
+   -- Up Migration
+   ALTER TABLE ingredients ADD COLUMN calories INTEGER;
+
+   -- Down Migration
+   ALTER TABLE ingredients DROP COLUMN calories;
+   ```
+3. `npm run migrate` - applies only the new file (the `pgmigrations` table tracks what already ran, so old
+   migrations are skipped). `npm run migrate down` rolls the last one back via its `Down` section.
+4. Update the code that uses the new shape (the relevant `Pg*Repository` SQL and types, plus a zod schema if it
+   is request input), and commit the migration file together with that code.
+
+The number prefixing a migration file is a timestamp that only sets apply order (later = runs later). Never
+rename, edit, or reorder a migration that has already been applied anywhere - add a new migration instead.
+
+#### Commands
+
+| Command | Does |
+| --- | --- |
+| `npm run migrate` | apply all pending migrations (up) |
+| `npm run migrate down` | roll back the last migration |
+| `npm run migrate:create <name>` | scaffold a new migration file |
+| `npm run migrate -- up --fake` | mark migrations as applied without running them (adopt an existing DB) |
+| `npm run seed` | load / top up reference + sample data (idempotent) |
+
+All commands work from the repo root or from `backend/`. The legacy `database.sql` has been removed - the
+migrations are the single source of truth for the schema (its old content is in git history if ever needed).
 
 ### 4. CORS - [src/app.ts](src/app.ts)
 
@@ -92,11 +171,12 @@ backend/
 ├── jest.config.js        Jest + ts-jest config
 ├── eslint.config.js      regular ESLint config
 ├── eslint.sonarjs.config.js
-├── database.sql          full schema + seed data (run once)
+├── migrations/           node-pg-migrate SQL migrations (the source of truth for the schema)
 ├── .env.example          env template (tracked) - copy to .env
 ├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
 └── src/
+    ├── scripts/             migrate.ts (node-pg-migrate runner) and seed.ts (idempotent seed)
     ├── app.ts                createApp(controllers); mounts middleware, health, and routers without listening
     ├── index.ts              runtime entry; listens on 8080 and shuts down server + pg pool cleanly
     ├── composition-root.ts   dependency injection: buildControllers(deps), plus real pg wiring
@@ -243,7 +323,7 @@ All endpoints under `/api`. Everything except `/health`, `/register`, and `/logi
 
 ## Data model
 
-Full schema in [database.sql](database.sql). Big picture:
+Full schema in the initial migration [migrations/1781185648364_initial-schema.sql](migrations/1781185648364_initial-schema.sql). Big picture:
 
 - `person` to `recipes` via `person_id` (recipe owner)
 - `recipes` to `ingredients` through `recipe_ingredients` (with `quantity_recipe_ingredients`)

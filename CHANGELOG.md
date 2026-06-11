@@ -22,6 +22,18 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.23 - 2026-06-11
+
+Backend:
+- Replaced the single non-idempotent database.sql setup with versioned migrations (node-pg-migrate) and
+  a separate, re-runnable seed step, and removed the legacy database.sql. The schema is now created and
+  rolled back reproducibly with `npm run migrate up` / `down`, and reference and sample data are loaded with
+  `npm run seed`. An already populated database can adopt the migrations without losing data via
+  `npm run migrate up -- --fake`.
+- Audited and patched dependency vulnerabilities: the root project is now clean, and the backend's
+  remaining advisories are limited to bcrypt's native build tooling.
+
+
 ## 1.22 - 2026-06-11
 
 Backend:
