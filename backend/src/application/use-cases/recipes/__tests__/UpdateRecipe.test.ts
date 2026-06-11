@@ -56,7 +56,7 @@ describe("UpdateRecipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Title and content cannot be empty",
+            "title: Title cannot be empty",
             400,
         );
         expect(recipeRepository.update).not.toHaveBeenCalled();

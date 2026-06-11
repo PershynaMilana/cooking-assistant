@@ -1,5 +1,8 @@
 import Menu from "@domain/entities/Menu";
 import type { MenuRepository } from "@domain/repositories/MenuRepository";
+import { idSchema } from "@application/validation/common.schemas";
+import { updateMenuSchema } from "@application/validation/menu.schemas";
+import { validate } from "@application/validation/validate";
 import type { UpdateMenuInput } from "./menu.types";
 
 export default class UpdateMenu {
@@ -9,11 +12,9 @@ export default class UpdateMenu {
         id: string | number | null,
         input: UpdateMenuInput,
     ): Promise<void> {
-        const menu = Menu.forUpdate(id, input);
-        await this.menuRepository.update(
-            id as string | number,
-            menu,
-            input.recipeIds,
-        );
+        const menuId = validate(idSchema, id);
+        const data = validate(updateMenuSchema, input);
+        const menu = Menu.forUpdate(menuId, data);
+        await this.menuRepository.update(menuId, menu, data.recipeIds);
     }
 }

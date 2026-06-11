@@ -1,4 +1,6 @@
 import { NotFoundError } from "@domain/errors/AppError";
+import { idSchema } from "@application/validation/common.schemas";
+import { validate } from "@application/validation/validate";
 import type { RecipeRepository } from "@domain/repositories/RecipeRepository";
 
 export default class GetRecipeById {
@@ -10,7 +12,9 @@ export default class GetRecipeById {
     ) {}
 
     async execute(id: string | number): Promise<unknown> {
-        const recipe = await this.recipeRepository.findByIdWithIngredients(id);
+        const recipeId = validate(idSchema, id);
+        const recipe =
+            await this.recipeRepository.findByIdWithIngredients(recipeId);
         if (!recipe) {
             throw new NotFoundError("Recipe not found");
         }

@@ -49,11 +49,7 @@ describe("UpdateMenu", () => {
 
         const error = await catchError(useCase.execute(null, makeInput()));
 
-        expect(error).toBeAppError(
-            ValidationError,
-            "Insufficient data to update menu",
-            400,
-        );
+        expect(error).toBeAppError(ValidationError, "ID is required", 400);
         expect(menuRepository.update).not.toHaveBeenCalled();
     });
 });

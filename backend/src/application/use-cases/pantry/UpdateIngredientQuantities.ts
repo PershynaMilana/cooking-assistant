@@ -1,8 +1,7 @@
-import { ValidationError } from "@domain/errors/AppError";
-import type {
-    PantryIngredientInput,
-    PantryRepository,
-} from "@domain/repositories/PantryRepository";
+import { idSchema } from "@application/validation/common.schemas";
+import { pantryIngredientsSchema } from "@application/validation/pantry.schemas";
+import { validate } from "@application/validation/validate";
+import type { PantryRepository } from "@domain/repositories/PantryRepository";
 
 export default class UpdateIngredientQuantities {
     constructor(
@@ -13,13 +12,9 @@ export default class UpdateIngredientQuantities {
         userId: string | number,
         updatedIngredients: unknown,
     ): Promise<void> {
-        if (!Array.isArray(updatedIngredients)) {
-            throw new ValidationError("Incorrect data format");
-        }
+        const validUserId = validate(idSchema, userId);
+        const data = validate(pantryIngredientsSchema, updatedIngredients);
 
-        await this.pantryRepository.updateQuantities(
-            userId,
-            updatedIngredients as PantryIngredientInput[],
-        );
+        await this.pantryRepository.updateQuantities(validUserId, data);
     }
 }

@@ -16,7 +16,7 @@ const authenticateToken: RequestHandler = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-        res.status(401).json({ message: "No token, access denied" });
+        res.status(401).json({ error: "No token, access denied" });
         return;
     }
 
@@ -24,13 +24,13 @@ const authenticateToken: RequestHandler = (req, res, next) => {
     try {
         secret = requireJwtSecret();
     } catch {
-        res.status(403).json({ message: "Token is invalid or expired" });
+        res.status(403).json({ error: "Token is invalid or expired" });
         return;
     }
 
     jwt.verify(token, secret, (err, decoded) => {
         if (err || !isUserPayload(decoded)) {
-            res.status(403).json({ message: "Token is invalid or expired" });
+            res.status(403).json({ error: "Token is invalid or expired" });
             return;
         }
 

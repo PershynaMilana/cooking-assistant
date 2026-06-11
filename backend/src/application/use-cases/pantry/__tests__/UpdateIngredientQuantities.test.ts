@@ -27,7 +27,7 @@ describe("UpdateIngredientQuantities", () => {
 
     it("should update user ingredient quantities when items are an array", async () => {
         const { useCase, pantryRepository } = setup();
-        const items = [{ id: 3, quantity: 2 }];
+        const items = [{ id: 3, quantity_person_ingradient: 2 }];
 
         const result = await useCase.execute(7, items);
 

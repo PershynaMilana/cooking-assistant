@@ -27,7 +27,7 @@ describe("AddUserIngredients", () => {
 
     it("should add user ingredients when ingredients are an array", async () => {
         const { useCase, pantryRepository } = setup();
-        const ingredients = [{ id: 3, quantity: 2 }];
+        const ingredients = [{ id: 3, quantity_person_ingradient: 2 }];
 
         const result = await useCase.execute(7, ingredients);
 

@@ -1,4 +1,7 @@
 import { NotFoundError } from "@domain/errors/AppError";
+import { idSchema } from "@application/validation/common.schemas";
+import { recipeTypeSchema } from "@application/validation/recipeType.schemas";
+import { validate } from "@application/validation/validate";
 import type {
     RecipeTypeInput,
     RecipeTypeRepository,
@@ -11,12 +14,14 @@ export default class UpdateRecipeType {
 
     async execute(
         id: string | number,
-        { type_name, description }: RecipeTypeInput,
+        input: RecipeTypeInput,
     ): Promise<unknown> {
-        const updated = await this.recipeTypeRepository.update(id, {
-            type_name,
-            description,
-        });
+        const recipeTypeId = validate(idSchema, id);
+        const data = validate(recipeTypeSchema, input);
+        const updated = await this.recipeTypeRepository.update(
+            recipeTypeId,
+            data,
+        );
         if (!updated) {
             throw new NotFoundError("Recipe type not found");
         }
