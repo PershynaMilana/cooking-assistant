@@ -22,6 +22,14 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.19 - 2026-06-10
+
+Backend:
+- Added middleware unit tests and supertest HTTP integration tests covering routing, auth, and error
+  responses. The Express app is now built through a createApp(controllers) factory so it can be
+  exercised in tests without a database. No API or behavior change.
+
+
 ## 1.18 - 2026-06-10
 
 Backend:

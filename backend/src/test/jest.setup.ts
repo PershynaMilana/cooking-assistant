@@ -1,3 +1,5 @@
+process.env.JWT_SECRET_KEY ??= "test-secret";
+
 expect.extend({
     toBeAppError(
         received: unknown,

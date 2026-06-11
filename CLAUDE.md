@@ -43,11 +43,14 @@ npm run preview  # serve production build
 npm run lint     # eslint .
 ```
 
-The backend has a Jest + ts-jest unit-test suite (`npm --prefix backend test`, or `test:coverage`). The frontend has no tests yet.
+The backend has a Jest + ts-jest test suite (`npm --prefix backend test`, or `test:coverage`). The frontend has no tests yet.
 
 Backend test conventions (match these when adding tests):
-- Unit tests only - no DB, no Express. Use cases and domain entities are tested with fake repositories/ports built from `jest.fn()`; mock only what is necessary.
-- Co-located in `__tests__/` next to the unit, named `<Unit>.test.ts`. One `describe` per unit (use case or entity).
+- Business-logic unit tests stay no DB, no Express. Use cases and domain entities are tested with fake repositories/ports built from `jest.fn()`; mock only what is necessary.
+- Middleware unit tests call the middleware directly with mocked `req`/`res`/`next`.
+- Supertest integration tests use `buildTestApp` with fake repositories/ports. They exercise real routes, auth middleware, controllers, use cases, and `errorHandler` without a database.
+- Pg-repository tests are deferred until a future real-DB suite with Testcontainers; do not add mock-pool SQL-string tests as a substitute.
+- Unit tests are co-located in `__tests__/` next to the unit, named `<Unit>.test.ts`; HTTP integration tests live in `backend/src/test/integration/`.
 - Test names start with "should": `it("should ...")`.
 - Assert domain errors with the custom matcher `expect(err).toBeAppError(Class, message, status)` ([backend/src/test/jest.setup.ts](backend/src/test/jest.setup.ts)); capture thrown errors with `catchError` / `catchSyncError` ([backend/src/test/helpers/assertions.ts](backend/src/test/helpers/assertions.ts)).
 
@@ -101,15 +104,15 @@ git push origin release/X.Y  # push branch (no -u flag)
 ## Required configuration
 
 1. PostgreSQL connection in [backend/src/config/env.ts](backend/src/config/env.ts) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset. [backend/src/db.ts](backend/src/db.ts) consumes that typed config.
-2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/src/config/env.ts](backend/src/config/env.ts) by JWT auth code) plus the `DB_*` keys and `PORT`. Without `JWT_SECRET_KEY`, login throws and every protected route 403s. When you add a new env key, add it (without a value) to `.env.example` too.
-3. CORS in [backend/src/index.ts](backend/src/index.ts) is locked to `origin: "http://localhost:5173"`. If you change the frontend port or run from a different origin, update it here.
+2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/src/config/env.ts](backend/src/config/env.ts) by JWT auth code) plus the `DB_*` keys and `PORT`. Without `JWT_SECRET_KEY`, login throws and every protected route 403s. Tests set `JWT_SECRET_KEY` to `test-secret` in [backend/src/test/jest.setup.ts](backend/src/test/jest.setup.ts). When you add a new env key, add it (without a value) to `.env.example` too.
+3. CORS in [backend/src/app.ts](backend/src/app.ts) is locked to `origin: "http://localhost:5173"`. If you change the frontend port or run from a different origin, update it here.
 4. Database seeding: run all of [backend/database.sql](backend/database.sql) once on a fresh DB. The file is NOT idempotent - it mixes `CREATE TABLE`, `ALTER TABLE`, and `INSERT` statements representing the historical migration history, and re-running it on a populated DB will error.
 
 ## Architecture
 
 ### Backend - clean (layered) architecture
 
-Express bootstrap in [backend/src/index.ts](backend/src/index.ts) mounts six routers under `/api`:
+Express app creation in [backend/src/app.ts](backend/src/app.ts) mounts six routers under `/api`; [backend/src/index.ts](backend/src/index.ts) only wires the real composition root into `createApp` and listens:
 
 - `user.routes` -> register, login, get users
 - `recipe.routes` -> recipe CRUD, ingredient list, filters, stats
@@ -118,7 +121,7 @@ Express bootstrap in [backend/src/index.ts](backend/src/index.ts) mounts six rou
 - `menu.routes` -> menu CRUD + per-user filter
 - `menuCategory.routes` -> menu category list, menus by category
 
-The backend is organised in layers with dependencies pointing inward (Dependency Rule). Wiring is built once in [backend/src/composition-root.ts](backend/src/composition-root.ts) and consumed by `index.ts`.
+The backend is organised in layers with dependencies pointing inward (Dependency Rule). Wiring is built once in [backend/src/composition-root.ts](backend/src/composition-root.ts): `buildControllers(deps)` is reusable for tests, and the default export uses the real Pg repositories/services.
 
 - **Routes** ([backend/src/routes/](backend/src/routes/)) are factory functions `(controller) => router`. They map `METHOD /path` -> a controller handler, wrap it with `asyncHandler`, and (almost always) guard it with `authenticateToken`. Only `/register` and `/login` are public.
 - **Controllers** ([backend/src/controller/](backend/src/controller/)) are thin HTTP adapters: classes whose handlers are arrow-function properties (so `this` is bound). A handler reads input from `req` (params/body/query/`req.user.id`), calls a use case, sends the response. No try/catch - errors propagate to the error middleware.
