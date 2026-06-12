@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { NotFoundError } from "@domain/errors/AppError";
+import { AppError, NotFoundError } from "@domain/errors/AppError";
 import errorHandler from "../errorHandler";
 
 function makeResponse(headersSent = false) {
@@ -25,8 +25,8 @@ describe("errorHandler", () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    it("should respond with 500 and the Error message for a regular Error", () => {
-        const err = new Error("Database failed");
+    it("should hide the message of an AppError with a 5xx status", () => {
+        const err = new AppError("JWT secret is not configured", 500);
         const req = {} as Request;
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
@@ -34,7 +34,37 @@ describe("errorHandler", () => {
         errorHandler(err, req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ error: "Database failed" });
+        expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should hide the Error message behind Server error for a regular Error", () => {
+        const err = new Error("duplicate key value violates unique constraint");
+        const req = {} as Request;
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        errorHandler(err, req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should keep the Error message for a non-AppError with a 4xx status", () => {
+        const err = Object.assign(new Error("Unexpected token in JSON"), {
+            status: 400,
+        });
+        const req = {} as Request;
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        errorHandler(err, req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({
+            error: "Unexpected token in JSON",
+        });
         expect(next).not.toHaveBeenCalled();
     });
 

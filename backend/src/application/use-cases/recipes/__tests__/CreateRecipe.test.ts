@@ -34,9 +34,39 @@ describe("CreateRecipe", () => {
         const recipe = recipeRepository.create.mock.calls[0][0];
 
         expect(recipe).toBeInstanceOf(Recipe);
-        expect(recipe).toMatchObject(input);
+        expect(recipe).toMatchObject({
+            title: input.title,
+            content: input.content,
+            person_id: input.person_id,
+            ingredients: [{ id: 3, quantity_recipe_ingredients: 2 }],
+            type_id: input.type_id,
+            cooking_time: input.cooking_time,
+            servings: input.servings,
+        });
         expect(recipeRepository.create).toHaveBeenCalledWith(recipe);
         expect(result).toEqual(createdRecipe);
+    });
+
+    it("should throw a 400 ValidationError when ingredient ids are duplicated", async () => {
+        const { useCase, recipeRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(
+                makeInput({
+                    ingredients: [
+                        { id: 3, quantity: 2 },
+                        { id: 3, quantity: 1 },
+                    ],
+                }),
+            ),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "ingredients: Ingredient IDs must be unique",
+            400,
+        );
+        expect(recipeRepository.create).not.toHaveBeenCalled();
     });
 
     it("should throw a 400 ValidationError and not create when input is invalid", async () => {

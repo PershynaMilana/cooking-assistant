@@ -6,7 +6,6 @@ import type GetAllMenus from "@application/use-cases/menus/GetAllMenus";
 import type GetMenuById from "@application/use-cases/menus/GetMenuById";
 import type SearchPersonMenus from "@application/use-cases/menus/SearchPersonMenus";
 import type UpdateMenu from "@application/use-cases/menus/UpdateMenu";
-import type { MenuFilters } from "@application/use-cases/menus/menu.types";
 import { getUserId } from "./requestUser";
 
 interface MenuControllerDependencies {
@@ -43,9 +42,7 @@ export default class MenuController {
     }
 
     getAll: RequestHandler = async (req, res) => {
-        const menus = await this.getAllMenusUseCase.execute(
-            req.query as MenuFilters,
-        );
+        const menus = await this.getAllMenusUseCase.execute(req.query);
         res.status(200).json(menus);
     };
 
@@ -72,9 +69,10 @@ export default class MenuController {
 
     update: RequestHandler = async (req, res) => {
         const id = req.params.id as string;
+        const personId = getUserId(req);
         const { menuTitle, menuContent, categoryId, recipeIds } = req.body;
 
-        await this.updateMenuUseCase.execute(id, {
+        await this.updateMenuUseCase.execute(id, personId, {
             menuTitle,
             menuContent,
             categoryId,
@@ -85,7 +83,10 @@ export default class MenuController {
     };
 
     remove: RequestHandler = async (req, res) => {
-        await this.deleteMenuUseCase.execute(req.params.id as string);
+        await this.deleteMenuUseCase.execute(
+            req.params.id as string,
+            getUserId(req),
+        );
         res.status(200).json({ message: "Menu deleted successfully" });
     };
 
@@ -93,7 +94,7 @@ export default class MenuController {
         const id = getUserId(req);
         const menus = await this.searchPersonMenusUseCase.execute(
             id,
-            req.query as MenuFilters,
+            req.query,
         );
         res.status(200).json(menus);
     };

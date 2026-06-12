@@ -9,7 +9,6 @@ import type GetRecipeStats from "@application/use-cases/recipes/GetRecipeStats";
 import type SearchPersonRecipes from "@application/use-cases/recipes/SearchPersonRecipes";
 import type SearchRecipes from "@application/use-cases/recipes/SearchRecipes";
 import type UpdateRecipe from "@application/use-cases/recipes/UpdateRecipe";
-import type { RecipeFilters } from "@application/use-cases/recipes/recipe.types";
 import { getUserId } from "./requestUser";
 
 interface RecipeControllerDependencies {
@@ -89,6 +88,7 @@ export default class RecipeController {
 
     updateRecipe: RequestHandler = async (req, res) => {
         const recipeId = req.params.id as string;
+        const person_id = getUserId(req);
         const {
             title,
             content,
@@ -98,22 +98,24 @@ export default class RecipeController {
             servings,
         } = req.body;
 
-        const updated = await this.updateRecipeUseCase.execute(recipeId, {
-            title,
-            content,
-            ingredients: newIngredients,
-            type_id,
-            cooking_time,
-            servings,
-        });
+        const updated = await this.updateRecipeUseCase.execute(
+            recipeId,
+            person_id,
+            {
+                title,
+                content,
+                ingredients: newIngredients,
+                type_id,
+                cooking_time,
+                servings,
+            },
+        );
 
         res.json(updated);
     };
 
     searchRecipes: RequestHandler = async (req, res) => {
-        const recipes = await this.searchRecipesUseCase.execute(
-            req.query as RecipeFilters,
-        );
+        const recipes = await this.searchRecipesUseCase.execute(req.query);
         res.json(recipes);
     };
 
@@ -121,14 +123,17 @@ export default class RecipeController {
         const person_id = getUserId(req);
         const recipes = await this.searchPersonRecipesUseCase.execute(
             person_id,
-            req.query as RecipeFilters,
+            req.query,
         );
 
         res.json(recipes);
     };
 
     deleteRecipe: RequestHandler = async (req, res) => {
-        await this.deleteRecipeUseCase.execute(req.params.id as string);
+        await this.deleteRecipeUseCase.execute(
+            req.params.id as string,
+            getUserId(req),
+        );
         res.json({ message: "Recipe successfully deleted" });
     };
 

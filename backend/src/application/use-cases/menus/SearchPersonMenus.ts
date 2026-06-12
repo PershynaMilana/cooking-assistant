@@ -1,15 +1,16 @@
 import { idSchema } from "@application/validation/common.schemas";
+import { menuFiltersSchema } from "@application/validation/menu.schemas";
 import { validate } from "@application/validation/validate";
 import type { MenuRepository } from "@domain/repositories/MenuRepository";
-import type { MenuFilters } from "./menu.types";
 
 export default class SearchPersonMenus {
     constructor(
         private menuRepository: Pick<MenuRepository, "searchByPerson">,
     ) {}
 
-    async execute(personId: number, filters: MenuFilters): Promise<unknown[]> {
+    async execute(personId: number, filters: unknown): Promise<unknown[]> {
         const validPersonId = validate(idSchema, personId);
-        return this.menuRepository.searchByPerson(validPersonId, filters);
+        const validFilters = validate(menuFiltersSchema, filters);
+        return this.menuRepository.searchByPerson(validPersonId, validFilters);
     }
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+    idListStringSchema,
     idSchema,
     nonEmptyStringSchema,
     optionalStringSchema,
@@ -22,4 +23,9 @@ export const createMenuSchema = z.object({
 
 export const updateMenuSchema = createMenuSchema.omit({
     personId: true,
+});
+
+export const menuFiltersSchema = z.object({
+    menu_name: optionalStringSchema("Menu name"),
+    category_ids: idListStringSchema("Category IDs").optional(),
 });

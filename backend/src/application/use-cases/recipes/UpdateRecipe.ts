@@ -11,12 +11,18 @@ export default class UpdateRecipe {
 
     async execute(
         id: string | number,
+        personId: number,
         input: RecipeUpdateInput,
     ): Promise<unknown> {
         const recipeId = validate(idSchema, id);
+        const validPersonId = validate(idSchema, personId);
         const data = validate(updateRecipeSchema, input);
         const recipe = Recipe.forUpdate(data);
-        const updated = await this.recipeRepository.update(recipeId, recipe);
+        const updated = await this.recipeRepository.update(
+            recipeId,
+            validPersonId,
+            recipe,
+        );
         if (!updated) {
             throw new NotFoundError("Recipe not found");
         }

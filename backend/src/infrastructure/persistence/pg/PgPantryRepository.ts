@@ -126,14 +126,16 @@ export default class PgPantryRepository implements PantryRepository {
                     ingredient.quantity_person_ingradient - currentQuantity;
 
                 if (addedQuantity > 0) {
+                    // an increase is a purchase: upsert the pantry row and log it
                     await client.query(
-                        `UPDATE person_ingredients
-           SET quantity_person_ingradient = $1, purchase_date = NOW()
-           WHERE person_id = $2 AND ingredient_id = $3`,
+                        `INSERT INTO person_ingredients (person_id, ingredient_id, quantity_person_ingradient, purchase_date)
+           VALUES ($1, $2, $3, NOW())
+           ON CONFLICT (person_id, ingredient_id)
+           DO UPDATE SET quantity_person_ingradient = $3, purchase_date = NOW()`,
                         [
-                            ingredient.quantity_person_ingradient,
                             userId,
                             ingredient.id,
+                            ingredient.quantity_person_ingradient,
                         ],
                     );
 
@@ -141,6 +143,18 @@ export default class PgPantryRepository implements PantryRepository {
                         `INSERT INTO ingredient_purchases (person_id, ingredient_id, quantity, purchase_date)
            VALUES ($1, $2, $3, NOW())`,
                         [userId, ingredient.id, addedQuantity],
+                    );
+                } else if (addedQuantity < 0) {
+                    // a decrease is consumption: update the stock without logging a purchase
+                    await client.query(
+                        `UPDATE person_ingredients
+           SET quantity_person_ingradient = $1
+           WHERE person_id = $2 AND ingredient_id = $3`,
+                        [
+                            ingredient.quantity_person_ingradient,
+                            userId,
+                            ingredient.id,
+                        ],
                     );
                 }
             }

@@ -80,7 +80,19 @@ describe("user routes", () => {
             password: "secret",
         });
 
-        expect(res.status).toBe(404);
-        expect(res.body).toEqual({ error: "User not found" });
+        expect(res.status).toBe(401);
+        expect(res.body).toEqual({ error: "Invalid login or password" });
+    });
+
+    it("should return a 400 error body for malformed JSON", async () => {
+        const { app } = buildTestApp();
+
+        const res = await request(app)
+            .post("/api/login")
+            .set("Content-Type", "application/json")
+            .send('{"login": "bob",');
+
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({ error: expect.any(String) });
     });
 });

@@ -34,11 +34,11 @@ export default class PgRecipeRepository implements RecipeRepository {
 
             const recipeId = newRecipe.rows[0].id;
 
-            for (const { id, quantity } of ingredients) {
+            for (const { id, quantity_recipe_ingredients } of ingredients) {
                 await client.query(
                     `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
              VALUES ($1, $2, $3)`,
-                    [recipeId, id, quantity || 1],
+                    [recipeId, id, quantity_recipe_ingredients],
                 );
             }
 
@@ -94,6 +94,7 @@ export default class PgRecipeRepository implements RecipeRepository {
 
     async update(
         recipeId: string | number,
+        personId: number,
         {
             title,
             content,
@@ -109,8 +110,16 @@ export default class PgRecipeRepository implements RecipeRepository {
 
             const result = await client.query(
                 `UPDATE recipes SET title = $1, content = $2, type_id = $3, cooking_time = $4, servings = $5
-         WHERE id = $6 RETURNING *`,
-                [title, content, type_id, cooking_time, servings, recipeId],
+         WHERE id = $6 AND person_id = $7 RETURNING *`,
+                [
+                    title,
+                    content,
+                    type_id,
+                    cooking_time,
+                    servings,
+                    recipeId,
+                    personId,
+                ],
             );
 
             if (result.rowCount === 0) {
@@ -127,7 +136,7 @@ export default class PgRecipeRepository implements RecipeRepository {
                 await client.query(
                     `INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity_recipe_ingredients)
              VALUES ($1, $2, $3)`,
-                    [recipeId, id, quantity_recipe_ingredients || 1],
+                    [recipeId, id, quantity_recipe_ingredients],
                 );
             }
 
@@ -293,10 +302,23 @@ export default class PgRecipeRepository implements RecipeRepository {
         return recipes.rows;
     }
 
-    async deleteById(recipeId: string | number): Promise<boolean> {
+    async deleteById(
+        recipeId: string | number,
+        personId: number,
+    ): Promise<boolean> {
         const client = await this.pool.connect();
         try {
             await client.query("BEGIN");
+
+            const owned = await client.query(
+                `SELECT id FROM recipes WHERE id = $1 AND person_id = $2 FOR UPDATE`,
+                [recipeId, personId],
+            );
+
+            if (owned.rowCount === 0) {
+                await client.query("ROLLBACK");
+                return false;
+            }
 
             await client.query(`DELETE FROM menu_recipe WHERE recipe_id = $1`, [
                 recipeId,

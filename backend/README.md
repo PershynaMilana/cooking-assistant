@@ -52,7 +52,8 @@ CORS_ORIGIN=http://localhost:5173
 
 `JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
 tokens) and [src/infrastructure/security/JwtTokenService.ts](src/infrastructure/security/JwtTokenService.ts)
-(signs them at login). Without it, login throws and every protected route returns 403.
+(signs them at login). It must be at least 32 characters (validated on startup). Without it, login and
+every protected route return a 500 configuration error.
 The rest of the env is validated with zod on startup; invalid ports or logger levels fail fast with a
 clear configuration error. `LOG_LEVEL` controls the pino logger level and defaults to `info` when unset.
 

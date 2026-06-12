@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-function toNumber(value: unknown): unknown {
+export function toNumber(value: unknown): unknown {
     const isEmptyInput = value === undefined || value === null || value === "";
 
     if (isEmptyInput) {
@@ -55,4 +55,15 @@ export function positiveIntegerSchema(field: string) {
     return numberSchema(field)
         .int(`${field} must be an integer`)
         .positive(`${field} must be positive`);
+}
+
+export function idListStringSchema(field: string) {
+    return z
+        .string({
+            invalid_type_error: `${field} must be a string`,
+        })
+        .regex(
+            /^\d+(,\d+)*$/,
+            `${field} must be a comma-separated list of IDs`,
+        );
 }

@@ -33,7 +33,10 @@ const envSchema = z.object({
     DB_PORT: envNumberSchema(5432),
     DB_NAME: envStringSchema("cooking_helper"),
     CORS_ORIGIN: envStringSchema("http://localhost:5173"),
-    JWT_SECRET_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
+    JWT_SECRET_KEY: z.preprocess(
+        emptyToUndefined,
+        z.string().min(32, "must be at least 32 characters").optional(),
+    ),
     LOG_LEVEL: z
         .preprocess(
             emptyToUndefined,

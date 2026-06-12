@@ -1,22 +1,34 @@
 import { ValidationError } from "@domain/errors/AppError";
 
-export interface RecipeIngredient {
+// raw request shape; validation unifies both quantity field names into quantity_recipe_ingredients
+export interface RecipeIngredientInput {
     id: number;
     quantity?: number;
     quantity_recipe_ingredients?: number;
+}
+
+export interface RecipeIngredient {
+    id: number;
+    quantity_recipe_ingredients: number;
 }
 
 export interface RecipeCreationInput {
     title?: string;
     content?: string;
     person_id?: number;
-    ingredients: RecipeIngredient[];
+    ingredients: RecipeIngredientInput[];
     type_id?: number;
     cooking_time?: number;
     servings?: number;
 }
 
 export type RecipeUpdateInput = Omit<RecipeCreationInput, "person_id">;
+
+export type RecipeCreationData = Omit<RecipeCreationInput, "ingredients"> & {
+    ingredients: RecipeIngredient[];
+};
+
+export type RecipeUpdateData = Omit<RecipeCreationData, "person_id">;
 
 function validateIngredients(ingredients: RecipeIngredient[]): void {
     if (!Array.isArray(ingredients) || ingredients.length === 0) {
@@ -47,7 +59,7 @@ export class Recipe {
         type_id,
         cooking_time,
         servings,
-    }: RecipeCreationInput): Recipe {
+    }: RecipeCreationData): Recipe {
         validateIngredients(ingredients);
 
         return new Recipe({
@@ -68,7 +80,7 @@ export class Recipe {
         type_id,
         cooking_time,
         servings,
-    }: RecipeUpdateInput): Recipe {
+    }: RecipeUpdateData): Recipe {
         if (!title || !content) {
             throw new ValidationError("Title and content cannot be empty");
         }

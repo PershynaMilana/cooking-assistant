@@ -22,6 +22,25 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.25 - 2026-06-12
+
+Backend:
+- Security: recipes and menus can now be edited and deleted only by their owner; a request against
+  someone else's recipe or menu returns 404. Deleting a recipe type still removes all recipes of that
+  type, and no longer fails with a server error when such a recipe is part of a menu.
+- Login no longer reveals whether a login exists: unknown login and wrong password both return the
+  same 401 "Invalid login or password". Registering an already taken login returns a clear 409 instead
+  of a server error. Server errors no longer expose internal details to the client.
+- Malformed list filters (recipe and menu search) are rejected with a clear 400 error instead of
+  failing with a server error, and searching menus by a name containing "%" works correctly.
+- Pantry fixes: lowering an ingredient quantity is now saved (previously it was silently ignored),
+  and pantry and purchase quantities must be at least 1 (a zero-quantity ingredient simply should not
+  exist in the pantry - remove it instead). Recipe ingredient amounts equal to 0 are rejected too, and
+  the amount field is accepted under either of its two historical names on both create and update.
+- Reliability: a dropped idle database connection no longer crashes the server, and frequent lookups
+  got database indexes. `JWT_SECRET_KEY` must now be at least 32 characters (checked at startup).
+
+
 ## 1.24 - 2026-06-11
 
 Backend:

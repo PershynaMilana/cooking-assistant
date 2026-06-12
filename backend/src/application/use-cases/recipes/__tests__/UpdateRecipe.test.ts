@@ -29,20 +29,28 @@ describe("UpdateRecipe", () => {
         const updatedRecipe = { id: 12, ...input };
         recipeRepository.update.mockResolvedValue(updatedRecipe);
 
-        const result = await useCase.execute(12, input);
-        const [id, recipe] = recipeRepository.update.mock.calls[0];
+        const result = await useCase.execute(12, 7, input);
+        const [id, personId, recipe] = recipeRepository.update.mock.calls[0];
 
         expect(id).toBe(12);
+        expect(personId).toBe(7);
         expect(recipe).toBeInstanceOf(Recipe);
-        expect(recipe).toMatchObject(input);
+        expect(recipe).toMatchObject({
+            title: input.title,
+            content: input.content,
+            ingredients: [{ id: 3, quantity_recipe_ingredients: 2 }],
+            type_id: input.type_id,
+            cooking_time: input.cooking_time,
+            servings: input.servings,
+        });
         expect(result).toEqual(updatedRecipe);
     });
 
-    it("should throw a 404 NotFoundError when the recipe does not exist", async () => {
+    it("should throw a 404 NotFoundError when the recipe does not belong to the user", async () => {
         const { useCase, recipeRepository } = setup();
         recipeRepository.update.mockResolvedValue(null);
 
-        const error = await catchError(useCase.execute(12, makeInput()));
+        const error = await catchError(useCase.execute(12, 7, makeInput()));
 
         expect(error).toBeAppError(NotFoundError, "Recipe not found", 404);
     });
@@ -51,7 +59,7 @@ describe("UpdateRecipe", () => {
         const { useCase, recipeRepository } = setup();
 
         const error = await catchError(
-            useCase.execute(12, makeInput({ title: "" })),
+            useCase.execute(12, 7, makeInput({ title: "" })),
         );
 
         expect(error).toBeAppError(

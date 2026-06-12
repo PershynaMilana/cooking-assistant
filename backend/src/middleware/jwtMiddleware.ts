@@ -20,15 +20,10 @@ const authenticateToken: RequestHandler = (req, res, next) => {
         return;
     }
 
-    let secret: string;
-    try {
-        secret = requireJwtSecret();
-    } catch {
-        res.status(403).json({ error: "Token is invalid or expired" });
-        return;
-    }
+    // a missing secret is a server misconfiguration: the AppError(500) propagates to errorHandler
+    const secret = requireJwtSecret();
 
-    jwt.verify(token, secret, (err, decoded) => {
+    jwt.verify(token, secret, { algorithms: ["HS256"] }, (err, decoded) => {
         if (err || !isUserPayload(decoded)) {
             res.status(403).json({ error: "Token is invalid or expired" });
             return;
