@@ -10,6 +10,17 @@ function toMenuFilters(filters: unknown): MenuFilters {
     return (filters ?? {}) as MenuFilters;
 }
 
+// the current frontend pre-encodes menu_name before axios encodes the query again,
+// so the value arrives still encoded once; decode defensively (never throw on a
+// literal "%") until the frontend refactor drops its encodeURIComponent calls
+function decodeMenuName(value: string): string {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return value;
+    }
+}
+
 export default class PgMenuRepository implements MenuRepository {
     constructor(private pool: Pool) {}
 
@@ -17,7 +28,7 @@ export default class PgMenuRepository implements MenuRepository {
         let { menu_name } = toMenuFilters(filters);
         const { category_ids } = toMenuFilters(filters);
         if (menu_name) {
-            menu_name = decodeURIComponent(menu_name);
+            menu_name = decodeMenuName(menu_name);
         }
 
         let query = `
@@ -90,9 +101,10 @@ export default class PgMenuRepository implements MenuRepository {
 
     async update(
         id: string | number,
+        personId: number,
         { menuTitle, menuContent, categoryId }: Menu,
         recipeIds: number[],
-    ): Promise<void> {
+    ): Promise<boolean> {
         const client = await this.pool.connect();
 
         try {
@@ -101,28 +113,34 @@ export default class PgMenuRepository implements MenuRepository {
             const updateMenuQuery = `
       UPDATE menu
       SET menu_title = $1, menu_content = $2, category_id = $3
-      WHERE menu_id = $4
+      WHERE menu_id = $4 AND person_id = $5
     `;
-            await client.query(updateMenuQuery, [
+            const result = await client.query(updateMenuQuery, [
                 menuTitle,
                 menuContent,
                 categoryId,
                 id,
+                personId,
             ]);
+
+            if (result.rowCount === 0) {
+                await client.query("ROLLBACK");
+                return false;
+            }
 
             const deleteRecipesQuery =
                 "DELETE FROM menu_recipe WHERE menu_id = $1";
             await client.query(deleteRecipesQuery, [id]);
 
-            const addRecipesPromises = recipeIds.map((recipeId) => {
-                return client.query(
+            for (const recipeId of recipeIds) {
+                await client.query(
                     "INSERT INTO menu_recipe (menu_id, recipe_id) VALUES ($1, $2)",
                     [id, recipeId],
                 );
-            });
-            await Promise.all(addRecipesPromises);
+            }
 
             await client.query("COMMIT");
+            return true;
         } catch (error) {
             await client.query("ROLLBACK");
             throw error;
@@ -209,24 +227,29 @@ export default class PgMenuRepository implements MenuRepository {
         return { menu, recipes: recipesWithDetails };
     }
 
-    async deleteById(id: string | number): Promise<boolean> {
+    async deleteById(id: string | number, personId: number): Promise<boolean> {
+        // menu_recipe is deleted explicitly: databases adopted from the legacy
+        // database.sql carry a second menu_id FK without ON DELETE CASCADE,
+        // so relying on the cascade would fail there
         const client = await this.pool.connect();
 
         try {
             await client.query("BEGIN");
 
-            const deleteMenuRecipeQuery =
-                "DELETE FROM menu_recipe WHERE menu_id = $1";
-            await client.query(deleteMenuRecipeQuery, [id]);
+            const owned = await client.query(
+                "SELECT menu_id FROM menu WHERE menu_id = $1 AND person_id = $2 FOR UPDATE",
+                [id, personId],
+            );
 
-            const deleteMenuQuery =
-                "DELETE FROM menu WHERE menu_id = $1 RETURNING menu_id";
-            const result = await client.query(deleteMenuQuery, [id]);
-
-            if (result.rowCount === 0) {
-                await client.query("COMMIT");
+            if (owned.rowCount === 0) {
+                await client.query("ROLLBACK");
                 return false;
             }
+
+            await client.query("DELETE FROM menu_recipe WHERE menu_id = $1", [
+                id,
+            ]);
+            await client.query("DELETE FROM menu WHERE menu_id = $1", [id]);
 
             await client.query("COMMIT");
             return true;
@@ -242,7 +265,7 @@ export default class PgMenuRepository implements MenuRepository {
         let { menu_name } = toMenuFilters(filters);
         const { category_ids } = toMenuFilters(filters);
         if (menu_name) {
-            menu_name = decodeURIComponent(menu_name);
+            menu_name = decodeMenuName(menu_name);
         }
 
         let query = `

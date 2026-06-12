@@ -13,6 +13,7 @@ backend/coverage
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
 
 # Local secrets - keep .env out of git, commit .env.example instead
 .env

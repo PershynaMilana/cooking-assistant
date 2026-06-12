@@ -8,9 +8,13 @@ export default class DeleteRecipe {
         private recipeRepository: Pick<RecipeRepository, "deleteById">,
     ) {}
 
-    async execute(id: string | number): Promise<void> {
+    async execute(id: string | number, personId: number): Promise<void> {
         const recipeId = validate(idSchema, id);
-        const deleted = await this.recipeRepository.deleteById(recipeId);
+        const validPersonId = validate(idSchema, personId);
+        const deleted = await this.recipeRepository.deleteById(
+            recipeId,
+            validPersonId,
+        );
         if (!deleted) {
             throw new NotFoundError("Recipe not found");
         }

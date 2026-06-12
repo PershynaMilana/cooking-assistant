@@ -1,5 +1,5 @@
 import LoginUser from "@application/use-cases/users/LoginUser";
-import { NotFoundError, UnauthorizedError } from "@domain/errors/AppError";
+import { UnauthorizedError } from "@domain/errors/AppError";
 import { catchError } from "@test/helpers/assertions";
 
 function setup() {
@@ -25,13 +25,17 @@ function makeCredentials(overrides = {}) {
 }
 
 describe("LoginUser", () => {
-    it("should throw a 404 NotFoundError when the user does not exist", async () => {
+    it("should throw a 401 UnauthorizedError when the user does not exist", async () => {
         const { useCase, userRepository } = setup();
         userRepository.findByLogin.mockResolvedValue(null);
 
         const error = await catchError(useCase.execute(makeCredentials()));
 
-        expect(error).toBeAppError(NotFoundError, "User not found", 404);
+        expect(error).toBeAppError(
+            UnauthorizedError,
+            "Invalid login or password",
+            401,
+        );
     });
 
     it("should throw a 401 UnauthorizedError when the password is wrong", async () => {
@@ -44,7 +48,11 @@ describe("LoginUser", () => {
 
         const error = await catchError(useCase.execute(makeCredentials()));
 
-        expect(error).toBeAppError(UnauthorizedError, "Wrong password", 401);
+        expect(error).toBeAppError(
+            UnauthorizedError,
+            "Invalid login or password",
+            401,
+        );
     });
 
     it("should return a token for valid credentials", async () => {

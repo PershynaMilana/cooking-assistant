@@ -6,9 +6,10 @@ export interface MenuRepository {
     findByIdWithRecipes(id: string | number): Promise<unknown | null>;
     update(
         id: string | number,
+        personId: number,
         menu: Menu,
         recipeIds: number[],
-    ): Promise<unknown>;
-    deleteById(id: string | number): Promise<unknown | null>;
+    ): Promise<boolean>;
+    deleteById(id: string | number, personId: number): Promise<unknown | null>;
     searchByPerson(personId: number, filters: unknown): Promise<unknown[]>;
 }

@@ -4,6 +4,7 @@ import helmet from "helmet";
 import pinoHttp from "pino-http";
 
 import type { Controllers } from "./composition-root";
+import { config } from "@config/env";
 import { logger } from "@config/logger";
 import errorHandler from "@middleware/errorHandler";
 import createHealthRouter from "@routes/health.routes";
@@ -27,7 +28,7 @@ export function createApp(controllers: Controllers): Express {
     );
     app.use(
         cors({
-            origin: "http://localhost:5173",
+            origin: config.corsOrigin,
             methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
             credentials: true,
         }),

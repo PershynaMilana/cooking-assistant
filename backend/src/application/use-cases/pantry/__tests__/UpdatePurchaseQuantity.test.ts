@@ -32,16 +32,29 @@ describe("UpdatePurchaseQuantity", () => {
         expect(error).toBeAppError(NotFoundError, "Purchase not found.", 404);
     });
 
+    it("should throw a 400 ValidationError when quantity is below 1", async () => {
+        const { useCase, pantryRepository } = setup();
+
+        const error = await catchError(useCase.execute(7, 12, 0));
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "Quantity must be at least 1",
+            400,
+        );
+        expect(pantryRepository.updatePurchaseQuantity).not.toHaveBeenCalled();
+    });
+
     it("should update the purchase quantity when the purchase exists", async () => {
         const { useCase, pantryRepository } = setup();
         pantryRepository.updatePurchaseQuantity.mockResolvedValue(true);
 
-        const result = await useCase.execute(7, 12, 0);
+        const result = await useCase.execute(7, 12, 5);
 
         expect(pantryRepository.updatePurchaseQuantity).toHaveBeenCalledWith(
             7,
             12,
-            0,
+            5,
         );
         expect(result).toBeUndefined();
     });

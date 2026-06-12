@@ -49,6 +49,10 @@ export default class PgRecipeTypeRepository implements RecipeTypeRepository {
             await client.query("BEGIN");
 
             await client.query(
+                "DELETE FROM menu_recipe WHERE recipe_id IN (SELECT id FROM recipes WHERE type_id = $1)",
+                [id],
+            );
+            await client.query(
                 "DELETE FROM recipe_ingredients WHERE recipe_id IN (SELECT id FROM recipes WHERE type_id = $1)",
                 [id],
             );

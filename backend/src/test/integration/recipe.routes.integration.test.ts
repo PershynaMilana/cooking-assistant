@@ -79,30 +79,46 @@ describe("recipe routes", () => {
         expect(res.body).toEqual(ingredients);
     });
 
-    it("should update a recipe", async () => {
+    it("should update a recipe owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         const updatedRecipe = { id: 12, title: "Tomato soup" };
         deps.recipeRepository.update.mockResolvedValue(updatedRecipe);
 
         const res = await request(app)
             .put("/api/recipe/12")
-            .set("Authorization", authHeader())
+            .set("Authorization", authHeader(7))
             .send(makeRecipeBody());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(updatedRecipe);
+        expect(deps.recipeRepository.update.mock.calls[0][0]).toBe(12);
+        expect(deps.recipeRepository.update.mock.calls[0][1]).toBe(7);
     });
 
-    it("should delete a recipe", async () => {
+    it("should return 404 when updating a recipe of another user", async () => {
+        const { app, deps } = buildTestApp();
+        deps.recipeRepository.update.mockResolvedValue(null);
+
+        const res = await request(app)
+            .put("/api/recipe/12")
+            .set("Authorization", authHeader(7))
+            .send(makeRecipeBody());
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: "Recipe not found" });
+    });
+
+    it("should delete a recipe owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         deps.recipeRepository.deleteById.mockResolvedValue(true);
 
         const res = await request(app)
             .delete("/api/recipe/12")
-            .set("Authorization", authHeader());
+            .set("Authorization", authHeader(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ message: "Recipe successfully deleted" });
+        expect(deps.recipeRepository.deleteById).toHaveBeenCalledWith(12, 7);
     });
 
     it("should search recipes by filters", async () => {
@@ -116,6 +132,20 @@ describe("recipe routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(recipes);
+    });
+
+    it("should return a 400 error body for an invalid filter", async () => {
+        const { app, deps } = buildTestApp();
+
+        const res = await request(app)
+            .get("/api/recipes-by-filters?type_ids=abc")
+            .set("Authorization", authHeader());
+
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({
+            error: "type_ids: Type IDs must be a comma-separated list of IDs",
+        });
+        expect(deps.recipeRepository.search).not.toHaveBeenCalled();
     });
 
     it("should search person recipes by the authenticated user", async () => {

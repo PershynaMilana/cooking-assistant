@@ -1,4 +1,4 @@
-import { NotFoundError, UnauthorizedError } from "@domain/errors/AppError";
+import { UnauthorizedError } from "@domain/errors/AppError";
 import type { PasswordHasher } from "@application/ports/PasswordHasher";
 import type { TokenService } from "@application/ports/TokenService";
 import { validate } from "@application/validation/validate";
@@ -19,9 +19,10 @@ export default class LoginUser {
 
     async execute(input: LoginInput): Promise<{ token: string }> {
         const data = validate(loginUserSchema, input);
+        // same error for unknown login and wrong password to prevent login enumeration
         const user = await this.userRepository.findByLogin(data.login);
         if (!user) {
-            throw new NotFoundError("User not found");
+            throw new UnauthorizedError("Invalid login or password");
         }
 
         const isPasswordValid = await this.passwordHasher.compare(
@@ -30,7 +31,7 @@ export default class LoginUser {
         );
 
         if (!isPasswordValid) {
-            throw new UnauthorizedError("Wrong password");
+            throw new UnauthorizedError("Invalid login or password");
         }
 
         const token = this.tokenService.generate(user.id);

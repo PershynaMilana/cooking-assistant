@@ -7,7 +7,7 @@ serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-rest
 
 - Node.js + TypeScript + Express 5 - HTTP server
 - PostgreSQL via `pg` (connection pool, raw SQL, no ORM)
-- jsonwebtoken + bcrypt - auth and password hashing
+- jsonwebtoken + bcryptjs - auth and password hashing
 - helmet + express-rate-limit - security headers and brute-force guard on auth
 - pino + pino-http - structured app and request logging
 - zod - request and environment validation
@@ -47,11 +47,13 @@ DB_PORT=5432
 DB_NAME=cooking_helper
 PORT=8080
 LOG_LEVEL=info
+CORS_ORIGIN=http://localhost:5173
 ```
 
 `JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
 tokens) and [src/infrastructure/security/JwtTokenService.ts](src/infrastructure/security/JwtTokenService.ts)
-(signs them at login). Without it, login throws and every protected route returns 403.
+(signs them at login). It must be at least 32 characters (validated on startup). Without it, login and
+every protected route return a 500 configuration error.
 The rest of the env is validated with zod on startup; invalid ports or logger levels fail fast with a
 clear configuration error. `LOG_LEVEL` controls the pino logger level and defaults to `info` when unset.
 
@@ -159,8 +161,8 @@ migrations are the single source of truth for the schema (its old content is in 
 
 ### 4. CORS - [src/app.ts](src/app.ts)
 
-Hardcoded to `origin: "http://localhost:5173"`. If the frontend runs from a different origin, update
-the app factory there.
+The allowed origin comes from the `CORS_ORIGIN` env var (default `http://localhost:5173`). Set it to the
+frontend's URL for non-local deploys; no code change needed.
 
 ## Structure
 
@@ -231,7 +233,7 @@ routers, and then the error handler in that order.
   Entities such as `Recipe` and `Menu` keep domain invariants like non-empty ingredient/recipe lists, so
   each validation rule lives in one layer only.
 - **infrastructure/persistence/pg/** - concrete repositories; ALL SQL; constructor takes the `pg.Pool`.
-  **infrastructure/security/** - bcrypt + jwt adapters.
+  **infrastructure/security/** - bcryptjs + jwt adapters.
 
 Errors: a use case throws a domain error -> Express 5 forwards the rejected promise -> `errorHandler`
 logs through pino and replies `{ error: <msg> }` with `err.status || 500`. Every error body uses

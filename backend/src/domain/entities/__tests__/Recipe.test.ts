@@ -10,7 +10,7 @@ function makeCreationInput(overrides: Record<string, unknown> = {}) {
         title: "Tomato soup",
         content: "Boil tomatoes with stock",
         person_id: 7,
-        ingredients: [{ id: 3, quantity: 2 }],
+        ingredients: [{ id: 3, quantity_recipe_ingredients: 2 }],
         type_id: 1,
         cooking_time: 30,
         servings: 4,
@@ -52,7 +52,9 @@ describe("Recipe", () => {
     });
 
     it("should throw a 400 ValidationError when a creation ingredient has no id", () => {
-        const error = catchCreationError({ ingredients: [{ quantity: 2 }] });
+        const error = catchCreationError({
+            ingredients: [{ quantity_recipe_ingredients: 2 }],
+        });
 
         expect(error).toBeAppError(
             ValidationError,
@@ -117,7 +119,9 @@ describe("Recipe", () => {
 
     it("should throw a 400 ValidationError when an update ingredient has no id", () => {
         const error = catchUpdateError(
-            makeCreationInput({ ingredients: [{ quantity: 2 }] }),
+            makeCreationInput({
+                ingredients: [{ quantity_recipe_ingredients: 2 }],
+            }),
         );
 
         expect(error).toBeAppError(

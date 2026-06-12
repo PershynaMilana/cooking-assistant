@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
+import { AppError } from "@domain/errors/AppError";
+import { catchSyncError } from "@test/helpers/assertions";
 import authenticateToken from "../jwtMiddleware";
 
 function makeResponse() {
@@ -73,7 +75,7 @@ describe("jwtMiddleware", () => {
         expect(next).not.toHaveBeenCalled();
     });
 
-    it("should return 403 when JWT secret is missing", () => {
+    it("should throw a 500 AppError when JWT secret is missing", () => {
         const token = jwt.sign({ id: 7 }, process.env.JWT_SECRET_KEY as string);
         delete process.env.JWT_SECRET_KEY;
         const req = {
@@ -82,12 +84,14 @@ describe("jwtMiddleware", () => {
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
 
-        authenticateToken(req, res, next);
+        const error = catchSyncError(() => authenticateToken(req, res, next));
 
-        expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+        expect(error).toBeInstanceOf(AppError);
+        expect(error).toMatchObject({
+            message: "JWT secret is not configured",
+            status: 500,
         });
+        expect(res.status).not.toHaveBeenCalled();
         expect(next).not.toHaveBeenCalled();
     });
 

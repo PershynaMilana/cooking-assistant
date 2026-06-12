@@ -25,6 +25,21 @@ describe("AddUserIngredients", () => {
         expect(pantryRepository.addIngredients).not.toHaveBeenCalled();
     });
 
+    it("should throw a 400 ValidationError when a quantity is below 1", async () => {
+        const { useCase, pantryRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(7, [{ id: 3, quantity_person_ingradient: 0 }]),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "0.quantity_person_ingradient: Quantity must be at least 1",
+            400,
+        );
+        expect(pantryRepository.addIngredients).not.toHaveBeenCalled();
+    });
+
     it("should add user ingredients when ingredients are an array", async () => {
         const { useCase, pantryRepository } = setup();
         const ingredients = [{ id: 3, quantity_person_ingradient: 2 }];

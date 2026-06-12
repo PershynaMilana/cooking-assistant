@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.23.0",
+  "version": "1.25.0",
   "private": true,
   "scripts": {
     "prepare": "husky",

@@ -7,6 +7,7 @@ declare global {
             DB_HOST?: string;
             DB_PORT?: string;
             DB_NAME?: string;
+            CORS_ORIGIN?: string;
             PORT?: string;
             LOG_LEVEL?: string;
         }

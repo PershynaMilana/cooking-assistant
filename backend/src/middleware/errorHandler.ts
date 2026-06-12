@@ -21,8 +21,9 @@ function getErrorStatus(err: unknown): number {
     return 500;
 }
 
-function getErrorMessage(err: unknown): string {
-    if (err instanceof Error) {
+function getErrorMessage(err: unknown, status: number): string {
+    // never leak internals (pg errors, config details) on 5xx responses, AppError included
+    if (status < 500 && err instanceof Error) {
         return err.message || "Server error";
     }
 
@@ -36,7 +37,8 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
         return _next(err);
     }
 
-    res.status(getErrorStatus(err)).json({ error: getErrorMessage(err) });
+    const status = getErrorStatus(err);
+    res.status(status).json({ error: getErrorMessage(err, status) });
 };
 
 export default errorHandler;

@@ -1,4 +1,4 @@
-process.env.JWT_SECRET_KEY ??= "test-secret";
+process.env.JWT_SECRET_KEY ??= "test-secret-test-secret-test-secret";
 
 expect.extend({
     toBeAppError(

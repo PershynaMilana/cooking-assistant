@@ -6,9 +6,13 @@ import type { MenuRepository } from "@domain/repositories/MenuRepository";
 export default class DeleteMenu {
     constructor(private menuRepository: Pick<MenuRepository, "deleteById">) {}
 
-    async execute(id: string | number | null): Promise<void> {
+    async execute(id: string | number | null, personId: number): Promise<void> {
         const menuId = validate(idSchema, id);
-        const deleted = await this.menuRepository.deleteById(menuId);
+        const validPersonId = validate(idSchema, personId);
+        const deleted = await this.menuRepository.deleteById(
+            menuId,
+            validPersonId,
+        );
         if (!deleted) {
             throw new NotFoundError("Menu not found");
         }

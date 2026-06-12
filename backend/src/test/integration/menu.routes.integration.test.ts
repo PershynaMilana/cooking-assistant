@@ -66,29 +66,45 @@ describe("menu routes", () => {
         expect(res.body).toEqual(menu);
     });
 
-    it("should update a menu", async () => {
+    it("should update a menu owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
-        deps.menuRepository.update.mockResolvedValue(undefined);
+        deps.menuRepository.update.mockResolvedValue(true);
 
         const res = await request(app)
             .put("/api/menu/9")
-            .set("Authorization", authHeader())
+            .set("Authorization", authHeader(7))
             .send(makeMenuBody());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ message: "Menu updated successfully" });
+        expect(deps.menuRepository.update.mock.calls[0][0]).toBe(9);
+        expect(deps.menuRepository.update.mock.calls[0][1]).toBe(7);
     });
 
-    it("should delete a menu", async () => {
+    it("should return 404 when updating a menu of another user", async () => {
+        const { app, deps } = buildTestApp();
+        deps.menuRepository.update.mockResolvedValue(false);
+
+        const res = await request(app)
+            .put("/api/menu/9")
+            .set("Authorization", authHeader(7))
+            .send(makeMenuBody());
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: "Menu not found" });
+    });
+
+    it("should delete a menu owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         deps.menuRepository.deleteById.mockResolvedValue(true);
 
         const res = await request(app)
             .delete("/api/menu/9")
-            .set("Authorization", authHeader());
+            .set("Authorization", authHeader(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ message: "Menu deleted successfully" });
+        expect(deps.menuRepository.deleteById).toHaveBeenCalledWith(9, 7);
     });
 
     it("should search person menus by the authenticated user", async () => {
