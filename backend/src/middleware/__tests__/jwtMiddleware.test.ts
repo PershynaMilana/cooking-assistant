@@ -38,6 +38,23 @@ describe("jwtMiddleware", () => {
         expect(next).not.toHaveBeenCalled();
     });
 
+    it("should return 401 when the scheme is not Bearer", () => {
+        const token = jwt.sign({ id: 7 }, process.env.JWT_SECRET_KEY as string);
+        const req = {
+            headers: { authorization: `Token ${token}` },
+        } as Request;
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        authenticateToken(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: "No token, access denied",
+        });
+        expect(next).not.toHaveBeenCalled();
+    });
+
     it("should return 403 when token is invalid", () => {
         const req = {
             headers: { authorization: "Bearer broken-token" },

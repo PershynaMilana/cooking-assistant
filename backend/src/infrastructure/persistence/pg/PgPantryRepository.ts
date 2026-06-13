@@ -179,7 +179,7 @@ export default class PgPantryRepository implements PantryRepository {
             await client.query("BEGIN");
 
             const purchase = await client.query(
-                `SELECT * FROM ingredient_purchases WHERE id = $1 AND person_id = $2`,
+                `SELECT quantity, ingredient_id FROM ingredient_purchases WHERE id = $1 AND person_id = $2 FOR UPDATE`,
                 [purchaseId, userId],
             );
 
@@ -188,25 +188,22 @@ export default class PgPantryRepository implements PantryRepository {
                 return null;
             }
 
+            // apply the purchase edit as a delta on the pantry stock so prior
+            // consumption is preserved (recomputing as SUM of purchases would lose it)
+            const { quantity: oldQuantity, ingredient_id: ingredientId } =
+                purchase.rows[0];
+            const delta = quantity - oldQuantity;
+
             await client.query(
                 `UPDATE ingredient_purchases SET quantity = $1 WHERE id = $2`,
                 [quantity, purchaseId],
             );
 
-            const ingredientId = purchase.rows[0].ingredient_id;
-            const totalQuantityResult = await client.query(
-                `SELECT SUM(quantity) AS total_quantity FROM ingredient_purchases WHERE ingredient_id = $1 AND person_id = $2`,
-                [ingredientId, userId],
-            );
-
-            const totalQuantity =
-                totalQuantityResult.rows[0].total_quantity || 0;
-
             await client.query(
                 `UPDATE person_ingredients
-           SET quantity_person_ingradient = $1
+           SET quantity_person_ingradient = GREATEST(quantity_person_ingradient + $1, 0)
            WHERE person_id = $2 AND ingredient_id = $3`,
-                [totalQuantity, userId, ingredientId],
+                [delta, userId, ingredientId],
             );
 
             await client.query("COMMIT");

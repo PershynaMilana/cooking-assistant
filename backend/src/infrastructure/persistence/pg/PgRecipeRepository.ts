@@ -354,37 +354,41 @@ export default class PgRecipeRepository implements RecipeRepository {
     }
 
     async getStats(): Promise<unknown> {
-        const { rows: fastestRecipe } = await this.pool.query(
-            `SELECT r.*, rt.type_name as "typeName"
+        // the six aggregates are independent, so run them in parallel
+        const [
+            { rows: fastestRecipe },
+            { rows: slowestRecipe },
+            { rows: typeStats },
+            { rows: recipesWithMostIngredients },
+            { rows: recipesWithLeastIngredients },
+            { rows: averageCookingTimes },
+        ] = await Promise.all([
+            this.pool.query(
+                `SELECT r.*, rt.type_name as "typeName"
            FROM recipes r
                   JOIN recipe_types rt ON r.type_id = rt.id
-           --ORDER BY r.cooking_time ASC LIMIT 1
            WHERE r.cooking_time = (
              SELECT MIN(cooking_time)
              FROM recipes
            )`,
-        );
-
-        const { rows: slowestRecipe } = await this.pool.query(
-            `SELECT r.*, rt.type_name as "typeName"
+            ),
+            this.pool.query(
+                `SELECT r.*, rt.type_name as "typeName"
            FROM recipes r
                   JOIN recipe_types rt ON r.type_id = rt.id
-           --ORDER BY r.cooking_time DESC LIMIT 1
            WHERE r.cooking_time = (
              SELECT MAX(cooking_time)
              FROM recipes
            )`,
-        );
-
-        const { rows: typeStats } = await this.pool.query(
-            `SELECT rt.type_name as "typeName", COUNT(*) as count
+            ),
+            this.pool.query(
+                `SELECT rt.type_name as "typeName", COUNT(*) as count
            FROM recipes r
              JOIN recipe_types rt ON r.type_id = rt.id
            GROUP BY rt.type_name`,
-        );
-
-        const { rows: recipesWithMostIngredients } = await this.pool.query(
-            `SELECT r.*, COUNT(ri.ingredient_id) as ingredient_count
+            ),
+            this.pool.query(
+                `SELECT r.*, COUNT(ri.ingredient_id) as ingredient_count
            FROM recipes r
                   JOIN recipe_ingredients ri ON r.id = ri.recipe_id
            GROUP BY r.id
@@ -397,10 +401,9 @@ export default class PgRecipeRepository implements RecipeRepository {
                     GROUP BY r.id
                   ) subquery
            )`,
-        );
-
-        const { rows: recipesWithLeastIngredients } = await this.pool.query(
-            `SELECT r.*, COUNT(ri.ingredient_id) as ingredient_count
+            ),
+            this.pool.query(
+                `SELECT r.*, COUNT(ri.ingredient_id) as ingredient_count
            FROM recipes r
                   JOIN recipe_ingredients ri ON r.id = ri.recipe_id
            GROUP BY r.id
@@ -413,15 +416,15 @@ export default class PgRecipeRepository implements RecipeRepository {
                     GROUP BY r.id
                   ) subquery
            )`,
-        );
-
-        const { rows: averageCookingTimes } = await this.pool.query(
-            `SELECT rt.type_name as "typeName",
+            ),
+            this.pool.query(
+                `SELECT rt.type_name as "typeName",
               AVG(r.cooking_time) as "averageCookingTime"
          FROM recipes r
          JOIN recipe_types rt ON r.type_id = rt.id
          GROUP BY rt.type_name`,
-        );
+            ),
+        ]);
 
         return {
             fastestRecipe,

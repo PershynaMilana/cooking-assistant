@@ -46,6 +46,16 @@ describe("UpdateRecipe", () => {
         expect(result).toEqual(updatedRecipe);
     });
 
+    it("should accept servings sent as a numeric string", async () => {
+        const { useCase, recipeRepository } = setup();
+        recipeRepository.update.mockResolvedValue({ id: 12 });
+
+        await useCase.execute(12, 7, makeInput({ servings: "4" }));
+        const [, , recipe] = recipeRepository.update.mock.calls[0];
+
+        expect(recipe).toMatchObject({ servings: 4 });
+    });
+
     it("should throw a 404 NotFoundError when the recipe does not belong to the user", async () => {
         const { useCase, recipeRepository } = setup();
         recipeRepository.update.mockResolvedValue(null);

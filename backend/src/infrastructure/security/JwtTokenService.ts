@@ -7,6 +7,7 @@ export default class JwtTokenService implements TokenService {
     generate(id: number): string {
         return jwt.sign({ id }, requireJwtSecret(), {
             expiresIn: "24h",
+            algorithm: "HS256",
         });
     }
 }

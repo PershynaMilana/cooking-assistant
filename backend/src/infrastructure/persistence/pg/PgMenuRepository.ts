@@ -191,12 +191,15 @@ export default class PgMenuRepository implements MenuRepository {
     `;
         const recipeResult = await this.pool.query(recipeQuery, [id]);
 
-        const recipesWithDetails: unknown[] = [];
-        for (const recipe of recipeResult.rows) {
-            const recipeId = recipe.recipe_id;
+        const recipeIds = recipeResult.rows.map((recipe) => recipe.recipe_id);
 
+        // fetch missing ingredients for every recipe of the menu in one query
+        // (previously an N+1 loop with a query per recipe), then group in memory
+        const missingByRecipe = new Map<number, unknown[]>();
+        if (recipeIds.length > 0) {
             const missingIngredientsQuery = `
         SELECT
+          ri.recipe_id,
           i.name AS ingredient_name,
           GREATEST(ri.quantity_recipe_ingredients - COALESCE(pi.quantity_person_ingradient, 0), 0) AS missing_quantity,
           u.unit_name,
@@ -208,21 +211,31 @@ export default class PgMenuRepository implements MenuRepository {
           ON ri.ingredient_id = i.id
         LEFT JOIN unit_measurement u
           ON i.id_unit_measurement = u.id
-        WHERE ri.recipe_id = $2
-        GROUP BY i.name, ri.quantity_recipe_ingredients, pi.quantity_person_ingradient, u.unit_name, u.coefficient
+        WHERE ri.recipe_id = ANY($2)
+        GROUP BY ri.recipe_id, i.name, ri.quantity_recipe_ingredients, pi.quantity_person_ingradient, u.unit_name, u.coefficient
         HAVING GREATEST(ri.quantity_recipe_ingredients - COALESCE(pi.quantity_person_ingradient, 0), 0) > 0
       `;
             const missingIngredientsResult = await this.pool.query(
                 missingIngredientsQuery,
-                [menu.personid, recipeId],
+                [menu.personid, recipeIds],
             );
 
-            const recipeDetails = {
-                ...recipe,
-                missingIngredients: missingIngredientsResult.rows,
-            };
-            recipesWithDetails.push(recipeDetails);
+            for (const row of missingIngredientsResult.rows) {
+                const group = missingByRecipe.get(row.recipe_id) ?? [];
+                group.push({
+                    ingredient_name: row.ingredient_name,
+                    missing_quantity: row.missing_quantity,
+                    unit_name: row.unit_name,
+                    coefficient: row.coefficient,
+                });
+                missingByRecipe.set(row.recipe_id, group);
+            }
         }
+
+        const recipesWithDetails = recipeResult.rows.map((recipe) => ({
+            ...recipe,
+            missingIngredients: missingByRecipe.get(recipe.recipe_id) ?? [],
+        }));
 
         return { menu, recipes: recipesWithDetails };
     }

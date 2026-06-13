@@ -56,6 +56,21 @@ describe("UpdateMenu", () => {
         expect(error).toBeAppError(NotFoundError, "Menu not found", 404);
     });
 
+    it("should throw a 400 ValidationError when recipe ids are duplicated", async () => {
+        const { useCase, menuRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(9, 7, { ...makeInput(), recipeIds: [3, 3] }),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "recipeIds: Recipe IDs must be unique",
+            400,
+        );
+        expect(menuRepository.update).not.toHaveBeenCalled();
+    });
+
     it("should throw a 400 ValidationError and not update when input is invalid", async () => {
         const { useCase, menuRepository } = setup();
 
