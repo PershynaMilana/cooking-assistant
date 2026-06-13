@@ -25,6 +25,39 @@ describe("UpdateIngredientQuantities", () => {
         expect(pantryRepository.updateQuantities).not.toHaveBeenCalled();
     });
 
+    it("should throw a 400 ValidationError when a quantity is not an integer", async () => {
+        const { useCase, pantryRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(7, [{ id: 3, quantity_person_ingradient: 1.5 }]),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "0.quantity_person_ingradient: Quantity must be an integer",
+            400,
+        );
+        expect(pantryRepository.updateQuantities).not.toHaveBeenCalled();
+    });
+
+    it("should throw a 400 ValidationError when ingredient ids are duplicated", async () => {
+        const { useCase, pantryRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(7, [
+                { id: 3, quantity_person_ingradient: 2 },
+                { id: 3, quantity_person_ingradient: 5 },
+            ]),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "Ingredient IDs must be unique",
+            400,
+        );
+        expect(pantryRepository.updateQuantities).not.toHaveBeenCalled();
+    });
+
     it("should update user ingredient quantities when items are an array", async () => {
         const { useCase, pantryRepository } = setup();
         const items = [{ id: 3, quantity_person_ingradient: 2 }];

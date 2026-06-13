@@ -22,6 +22,17 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.27 - 2026-06-13
+
+Backend:
+- Fixed: editing a past purchase no longer overwrites the pantry stock with the sum of all
+  purchases - it now adjusts the stock by the change, so ingredients you have already used up
+  stay accounted for.
+- Authorization now accepts only the `Bearer` scheme; a token sent under any other scheme is
+  rejected with 401.
+- The statistics page and the menu detail view load faster (their database queries no longer run
+  one-by-one).
+
 ## 1.26 - 2026-06-13
 
 Backend:

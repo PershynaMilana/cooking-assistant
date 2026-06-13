@@ -13,9 +13,9 @@ function isUserPayload(
 }
 
 const authenticateToken: RequestHandler = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    const [scheme, token] = req.headers.authorization?.split(" ") ?? [];
 
-    if (!token) {
+    if (scheme !== "Bearer" || !token) {
         res.status(401).json({ error: "No token, access denied" });
         return;
     }
