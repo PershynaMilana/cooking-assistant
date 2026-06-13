@@ -47,6 +47,15 @@ describe("CreateRecipe", () => {
         expect(result).toEqual(createdRecipe);
     });
 
+    it("should accept servings sent as a numeric string", async () => {
+        const { useCase, recipeRepository } = setup();
+
+        await useCase.execute(makeInput({ servings: "4" }));
+        const recipe = recipeRepository.create.mock.calls[0][0];
+
+        expect(recipe).toMatchObject({ servings: 4 });
+    });
+
     it("should throw a 400 ValidationError when ingredient ids are duplicated", async () => {
         const { useCase, recipeRepository } = setup();
 

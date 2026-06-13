@@ -15,10 +15,14 @@ export const createMenuSchema = z.object({
     menuContent: optionalStringSchema("Menu content"),
     categoryId: positiveIntegerSchema("Category ID"),
     personId: idSchema,
-    recipeIds: z.array(recipeIdSchema, {
-        required_error: "Recipe IDs are required",
-        invalid_type_error: "Recipe IDs must be an array",
-    }),
+    recipeIds: z
+        .array(recipeIdSchema, {
+            required_error: "Recipe IDs are required",
+            invalid_type_error: "Recipe IDs must be an array",
+        })
+        .refine((ids) => new Set(ids).size === ids.length, {
+            message: "Recipe IDs must be unique",
+        }),
 });
 
 export const updateMenuSchema = createMenuSchema.omit({
