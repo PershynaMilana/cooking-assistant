@@ -46,6 +46,21 @@ describe("CreateMenu", () => {
         expect(result).toEqual(createdMenu);
     });
 
+    it("should throw a 400 ValidationError when recipe ids are duplicated", async () => {
+        const { useCase, menuRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(makeInput({ recipeIds: [3, 3] })),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "recipeIds: Recipe IDs must be unique",
+            400,
+        );
+        expect(menuRepository.create).not.toHaveBeenCalled();
+    });
+
     it("should throw a 400 ValidationError and not create when input is invalid", async () => {
         const { useCase, menuRepository } = setup();
 

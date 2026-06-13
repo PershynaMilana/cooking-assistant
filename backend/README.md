@@ -39,7 +39,7 @@ cp .env.example .env     # PowerShell: Copy-Item .env.example .env
 [.env.example](.env.example) lists every key:
 
 ```
-JWT_SECRET_KEY=your_long_random_secret_here
+JWT_SECRET_KEY=replace_with_a_random_string_of_at_least_32_characters
 DB_USER=postgres
 DB_PASSWORD=12345678
 DB_HOST=localhost

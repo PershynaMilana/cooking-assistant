@@ -116,7 +116,8 @@ export default class PgPantryRepository implements PantryRepository {
                 const { rows } = await client.query(
                     `SELECT quantity_person_ingradient
              FROM person_ingredients
-             WHERE person_id = $1 AND ingredient_id = $2`,
+             WHERE person_id = $1 AND ingredient_id = $2
+             FOR UPDATE`,
                     [userId, ingredient.id],
                 );
 

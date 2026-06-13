@@ -22,7 +22,21 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
-## 1.25 - 2026-06-12
+## 1.26 - 2026-06-13
+
+Backend:
+- Creating or editing a recipe now accepts the number of servings sent as text (the
+  way the current app sends it), instead of rejecting it with a validation error.
+- Adding pantry ingredients, updating their quantities, and building or editing a menu
+  now reject duplicate items in a single request with a clear 400 error.
+- Pantry quantities must be whole numbers: a fractional amount is rejected with a 400
+  error instead of failing with a server error.
+- Concurrent updates to the same pantry ingredient no longer race and lose changes.
+
+Project:
+- Documentation and release metadata fixes: the example JWT secret in the backend
+  README now meets the required minimum length, and the lockfile versions match the
+  current release.
 
 Backend:
 - Security: recipes and menus can now be edited and deleted only by their owner; a request against

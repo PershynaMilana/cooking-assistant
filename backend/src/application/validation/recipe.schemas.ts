@@ -43,7 +43,10 @@ export const createRecipeSchema = z.object({
         ),
     type_id: positiveIntegerSchema("Recipe type ID").optional(),
     cooking_time: positiveIntegerSchema("Cooking time").optional(),
-    servings: positiveIntegerSchema("Servings").optional(),
+    servings: z.preprocess(
+        toNumber,
+        positiveIntegerSchema("Servings").optional(),
+    ),
 });
 
 export const updateRecipeSchema = createRecipeSchema.omit({
