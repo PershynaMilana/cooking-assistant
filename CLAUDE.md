@@ -15,6 +15,7 @@ Two-app monorepo (no workspaces - each side has its own `package.json`):
 ## Common commands
 
 Preferred - from repository root ([package.json](package.json)):
+
 ```bash
 npm install              # installs root + auto-runs postinstall in backend & frontend
 npm start                # OR npm run dev - concurrently boots backend (8080) + frontend (5173)
@@ -27,6 +28,7 @@ The root `postinstall` hook (`npm --prefix backend install && npm --prefix front
 Per-app, if you need it directly:
 
 Backend ([backend/](backend/)):
+
 ```bash
 npm run dev        # tsx watch -> http://localhost:8080
 npm start          # tsx src/index.ts, no auto-reload
@@ -38,6 +40,7 @@ npm run seed       # load reference + sample data (idempotent)
 ```
 
 Frontend ([frontend/](frontend/)):
+
 ```bash
 npm run dev      # vite dev server -> http://localhost:5173
 npm run build    # tsc -b && vite build  (real type-check happens here)
@@ -48,6 +51,7 @@ npm run lint     # eslint .
 The backend has a Jest + ts-jest test suite (`npm --prefix backend test`, or `test:coverage`). The frontend has no tests yet.
 
 Backend test conventions (match these when adding tests):
+
 - Business-logic unit tests stay no DB, no Express. Use cases and domain entities are tested with fake repositories/ports built from `jest.fn()`; mock only what is necessary.
 - Middleware unit tests call the middleware directly with mocked `req`/`res`/`next`.
 - Supertest integration tests use `buildTestApp` with fake repositories/ports. They exercise real routes, auth middleware, controllers, use cases, and `errorHandler` without a database.
@@ -63,6 +67,7 @@ The whole project shares ONE version, stored in the root [package.json](package.
 A release also bumps `backend/package.json` and/or `frontend/package.json` up to the shared number, but only for the side(s) actually changed. An untouched side keeps its old number. So a package version is a marker of "the last release in which this package changed" and may skip numbers - it is NOT strict SemVer.
 
 Worked example:
+
 - `1.2` changed only the backend: `backend` went to `1.2`, `frontend` stayed on its previous number.
 - `1.3` changed both: both went to `1.3`.
 - A later `1.5` that changes only the backend takes `backend` straight to `1.5` (skipping `1.4`, which it was not part of); `frontend` stays where it was.
@@ -83,25 +88,49 @@ There is ONE changelog: root [CHANGELOG.md](CHANGELOG.md). There are no per-pack
 One commit = code change + version bump + changelog update. Bundle them together.
 
 Message format: `<version>: <short description>` - the shared target version, for example:
+
 ```
 1.4: add cooking-time filter to the recipe list
 1.5: fix menu deletion leaving orphaned rows
 ```
+
 Optionally note the side when only one changed: `1.4 (frontend): ...`. The version in the message lets GitLens blame hover show which release a line landed in (a confirmed user preference).
 
 Hard rules:
+
 - Do NOT create git tags.
 - Do NOT add a `Co-Authored-By` trailer to commits.
 - Do NOT commit directly to `main`. Branch from `main`, named after the release (for example `release/1.4`), commit there, push, and open a PR for review.
 - Never `git push` without explicit user permission.
 
 Preferred git commands (use these exact forms):
+
 ```
 git switch main          # switch to existing branch
 git switch -c release/X.Y   # create and switch to new branch
 git add .                # stage all changes
 git push origin release/X.Y  # push branch (no -u flag)
 ```
+
+### PR / MR description
+
+Keep the body short and to the point - what was **added** and what was **fixed**, nothing else. Two optional bulleted sections; omit either if it has nothing:
+
+```
+<version>: <same text as the commit title>
+
+Added:
+- <new capability, in user-facing language>
+
+Fixed:
+- <bug fixed, in user-facing language>
+```
+
+PR title = the commit title (`<version>: <description>`). One bullet per change, in plain language (what it means for a user, not the code). Default to just `Added`/`Fixed`; only reach for `Changed`/`Removed`/`Security` if a change is genuinely neither. No verification/"Checks" line, no Claude/Co-Authored-By attribution.
+
+### Quality gates (CI + hooks)
+
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR and on push to `main`: `format` (Prettier check), `lint` (ESLint), `typecheck` (`tsc --noEmit`), `sonarjs` (SonarJS lint), and `test` (Jest with coverage). All must be green to merge. The same checks run locally before a commit via the Husky `pre-commit` hook (lint-staged + typecheck + lint + sonarjs + tests), and `pre-push` blocks pushing straight to `main`. Hosted SonarCloud is not wired up (no `SONAR_TOKEN`); the local `sonarjs` lint covers the static-analysis role for now.
 
 ## Required configuration
 
@@ -116,11 +145,12 @@ Three kinds of database change, and they are NOT the same thing - pick by what y
 
 1. **Runtime data** (a user creates a recipe, adds a pantry ingredient, etc.) - just flows in through the normal API/repository `INSERT`s while the app runs. No migration, no seed, nothing to edit. This is the vast majority of writes.
 2. **Seed / starter reference data** (the unit_measurement / recipe_types / menu_category rows and the sample ingredients that every fresh DB should start with) - lives in [backend/src/scripts/seed.ts](backend/src/scripts/seed.ts).
-3. **Schema change** (a new table, column, constraint, or index - the *shape* of the DB) - a new migration in [backend/migrations/](backend/migrations/).
+3. **Schema change** (a new table, column, constraint, or index - the _shape_ of the DB) - a new migration in [backend/migrations/](backend/migrations/).
 
 **To add a new starter ingredient (e.g. a 23rd one):** add one row to the ingredients `VALUES` list in [backend/src/scripts/seed.ts](backend/src/scripts/seed.ts) (name, unit, allergens, days_to_expire, seasonality, storage_condition), then run `npm run seed`. Seed is idempotent (`ON CONFLICT (name) DO NOTHING`), so on an existing DB it inserts only the new row and leaves the other 22 alone. Commit the seed change. Do NOT write a migration for this - ingredients are rows, not schema.
 
 **To make a schema change (the only time you write a migration):**
+
 1. `npm --prefix backend run migrate:create <short-name>` - scaffolds `migrations/<timestamp>_<short-name>.sql` with empty `-- Up Migration` / `-- Down Migration` sections.
 2. Fill in `Up` (the change, e.g. `ALTER TABLE ingredients ADD COLUMN calories INTEGER;`) and `Down` (the exact reverse, e.g. `ALTER TABLE ingredients DROP COLUMN calories;`).
 3. `npm run migrate` - applies only the new file (already-run migrations are recorded in the `pgmigrations` table and skipped). `npm run migrate down` rolls back the last one via its `Down` section.
@@ -129,6 +159,7 @@ Three kinds of database change, and they are NOT the same thing - pick by what y
 The timestamp prefix on a migration filename only sets apply order (later timestamp = runs later); never rename or reorder existing migration files once they have been applied anywhere.
 
 **How it is wired (read before adding any DB feature):**
+
 - Migrations are plain SQL files in [backend/migrations/](backend/migrations/), one file per change, using node-pg-migrate's `-- Up Migration` / `-- Down Migration` markers (the `migrate:create` script scaffolds them; `migration-file-language` is `sql`). node-pg-migrate records applied migrations in a `pgmigrations` table and skips them next run. No `pgm.*` JS DSL - keep migrations as raw SQL.
 - The runner and seed are tsx scripts in [backend/src/scripts/](backend/src/scripts/) (`migrate.ts`, `seed.ts`), placed under `src/` so they are typechecked and linted (they are excluded from coverage by the `collectCoverageFrom` allowlist). `migrate.ts` calls node-pg-migrate's programmatic `runner({ databaseUrl: config.db, ... })` and parses `up`/`down`/`--fake` from `argv`; `seed.ts` opens its own short-lived `new Pool(config.db)`. Both reuse `config.db` from [backend/src/config/env.ts](backend/src/config/env.ts) - the same `DB_*` source as `db.ts`; there is deliberately NO separate `DATABASE_URL`. Both log through the pino `logger` (the global `no-console` rule applies) and set `process.exitCode = 1` on failure.
 - node-pg-migrate exposes its types through an `exports` map that the project's `moduleResolution: "Node"` does not read, so [backend/src/types/node-pg-migrate.d.ts](backend/src/types/node-pg-migrate.d.ts) re-exports them for tsc only (tsx resolves the real module at runtime). Leave that shim in place.
@@ -180,6 +211,7 @@ Pages are organized by domain folder under [frontend/src/pages/](frontend/src/pa
 ### Database model highlights
 
 Key tables and joins (see the initial migration [backend/migrations/1781185648364_initial-schema.sql](backend/migrations/1781185648364_initial-schema.sql) for the full schema):
+
 - `person` (users) <-> `recipes` via `person_id`
 - `recipes` <-> `ingredients` through `recipe_ingredients` (with `quantity_recipe_ingredients`)
 - `recipes.type_id` -> `recipe_types`
@@ -194,12 +226,12 @@ The "missing ingredients for a menu" feature works by joining `menu_recipe` -> `
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms / proper nouns like JWT, SQL, URL, Express keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed - don't reintroduce them.
 - Backend source is TypeScript with ESM-style `import`/`export`, executed by `tsx` with CommonJS runtime semantics (`module: "CommonJS"` in [backend/tsconfig.json](backend/tsconfig.json)). Do not add new `require`/`module.exports` in backend source files; root tooling configs such as ESLint and Jest stay CommonJS `.js`.
 - Backend layering rules (keep the style uniform):
-  - In a controller, every injected use case is a field named `<operation>UseCase` (e.g. `this.createRecipeUseCase`), called from the matching arrow-function handler. Uniform naming, and it never clashes with a handler name.
-  - Add a `domain/entities/` class only when it enforces an invariant. The write use case builds it through a named factory (`Recipe.forCreation(...)` / `Recipe.forUpdate(...)`) that throws a `ValidationError`, then passes the entity to the repository. Do NOT create empty data-holder entities, and do NOT route reads through entities (queries return repository rows as-is, so response shapes stay identical).
-  - Validate request input with a zod schema in `application/validation/` (one `<area>.schemas.ts` per domain, shared field helpers in `common.schemas.ts`); the use case calls `validate(schema, input)` from [backend/src/application/validation/validate.ts](backend/src/application/validation/validate.ts) at the top of `execute()` before building any entity. Schemas cover request shape only (types, required scalars, formats, ranges, array item shape) - the entity factory keeps the domain invariant (e.g. non-empty ingredients), so each rule lives in exactly one layer and zod does NOT duplicate it. A failed `validate` throws `ValidationError` (400), so every bad input is `{ error }`.
-  - One route path = exactly one handler. Don't register a second router on a path another router already owns - the later one is unreachable dead code (mount order is in `index.ts`).
-  - All SQL lives in `infrastructure/persistence/pg/*` repositories that implement an interface from `domain/repositories/`; multi-step transactions (`BEGIN/COMMIT/ROLLBACK`) stay inside a single repository method.
-  - Type placement follows the layer: use inline types for one file, co-located `<area>.types.ts` for shared DTO/filter shapes inside a folder, and exported entity/repository types from their own modules. Do not turn `backend/src/types/` into a general type bucket.
+    - In a controller, every injected use case is a field named `<operation>UseCase` (e.g. `this.createRecipeUseCase`), called from the matching arrow-function handler. Uniform naming, and it never clashes with a handler name.
+    - Add a `domain/entities/` class only when it enforces an invariant. The write use case builds it through a named factory (`Recipe.forCreation(...)` / `Recipe.forUpdate(...)`) that throws a `ValidationError`, then passes the entity to the repository. Do NOT create empty data-holder entities, and do NOT route reads through entities (queries return repository rows as-is, so response shapes stay identical).
+    - Validate request input with a zod schema in `application/validation/` (one `<area>.schemas.ts` per domain, shared field helpers in `common.schemas.ts`); the use case calls `validate(schema, input)` from [backend/src/application/validation/validate.ts](backend/src/application/validation/validate.ts) at the top of `execute()` before building any entity. Schemas cover request shape only (types, required scalars, formats, ranges, array item shape) - the entity factory keeps the domain invariant (e.g. non-empty ingredients), so each rule lives in exactly one layer and zod does NOT duplicate it. A failed `validate` throws `ValidationError` (400), so every bad input is `{ error }`.
+    - One route path = exactly one handler. Don't register a second router on a path another router already owns - the later one is unreachable dead code (mount order is in `index.ts`).
+    - All SQL lives in `infrastructure/persistence/pg/*` repositories that implement an interface from `domain/repositories/`; multi-step transactions (`BEGIN/COMMIT/ROLLBACK`) stay inside a single repository method.
+    - Type placement follows the layer: use inline types for one file, co-located `<area>.types.ts` for shared DTO/filter shapes inside a folder, and exported entity/repository types from their own modules. Do not turn `backend/src/types/` into a general type bucket.
 - Backend path aliases are configured in [backend/tsconfig.json](backend/tsconfig.json): `@domain/*`, `@application/*`, `@infrastructure/*`, `@controller/*`, `@routes/*`, `@middleware/*`, `@config/*`, and `@test/*`. Do not introduce `../` imports under `backend/src/`; cross-folder imports use aliases, while true same-folder neighbors stay relative with `./`. `tsx` resolves the aliases at runtime, and Jest maps them through `pathsToModuleNameMapper` in [backend/jest.config.js](backend/jest.config.js).
 - The frontend has minor inconsistencies (typo `person-ingradients` folder, the dead `useAuth` hook). Don't "clean these up" as part of an unrelated change - they're load-bearing for existing imports.
 - Commit lockfiles and tool configs. `package-lock.json` (root/backend/frontend) and `eslint.config.js` are tracked - committing them keeps installs reproducible and lets CI run `npm ci`. (They used to be gitignored; that rule was removed.)

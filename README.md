@@ -68,7 +68,7 @@ per-app detail.
 ```bash
 npm install              # installs root + backend + frontend (postinstall hook)
 npm start                # boot backend + frontend together (alias: npm run dev)
-npm run start:backend    # backend only (nodemon -> :8080)
+npm run start:backend    # backend only (tsx watch -> :8080)
 npm run start:frontend   # frontend only (vite -> :5173)
 ```
 
@@ -93,13 +93,20 @@ open a PR for review. No git tags.
 > project that was more overhead than value, so we consolidated to the single version + single
 > changelog described above. See the note at the top of [CHANGELOG.md](CHANGELOG.md).
 
+## How we work (contributing)
+
+- **Branch from `main`** named after the release (`release/X.Y`); never commit straight to `main` (a `pre-push` hook blocks it). Open a PR for review.
+- **One commit = code change + version bump + changelog entry**, bundled together. Commit title: `<version>: <short description>` (e.g. `1.27: fix purchase-edit stock recalculation`).
+- **PR description: short and to the point** - an `Added:` and/or `Fixed:` bullet list of what changed in user-facing terms. Omit a section if it has nothing. No "Checks" line, no git tags, no co-author trailer.
+- **Quality gates must pass to merge:** CI runs a Prettier check, ESLint, a `tsc` typecheck, a SonarJS lint, and the Jest test suite. The same checks run locally on `pre-commit` (Husky + lint-staged).
+
 ## Tech stack
 
 - Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, jwt-decode, ApexCharts, @react-pdf/renderer, jsPDF
 - Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `zod`, `helmet`, `pino`, `tsx`
 - Database: PostgreSQL 14+
 
-There is no test suite. Changes are validated by running both apps locally and clicking through.
+The backend has a Jest + ts-jest test suite (`npm --prefix backend test`); the frontend has no tests yet. Frontend changes are validated by running both apps locally and clicking through.
 
 ## License
 
