@@ -29,50 +29,48 @@ const UpdateMenuPage: React.FC = () => {
     const [recipesError, setRecipesError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    // load menu data for editing
-    const fetchMenuDetails = async () => {
-        const token = localStorage.getItem("authToken");
-        try {
-            const response = await axios.get(`http://localhost:8080/api/menu/${id}`, {
-                headers: { Authorization: token ? `Bearer ${token}` : "" },
-            });
-            const { menu, recipes } = response.data;
-
-            setMenuTitle(menu.title || "");
-            setMenuDescription(menu.menucontent || "");
-            setSelectedCategory(menu.categoryid  || null);
-
-            setSelectedRecipes(recipes.map((recipe: { id: any; }) => recipe.id) || []);
-        } catch (error: unknown) {
-            console.error("Error fetching menu data:", error);
-            setError("Failed to load menu data. Please try again later.");
-        }
-    };
-
-    // load categories and recipes
-    const fetchCategoriesAndRecipes = async () => {
-        const token = localStorage.getItem("authToken");
-        try {
-            const [categoriesResponse, recipesResponse] = await Promise.all([
-                axios.get("http://localhost:8080/api/menu-categories", {
-                    headers: { Authorization: token ? `Bearer ${token}` : "" },
-                }),
-                axios.get("http://localhost:8080/api/recipes", {
-                    headers: { Authorization: token ? `Bearer ${token}` : "" },
-                }),
-            ]);
-
-            console.log(categoriesResponse.data);
-
-            setCategories(categoriesResponse.data);
-            setAllRecipes(recipesResponse.data);
-        } catch (error: unknown) {
-            console.error("Error loading categories or recipes:", error);
-            setError("Failed to load categories or recipes.");
-        }
-    };
-
     useEffect(() => {
+        const fetchMenuDetails = async () => {
+            const token = localStorage.getItem("authToken");
+            try {
+                const response = await axios.get(`http://localhost:8080/api/menu/${id}`, {
+                    headers: { Authorization: token ? `Bearer ${token}` : "" },
+                });
+                const { menu, recipes } = response.data;
+
+                setMenuTitle(menu.title || "");
+                setMenuDescription(menu.menucontent || "");
+                setSelectedCategory(menu.categoryid || null);
+
+                setSelectedRecipes(recipes.map((recipe: { id: number; }) => recipe.id) || []);
+            } catch (error: unknown) {
+                console.error("Error fetching menu data:", error);
+                setError("Failed to load menu data. Please try again later.");
+            }
+        };
+
+        const fetchCategoriesAndRecipes = async () => {
+            const token = localStorage.getItem("authToken");
+            try {
+                const [categoriesResponse, recipesResponse] = await Promise.all([
+                    axios.get("http://localhost:8080/api/menu-categories", {
+                        headers: { Authorization: token ? `Bearer ${token}` : "" },
+                    }),
+                    axios.get("http://localhost:8080/api/recipes", {
+                        headers: { Authorization: token ? `Bearer ${token}` : "" },
+                    }),
+                ]);
+
+                console.log(categoriesResponse.data);
+
+                setCategories(categoriesResponse.data);
+                setAllRecipes(recipesResponse.data);
+            } catch (error: unknown) {
+                console.error("Error loading categories or recipes:", error);
+                setError("Failed to load categories or recipes.");
+            }
+        };
+
         const fetchData = async () => {
             setLoading(true);
             await Promise.all([fetchCategoriesAndRecipes(), fetchMenuDetails()]);

@@ -39,7 +39,7 @@ const UserMenuPage: React.FC = () => {
       return;
     }
 
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken = jwtDecode<{ id: number }>(token);
     const userId = decodedToken.id;
 
     try {
