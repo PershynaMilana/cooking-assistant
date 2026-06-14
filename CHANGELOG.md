@@ -22,6 +22,13 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.28 - 2026-06-14
+
+Frontend:
+- Fixed: frontend build and lint now pass with 0 errors (unused-variable, no-explicit-any, unused-catch-binding, and ban-ts-comment errors resolved).
+- Fixed: removed unused Vite scaffold leftovers - vite.svg, react.svg, App.css, and 16 unreferenced Montserrat font variants.
+
+
 ## 1.27 - 2026-06-13
 
 Backend:

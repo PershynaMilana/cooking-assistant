@@ -107,6 +107,7 @@ const MainPage: React.FC = () => {
     maxCookingTime,
     sortOrder,
     sortRecipes,
+    token,
   ]);
 
   // fetch recipes on first render or filters change

@@ -76,7 +76,7 @@ const RegisterPage: React.FC = () => {
             });
 
             navigate("/login");
-        } catch (error) {
+        } catch {
             setError("This user already exists.");
         }
     };

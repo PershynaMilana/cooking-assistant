@@ -184,7 +184,7 @@ const ChangeRecipePage: React.FC = () => {
       });
 
       navigate("/");
-    } catch (error) {
+    } catch {
       setError("Error updating recipe.");
     }
   };

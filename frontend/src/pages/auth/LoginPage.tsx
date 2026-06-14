@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
             const { token } = response.data;
             localStorage.setItem("authToken", token);
             navigate("/main");
-        } catch (error: unknown) {
+        } catch {
             setError("Incorrect username or password.");
         }
     };

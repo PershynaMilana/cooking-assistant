@@ -22,6 +22,18 @@ interface AllIngredient {
   name: string;
 }
 
+interface UserIngredientResponse {
+  ingredient_id: number;
+  ingredient_name: string;
+  unit_name: string;
+  quantity_person_ingradient: number;
+  storage_condition?: string;
+  seasonality?: string;
+  days_to_expire?: number;
+  allergens?: string[];
+  purchase_date?: string;
+}
+
 const IngredientsPage: React.FC = () => {
   const [allIngredients, setAllIngredients] = useState<AllIngredient[]>([]);
   const [personIngredients, setPersonIngredients] = useState<Ingredient[]>([]);
@@ -82,7 +94,7 @@ const IngredientsPage: React.FC = () => {
       return;
     }
 
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken = jwtDecode<{ id: number }>(token);
     const userId = decodedToken.id;
 
     try {
@@ -95,7 +107,7 @@ const IngredientsPage: React.FC = () => {
       );
 
       setPersonIngredients(
-          response.data.map((item: any) => ({
+          response.data.map((item: UserIngredientResponse) => ({
             ...item,
             id: item.ingredient_id,
             ingredient_name: item.ingredient_name,
@@ -131,7 +143,7 @@ const IngredientsPage: React.FC = () => {
       return;
     }
 
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken = jwtDecode<{ id: number }>(token);
     const userId = decodedToken.id;
 
     const newIngredients = allIngredients
@@ -194,7 +206,7 @@ const IngredientsPage: React.FC = () => {
       return;
     }
 
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken = jwtDecode<{ id: number }>(token);
     const userId = decodedToken.id;
 
     const changedIngredients = updatedIngredients.filter((updatedIngredient) => {
@@ -242,7 +254,7 @@ const IngredientsPage: React.FC = () => {
       return;
     }
 
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken = jwtDecode<{ id: number }>(token);
     const userId = decodedToken.id;
 
     try {

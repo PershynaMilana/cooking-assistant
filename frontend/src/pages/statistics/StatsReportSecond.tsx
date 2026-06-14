@@ -6,8 +6,7 @@ import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
 Font.register({ family: "Montserrat", src: montserrat });
 
 const formatDate = (date: Date) => {
-    const options = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" };
-    // @ts-ignore
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" };
     return date.toLocaleString("en-GB", options);
 };
 
@@ -54,6 +53,12 @@ const styles = StyleSheet.create({
         borderBottom: "1px solid black",
         marginVertical: 10,
     },
+    errorText: {
+        fontFamily: "Montserrat",
+        fontSize: 12,
+        color: "red",
+        marginBottom: 10,
+    },
 });
 
 interface Menu {
@@ -79,15 +84,12 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
     const [recipesCount, setRecipesCount] = useState(0);
     const [averageCookingTimes, setAverageCookingTimes] = useState<Recipe[]>([]);
     const [menuCountByCategory, setMenuCountByCategory] = useState<Menu[]>([]);
-    const [error, setError] = useState("");
-    const [noMenus, setNoMenus] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchStats = useCallback(async () => {
-        setError("");
-        setNoMenus(false);
-
+        setError(null);
         if (!token) {
-            setError("Token not found");
+            setError("No auth token found.");
             return;
         }
 
@@ -124,7 +126,7 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
             });
 
             if (Array.isArray(avgCookingTimes.averageCookingTimes)) {
-                const formattedTimes = avgCookingTimes.averageCookingTimes.map((item: { averageCookingTime: string; typeName: any; }) => {
+                const formattedTimes = avgCookingTimes.averageCookingTimes.map((item: { averageCookingTime: string; typeName: string; }) => {
                     const averageCookingTime = parseFloat(item.averageCookingTime);
                     const hours = Math.floor(averageCookingTime / 60);
                     const minutes = Math.round(averageCookingTime % 60);
@@ -138,12 +140,8 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
             } else {
                 setAverageCookingTimes([]);
             }
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.error || error.message);
-            } else {
-                setError("Unknown error");
-            }
+        } catch (err) {
+            setError(axios.isAxiosError(err) ? (err.response?.data?.error ?? err.message) : "Failed to load statistics.");
         }
     }, [token]);
 
@@ -159,6 +157,12 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
                 <View style={styles.section}>
                     <Text style={styles.title}>Statistics Report</Text>
                 </View>
+
+                {error && (
+                    <View style={styles.section}>
+                        <Text style={styles.errorText}>Error: {error}</Text>
+                    </View>
+                )}
 
                 <View style={styles.section}>
                     <Text style={styles.subtitle}>Total number of menus: {menusCount}</Text>

@@ -45,7 +45,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
         );
         console.log(response.data);
         setPurchaseHistory(response.data);
-      } catch (err) {
+      } catch {
         setError("Error loading purchase history.");
       } finally {
         setLoading(false);
@@ -92,7 +92,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
               purchase.id === id ? { ...purchase, quantity: newQuantity } : purchase
           )
       );
-    } catch (err) {
+    } catch {
       setError("Error saving changes.");
     } finally {
       setLoading(false);
