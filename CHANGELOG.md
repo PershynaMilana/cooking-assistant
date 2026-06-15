@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.30 - 2026-06-15
+
+Frontend:
+- Added: shared axios client instance with configurable base URL (via `VITE_API_URL` env var) and automatic auth-token injection, establishing the API layer foundation for future migration of inline HTTP calls.
+
+
 ## 1.29 - 2026-06-14
 
 Frontend:
