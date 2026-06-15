@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
 import Header from "../../components/Header.tsx";
+import { getRecipeTypeById, updateRecipeType } from "../../api/recipeTypesApi";
 
 interface RecipeType {
     type_name: string;
@@ -21,18 +21,10 @@ const EditRecipeType: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchRecipeType = useCallback(async () => {
-        const token = localStorage.getItem("authToken");
         if (!id) return;
         try {
-            const response = await axios.get<RecipeType>(
-                `http://localhost:8080/api/recipe-type/${id}`,
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-            setTypeData(response.data);
+            const data = await getRecipeTypeById(id);
+            setTypeData(data);
             setIsLoading(false);
         } catch (error) {
             console.error("Error loading recipe type:", error);
@@ -67,18 +59,10 @@ const EditRecipeType: React.FC = () => {
             return;
         }
 
-        try {
-            const token = localStorage.getItem("authToken");
+        if (!id) return;
 
-            await axios.put(
-                `http://localhost:8080/api/recipe-type/${id}`,
-                typeData,
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
+        try {
+            await updateRecipeType(id, typeData);
 
             window.location.href = "/types";
         } catch (error) {

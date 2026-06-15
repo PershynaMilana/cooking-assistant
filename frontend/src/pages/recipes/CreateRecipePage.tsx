@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Header from "../../components/Header.tsx";
 import { jwtDecode } from "jwt-decode";
+import { getIngredients } from "../../api/ingredientsApi";
+import { getRecipeTypes } from "../../api/recipeTypesApi";
+import { createRecipe } from "../../api/recipesApi";
 
 interface Ingredient {
     id: number;
@@ -41,19 +43,10 @@ const CreateRecipePage: React.FC = () => {
     const navigate = useNavigate();
 
     const fetchIngredients = async () => {
-        const token = localStorage.getItem("authToken");
         try {
-            const response = await axios.get(
-                "http://localhost:8080/api/ingredients",
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-            const sortedIngredients = response.data.sort(
-                (a: Ingredient, b: Ingredient) =>
-                    a.name.localeCompare(b.name, "uk"),
+            const data = await getIngredients();
+            const sortedIngredients = data.sort((a, b) =>
+                a.name.localeCompare(b.name, "uk"),
             );
             setAllIngredients(sortedIngredients);
         } catch (error: unknown) {
@@ -62,17 +55,9 @@ const CreateRecipePage: React.FC = () => {
     };
 
     const fetchRecipeTypes = async () => {
-        const token = localStorage.getItem("authToken");
         try {
-            const response = await axios.get(
-                "http://localhost:8080/api/recipe-types",
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-            setAllTypes(response.data);
+            const data = await getRecipeTypes();
+            setAllTypes(data);
         } catch (error: unknown) {
             setError((error as Error).message);
         }
@@ -194,12 +179,7 @@ const CreateRecipePage: React.FC = () => {
                 servings,
             };
 
-            await axios.post("http://localhost:8080/api/recipe", recipeData, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: token ? `Bearer ${token}` : "",
-                },
-            });
+            await createRecipe(recipeData);
 
             navigate("/");
         } catch (error: unknown) {

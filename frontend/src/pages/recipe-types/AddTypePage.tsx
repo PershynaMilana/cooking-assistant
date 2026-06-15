@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import Header from "../../components/Header.tsx";
+import { createRecipeType } from "../../api/recipeTypesApi";
 
 interface RecipeType {
     type_name: string;
@@ -43,17 +43,7 @@ const AddRecipeType: React.FC = () => {
         }
 
         try {
-            const token = localStorage.getItem("authToken");
-
-            await axios.post(
-                "http://localhost:8080/api/recipe-types",
-                typeData,
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
+            await createRecipeType(typeData);
 
             window.location.href = "/types";
         } catch (error) {

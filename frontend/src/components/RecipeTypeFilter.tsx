@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import { getRecipeTypes } from "../api/recipeTypesApi";
 
 interface RecipeType {
     id: number;
@@ -23,18 +23,9 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
     // fetch the list of recipe types from the database
     useEffect(() => {
         const fetchTypes = async () => {
-            const token = localStorage.getItem("authToken"); // get token from localStorage
-
             try {
-                const response = await axios.get(
-                    "http://localhost:8080/api/recipe-types",
-                    {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "", // add token to header
-                        },
-                    },
-                );
-                setTypes(response.data); // update state with recipe types
+                const data = await getRecipeTypes();
+                setTypes(data); // update state with recipe types
             } catch (error) {
                 // error handling
                 console.error("Error fetching recipe types:", error);

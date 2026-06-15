@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Header from "../../components/Header.tsx";
 import { Link } from "react-router-dom";
+import { getRecipeTypes, deleteRecipeType } from "../../api/recipeTypesApi";
 
 interface RecipeType {
     id: number;
@@ -18,17 +18,9 @@ const TypesPage: React.FC = () => {
     }, []);
 
     const fetchRecipeTypes = async () => {
-        const token = localStorage.getItem("authToken");
         try {
-            const response = await axios.get<RecipeType[]>(
-                "http://localhost:8080/api/recipe-types",
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-            setRecipeTypes(response.data);
+            const data = await getRecipeTypes();
+            setRecipeTypes(data);
         } catch (error) {
             console.error("Error loading recipe types:", error);
         }
@@ -40,17 +32,9 @@ const TypesPage: React.FC = () => {
     };
 
     const handleDeleteConfirm = async () => {
-        const token = localStorage.getItem("authToken");
         if (selectedType) {
             try {
-                await axios.delete(
-                    `http://localhost:8080/api/recipe-type/${selectedType.id}`,
-                    {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    },
-                );
+                await deleteRecipeType(selectedType.id);
                 fetchRecipeTypes();
                 setIsModalOpen(false);
                 setSelectedType(null);

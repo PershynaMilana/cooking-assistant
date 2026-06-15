@@ -5,7 +5,9 @@ import Header from "../../components/Header.tsx";
 import SearchComponent from "../../components/SearchComponent.tsx";
 import RecipeTypeFilter from "../../components/RecipeTypeFilter.tsx";
 import DateFilterDropdown from "../../components/DateFilterDropdown.tsx";
-import axios from "axios";
+import { getRecipesByPerson } from "../../api/recipesApi";
+import { getRecipeTypes } from "../../api/recipeTypesApi";
+import { getApiErrorMessage } from "../../api/httpError";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
 
@@ -73,39 +75,27 @@ const UserRecipesPage: React.FC = () => {
         const userId = decodedToken.id;
 
         try {
-            const response = await axios.get(
-                `http://localhost:8080/api/recipes-filters-person/${userId}`,
-                {
-                    params: {
-                        ingredient_name: ingredientName || "",
-                        type_ids:
-                            selectedTypes.length > 0
-                                ? selectedTypes.join(",")
-                                : undefined,
-                        start_date: startDate || undefined,
-                        end_date: endDate || undefined,
-                        min_cooking_time: minCookingTime || undefined,
-                        max_cooking_time: maxCookingTime || undefined,
-                        sort_order: sortOrder,
-                    },
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
+            const data = await getRecipesByPerson(userId, {
+                ingredient_name: ingredientName || "",
+                type_ids:
+                    selectedTypes.length > 0
+                        ? selectedTypes.join(",")
+                        : undefined,
+                start_date: startDate || undefined,
+                end_date: endDate || undefined,
+                min_cooking_time: minCookingTime || undefined,
+                max_cooking_time: maxCookingTime || undefined,
+                sort_order: sortOrder,
+            });
 
-            if (response.data.length === 0) {
+            if (data.length === 0) {
                 setNoRecipes(true);
             } else {
-                const sortedRecipes = sortRecipes(response.data);
+                const sortedRecipes = sortRecipes(data);
                 setRecipes(sortedRecipes);
             }
         } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.error || error.message);
-            } else {
-                setError("Unknown error");
-            }
+            setError(getApiErrorMessage(error));
         }
     }, [
         ingredientName,
@@ -124,20 +114,12 @@ const UserRecipesPage: React.FC = () => {
 
     useEffect(() => {
         const fetchTypesDescriptions = async () => {
-            const token = localStorage.getItem("authToken");
-
             try {
                 if (selectedTypes.length > 0) {
-                    const response = await axios.get(
-                        `http://localhost:8080/api/recipe-types`,
-                        {
-                            params: { ids: selectedTypes.join(",") },
-                            headers: {
-                                Authorization: token ? `Bearer ${token}` : "",
-                            },
-                        },
-                    );
-                    setTypesDescriptions(response.data);
+                    const data = await getRecipeTypes({
+                        ids: selectedTypes.join(","),
+                    });
+                    setTypesDescriptions(data);
                 } else {
                     setTypesDescriptions([]);
                 }
