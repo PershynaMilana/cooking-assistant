@@ -3,3 +3,6 @@ npm --prefix backend run typecheck
 npm --prefix backend run lint
 npm --prefix backend run lint:sonarjs
 npm --prefix backend run test:coverage
+npm --prefix frontend run typecheck
+npm --prefix frontend run lint
+npm --prefix frontend run lint:sonarjs

@@ -36,7 +36,7 @@ http://localhost:5173 - if you change Vite's port, update [../backend/index.js](
 src/
 ├── App.tsx               all routes + <PrivateRoute> wrapping
 ├── main.tsx              ReactDOM root
-├── index.css / App.css   global Tailwind + custom CSS
+├── index.css             global Tailwind + custom CSS
 │
 ├── components/           shared UI
 │   ├── Header.tsx
@@ -63,7 +63,7 @@ src/
 │   ├── statistics/       StatsPage (charts + PDF export)
 │   └── not-found/        404 catch-all
 │
-└── assets/               fonts, react.svg, searchIcon.png
+└── assets/               fonts, searchIcon.png
 ```
 
 ## Routes
@@ -107,8 +107,7 @@ API call inside is what 403s.
 
 - API calls live inside pages, using axios directly. No shared API client, no interceptor, no central
   error handler - do not add one casually.
-- Tailwind for layout/spacing; custom CSS in [src/App.css](src/App.css) and
-  [src/index.css](src/index.css).
+- Tailwind for layout/spacing; custom CSS in [src/index.css](src/index.css).
 - Type errors only surface at `npm run build` (`tsc -b`), not at `npm run dev`. Run build before a PR.
 
 ## Known oddities (not bugs to fix in unrelated changes)

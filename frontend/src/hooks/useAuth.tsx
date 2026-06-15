@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 interface DecodedToken {
     exp: number; // token expiration time
@@ -12,21 +12,21 @@ const useAuth = () => {
 
     // token validation
     const checkToken = () => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
 
         if (token) {
             try {
                 const decoded: DecodedToken = jwtDecode(token);
 
                 if (decoded.exp * 1000 < Date.now()) {
-                    localStorage.removeItem('token');
+                    localStorage.removeItem("token");
                     setIsAuthenticated(false);
                 } else {
                     setIsAuthenticated(true);
                 }
             } catch (error) {
-                console.error('Error decoding token', error);
-                localStorage.removeItem('token');
+                console.error("Error decoding token", error);
+                localStorage.removeItem("token");
                 setIsAuthenticated(false);
             }
         } else {
@@ -35,15 +35,15 @@ const useAuth = () => {
     };
 
     const login = (token: string) => {
-        localStorage.setItem('token', token);
+        localStorage.setItem("token", token);
         setIsAuthenticated(true);
-        navigate('/main');
+        navigate("/main");
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
         setIsAuthenticated(false);
-        navigate('/login');
+        navigate("/login");
     };
 
     useEffect(() => {

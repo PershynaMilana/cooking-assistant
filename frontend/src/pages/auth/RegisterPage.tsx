@@ -17,16 +17,20 @@ const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
 
     const validateName = (value: string) => {
-        if (!/^[A-ZА-Я][a-zа-я]{1,}$/.test(value)) {
-            setNameError("Name must start with a capital letter and contain only letters, at least 2 characters.");
+        if (!/^[A-ZА-Я][a-zа-я]+$/.test(value)) {
+            setNameError(
+                "Name must start with a capital letter and contain only letters, at least 2 characters.",
+            );
         } else {
             setNameError(null);
         }
     };
 
     const validateSurname = (value: string) => {
-        if (!/^[A-ZА-Я][a-zа-я]{1,}$/.test(value)) {
-            setSurnameError("Surname must start with a capital letter and contain only letters, at least 2 characters.");
+        if (!/^[A-ZА-Я][a-zа-я]+$/.test(value)) {
+            setSurnameError(
+                "Surname must start with a capital letter and contain only letters, at least 2 characters.",
+            );
         } else {
             setSurnameError(null);
         }
@@ -92,10 +96,14 @@ const RegisterPage: React.FC = () => {
 
                     {/* Name field */}
                     <div>
-                        <label className="block text-sm font-montserratRegular font-medium text-gray-700">
+                        <label
+                            htmlFor="register-name"
+                            className="block text-sm font-montserratRegular font-medium text-gray-700"
+                        >
                             Name:
                         </label>
                         <input
+                            id="register-name"
                             type="text"
                             value={name}
                             onChange={(e) => {
@@ -105,15 +113,21 @@ const RegisterPage: React.FC = () => {
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
                             placeholder="Enter name"
                         />
-                        {nameError && <div className="text-red-500">{nameError}</div>}
+                        {nameError && (
+                            <div className="text-red-500">{nameError}</div>
+                        )}
                     </div>
 
                     {/* Surname field */}
                     <div>
-                        <label className="block text-sm font-montserratRegular font-medium text-gray-700">
+                        <label
+                            htmlFor="register-surname"
+                            className="block text-sm font-montserratRegular font-medium text-gray-700"
+                        >
                             Surname:
                         </label>
                         <input
+                            id="register-surname"
                             type="text"
                             value={surname}
                             onChange={(e) => {
@@ -123,15 +137,21 @@ const RegisterPage: React.FC = () => {
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
                             placeholder="Enter surname"
                         />
-                        {surnameError && <div className="text-red-500">{surnameError}</div>}
+                        {surnameError && (
+                            <div className="text-red-500">{surnameError}</div>
+                        )}
                     </div>
 
                     {/* Username field */}
                     <div>
-                        <label className="block text-sm font-montserratRegular font-medium text-gray-700">
+                        <label
+                            htmlFor="register-username"
+                            className="block text-sm font-montserratRegular font-medium text-gray-700"
+                        >
                             Username:
                         </label>
                         <input
+                            id="register-username"
                             type="text"
                             value={login}
                             onChange={(e) => {
@@ -141,16 +161,22 @@ const RegisterPage: React.FC = () => {
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
                             placeholder="Enter username"
                         />
-                        {loginError && <div className="text-red-500">{loginError}</div>}
+                        {loginError && (
+                            <div className="text-red-500">{loginError}</div>
+                        )}
                     </div>
 
                     {/* Password field */}
                     <div>
-                        <label className="block text-sm font-montserratRegular font-medium text-gray-700">
+                        <label
+                            htmlFor="register-password"
+                            className="block text-sm font-montserratRegular font-medium text-gray-700"
+                        >
                             Password:
                         </label>
                         <div className="relative">
                             <input
+                                id="register-password"
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => {
@@ -168,7 +194,9 @@ const RegisterPage: React.FC = () => {
                                 {showPassword ? "Hide" : "Show"}
                             </button>
                         </div>
-                        {passwordError && <div className="text-red-500">{passwordError}</div>}
+                        {passwordError && (
+                            <div className="text-red-500">{passwordError}</div>
+                        )}
                     </div>
 
                     {/* General error display */}
