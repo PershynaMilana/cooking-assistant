@@ -5,7 +5,9 @@ import Header from "../../components/Header.tsx";
 import SearchComponent from "../../components/SearchComponent.tsx";
 import RecipeTypeFilter from "../../components/RecipeTypeFilter.tsx";
 import DateFilterDropdown from "../../components/DateFilterDropdown.tsx";
-import axios from "axios";
+import { getRecipesByFilters } from "../../api/recipesApi";
+import { getRecipeTypes } from "../../api/recipeTypesApi";
+import { getApiErrorMessage } from "../../api/httpError";
 
 // interface describing the structure of a recipe object
 interface Recipe {
@@ -34,7 +36,6 @@ const MainPage: React.FC = () => {
     const [noRecipes, setNoRecipes] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const ingredientName = searchParams.get("ingredient_name");
-    const token = localStorage.getItem("authToken");
 
     // states for date and cooking time filters
     const [startDate, setStartDate] = useState<string>("");
@@ -70,39 +71,27 @@ const MainPage: React.FC = () => {
         setNoRecipes(false);
 
         try {
-            const response = await axios.get(
-                `http://localhost:8080/api/recipes-by-filters`,
-                {
-                    params: {
-                        ingredient_name: ingredientName || "",
-                        type_ids:
-                            selectedTypes.length > 0
-                                ? selectedTypes.join(",")
-                                : undefined,
-                        start_date: startDate || undefined,
-                        end_date: endDate || undefined,
-                        min_cooking_time: minCookingTime || undefined,
-                        max_cooking_time: maxCookingTime || undefined,
-                        sort_order: sortOrder,
-                    },
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
+            const data = await getRecipesByFilters({
+                ingredient_name: ingredientName || "",
+                type_ids:
+                    selectedTypes.length > 0
+                        ? selectedTypes.join(",")
+                        : undefined,
+                start_date: startDate || undefined,
+                end_date: endDate || undefined,
+                min_cooking_time: minCookingTime || undefined,
+                max_cooking_time: maxCookingTime || undefined,
+                sort_order: sortOrder,
+            });
 
-            if (response.data.length === 0) {
+            if (data.length === 0) {
                 setNoRecipes(true);
             } else {
-                const sortedRecipes = sortRecipes(response.data);
+                const sortedRecipes = sortRecipes(data);
                 setRecipes(sortedRecipes);
             }
         } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.error || error.message);
-            } else {
-                setError("Unknown error");
-            }
+            setError(getApiErrorMessage(error));
         }
     }, [
         ingredientName,
@@ -113,7 +102,6 @@ const MainPage: React.FC = () => {
         maxCookingTime,
         sortOrder,
         sortRecipes,
-        token,
     ]);
 
     // fetch recipes on first render or filters change
@@ -124,20 +112,12 @@ const MainPage: React.FC = () => {
     // fetch recipe type descriptions
     useEffect(() => {
         const fetchTypesDescriptions = async () => {
-            const token = localStorage.getItem("authToken");
-
             try {
                 if (selectedTypes.length > 0) {
-                    const response = await axios.get(
-                        `http://localhost:8080/api/recipe-types`,
-                        {
-                            params: { ids: selectedTypes.join(",") },
-                            headers: {
-                                Authorization: token ? `Bearer ${token}` : "",
-                            },
-                        },
-                    );
-                    setTypesDescriptions(response.data);
+                    const data = await getRecipeTypes({
+                        ids: selectedTypes.join(","),
+                    });
+                    setTypesDescriptions(data);
                 } else {
                     setTypesDescriptions([]);
                 }

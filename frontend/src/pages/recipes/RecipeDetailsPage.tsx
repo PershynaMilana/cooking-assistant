@@ -3,6 +3,10 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "../../components/Header.tsx";
 import Modal from "../../components/Modal.tsx";
 import { jwtDecode } from "jwt-decode";
+import {
+    getRecipeById,
+    deleteRecipe as deleteRecipeRequest,
+} from "../../api/recipesApi";
 
 interface Ingredient {
     name: string;
@@ -44,27 +48,12 @@ const RecipeDetailsPage: React.FC = () => {
     const navigate = useNavigate();
 
     const fetchRecipeDetails = useCallback(async () => {
-        const token = localStorage.getItem("authToken");
+        if (!id) return;
         try {
-            const response = await fetch(
-                `http://localhost:8080/api/recipe/${id}`,
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-            if (!response.ok) {
-                throw new Error("Error fetching recipe details");
-            }
-            const data = await response.json();
+            const data = await getRecipeById(id);
             setRecipe(data);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("Unknown error");
-            }
+        } catch {
+            setError("Error fetching recipe details");
         }
     }, [id]);
 
@@ -77,29 +66,12 @@ const RecipeDetailsPage: React.FC = () => {
     const isOwner = recipe?.person_id === currentUserId;
 
     const deleteRecipe = async () => {
-        const token = localStorage.getItem("authToken");
+        if (!id) return;
         try {
-            const response = await fetch(
-                `http://localhost:8080/api/recipe/${id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error("Error deleting recipe");
-            }
-
+            await deleteRecipeRequest(id);
             navigate("/main");
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("Unknown error");
-            }
+        } catch {
+            setError("Error deleting recipe");
         }
     };
 

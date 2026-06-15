@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import Header from "../../components/Header.tsx";
+import { getRecipeById, updateRecipe } from "../../api/recipesApi";
+import { getIngredients } from "../../api/ingredientsApi";
+import { getRecipeTypes } from "../../api/recipeTypesApi";
 
 interface Ingredient {
     id: number;
@@ -12,20 +14,6 @@ interface Ingredient {
 interface RecipeType {
     id: number;
     type_name: string;
-}
-
-interface Recipe {
-    title: string;
-    content: string;
-    ingredients: {
-        id: number;
-        name: string;
-        quantity_recipe_ingredients: number;
-        unit_name: string;
-    }[];
-    type_id: number;
-    cooking_time: number;
-    servings: string;
 }
 
 const ChangeRecipePage: React.FC = () => {
@@ -53,34 +41,20 @@ const ChangeRecipePage: React.FC = () => {
     const navigate = useNavigate();
 
     const fetchRecipeDetails = useCallback(async () => {
-        const token = localStorage.getItem("authToken");
+        if (!id) return;
         try {
-            const [recipeResponse, ingredientsResponse, typesResponse] =
-                await Promise.all([
-                    axios.get(`http://localhost:8080/api/recipe/${id}`, {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    }),
-                    axios.get("http://localhost:8080/api/ingredients", {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    }),
-                    axios.get("http://localhost:8080/api/recipe-types", {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    }),
-                ]);
+            const [recipeData, ingredients, types] = await Promise.all([
+                getRecipeById(id),
+                getIngredients(),
+                getRecipeTypes(),
+            ]);
 
-            const recipeData: Recipe = recipeResponse.data;
             setTitle(recipeData.title);
             setContent(recipeData.content);
             setCookingTime(formatCookingTime(recipeData.cooking_time));
             setServings(recipeData.servings || "");
-            setAllIngredients(ingredientsResponse.data);
-            setAllTypes(typesResponse.data);
+            setAllIngredients(ingredients);
+            setAllTypes(types);
             setSelectedIngredients(recipeData.ingredients);
             setSelectedTypeId(recipeData.type_id);
         } catch (error: unknown) {
@@ -144,6 +118,8 @@ const ChangeRecipePage: React.FC = () => {
         setError(null);
         setCookingTimeError(null);
 
+        if (!id) return;
+
         if (!servings.trim()) {
             setError("Servings cannot be empty.");
             return;
@@ -183,17 +159,7 @@ const ChangeRecipePage: React.FC = () => {
         };
 
         try {
-            const token = localStorage.getItem("authToken");
-            await axios.put(
-                `http://localhost:8080/api/recipe/${id}`,
-                updatedRecipe,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
+            await updateRecipe(id, updatedRecipe);
 
             navigate("/");
         } catch {
