@@ -4,6 +4,8 @@ import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Header.tsx";
 import PurchaseHistoryModal from "../../components/PurchaseHistoryModal.tsx";
 
+const NO_AUTH_TOKEN = "No auth token found.";
+
 interface Ingredient {
     id: number;
     name?: string | "";
@@ -70,7 +72,7 @@ const IngredientsPage: React.FC = () => {
             const token = localStorage.getItem("authToken");
 
             if (!token) {
-                console.error("No auth token found.");
+                console.error(NO_AUTH_TOKEN);
                 return;
             }
 
@@ -99,7 +101,7 @@ const IngredientsPage: React.FC = () => {
         const token = localStorage.getItem("authToken");
 
         if (!token) {
-            console.error("No auth token found.");
+            console.error(NO_AUTH_TOKEN);
             return;
         }
 
@@ -151,7 +153,7 @@ const IngredientsPage: React.FC = () => {
     const saveIngredients = async () => {
         const token = localStorage.getItem("authToken");
         if (!token) {
-            console.error("No auth token found.");
+            console.error(NO_AUTH_TOKEN);
             return;
         }
 
@@ -217,7 +219,7 @@ const IngredientsPage: React.FC = () => {
     const saveUpdatedQuantities = async () => {
         const token = localStorage.getItem("authToken");
         if (!token) {
-            console.error("No auth token found.");
+            console.error(NO_AUTH_TOKEN);
             return;
         }
 

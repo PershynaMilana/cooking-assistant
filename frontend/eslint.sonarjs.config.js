@@ -10,9 +10,8 @@ export default [
             parser: tseslint.parser,
         },
         rules: {
-            // TODO R23: enable as error after components are split
-            "sonarjs/cognitive-complexity": "warn",
-            "sonarjs/no-duplicate-string": "warn",
+            "sonarjs/cognitive-complexity": "error",
+            "sonarjs/no-duplicate-string": "error",
         },
     },
 ];

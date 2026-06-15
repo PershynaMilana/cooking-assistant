@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  format-backend:
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
         with:
           cache-dependency-path: package-lock.json
           install: npm ci --ignore-scripts
-      - name: Check backend formatting
+      - name: Check formatting
         run: npm run format:check
 
   lint-backend:
@@ -69,17 +69,6 @@ jobs:
       - name: Test backend with coverage
         run: npm --prefix backend run test:coverage
 
-  format-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-        with:
-          cache-dependency-path: frontend/package-lock.json
-          install: npm --prefix frontend ci
-      - name: Check frontend formatting
-        run: npm --prefix frontend run format:check
-
   lint-frontend:
     runs-on: ubuntu-latest
     steps:
@@ -123,3 +112,13 @@ jobs:
           install: npm --prefix frontend ci
       - name: Build frontend
         run: npm --prefix frontend run build
+
+  ci-success:
+    name: ci-success
+    if: always()
+    needs: [format, lint-backend, lint-frontend, typecheck-backend, typecheck-frontend, sonarjs-backend, sonarjs-frontend, test-backend, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any needed job failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
