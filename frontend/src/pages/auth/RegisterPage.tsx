@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import Header from "../../components/Header.tsx";
 import { useNavigate } from "react-router-dom";
+import { register } from "../../api/authApi";
 
 const RegisterPage: React.FC = () => {
     const [name, setName] = useState("");
@@ -72,12 +72,7 @@ const RegisterPage: React.FC = () => {
         }
 
         try {
-            await axios.post("http://localhost:8080/api/register", {
-                name,
-                surname,
-                login,
-                password,
-            });
+            await register({ name, surname, login, password });
 
             navigate("/login");
         } catch {
