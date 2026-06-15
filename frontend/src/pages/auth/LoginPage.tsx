@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import { login as loginRequest } from "../../api/authApi";
 
 const LoginPage: React.FC = () => {
     const [login, setLogin] = useState("");
@@ -19,17 +19,11 @@ const LoginPage: React.FC = () => {
         }
 
         try {
-            const response = await axios.post(
-                "http://localhost:8080/api/login",
-                {
-                    login,
-                    password,
-                },
-            );
+            const data = await loginRequest({ login, password });
 
             console.log("http://localhost:8080/api/login", login, password);
 
-            const { token } = response.data;
+            const { token } = data;
             localStorage.setItem("authToken", token);
             navigate("/main");
         } catch {
