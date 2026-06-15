@@ -17,13 +17,17 @@ interface MenuCategory {
 const CreateMenuPage: React.FC = () => {
     const [menuTitle, setMenuTitle] = useState("");
     const [menuDescription, setMenuDescription] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(
+        null,
+    );
     const [categories, setCategories] = useState<MenuCategory[]>([]);
     const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
     const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
 
     const [menuTitleError, setMenuTitleError] = useState<string | null>(null);
-    const [menuDescriptionError, setMenuDescriptionError] = useState<string | null>(null);
+    const [menuDescriptionError, setMenuDescriptionError] = useState<
+        string | null
+    >(null);
     const [categoryError, setCategoryError] = useState<string | null>(null);
     const [recipesError, setRecipesError] = useState<string | null>(null);
 
@@ -33,9 +37,12 @@ const CreateMenuPage: React.FC = () => {
     const fetchCategories = async () => {
         const token = localStorage.getItem("authToken");
         try {
-            const response = await axios.get("http://localhost:8080/api/menu-categories", {
-                headers: { Authorization: token ? `Bearer ${token}` : "" },
-            });
+            const response = await axios.get(
+                "http://localhost:8080/api/menu-categories",
+                {
+                    headers: { Authorization: token ? `Bearer ${token}` : "" },
+                },
+            );
             setCategories(response.data);
         } catch (error: unknown) {
             console.error("Error fetching categories:", error);
@@ -46,9 +53,12 @@ const CreateMenuPage: React.FC = () => {
     const fetchRecipes = async () => {
         const token = localStorage.getItem("authToken");
         try {
-            const response = await axios.get("http://localhost:8080/api/recipes", {
-                headers: { Authorization: token ? `Bearer ${token}` : "" },
-            });
+            const response = await axios.get(
+                "http://localhost:8080/api/recipes",
+                {
+                    headers: { Authorization: token ? `Bearer ${token}` : "" },
+                },
+            );
             setAllRecipes(response.data);
         } catch (error: unknown) {
             console.error("Error fetching recipes:", error);
@@ -148,66 +158,111 @@ const CreateMenuPage: React.FC = () => {
                 <form className="space-y-4">
                     {/* Menu title */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Menu title</label>
+                        <label
+                            htmlFor="create-menu-title"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Menu title
+                        </label>
                         <input
+                            id="create-menu-title"
                             type="text"
                             value={menuTitle}
                             onChange={(e) => setMenuTitle(e.target.value)}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
-                        {menuTitleError && <div className="text-red-500 text-sm mt-1">{menuTitleError}</div>}
+                        {menuTitleError && (
+                            <div className="text-red-500 text-sm mt-1">
+                                {menuTitleError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Menu description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Menu description</label>
+                        <label
+                            htmlFor="create-menu-description"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Menu description
+                        </label>
                         <textarea
+                            id="create-menu-description"
                             value={menuDescription}
                             onChange={(e) => setMenuDescription(e.target.value)}
                             rows={4}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
-                        {menuDescriptionError && <div className="text-red-500 text-sm mt-1">{menuDescriptionError}</div>}
+                        {menuDescriptionError && (
+                            <div className="text-red-500 text-sm mt-1">
+                                {menuDescriptionError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Menu category */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Menu category</label>
+                        <label
+                            htmlFor="create-menu-category"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Menu category
+                        </label>
                         <select
+                            id="create-menu-category"
                             value={selectedCategory || ""}
-                            onChange={(e) => setSelectedCategory(Number(e.target.value))}
+                            onChange={(e) =>
+                                setSelectedCategory(Number(e.target.value))
+                            }
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         >
                             <option value="" disabled>
                                 Select a menu category
                             </option>
                             {categories.map((category) => (
-                                <option key={category.menu_category_id} value={category.menu_category_id}>
+                                <option
+                                    key={category.menu_category_id}
+                                    value={category.menu_category_id}
+                                >
                                     {category.category_name}
                                 </option>
                             ))}
                         </select>
-                        {categoryError && <div className="text-red-500 text-sm mt-1">{categoryError}</div>}
+                        {categoryError && (
+                            <div className="text-red-500 text-sm mt-1">
+                                {categoryError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Recipes */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Recipes</label>
+                        <p className="block text-sm font-medium text-gray-700">
+                            Recipes
+                        </p>
                         <div className="flex flex-wrap gap-2">
                             {allRecipes.map((recipe) => (
                                 <button
                                     key={recipe.id}
                                     type="button"
-                                    onClick={() => toggleRecipeSelection(recipe.id)}
+                                    onClick={() =>
+                                        toggleRecipeSelection(recipe.id)
+                                    }
                                     className={`py-2 px-4 border rounded-md ${
-                                        selectedRecipes.includes(recipe.id) ? "bg-blue-500 text-white" : "bg-white"
+                                        selectedRecipes.includes(recipe.id)
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-white"
                                     }`}
                                 >
                                     {recipe.title}
                                 </button>
                             ))}
                         </div>
-                        {recipesError && <div className="text-red-500 text-sm mt-1">{recipesError}</div>}
+                        {recipesError && (
+                            <div className="text-red-500 text-sm mt-1">
+                                {recipesError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Create menu button */}

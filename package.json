@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.28.0",
+  "version": "1.29.0",
   "private": true,
   "scripts": {
     "prepare": "husky",
@@ -11,14 +11,23 @@
     "start:frontend": "npm --prefix frontend run dev",
     "migrate": "npm --prefix backend run migrate",
     "seed": "npm --prefix backend run seed",
-    "format": "prettier --write \"backend/**/*.ts\"",
-    "format:check": "prettier --check \"backend/**/*.ts\"",
+    "format": "prettier --write \"backend/**/*.ts\" \"frontend/src/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"backend/**/*.ts\" \"frontend/src/**/*.{ts,tsx,css}\"",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "lint:sonarjs": "npm --prefix backend run lint:sonarjs && npm --prefix frontend run lint:sonarjs",
+    "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
+    "test": "npm --prefix backend run test",
+    "build": "npm --prefix frontend run build",
+    "verify": "npm run format:check && npm run lint && npm run lint:sonarjs && npm run typecheck && npm run test && npm run build",
     "patch": "npm version patch --no-git-tag-version",
     "minor": "npm version minor --no-git-tag-version",
     "major": "npm version major --no-git-tag-version"
   },
   "lint-staged": {
     "backend/**/*.ts": [
+      "prettier --write"
+    ],
+    "frontend/**/*.{ts,tsx,css}": [
       "prettier --write"
     ]
   },

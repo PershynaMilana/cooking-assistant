@@ -1,12 +1,26 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import {
+    Document,
+    Font,
+    Page,
+    StyleSheet,
+    Text,
+    View,
+} from "@react-pdf/renderer";
 import axios from "axios";
 import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
 
 Font.register({ family: "Montserrat", src: montserrat });
 
 const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" };
+    const options: Intl.DateTimeFormatOptions = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    };
     return date.toLocaleString("en-GB", options);
 };
 
@@ -78,11 +92,15 @@ interface StatsReportSecondProps {
     reportTime: Date;
 }
 
-const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => {
+const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
+    reportTime,
+}) => {
     const token = localStorage.getItem("authToken");
     const [menusCount, setMenusCount] = useState(0);
     const [recipesCount, setRecipesCount] = useState(0);
-    const [averageCookingTimes, setAverageCookingTimes] = useState<Recipe[]>([]);
+    const [averageCookingTimes, setAverageCookingTimes] = useState<Recipe[]>(
+        [],
+    );
     const [menuCountByCategory, setMenuCountByCategory] = useState<Menu[]>([]);
     const [error, setError] = useState<string | null>(null);
 
@@ -94,54 +112,77 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
         }
 
         try {
-            const { data: allMenus } = await axios.get("http://localhost:8080/api/menu", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            const { data: allMenus } = await axios.get(
+                "http://localhost:8080/api/menu",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 },
-            });
+            );
             setMenusCount(allMenus.length);
 
             const categoryCounts: Record<string, number> = {};
             allMenus.forEach((menu: { categoryname: string }) => {
-                categoryCounts[menu.categoryname] = (categoryCounts[menu.categoryname] || 0) + 1;
+                categoryCounts[menu.categoryname] =
+                    (categoryCounts[menu.categoryname] || 0) + 1;
             });
 
-            const categoryStats = Object.entries(categoryCounts).map(([categoryname, menuCount]) => ({
-                categoryname,
-                menuCount,
-            }));
+            const categoryStats = Object.entries(categoryCounts).map(
+                ([categoryname, menuCount]) => ({
+                    categoryname,
+                    menuCount,
+                }),
+            );
             setMenuCountByCategory(categoryStats);
 
-            const { data: allRecipes } = await axios.get("http://localhost:8080/api/recipes", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            const { data: allRecipes } = await axios.get(
+                "http://localhost:8080/api/recipes",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 },
-            });
+            );
             setRecipesCount(allRecipes.length);
 
-            const { data: avgCookingTimes } = await axios.get("http://localhost:8080/api/recipes-stats", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            const { data: avgCookingTimes } = await axios.get(
+                "http://localhost:8080/api/recipes-stats",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 },
-            });
+            );
 
             if (Array.isArray(avgCookingTimes.averageCookingTimes)) {
-                const formattedTimes = avgCookingTimes.averageCookingTimes.map((item: { averageCookingTime: string; typeName: string; }) => {
-                    const averageCookingTime = parseFloat(item.averageCookingTime);
-                    const hours = Math.floor(averageCookingTime / 60);
-                    const minutes = Math.round(averageCookingTime % 60);
+                const formattedTimes = avgCookingTimes.averageCookingTimes.map(
+                    (item: {
+                        averageCookingTime: string;
+                        typeName: string;
+                    }) => {
+                        const averageCookingTime = parseFloat(
+                            item.averageCookingTime,
+                        );
+                        const hours = Math.floor(averageCookingTime / 60);
+                        const minutes = Math.round(averageCookingTime % 60);
 
-                    return {
-                        typeName: item.typeName,
-                        averageCookingTime: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
-                    };
-                });
+                        return {
+                            typeName: item.typeName,
+                            averageCookingTime: `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
+                        };
+                    },
+                );
                 setAverageCookingTimes(formattedTimes);
             } else {
                 setAverageCookingTimes([]);
             }
         } catch (err) {
-            setError(axios.isAxiosError(err) ? (err.response?.data?.error ?? err.message) : "Failed to load statistics.");
+            setError(
+                axios.isAxiosError(err)
+                    ? (err.response?.data?.error ?? err.message)
+                    : "Failed to load statistics.",
+            );
         }
     }, [token]);
 
@@ -165,15 +206,21 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
                 )}
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Total number of menus: {menusCount}</Text>
+                    <Text style={styles.subtitle}>
+                        Total number of menus: {menusCount}
+                    </Text>
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Total number of recipes: {recipesCount}</Text>
+                    <Text style={styles.subtitle}>
+                        Total number of recipes: {recipesCount}
+                    </Text>
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Average cooking time by recipe types:</Text>
+                    <Text style={styles.subtitle}>
+                        Average cooking time by recipe types:
+                    </Text>
                     {averageCookingTimes.map((item) => (
                         <Text key={item.typeName} style={styles.text}>
                             {item.typeName}: {item.averageCookingTime} min
@@ -182,7 +229,9 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({ reportTime }) => 
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Number of menus per category:</Text>
+                    <Text style={styles.subtitle}>
+                        Number of menus per category:
+                    </Text>
                     {menuCountByCategory.map((category) => (
                         <Text key={category.categoryname} style={styles.text}>
                             {category.categoryname}: {category.menuCount}

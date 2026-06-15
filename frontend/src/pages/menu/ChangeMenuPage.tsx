@@ -17,14 +17,18 @@ const UpdateMenuPage: React.FC = () => {
     const { id } = useParams();
     const [menuTitle, setMenuTitle] = useState("");
     const [menuDescription, setMenuDescription] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(
+        null,
+    );
     const [categories, setCategories] = useState<MenuCategory[]>([]);
     const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
     const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [menuTitleError, setMenuTitleError] = useState<string | null>(null);
-    const [menuDescriptionError, setMenuDescriptionError] = useState<string | null>(null);
+    const [menuDescriptionError, setMenuDescriptionError] = useState<
+        string | null
+    >(null);
     const [categoryError, setCategoryError] = useState<string | null>(null);
     const [recipesError, setRecipesError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -33,16 +37,23 @@ const UpdateMenuPage: React.FC = () => {
         const fetchMenuDetails = async () => {
             const token = localStorage.getItem("authToken");
             try {
-                const response = await axios.get(`http://localhost:8080/api/menu/${id}`, {
-                    headers: { Authorization: token ? `Bearer ${token}` : "" },
-                });
+                const response = await axios.get(
+                    `http://localhost:8080/api/menu/${id}`,
+                    {
+                        headers: {
+                            Authorization: token ? `Bearer ${token}` : "",
+                        },
+                    },
+                );
                 const { menu, recipes } = response.data;
 
                 setMenuTitle(menu.title || "");
                 setMenuDescription(menu.menucontent || "");
                 setSelectedCategory(menu.categoryid || null);
 
-                setSelectedRecipes(recipes.map((recipe: { id: number; }) => recipe.id) || []);
+                setSelectedRecipes(
+                    recipes.map((recipe: { id: number }) => recipe.id) || [],
+                );
             } catch (error: unknown) {
                 console.error("Error fetching menu data:", error);
                 setError("Failed to load menu data. Please try again later.");
@@ -52,14 +63,20 @@ const UpdateMenuPage: React.FC = () => {
         const fetchCategoriesAndRecipes = async () => {
             const token = localStorage.getItem("authToken");
             try {
-                const [categoriesResponse, recipesResponse] = await Promise.all([
-                    axios.get("http://localhost:8080/api/menu-categories", {
-                        headers: { Authorization: token ? `Bearer ${token}` : "" },
-                    }),
-                    axios.get("http://localhost:8080/api/recipes", {
-                        headers: { Authorization: token ? `Bearer ${token}` : "" },
-                    }),
-                ]);
+                const [categoriesResponse, recipesResponse] = await Promise.all(
+                    [
+                        axios.get("http://localhost:8080/api/menu-categories", {
+                            headers: {
+                                Authorization: token ? `Bearer ${token}` : "",
+                            },
+                        }),
+                        axios.get("http://localhost:8080/api/recipes", {
+                            headers: {
+                                Authorization: token ? `Bearer ${token}` : "",
+                            },
+                        }),
+                    ],
+                );
 
                 console.log(categoriesResponse.data);
 
@@ -73,7 +90,10 @@ const UpdateMenuPage: React.FC = () => {
 
         const fetchData = async () => {
             setLoading(true);
-            await Promise.all([fetchCategoriesAndRecipes(), fetchMenuDetails()]);
+            await Promise.all([
+                fetchCategoriesAndRecipes(),
+                fetchMenuDetails(),
+            ]);
             setLoading(false);
         };
         fetchData();
@@ -149,7 +169,7 @@ const UpdateMenuPage: React.FC = () => {
         setSelectedRecipes((prevSelected) =>
             prevSelected.includes(recipeId)
                 ? prevSelected.filter((id) => id !== recipeId)
-                : [...prevSelected, recipeId]
+                : [...prevSelected, recipeId],
         );
     };
 
@@ -168,8 +188,14 @@ const UpdateMenuPage: React.FC = () => {
                 <form className="space-y-4">
                     {/* Menu title */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Menu title</label>
+                        <label
+                            htmlFor="edit-menu-title"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Menu title
+                        </label>
                         <input
+                            id="edit-menu-title"
                             type="text"
                             value={menuTitle}
                             onChange={(e) => {
@@ -178,13 +204,23 @@ const UpdateMenuPage: React.FC = () => {
                             }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
-                        {menuTitleError && <div className="text-red-500 text-sm">{menuTitleError}</div>}
+                        {menuTitleError && (
+                            <div className="text-red-500 text-sm">
+                                {menuTitleError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Menu description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Menu description</label>
+                        <label
+                            htmlFor="edit-menu-description"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Menu description
+                        </label>
                         <textarea
+                            id="edit-menu-description"
                             value={menuDescription}
                             onChange={(e) => {
                                 setMenuDescription(e.target.value);
@@ -193,13 +229,23 @@ const UpdateMenuPage: React.FC = () => {
                             rows={4}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
-                        {menuDescriptionError && <div className="text-red-500 text-sm">{menuDescriptionError}</div>}
+                        {menuDescriptionError && (
+                            <div className="text-red-500 text-sm">
+                                {menuDescriptionError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Menu category */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Menu category</label>
+                        <label
+                            htmlFor="edit-menu-category"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Menu category
+                        </label>
                         <select
+                            id="edit-menu-category"
                             value={selectedCategory || ""}
                             onChange={(e) => {
                                 setSelectedCategory(Number(e.target.value));
@@ -211,23 +257,34 @@ const UpdateMenuPage: React.FC = () => {
                                 Select a menu category
                             </option>
                             {categories.map((category) => (
-                                <option key={category.menu_category_id} value={category.menu_category_id}>
+                                <option
+                                    key={category.menu_category_id}
+                                    value={category.menu_category_id}
+                                >
                                     {category.category_name}
                                 </option>
                             ))}
                         </select>
-                        {categoryError && <div className="text-red-500 text-sm">{categoryError}</div>}
+                        {categoryError && (
+                            <div className="text-red-500 text-sm">
+                                {categoryError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Recipes */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Recipes</label>
+                        <p className="block text-sm font-medium text-gray-700">
+                            Recipes
+                        </p>
                         <div className="flex flex-wrap gap-2">
                             {allRecipes.map((recipe) => (
                                 <button
                                     type="button"
                                     key={recipe.id}
-                                    onClick={() => toggleRecipeSelection(recipe.id)}
+                                    onClick={() =>
+                                        toggleRecipeSelection(recipe.id)
+                                    }
                                     className={`py-2 px-4 border rounded-md ${
                                         selectedRecipes.includes(recipe.id)
                                             ? "bg-blue-500 text-white"
@@ -238,7 +295,11 @@ const UpdateMenuPage: React.FC = () => {
                                 </button>
                             ))}
                         </div>
-                        {recipesError && <div className="text-red-500 text-sm">{recipesError}</div>}
+                        {recipesError && (
+                            <div className="text-red-500 text-sm">
+                                {recipesError}
+                            </div>
+                        )}
                     </div>
 
                     {/* Update menu button */}
@@ -253,7 +314,9 @@ const UpdateMenuPage: React.FC = () => {
                     </div>
                 </form>
 
-                {error && <div className="text-red-500 text-sm mt-4">{error}</div>}
+                {error && (
+                    <div className="text-red-500 text-sm mt-4">{error}</div>
+                )}
             </div>
         </div>
     );

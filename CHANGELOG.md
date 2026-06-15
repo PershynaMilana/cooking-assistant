@@ -22,6 +22,14 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.29 - 2026-06-14
+
+Frontend:
+- Added: strict linting, accessibility checks, and code-quality analysis (ESLint strict mode, jsx-a11y, SonarJS) enforced on every commit via pre-commit hook and in CI.
+- Added: Prettier formatting enforced for all frontend TypeScript, TSX, and CSS files in CI and pre-commit.
+- Added: aggregate root scripts (`lint`, `typecheck`, `test`, `build`, `verify`) to run checks across both packages from the repo root.
+
+
 ## 1.28 - 2026-06-14
 
 Frontend:

@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import {
+    Document,
+    Page,
+    Text,
+    View,
+    StyleSheet,
+    Font,
+} from "@react-pdf/renderer";
 import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
 import axios from "axios";
 
 Font.register({ family: "Montserrat", src: montserrat });
 
 const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" };
+    const options: Intl.DateTimeFormatOptions = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    };
     return date.toLocaleString("en-GB", options);
 };
 
@@ -78,46 +92,82 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
     const [stats, setStats] = useState<Stat[]>([]);
     const [fastestRecipes, setFastestRecipes] = useState<Recipe[]>([]);
     const [slowestRecipes, setSlowestRecipes] = useState<Recipe[]>([]);
-    const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<Recipe[]>([]);
-    const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<Recipe[]>([]);
+    const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<
+        Recipe[]
+    >([]);
+    const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
+        Recipe[]
+    >([]);
 
     useEffect(() => {
         const fetchStats = async () => {
             const token = localStorage.getItem("authToken");
             try {
-                const response = await axios.get("http://localhost:8080/api/recipes", {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
+                const response = await axios.get(
+                    "http://localhost:8080/api/recipes",
+                    {
+                        headers: {
+                            Authorization: token ? `Bearer ${token}` : "",
+                        },
                     },
-                });
+                );
                 const recipes: Recipe[] = response.data;
 
                 // count recipes per type
                 const typeCounts: { [key: string]: number } = {};
                 recipes.forEach((recipe) => {
-                    typeCounts[recipe.type_name] = (typeCounts[recipe.type_name] || 0) + 1;
+                    typeCounts[recipe.type_name] =
+                        (typeCounts[recipe.type_name] || 0) + 1;
                 });
 
-                const formattedStats = Object.keys(typeCounts).map((typeName) => ({
-                    typeName,
-                    count: typeCounts[typeName],
-                }));
+                const formattedStats = Object.keys(typeCounts).map(
+                    (typeName) => ({
+                        typeName,
+                        count: typeCounts[typeName],
+                    }),
+                );
                 setStats(formattedStats);
 
                 // find recipes by cooking time
                 if (recipes.length > 0) {
-                    const minTime = Math.min(...recipes.map((recipe) => recipe.cooking_time));
-                    const maxTime = Math.max(...recipes.map((recipe) => recipe.cooking_time));
+                    const minTime = Math.min(
+                        ...recipes.map((recipe) => recipe.cooking_time),
+                    );
+                    const maxTime = Math.max(
+                        ...recipes.map((recipe) => recipe.cooking_time),
+                    );
 
-                    setFastestRecipes(recipes.filter((recipe) => recipe.cooking_time === minTime));
-                    setSlowestRecipes(recipes.filter((recipe) => recipe.cooking_time === maxTime));
+                    setFastestRecipes(
+                        recipes.filter(
+                            (recipe) => recipe.cooking_time === minTime,
+                        ),
+                    );
+                    setSlowestRecipes(
+                        recipes.filter(
+                            (recipe) => recipe.cooking_time === maxTime,
+                        ),
+                    );
 
                     // find recipes by number of ingredients
-                    const maxIngredients = Math.max(...recipes.map((recipe) => recipe.ingredients.length));
-                    const minIngredients = Math.min(...recipes.map((recipe) => recipe.ingredients.length));
+                    const maxIngredients = Math.max(
+                        ...recipes.map((recipe) => recipe.ingredients.length),
+                    );
+                    const minIngredients = Math.min(
+                        ...recipes.map((recipe) => recipe.ingredients.length),
+                    );
 
-                    setMostIngredientsRecipes(recipes.filter((recipe) => recipe.ingredients.length === maxIngredients));
-                    setLeastIngredientsRecipes(recipes.filter((recipe) => recipe.ingredients.length === minIngredients));
+                    setMostIngredientsRecipes(
+                        recipes.filter(
+                            (recipe) =>
+                                recipe.ingredients.length === maxIngredients,
+                        ),
+                    );
+                    setLeastIngredientsRecipes(
+                        recipes.filter(
+                            (recipe) =>
+                                recipe.ingredients.length === minIngredients,
+                        ),
+                    );
                 }
             } catch (error) {
                 console.error("Error fetching statistics:", error);
@@ -158,19 +208,25 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Recipes with Most Ingredients:</Text>
+                    <Text style={styles.subtitle}>
+                        Recipes with Most Ingredients:
+                    </Text>
                     {mostIngredientsRecipes.map((recipe) => (
                         <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.ingredients.length} ingredients)
+                            {recipe.title} ({recipe.ingredients.length}{" "}
+                            ingredients)
                         </Text>
                     ))}
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subtitle}>Recipes with Least Ingredients:</Text>
+                    <Text style={styles.subtitle}>
+                        Recipes with Least Ingredients:
+                    </Text>
                     {leastIngredientsRecipes.map((recipe) => (
                         <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.ingredients.length} ingredients)
+                            {recipe.title} ({recipe.ingredients.length}{" "}
+                            ingredients)
                         </Text>
                     ))}
                 </View>

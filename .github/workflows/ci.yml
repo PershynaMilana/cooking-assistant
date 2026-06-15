@@ -22,10 +22,10 @@ jobs:
         with:
           cache-dependency-path: package-lock.json
           install: npm ci --ignore-scripts
-      - name: Check backend formatting
+      - name: Check formatting
         run: npm run format:check
 
-  lint:
+  lint-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
       - name: Lint backend
         run: npm --prefix backend run lint
 
-  typecheck:
+  typecheck-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
       - name: Typecheck backend
         run: npm --prefix backend run typecheck
 
-  sonarjs:
+  sonarjs-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
       - name: Run backend SonarJS lint
         run: npm --prefix backend run lint:sonarjs
 
-  test:
+  test-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,4 +68,57 @@ jobs:
           install: npm --prefix backend ci
       - name: Test backend with coverage
         run: npm --prefix backend run test:coverage
-  # SonarCloud can still be added later if the project gets SONAR_TOKEN and a hosted quality gate.
+
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: frontend/package-lock.json
+          install: npm --prefix frontend ci
+      - name: Lint frontend
+        run: npm --prefix frontend run lint
+
+  typecheck-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: frontend/package-lock.json
+          install: npm --prefix frontend ci
+      - name: Typecheck frontend
+        run: npm --prefix frontend run typecheck
+
+  sonarjs-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: frontend/package-lock.json
+          install: npm --prefix frontend ci
+      - name: Run frontend SonarJS lint
+        run: npm --prefix frontend run lint:sonarjs
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: frontend/package-lock.json
+          install: npm --prefix frontend ci
+      - name: Build frontend
+        run: npm --prefix frontend run build
+
+  ci-success:
+    name: ci-success
+    if: always()
+    needs: [format, lint-backend, lint-frontend, typecheck-backend, typecheck-frontend, sonarjs-backend, sonarjs-frontend, test-backend, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any needed job failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

@@ -19,10 +19,13 @@ const LoginPage: React.FC = () => {
         }
 
         try {
-            const response = await axios.post("http://localhost:8080/api/login", {
-                login,
-                password,
-            });
+            const response = await axios.post(
+                "http://localhost:8080/api/login",
+                {
+                    login,
+                    password,
+                },
+            );
 
             console.log("http://localhost:8080/api/login", login, password);
 
@@ -45,10 +48,14 @@ const LoginPage: React.FC = () => {
 
                     {/* Username field */}
                     <div>
-                        <label className="block text-sm font-montserratRegular font-medium text-gray-700">
+                        <label
+                            htmlFor="login-username"
+                            className="block text-sm font-montserratRegular font-medium text-gray-700"
+                        >
                             Username:
                         </label>
                         <input
+                            id="login-username"
                             type="text"
                             value={login}
                             onChange={(e) => setLogin(e.target.value)}
@@ -59,11 +66,15 @@ const LoginPage: React.FC = () => {
 
                     {/* Password field */}
                     <div>
-                        <label className="block text-sm font-montserratRegular font-medium text-gray-700">
+                        <label
+                            htmlFor="login-password"
+                            className="block text-sm font-montserratRegular font-medium text-gray-700"
+                        >
                             Password:
                         </label>
                         <div className="relative">
                             <input
+                                id="login-password"
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
