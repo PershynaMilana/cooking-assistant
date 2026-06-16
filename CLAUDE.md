@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Two-app monorepo (no workspaces - each side has its own `package.json`):
 
-- [backend/](backend/) - Node.js + Express 5 + TypeScript + PostgreSQL (`pg`) API on port `8080`; helmet, express-rate-limit, pino, and zod provide operational hardening and input validation; source lives under [backend/src/](backend/src/)
-- [frontend/](frontend/) - React 18 + TypeScript + Vite on port `5173` (Tailwind CSS, React Router v6)
+- [backend/](backend/) - Node.js + Express 5 + TypeScript + PostgreSQL (`pg`) API on port `3000`; helmet, express-rate-limit, pino, and zod provide operational hardening and input validation; source lives under [backend/src/](backend/src/)
+- [frontend/](frontend/) - React 18 + TypeScript + Vite on port `8080` (Tailwind CSS, React Router v6)
 - Database schema is managed by `node-pg-migrate`: SQL migrations live in [backend/migrations/](backend/migrations/) (the initial one captures the full current schema) and reference/sample data is loaded by [backend/src/scripts/seed.ts](backend/src/scripts/seed.ts).
 - Root [package.json](package.json) is an orchestration shim: it pulls in `concurrently` and exposes scripts that drive both sub-packages. It also holds the single shared project version (see [Versioning](#versioning) below).
 - [CHANGELOG.md](CHANGELOG.md) at the root is the single changelog for the whole project.
@@ -18,7 +18,7 @@ Preferred - from repository root ([package.json](package.json)):
 
 ```bash
 npm install              # installs root + auto-runs postinstall in backend & frontend
-npm start                # OR npm run dev - concurrently boots backend (8080) + frontend (5173)
+npm start                # OR npm run dev - concurrently boots backend (3000) + frontend (8080)
 npm run start:backend    # backend only (tsx watch)
 npm run start:frontend   # frontend only (vite)
 ```
@@ -30,7 +30,7 @@ Per-app, if you need it directly:
 Backend ([backend/](backend/)):
 
 ```bash
-npm run dev        # tsx watch -> http://localhost:8080
+npm run dev        # tsx watch -> http://localhost:3000
 npm start          # tsx src/index.ts, no auto-reload
 npm run typecheck  # tsc --noEmit
 npm run lint       # eslint .
@@ -42,7 +42,7 @@ npm run seed       # load reference + sample data (idempotent)
 Frontend ([frontend/](frontend/)):
 
 ```bash
-npm run dev      # vite dev server -> http://localhost:5173
+npm run dev      # vite dev server -> http://localhost:8080
 npm run build    # tsc -b && vite build  (real type-check happens here)
 npm run preview  # serve production build
 npm run lint     # eslint .
@@ -136,7 +136,7 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR and o
 
 1. PostgreSQL connection in [backend/src/config/env.ts](backend/src/config/env.ts) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset. Env values are parsed with zod on startup, so invalid ports or logger levels fail fast with a clear configuration error. `JWT_SECRET_KEY` stays optional at startup (but must be at least 32 characters when set) and is still checked lazily by JWT code. [backend/src/db.ts](backend/src/db.ts) consumes that typed config.
 2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/src/config/env.ts](backend/src/config/env.ts) by JWT auth code) plus the `DB_*` keys, `PORT`, optional `LOG_LEVEL` for pino, and `CORS_ORIGIN` (the allowed frontend origin). Without `JWT_SECRET_KEY`, login and every protected route return a 500 configuration error. Tests set a long `JWT_SECRET_KEY` in [backend/src/test/jest.setup.ts](backend/src/test/jest.setup.ts). When you add a new env key, add it (without a value) to `.env.example` too.
-3. CORS in [backend/src/app.ts](backend/src/app.ts) allows the origin from the `CORS_ORIGIN` env var (default `http://localhost:5173`, via `config.corsOrigin`). For a different frontend port or a deployed origin, set `CORS_ORIGIN` in `.env` - no code change.
+3. CORS in [backend/src/app.ts](backend/src/app.ts) allows the origin from the `CORS_ORIGIN` env var (default `http://localhost:8080`, via `config.corsOrigin`). For a different frontend port or a deployed origin, set `CORS_ORIGIN` in `.env` - no code change.
 4. Database setup uses `node-pg-migrate` (configured to reuse the same `config.db` as the app, so there is no separate `DATABASE_URL`). On a fresh DB run `npm run migrate` (or `migrate up`) then `npm run seed` from the root or `backend/`. `seed` is idempotent (guards against existing rows), so it is safe to re-run. A DB that already has the schema from the legacy `database.sql` adopts the migrations without re-creating anything via `npm run migrate -- up --fake` (marks the initial migration as applied; data is untouched). New migrations are scaffolded with `npm --prefix backend run migrate:create <name>` (SQL files with `-- Up Migration` / `-- Down Migration` markers). The legacy `database.sql` has been removed - migrations are the only source of truth for the schema (its old content lives in git history if ever needed).
 
 ## Database workflow

@@ -1,7 +1,7 @@
 # Cooking Assistant - Backend
 
-Express + PostgreSQL API for the [Cooking Assistant](../README.md) platform. Listens on port 8080 and
-serves the [frontend](../frontend/README.md) at http://localhost:5173 (CORS-restricted).
+Express + PostgreSQL API for the [Cooking Assistant](../README.md) platform. Listens on port 3000 and
+serves the [frontend](../frontend/README.md) at http://localhost:8080 (CORS-restricted).
 
 ## Tech stack
 
@@ -21,7 +21,7 @@ commands below only to work on the backend alone.
 
 ```bash
 npm install
-npm run dev      # tsx watch -> http://localhost:8080 (auto-reload)
+npm run dev      # tsx watch -> http://localhost:3000 (auto-reload)
 npm start        # tsx, no auto-reload
 npm run typecheck
 ```
@@ -45,9 +45,9 @@ DB_PASSWORD=12345678
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=cooking_helper
-PORT=8080
+PORT=3000
 LOG_LEVEL=info
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=http://localhost:8080
 ```
 
 `JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
@@ -161,7 +161,7 @@ migrations are the single source of truth for the schema (its old content is in 
 
 ### 4. CORS - [src/app.ts](src/app.ts)
 
-The allowed origin comes from the `CORS_ORIGIN` env var (default `http://localhost:5173`). Set it to the
+The allowed origin comes from the `CORS_ORIGIN` env var (default `http://localhost:8080`). Set it to the
 frontend's URL for non-local deploys; no code change needed.
 
 ## Structure
@@ -180,7 +180,7 @@ backend/
 └── src/
     ├── scripts/             migrate.ts (node-pg-migrate runner) and seed.ts (idempotent seed)
     ├── app.ts                createApp(controllers); mounts middleware, health, and routers without listening
-    ├── index.ts              runtime entry; listens on 8080 and shuts down server + pg pool cleanly
+    ├── index.ts              runtime entry; listens on 3000 and shuts down server + pg pool cleanly
     ├── composition-root.ts   dependency injection: buildControllers(deps), plus real pg wiring
     ├── db.ts                 pg.Pool connection (reads DB_* env via config/env.ts)
     ├── config/env.ts         typed env loading and JWT secret guard

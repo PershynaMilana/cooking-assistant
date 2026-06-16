@@ -22,6 +22,15 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.35 - 2026-06-16
+
+Backend:
+- Changed: the API server now listens on port 3000 (previously 8080), and the default allowed CORS origin is now http://localhost:8080 (previously http://localhost:5173).
+
+Frontend:
+- Changed: the dev server now runs on port 8080 (previously 5173), and the default backend API URL is now http://localhost:3000 (previously http://localhost:8080).
+
+
 ## 1.34 - 2026-06-16
 
 Frontend:

@@ -26,13 +26,13 @@ const envStringSchema = (fallback: string) =>
     z.preprocess(emptyToUndefined, z.string().default(fallback));
 
 const envSchema = z.object({
-    PORT: envNumberSchema(8080),
+    PORT: envNumberSchema(3000),
     DB_USER: envStringSchema("postgres"),
     DB_PASSWORD: envStringSchema("12345678"),
     DB_HOST: envStringSchema("localhost"),
     DB_PORT: envNumberSchema(5432),
     DB_NAME: envStringSchema("cooking_helper"),
-    CORS_ORIGIN: envStringSchema("http://localhost:5173"),
+    CORS_ORIGIN: envStringSchema("http://localhost:8080"),
     JWT_SECRET_KEY: z.preprocess(
         emptyToUndefined,
         z.string().min(32, "must be at least 32 characters").optional(),
