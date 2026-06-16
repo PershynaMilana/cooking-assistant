@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Chart from "react-apexcharts";
+import { getRecipes } from "../../api/recipesApi";
+import type { RecipeWithIngredientNames } from "../../types/recipe";
 import Header from "../../components/Header.tsx";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import StatsReportSecond from "./StatsReportSecond.tsx";
@@ -11,39 +12,26 @@ interface Stat {
     count: number;
 }
 
-interface Recipe {
-    id: number;
-    title: string;
-    cooking_time: number;
-    type_name: string;
-    ingredients: string[];
-}
-
 const StatsPage: React.FC = () => {
     const [stats, setStats] = useState<Stat[]>([]);
-    const [fastestRecipes, setFastestRecipes] = useState<Recipe[]>([]);
-    const [slowestRecipes, setSlowestRecipes] = useState<Recipe[]>([]);
+    const [fastestRecipes, setFastestRecipes] = useState<
+        RecipeWithIngredientNames[]
+    >([]);
+    const [slowestRecipes, setSlowestRecipes] = useState<
+        RecipeWithIngredientNames[]
+    >([]);
     const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<
-        Recipe[]
+        RecipeWithIngredientNames[]
     >([]);
     const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
-        Recipe[]
+        RecipeWithIngredientNames[]
     >([]);
     const [reportTime, setReportTime] = useState<Date | null>(null);
 
     useEffect(() => {
         const fetchStats = async () => {
-            const token = localStorage.getItem("authToken");
             try {
-                const response = await axios.get(
-                    "http://localhost:8080/api/recipes",
-                    {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    },
-                );
-                const recipes: Recipe[] = response.data;
+                const recipes = await getRecipes();
 
                 // count recipes per type
                 const typeCounts: { [key: string]: number } = {};

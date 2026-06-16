@@ -6,6 +6,12 @@ export interface RecipeListItem {
     cooking_time: number;
 }
 
+// shape returned by GET /api/recipes - the recipe list plus an array_agg of
+// ingredient names (the list query in PgRecipeRepository.findAllWithIngredients)
+export interface RecipeWithIngredientNames extends RecipeListItem {
+    ingredients: string[];
+}
+
 export interface RecipeDetailIngredient {
     id: number;
     name: string;

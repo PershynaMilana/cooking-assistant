@@ -1,39 +1,21 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Header.tsx";
 import PurchaseHistoryModal from "../../components/PurchaseHistoryModal.tsx";
+import { getIngredients } from "../../api/ingredientsApi";
+import {
+    getUserIngredients,
+    saveUserIngredient,
+    updateQuantities,
+    deleteUserIngredient,
+} from "../../api/userIngredientsApi";
+import type { PantryIngredient as Ingredient } from "../../types/userIngredient";
 
 const NO_AUTH_TOKEN = "No auth token found.";
-
-interface Ingredient {
-    id: number;
-    name?: string | "";
-    ingredient_name?: string;
-    unit_name: string;
-    quantity_person_ingradient: number;
-    storage_condition?: string;
-    seasonality?: string;
-    days_to_expire?: number;
-    allergens?: string[];
-    purchase_date?: string;
-}
 
 interface AllIngredient {
     id: number;
     name: string;
-}
-
-interface UserIngredientResponse {
-    ingredient_id: number;
-    ingredient_name: string;
-    unit_name: string;
-    quantity_person_ingradient: number;
-    storage_condition?: string;
-    seasonality?: string;
-    days_to_expire?: number;
-    allergens?: string[];
-    purchase_date?: string;
 }
 
 const IngredientsPage: React.FC = () => {
@@ -77,16 +59,9 @@ const IngredientsPage: React.FC = () => {
             }
 
             try {
-                const response = await axios.get(
-                    "http://localhost:8080/api/ingredients",
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    },
-                );
-
-                const sortedIngredients = response.data.sort(
-                    (a: AllIngredient, b: AllIngredient) =>
-                        a.name.localeCompare(b.name),
+                const ingredients = await getIngredients();
+                const sortedIngredients = ingredients.sort((a, b) =>
+                    a.name.localeCompare(b.name),
                 );
                 setAllIngredients(sortedIngredients);
             } catch (error) {
@@ -109,16 +84,10 @@ const IngredientsPage: React.FC = () => {
         const userId = decodedToken.id;
 
         try {
-            const response = await axios.get(
-                `http://localhost:8080/api/user-ingredients/${userId}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    params: { userId },
-                },
-            );
+            const data = await getUserIngredients(userId);
 
             setPersonIngredients(
-                response.data.map((item: UserIngredientResponse) => ({
+                data.map((item) => ({
                     ...item,
                     id: item.ingredient_id,
                     ingredient_name: item.ingredient_name,
@@ -128,10 +97,7 @@ const IngredientsPage: React.FC = () => {
             );
 
             setSelectedIngredients(
-                response.data.map(
-                    (ingredient: { ingredient_id: number }) =>
-                        ingredient.ingredient_id,
-                ),
+                data.map((ingredient) => ingredient.ingredient_id),
             );
         } catch (error) {
             console.error("Error loading selected ingredients:", error);
@@ -175,14 +141,7 @@ const IngredientsPage: React.FC = () => {
             }));
 
         try {
-            await axios.put(
-                `http://localhost:8080/api/user-ingredients/${userId}`,
-                { ingredients: newIngredients },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    params: { userId },
-                },
-            );
+            await saveUserIngredient(userId, { ingredients: newIngredients });
 
             setIsEditing(false);
             await fetchSelectedIngredients();
@@ -245,13 +204,9 @@ const IngredientsPage: React.FC = () => {
         }
 
         try {
-            await axios.put(
-                `http://localhost:8080/api/user-ingredients/update-quantities/${userId}`,
-                { updatedIngredients: changedIngredients },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
+            await updateQuantities(userId, {
+                updatedIngredients: changedIngredients,
+            });
 
             setIsEditingQuantity(false);
             await fetchSelectedIngredients();
@@ -280,12 +235,7 @@ const IngredientsPage: React.FC = () => {
         const userId = decodedToken.id;
 
         try {
-            await axios.delete(
-                `http://localhost:8080/api/user-ingredients/${userId}/${selectedIngredientToDelete.id}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
+            await deleteUserIngredient(userId, selectedIngredientToDelete.id);
 
             setPersonIngredients((prev) =>
                 prev.filter(

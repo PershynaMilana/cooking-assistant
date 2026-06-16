@@ -8,7 +8,8 @@ import {
     Font,
 } from "@react-pdf/renderer";
 import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
-import axios from "axios";
+import { getRecipes } from "../../api/recipesApi";
+import type { RecipeWithIngredientNames } from "../../types/recipe";
 
 Font.register({ family: "Montserrat", src: montserrat });
 
@@ -80,38 +81,25 @@ interface Stat {
     count: number;
 }
 
-interface Recipe {
-    id: number;
-    title: string;
-    cooking_time: number;
-    type_name: string;
-    ingredients: string[];
-}
-
 const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
     const [stats, setStats] = useState<Stat[]>([]);
-    const [fastestRecipes, setFastestRecipes] = useState<Recipe[]>([]);
-    const [slowestRecipes, setSlowestRecipes] = useState<Recipe[]>([]);
+    const [fastestRecipes, setFastestRecipes] = useState<
+        RecipeWithIngredientNames[]
+    >([]);
+    const [slowestRecipes, setSlowestRecipes] = useState<
+        RecipeWithIngredientNames[]
+    >([]);
     const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<
-        Recipe[]
+        RecipeWithIngredientNames[]
     >([]);
     const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
-        Recipe[]
+        RecipeWithIngredientNames[]
     >([]);
 
     useEffect(() => {
         const fetchStats = async () => {
-            const token = localStorage.getItem("authToken");
             try {
-                const response = await axios.get(
-                    "http://localhost:8080/api/recipes",
-                    {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    },
-                );
-                const recipes: Recipe[] = response.data;
+                const recipes = await getRecipes();
 
                 // count recipes per type
                 const typeCounts: { [key: string]: number } = {};

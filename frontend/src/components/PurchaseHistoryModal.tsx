@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-
-interface Purchase {
-    id: number;
-    quantity: number;
-    purchase_date: string;
-    unit_name: string;
-    days_to_expire: number;
-}
+import { getPurchaseHistory, updatePurchase } from "../api/userIngredientsApi";
+import type { Purchase } from "../types/userIngredient";
 
 interface PurchaseHistoryModalProps {
     ingredientId: number;
@@ -39,12 +32,9 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
             try {
                 const userId = jwtDecode<{ id: number }>(token).id;
 
-                const response = await axios.get(
-                    `http://localhost:8080/api/user-ingredients/${userId}/history/${ingredientId}`,
-                    { headers: { Authorization: `Bearer ${token}` } },
-                );
-                console.log(response.data);
-                setPurchaseHistory(response.data);
+                const data = await getPurchaseHistory(userId, ingredientId);
+                console.log(data);
+                setPurchaseHistory(data);
             } catch {
                 setError("Error loading purchase history.");
             } finally {
@@ -82,11 +72,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
                 newQuantity,
                 `Bearer ${token}`,
             );
-            await axios.put(
-                `http://localhost:8080/api/user-ingredients/${userId}/history/${id}`,
-                { quantity: newQuantity },
-                { headers: { Authorization: `Bearer ${token}` } },
-            );
+            await updatePurchase(userId, id, { quantity: newQuantity });
 
             // update local state
             setPurchaseHistory((prev) =>

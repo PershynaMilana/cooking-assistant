@@ -7,8 +7,12 @@ import {
     Text,
     View,
 } from "@react-pdf/renderer";
-import axios from "axios";
 import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
+import { getMenus } from "../../api/menusApi";
+import { getRecipes } from "../../api/recipesApi";
+import { getRecipesStats } from "../../api/statsApi";
+import { getApiErrorMessage } from "../../api/httpError";
+import type { AverageCookingTime } from "../../types/stats";
 
 Font.register({ family: "Montserrat", src: montserrat });
 
@@ -80,14 +84,6 @@ interface Menu {
     menuCount: number;
 }
 
-interface Recipe {
-    id: number;
-    title: string;
-    averageCookingTime: number;
-    typeName: string;
-    ingredients: string[];
-}
-
 interface StatsReportSecondProps {
     reportTime: Date;
 }
@@ -98,9 +94,9 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
     const token = localStorage.getItem("authToken");
     const [menusCount, setMenusCount] = useState(0);
     const [recipesCount, setRecipesCount] = useState(0);
-    const [averageCookingTimes, setAverageCookingTimes] = useState<Recipe[]>(
-        [],
-    );
+    const [averageCookingTimes, setAverageCookingTimes] = useState<
+        AverageCookingTime[]
+    >([]);
     const [menuCountByCategory, setMenuCountByCategory] = useState<Menu[]>([]);
     const [error, setError] = useState<string | null>(null);
 
@@ -112,14 +108,7 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
         }
 
         try {
-            const { data: allMenus } = await axios.get(
-                "http://localhost:8080/api/menu",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            );
+            const allMenus = await getMenus({});
             setMenusCount(allMenus.length);
 
             const categoryCounts: Record<string, number> = {};
@@ -136,24 +125,10 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
             );
             setMenuCountByCategory(categoryStats);
 
-            const { data: allRecipes } = await axios.get(
-                "http://localhost:8080/api/recipes",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            );
+            const allRecipes = await getRecipes();
             setRecipesCount(allRecipes.length);
 
-            const { data: avgCookingTimes } = await axios.get(
-                "http://localhost:8080/api/recipes-stats",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            );
+            const avgCookingTimes = await getRecipesStats();
 
             if (Array.isArray(avgCookingTimes.averageCookingTimes)) {
                 const formattedTimes = avgCookingTimes.averageCookingTimes.map(
@@ -178,11 +153,7 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
                 setAverageCookingTimes([]);
             }
         } catch (err) {
-            setError(
-                axios.isAxiosError(err)
-                    ? (err.response?.data?.error ?? err.message)
-                    : "Failed to load statistics.",
-            );
+            setError(getApiErrorMessage(err));
         }
     }, [token]);
 
