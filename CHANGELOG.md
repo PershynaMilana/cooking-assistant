@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.33 - 2026-06-16
+
+Frontend:
+- Changed: menu and user-menu HTTP calls extracted from their pages into `src/api/menusApi.ts` and `src/api/menuCategoriesApi.ts`; `getRecipes()` added to `src/api/recipesApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios/fetch directly or reference hardcoded backend URLs.
+
+
 ## 1.32 - 2026-06-15
 
 Frontend:

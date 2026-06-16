@@ -4,27 +4,12 @@ import Header from "../../components/Header.tsx";
 import RecipeCard from "../../components/RecipeCard.tsx";
 import Modal from "../../components/Modal.tsx";
 import { jwtDecode } from "jwt-decode";
-
-interface Recipe {
-    id: number;
-    recipe_id: number;
-    title: string;
-    type_name: string;
-    cooking_time: number;
-    creation_date: string;
-    missingIngredients: [];
-}
-
-interface MenuDetails {
-    menu: {
-        id: number;
-        title: string;
-        categoryname: string;
-        menucontent: string;
-        personid?: number;
-    };
-    recipes: Recipe[];
-}
+import {
+    getMenuById,
+    deleteMenu as deleteMenuApi,
+} from "../../api/menusApi.ts";
+import { getApiErrorMessage } from "../../api/httpError.ts";
+import type { MenuDetails, MenuDetailRecipe } from "../../types/menu.ts";
 
 const getCurrentUserId = () => {
     const token = localStorage.getItem("authToken");
@@ -50,27 +35,12 @@ const MenuDetailsPage: React.FC = () => {
 
     // function to fetch menu details
     const fetchMenuDetails = useCallback(async () => {
-        const token = localStorage.getItem("authToken");
+        if (!id) return;
         try {
-            const response = await fetch(
-                `http://localhost:8080/api/menu/${id}`,
-                {
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-            if (!response.ok) {
-                throw new Error("Error fetching menu details");
-            }
-            const data = await response.json();
+            const data = await getMenuById(id);
             setMenu(data);
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("Unknown error");
-            }
+            setError(getApiErrorMessage(error));
         }
     }, [id]);
 
@@ -104,7 +74,7 @@ const MenuDetailsPage: React.FC = () => {
 
     // group recipes by type
     const groupedRecipes = menu.recipes.reduce(
-        (groups: { [key: string]: Recipe[] }, recipe) => {
+        (groups: { [key: string]: MenuDetailRecipe[] }, recipe) => {
             const { type_name } = recipe;
             if (!groups[type_name]) {
                 groups[type_name] = [];
@@ -117,28 +87,11 @@ const MenuDetailsPage: React.FC = () => {
 
     // delete menu
     const deleteMenu = async () => {
-        const token = localStorage.getItem("authToken");
         try {
-            const response = await fetch(
-                `http://localhost:8080/api/menu/${menu.menu.id}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error("Error deleting menu");
-            }
+            await deleteMenuApi(menu.menu.id);
             navigate("/menu");
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("Unknown error");
-            }
+            setError(getApiErrorMessage(error));
         }
     };
 

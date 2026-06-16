@@ -50,3 +50,10 @@ export async function updateRecipe(
 export async function deleteRecipe(id: string): Promise<void> {
     await apiClient.delete(API_ROUTES.recipes.byId(id));
 }
+
+export async function getRecipes(): Promise<RecipeListItem[]> {
+    const response = await apiClient.get<RecipeListItem[]>(
+        API_ROUTES.recipes.list,
+    );
+    return response.data;
+}

@@ -4,21 +4,12 @@ import MenuCard from "../../components/menu/MenuCard.tsx";
 import Header from "../../components/Header.tsx";
 import SearchComponent from "../../components/SearchComponent.tsx";
 import MenuCategoryFilter from "../../components/menu/MenuCategoryFilter.tsx";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
-
-interface Menu {
-    id: number;
-    title: string;
-    categoryname: string;
-    menucontent: string;
-}
-
-interface MenuCategory {
-    menu_category_id: number;
-    category_name: string;
-}
+import { getMenusByPerson } from "../../api/menusApi.ts";
+import { getMenuCategories } from "../../api/menuCategoriesApi.ts";
+import { getApiErrorMessage } from "../../api/httpError.ts";
+import type { Menu, MenuCategory } from "../../types/menu.ts";
 
 const UserMenuPage: React.FC = () => {
     const [menus, setMenus] = useState<Menu[]>([]);
@@ -45,33 +36,21 @@ const UserMenuPage: React.FC = () => {
         try {
             const encodedMenuName = encodeURIComponent(menuName || "");
 
-            const response = await axios.get(
-                `http://localhost:8080/api/menu-filters-person/${userId}`,
-                {
-                    params: {
-                        menu_name: encodedMenuName,
-                        category_ids:
-                            selectedCategories.length > 0
-                                ? selectedCategories.join(",")
-                                : undefined,
-                    },
-                    headers: {
-                        Authorization: token ? `Bearer ${token}` : "",
-                    },
-                },
-            );
+            const data = await getMenusByPerson(userId, {
+                menu_name: encodedMenuName,
+                category_ids:
+                    selectedCategories.length > 0
+                        ? selectedCategories.join(",")
+                        : undefined,
+            });
 
-            if (response.data.length === 0) {
+            if (data.length === 0) {
                 setNoMenus(true);
             } else {
-                setMenus(response.data);
+                setMenus(data);
             }
         } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                setError(error.response?.data?.error || error.message);
-            } else {
-                setError("Unknown error");
-            }
+            setError(getApiErrorMessage(error));
         }
     }, [menuName, selectedCategories, token]);
 
@@ -82,15 +61,8 @@ const UserMenuPage: React.FC = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(
-                    `http://localhost:8080/api/menu-categories`,
-                    {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    },
-                );
-                setCategories(response.data);
+                const data = await getMenuCategories();
+                setCategories(data);
             } catch (error) {
                 console.error("Error fetching menu categories.", error);
             }
