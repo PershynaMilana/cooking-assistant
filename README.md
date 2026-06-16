@@ -41,7 +41,7 @@ npm run seed        # load reference + sample data (idempotent)
 npm start
 ```
 
-Open http://localhost:5173, register, and you are in.
+Open http://localhost:8080, register, and you are in.
 
 > **Already have a `cooking_helper` from the old `database.sql` setup?** Don't run a plain `npm run migrate` on
 > it (the tables already exist - it would error). Instead adopt the migrations once, without touching your data:
@@ -55,8 +55,8 @@ cooking-assistant/
 ├── package.json     orchestration scripts (concurrently)
 ├── CHANGELOG.md     single changelog for the whole project
 ├── CLAUDE.md        notes for AI tooling (also useful for humans)
-├── backend/         Express + PostgreSQL API on :8080  (see backend/README.md)
-└── frontend/        React + Vite SPA on :5173          (see frontend/README.md)
+├── backend/         Express + PostgreSQL API on :3000  (see backend/README.md)
+└── frontend/        React + Vite SPA on :8080          (see frontend/README.md)
 ```
 
 It is a plain monorepo - no workspaces. The root `package.json` only holds `concurrently` and a few
@@ -68,8 +68,8 @@ per-app detail.
 ```bash
 npm install              # installs root + backend + frontend (postinstall hook)
 npm start                # boot backend + frontend together (alias: npm run dev)
-npm run start:backend    # backend only (tsx watch -> :8080)
-npm run start:frontend   # frontend only (vite -> :5173)
+npm run start:backend    # backend only (tsx watch -> :3000)
+npm run start:frontend   # frontend only (vite -> :8080)
 ```
 
 ## Versioning and changelog

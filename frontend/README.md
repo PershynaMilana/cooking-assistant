@@ -1,7 +1,7 @@
 # Cooking Assistant - Frontend
 
 React 18 + TypeScript + Vite client for the [Cooking Assistant](../README.md) platform. Talks to the
-[backend](../backend/README.md) API at http://localhost:8080/api.
+[backend](../backend/README.md) API at http://localhost:3000/api.
 
 ## Tech stack
 
@@ -21,14 +21,15 @@ commands below only to work on the frontend alone.
 
 ```bash
 npm install
-npm run dev      # vite dev server -> http://localhost:5173
+npm run dev      # vite dev server -> http://localhost:8080
 npm run build    # tsc -b && vite build (real type-check happens here)
 npm run preview  # preview the production dist/
 npm run lint     # eslint .
 ```
 
-The dev server expects the backend at http://localhost:8080. Backend CORS is locked to
-http://localhost:5173 - if you change Vite's port, update [../backend/index.js](../backend/index.js).
+The dev server expects the backend at http://localhost:3000. Backend CORS is env-driven via the
+`CORS_ORIGIN` variable (default `http://localhost:8080`); to allow a different Vite port, set
+`CORS_ORIGIN` in `backend/.env` - no code change.
 
 ## Source structure
 
@@ -95,7 +96,7 @@ code. Do not import it for new auth logic. The pattern used throughout:
 
 ```tsx
 const token = localStorage.getItem("authToken");
-axios.get("http://localhost:8080/api/recipes", {
+axios.get("http://localhost:3000/api/recipes", {
   headers: { Authorization: `Bearer ${token}` },
 });
 ```
