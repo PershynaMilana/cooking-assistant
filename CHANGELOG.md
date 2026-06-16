@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.34 - 2026-06-16
+
+Frontend:
+- Changed: ingredient-pantry and statistics HTTP calls extracted from their pages/components into `src/api/userIngredientsApi.ts` and `src/api/statsApi.ts`; paths centralised in `src/api/endpoints.ts`; pages and components no longer call axios directly or build hardcoded backend URLs for requests, completing the API-layer migration of every frontend domain.
+
+
 ## 1.33 - 2026-06-16
 
 Frontend:

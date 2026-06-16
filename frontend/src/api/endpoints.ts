@@ -10,6 +10,7 @@ export const API_ROUTES = {
             `/api/recipes-filters-person/${userId}`,
         create: "/api/recipe",
         byId: (id: string | number) => `/api/recipe/${id}`,
+        stats: "/api/recipes-stats",
     },
     recipeTypes: {
         list: "/api/recipe-types",
@@ -17,6 +18,16 @@ export const API_ROUTES = {
     },
     ingredients: {
         list: "/api/ingredients",
+    },
+    userIngredients: {
+        byPerson: (userId: string | number) =>
+            `/api/user-ingredients/${userId}`,
+        updateQuantities: (userId: string | number) =>
+            `/api/user-ingredients/update-quantities/${userId}`,
+        item: (userId: string | number, ingredientId: string | number) =>
+            `/api/user-ingredients/${userId}/${ingredientId}`,
+        history: (userId: string | number, ingredientId: string | number) =>
+            `/api/user-ingredients/${userId}/history/${ingredientId}`,
     },
     menu: {
         list: "/api/menu",
