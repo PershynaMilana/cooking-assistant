@@ -1,27 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import Header from "../../components/Header.tsx";
-
-interface Recipe {
-    id: number;
-    title: string;
-}
-
-interface MenuCategory {
-    menu_category_id: number;
-    category_name: string;
-}
+import { getMenuById, updateMenu } from "../../api/menusApi.ts";
+import { getMenuCategories } from "../../api/menuCategoriesApi.ts";
+import { getRecipes } from "../../api/recipesApi.ts";
+import type { MenuCategory } from "../../types/menu.ts";
+import type { RecipeListItem } from "../../types/recipe.ts";
 
 const UpdateMenuPage: React.FC = () => {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const [menuTitle, setMenuTitle] = useState("");
     const [menuDescription, setMenuDescription] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<number | null>(
         null,
     );
     const [categories, setCategories] = useState<MenuCategory[]>([]);
-    const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
+    const [allRecipes, setAllRecipes] = useState<RecipeListItem[]>([]);
     const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -35,25 +29,16 @@ const UpdateMenuPage: React.FC = () => {
 
     useEffect(() => {
         const fetchMenuDetails = async () => {
-            const token = localStorage.getItem("authToken");
+            if (!id) return;
             try {
-                const response = await axios.get(
-                    `http://localhost:8080/api/menu/${id}`,
-                    {
-                        headers: {
-                            Authorization: token ? `Bearer ${token}` : "",
-                        },
-                    },
-                );
-                const { menu, recipes } = response.data;
+                const data = await getMenuById(id);
+                const { menu, recipes } = data;
 
                 setMenuTitle(menu.title || "");
                 setMenuDescription(menu.menucontent || "");
                 setSelectedCategory(menu.categoryid || null);
 
-                setSelectedRecipes(
-                    recipes.map((recipe: { id: number }) => recipe.id) || [],
-                );
+                setSelectedRecipes(recipes.map((recipe) => recipe.id) || []);
             } catch (error: unknown) {
                 console.error("Error fetching menu data:", error);
                 setError("Failed to load menu data. Please try again later.");
@@ -61,27 +46,16 @@ const UpdateMenuPage: React.FC = () => {
         };
 
         const fetchCategoriesAndRecipes = async () => {
-            const token = localStorage.getItem("authToken");
             try {
-                const [categoriesResponse, recipesResponse] = await Promise.all(
-                    [
-                        axios.get("http://localhost:8080/api/menu-categories", {
-                            headers: {
-                                Authorization: token ? `Bearer ${token}` : "",
-                            },
-                        }),
-                        axios.get("http://localhost:8080/api/recipes", {
-                            headers: {
-                                Authorization: token ? `Bearer ${token}` : "",
-                            },
-                        }),
-                    ],
-                );
+                const [categoriesData, recipesData] = await Promise.all([
+                    getMenuCategories(),
+                    getRecipes(),
+                ]);
 
-                console.log(categoriesResponse.data);
+                console.log(categoriesData);
 
-                setCategories(categoriesResponse.data);
-                setAllRecipes(recipesResponse.data);
+                setCategories(categoriesData);
+                setAllRecipes(recipesData);
             } catch (error: unknown) {
                 console.error("Error loading categories or recipes:", error);
                 setError("Failed to load categories or recipes.");
@@ -138,11 +112,12 @@ const UpdateMenuPage: React.FC = () => {
     const handleUpdateMenu = async () => {
         if (!validateForm()) return;
 
-        const token = localStorage.getItem("authToken");
-        if (!token) {
+        if (!localStorage.getItem("authToken")) {
             console.error("Authentication token not found.");
             return;
         }
+
+        if (!id) return;
 
         try {
             const data = {
@@ -153,9 +128,7 @@ const UpdateMenuPage: React.FC = () => {
             };
             console.log(data);
 
-            await axios.put(`http://localhost:8080/api/menu/${id}`, data, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await updateMenu(id, data);
 
             navigate("/menu");
         } catch (error: unknown) {

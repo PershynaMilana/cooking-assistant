@@ -4,6 +4,7 @@ export const API_ROUTES = {
         register: "/api/register",
     },
     recipes: {
+        list: "/api/recipes",
         byFilters: "/api/recipes-by-filters",
         byPerson: (userId: string | number) =>
             `/api/recipes-filters-person/${userId}`,
@@ -16,5 +17,15 @@ export const API_ROUTES = {
     },
     ingredients: {
         list: "/api/ingredients",
+    },
+    menu: {
+        list: "/api/menu",
+        create: "/api/create-menu",
+        byId: (id: string | number) => `/api/menu/${id}`,
+        byPerson: (userId: string | number) =>
+            `/api/menu-filters-person/${userId}`,
+    },
+    menuCategories: {
+        list: "/api/menu-categories",
     },
 } as const;
