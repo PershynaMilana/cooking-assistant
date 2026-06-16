@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.36 - 2026-06-16
+
+Frontend:
+- Added: a Jest + React Testing Library test setup (jsdom) so UI components can be unit-tested, with a first smoke test covering the confirmation modal.
+
+
 ## 1.35 - 2026-06-16
 
 Backend:
