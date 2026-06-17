@@ -1,0 +1,5 @@
+{
+  // editor + `tsc -b` type-check view of the tests; the sibling ./tsconfig.spec.json
+  // is the ts-jest runtime view, differing only by the CommonJS module options
+  "extends": "./tsconfig.test-base.json"
+}

@@ -1,0 +1,35 @@
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import LoginPage from "../LoginPage";
+import { login } from "../../../api/authApi";
+import { mockNavigate, renderWithRouter } from "../../../test/router";
+
+jest.mock("react-router-dom", () => ({
+    ...jest.requireActual("react-router-dom"),
+    useNavigate: () => mockNavigate,
+}));
+jest.mock("../../../api/authApi");
+
+const USERNAME = "test-user";
+const PASSWORD = "test-pass";
+const TOKEN = "test-token";
+
+describe("LoginPage", () => {
+    it("should store the token and navigate to main on successful login", async () => {
+        const mockedLogin = jest.mocked(login);
+        mockedLogin.mockResolvedValue({ token: TOKEN });
+
+        renderWithRouter(<LoginPage />);
+
+        await userEvent.type(screen.getByLabelText("Username:"), USERNAME);
+        await userEvent.type(screen.getByLabelText("Password:"), PASSWORD);
+        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+
+        expect(mockedLogin).toHaveBeenCalledWith({
+            login: USERNAME,
+            password: PASSWORD,
+        });
+        expect(localStorage.getItem("authToken")).toBe(TOKEN);
+        expect(mockNavigate).toHaveBeenCalledWith("/main");
+    });
+});

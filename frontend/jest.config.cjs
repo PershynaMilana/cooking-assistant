@@ -11,6 +11,7 @@ module.exports = {
         "\\.(css|less|scss|sass)$": "identity-obj-proxy",
         "\\.(svg|png|jpg|jpeg|gif|webp|avif|ttf|woff|woff2|eot)$":
             "<rootDir>/src/test/fileMock.ts",
+        "^.*/config/env$": "<rootDir>/src/test/envMock.ts",
     },
     transform: {
         "^.+\\.(ts|tsx|js|jsx)$": [

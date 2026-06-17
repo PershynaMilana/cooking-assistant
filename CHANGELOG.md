@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.37 - 2026-06-16
+
+Frontend:
+- Added: a frontend test suite (Jest + React Testing Library) that locks in current behaviour ahead of the upcoming UI refactor - unit tests for every API-layer function and the shared error helper, tests for the reusable UI components, and a behavioral smoke test for every page (login, registration, the recipe and menu lists, recipe and menu details, recipe and menu creation and editing, recipe types, the pantry, and statistics).
+
+
 ## 1.36 - 2026-06-16
 
 Frontend:

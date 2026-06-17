@@ -1,0 +1,11 @@
+{
+  // shared base for the two test tsconfigs - ./tsconfig.test.json (editor + tsc -b)
+  // and ./tsconfig.spec.json (ts-jest runtime) - so jest types and test inclusion
+  // live in one place; the two differ only by the ts-jest CommonJS module options
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["jest", "@testing-library/jest-dom"]
+  },
+  "include": ["src"],
+  "exclude": []
+}
