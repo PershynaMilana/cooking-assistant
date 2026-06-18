@@ -31,7 +31,7 @@
       "prettier --write"
     ],
     "frontend/**/*.{css,scss}": [
-      "stylelint --fix"
+      "./frontend/node_modules/.bin/stylelint --fix"
     ]
   },
   "overrides": {

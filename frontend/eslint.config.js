@@ -219,27 +219,30 @@ export default tseslint.config(
             ],
         },
         rules: {
-            "boundaries/element-types": [
+            "boundaries/dependencies": [
                 "warn",
                 {
+                    checkAllOrigins: true,
                     default: "allow",
                     rules: [
                         {
-                            from: ["components"],
-                            disallow: ["pages"],
+                            from: { type: "components" },
+                            disallow: {
+                                to: { type: "pages" },
+                            },
                             message: "Components must not import pages.",
                         },
-                    ],
-                },
-            ],
-            "boundaries/external": [
-                "warn",
-                {
-                    default: "allow",
-                    rules: [
                         {
-                            from: ["components", "pages", "hooks", "utils"],
-                            disallow: ["axios"],
+                            from: [
+                                { type: "components" },
+                                { type: "pages" },
+                                { type: "hooks" },
+                                { type: "utils" },
+                            ],
+                            disallow: {
+                                to: { origin: "external" },
+                                dependency: { module: "axios" },
+                            },
                             message:
                                 "Use the api layer instead of importing axios directly.",
                         },
