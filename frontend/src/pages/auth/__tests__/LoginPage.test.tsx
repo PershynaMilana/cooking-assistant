@@ -1,11 +1,14 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import LoginPage from "../LoginPage";
-import { login } from "../../../api/authApi";
-import { mockNavigate, renderWithRouter } from "../../../test/router";
+import type * as ReactRouterDom from "react-router-dom";
+
+import { login } from "api/authApi";
+
+import LoginPage from "pages/auth/LoginPage";
+import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
+    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
 jest.mock("../../../api/authApi");
@@ -17,6 +20,7 @@ const TOKEN = "test-token";
 describe("LoginPage", () => {
     it("should store the token and navigate to main on successful login", async () => {
         const mockedLogin = jest.mocked(login);
+
         mockedLogin.mockResolvedValue({ token: TOKEN });
 
         renderWithRouter(<LoginPage />);

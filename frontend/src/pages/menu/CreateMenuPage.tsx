@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../../components/Header.tsx";
-import { jwtDecode } from "jwt-decode";
-import { getMenuCategories } from "../../api/menuCategoriesApi.ts";
-import { getRecipes } from "../../api/recipesApi.ts";
-import { createMenu } from "../../api/menusApi.ts";
-import type { MenuCategory } from "../../types/menu.ts";
-import type { RecipeListItem } from "../../types/recipe.ts";
+
+import type { MenuCategory } from "types/menu";
+import type { RecipeListItem } from "types/recipe";
+
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { createMenu } from "api/menusApi";
+import { getRecipes } from "api/recipesApi";
+
+import { Header } from "components/layout/Header";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
 
 const CreateMenuPage: React.FC = () => {
     const [menuTitle, setMenuTitle] = useState("");
@@ -31,6 +35,7 @@ const CreateMenuPage: React.FC = () => {
     const fetchCategories = async () => {
         try {
             const data = await getMenuCategories();
+
             setCategories(data);
         } catch (error: unknown) {
             console.error("Error fetching categories:", error);
@@ -41,6 +46,7 @@ const CreateMenuPage: React.FC = () => {
     const fetchRecipes = async () => {
         try {
             const data = await getRecipes();
+
             setAllRecipes(data);
         } catch (error: unknown) {
             console.error("Error fetching recipes:", error);
@@ -48,8 +54,8 @@ const CreateMenuPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchCategories();
-        fetchRecipes();
+        void fetchCategories();
+        void fetchRecipes();
     }, []);
 
     // form validation
@@ -91,20 +97,23 @@ const CreateMenuPage: React.FC = () => {
     const handleCreateMenu = async () => {
         if (!validateForm()) return;
 
-        const token = localStorage.getItem("authToken");
-        if (!token) {
+        const userId = getCurrentUserId();
+
+        if (userId === null) {
             console.error("No auth token found.");
+
             return;
         }
 
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
+        if (selectedCategory === null) {
+            return;
+        }
 
         try {
             await createMenu({
                 menuTitle,
                 menuContent: menuDescription,
-                categoryId: selectedCategory as number,
+                categoryId: selectedCategory,
                 personId: userId,
                 recipeIds: selectedRecipes,
             });
@@ -146,7 +155,9 @@ const CreateMenuPage: React.FC = () => {
                             id="create-menu-title"
                             type="text"
                             value={menuTitle}
-                            onChange={(e) => setMenuTitle(e.target.value)}
+                            onChange={(e) => {
+                                setMenuTitle(e.target.value);
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
                         {menuTitleError && (
@@ -167,7 +178,9 @@ const CreateMenuPage: React.FC = () => {
                         <textarea
                             id="create-menu-description"
                             value={menuDescription}
-                            onChange={(e) => setMenuDescription(e.target.value)}
+                            onChange={(e) => {
+                                setMenuDescription(e.target.value);
+                            }}
                             rows={4}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
@@ -188,10 +201,10 @@ const CreateMenuPage: React.FC = () => {
                         </label>
                         <select
                             id="create-menu-category"
-                            value={selectedCategory || ""}
-                            onChange={(e) =>
-                                setSelectedCategory(Number(e.target.value))
-                            }
+                            value={selectedCategory ?? ""}
+                            onChange={(e) => {
+                                setSelectedCategory(Number(e.target.value));
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         >
                             <option value="" disabled>
@@ -223,9 +236,9 @@ const CreateMenuPage: React.FC = () => {
                                 <button
                                     key={recipe.id}
                                     type="button"
-                                    onClick={() =>
-                                        toggleRecipeSelection(recipe.id)
-                                    }
+                                    onClick={() => {
+                                        toggleRecipeSelection(recipe.id);
+                                    }}
                                     className={`py-2 px-4 border rounded-md ${
                                         selectedRecipes.includes(recipe.id)
                                             ? "bg-blue-500 text-white"
@@ -247,7 +260,9 @@ const CreateMenuPage: React.FC = () => {
                     <div>
                         <button
                             type="button"
-                            onClick={handleCreateMenu}
+                            onClick={() => {
+                                void handleCreateMenu();
+                            }}
                             className="w-full py-2 bg-green-500 text-white rounded-md"
                         >
                             Create Menu

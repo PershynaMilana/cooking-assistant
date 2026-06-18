@@ -1,8 +1,10 @@
 import { screen } from "@testing-library/react";
-import MainPage from "../MainPage";
-import { getRecipesByFilters } from "../../../api/recipesApi";
-import { getRecipeTypes } from "../../../api/recipeTypesApi";
-import { renderWithRouter } from "../../../test/router";
+
+import { getRecipesByFilters } from "api/recipesApi";
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import MainPage from "pages/recipes/MainPage";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/recipesApi");
 jest.mock("../../../api/recipeTypesApi");

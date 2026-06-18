@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import RecipeCard from "../../components/RecipeCard.tsx";
-import Header from "../../components/Header.tsx";
-import SearchComponent from "../../components/SearchComponent.tsx";
-import RecipeTypeFilter from "../../components/RecipeTypeFilter.tsx";
-import DateFilterDropdown from "../../components/DateFilterDropdown.tsx";
-import { getRecipesByFilters } from "../../api/recipesApi";
-import { getRecipeTypes } from "../../api/recipeTypesApi";
-import { getApiErrorMessage } from "../../api/httpError";
+
+import { getApiErrorMessage } from "api/httpError";
+import { getRecipesByFilters } from "api/recipesApi";
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import { Header } from "components/layout/Header";
+import RecipeCard from "components/RecipeCard";
+import RecipeTypeFilter from "components/RecipeTypeFilter";
+import { DateFilterDropdown } from "components/ui/DateFilterDropdown";
+import { SearchComponent } from "components/ui/SearchComponent";
 
 // interface describing the structure of a recipe object
 interface Recipe {
@@ -47,8 +49,8 @@ const MainPage: React.FC = () => {
 
     // function to sort recipes by cooking time and title
     const sortRecipes = useCallback(
-        (recipes: Recipe[]): Recipe[] => {
-            return recipes.sort((a, b) => {
+        (recipesToSort: Recipe[]): Recipe[] => {
+            return recipesToSort.sort((a, b) => {
                 if (sortOrder === "asc") {
                     return (
                         a.cooking_time - b.cooking_time ||
@@ -72,7 +74,7 @@ const MainPage: React.FC = () => {
 
         try {
             const data = await getRecipesByFilters({
-                ingredient_name: ingredientName || "",
+                ingredient_name: ingredientName ?? "",
                 type_ids:
                     selectedTypes.length > 0
                         ? selectedTypes.join(",")
@@ -88,10 +90,11 @@ const MainPage: React.FC = () => {
                 setNoRecipes(true);
             } else {
                 const sortedRecipes = sortRecipes(data);
+
                 setRecipes(sortedRecipes);
             }
-        } catch (error: unknown) {
-            setError(getApiErrorMessage(error));
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
     }, [
         ingredientName,
@@ -106,7 +109,7 @@ const MainPage: React.FC = () => {
 
     // fetch recipes on first render or filters change
     useEffect(() => {
-        fetchRecipes();
+        void fetchRecipes();
     }, [fetchRecipes]);
 
     // fetch recipe type descriptions
@@ -117,19 +120,17 @@ const MainPage: React.FC = () => {
                     const data = await getRecipeTypes({
                         ids: selectedTypes.join(","),
                     });
+
                     setTypesDescriptions(data);
                 } else {
                     setTypesDescriptions([]);
                 }
-            } catch (error) {
-                console.error(
-                    "Error fetching recipe type descriptions.",
-                    error,
-                );
+            } catch (err) {
+                console.error("Error fetching recipe type descriptions.", err);
             }
         };
 
-        fetchTypesDescriptions();
+        void fetchTypesDescriptions();
     }, [selectedTypes]);
 
     // function to generate header from selected recipe types
@@ -184,7 +185,9 @@ const MainPage: React.FC = () => {
                             type="number"
                             id="minCookingTime"
                             value={minCookingTime}
-                            onChange={(e) => setMinCookingTime(e.target.value)}
+                            onChange={(e) => {
+                                setMinCookingTime(e.target.value);
+                            }}
                             placeholder="min"
                             className="border rounded p-2 w-20"
                             min="0"
@@ -195,6 +198,7 @@ const MainPage: React.FC = () => {
                             }}
                             onInput={(e) => {
                                 const target = e.target as HTMLInputElement;
+
                                 target.value = target.value.replace(/\D/g, "");
                             }}
                         />
@@ -209,7 +213,9 @@ const MainPage: React.FC = () => {
                             type="number"
                             id="maxCookingTime"
                             value={maxCookingTime}
-                            onChange={(e) => setMaxCookingTime(e.target.value)}
+                            onChange={(e) => {
+                                setMaxCookingTime(e.target.value);
+                            }}
                             placeholder="min"
                             className="border rounded p-2 w-20"
                             min="1"
@@ -220,6 +226,7 @@ const MainPage: React.FC = () => {
                             }}
                             onInput={(e) => {
                                 const target = e.target as HTMLInputElement;
+
                                 target.value = target.value.replace(/\D/g, "");
                             }}
                         />
@@ -233,7 +240,9 @@ const MainPage: React.FC = () => {
                         <select
                             id="sortOrder"
                             value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
+                            onChange={(e) => {
+                                setSortOrder(e.target.value);
+                            }}
                             className="border rounded p-2"
                         >
                             <option value="asc">From fast to long</option>

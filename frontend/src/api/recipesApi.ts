@@ -1,13 +1,14 @@
-import { apiClient } from "./client";
-import { API_ROUTES } from "./endpoints";
 import type {
-    RecipeListItem,
-    RecipeWithIngredientNames,
+    CreateRecipeRequest,
     RecipeDetails,
     RecipeFilterParams,
-    CreateRecipeRequest,
+    RecipeListItem,
+    RecipeWithIngredientNames,
     UpdateRecipeRequest,
-} from "../types/recipe";
+} from "types/recipe";
+
+import { apiClient } from "./client";
+import { API_ROUTES } from "./endpoints";
 
 export async function getRecipesByFilters(
     params: RecipeFilterParams,
@@ -16,6 +17,7 @@ export async function getRecipesByFilters(
         API_ROUTES.recipes.byFilters,
         { params },
     );
+
     return response.data;
 }
 
@@ -27,6 +29,7 @@ export async function getRecipesByPerson(
         API_ROUTES.recipes.byPerson(userId),
         { params },
     );
+
     return response.data;
 }
 
@@ -34,6 +37,7 @@ export async function getRecipeById(id: string): Promise<RecipeDetails> {
     const response = await apiClient.get<RecipeDetails>(
         API_ROUTES.recipes.byId(id),
     );
+
     return response.data;
 }
 
@@ -56,5 +60,6 @@ export async function getRecipes(): Promise<RecipeWithIngredientNames[]> {
     const response = await apiClient.get<RecipeWithIngredientNames[]>(
         API_ROUTES.recipes.list,
     );
+
     return response.data;
 }

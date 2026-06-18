@@ -1,11 +1,12 @@
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
 
 interface PrivateRouteProps {
     children: ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
@@ -14,5 +15,3 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 
     return <>{children}</>;
 };
-
-export default PrivateRoute;

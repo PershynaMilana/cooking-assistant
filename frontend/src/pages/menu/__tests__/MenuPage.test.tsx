@@ -1,9 +1,12 @@
 import { screen } from "@testing-library/react";
-import MenuPage from "../MenuPage";
-import { getMenus } from "../../../api/menusApi";
-import { getMenuCategories } from "../../../api/menuCategoriesApi";
-import { renderWithRouter } from "../../../test/router";
-import type { Menu } from "../../../types/menu";
+
+import type { Menu } from "types/menu";
+
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { getMenus } from "api/menusApi";
+
+import MenuPage from "pages/menu/MenuPage";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/menusApi");
 jest.mock("../../../api/menuCategoriesApi");

@@ -1,11 +1,14 @@
 import { screen } from "@testing-library/react";
-import IngredientsPage from "../IngredientsPage";
-import { getIngredients } from "../../../api/ingredientsApi";
-import { getUserIngredients } from "../../../api/userIngredientsApi";
-import { renderWithRouter } from "../../../test/router";
-import { setAuthToken, mockJwtUser } from "../../../test/auth";
-import type { UserIngredient } from "../../../types/userIngredient";
-import type { Ingredient } from "../../../types/ingredient";
+
+import type { Ingredient } from "types/ingredient";
+import type { UserIngredient } from "types/userIngredient";
+
+import { getIngredients } from "api/ingredientsApi";
+import { getUserIngredients } from "api/userIngredientsApi";
+
+import IngredientsPage from "pages/person-ingradients/IngredientsPage";
+import { mockJwtUser, setAuthToken } from "test/auth";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/ingredientsApi");
 jest.mock("../../../api/userIngredientsApi");

@@ -22,6 +22,14 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.38 - 2026-06-17
+
+Frontend:
+- Changed: reorganised the shared UI components (header, search bar, date filter, confirmation dialog, private route guard) into self-contained folders with named exports.
+- Changed: tightened the build and lint tooling - type-aware ESLint rules, import path aliases throughout, CSS linting (Stylelint) in CI and pre-commit, and a faster test transformer. No change to how the app looks or behaves.
+- Added: translation groundwork for the shared interface elements (header navigation, search, date filter, confirmation dialog) - strings remain in English; the structure is in place for future languages.
+
+
 ## 1.37 - 2026-06-16
 
 Frontend:

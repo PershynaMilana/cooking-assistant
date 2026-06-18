@@ -1,21 +1,20 @@
-import { API_ROUTES } from "../endpoints";
+import type { RecipeTypeFormData, RecipeTypeSummary } from "types/recipeType";
+
+import { API_ROUTES } from "api/endpoints";
 import {
-    getRecipeTypes,
-    getRecipeTypeById,
     createRecipeType,
-    updateRecipeType,
     deleteRecipeType,
-} from "../recipeTypesApi";
-import type {
-    RecipeTypeSummary,
-    RecipeTypeFormData,
-} from "../../types/recipeType";
+    getRecipeTypeById,
+    getRecipeTypes,
+    updateRecipeType,
+} from "api/recipeTypesApi";
+
 import {
+    mockedDelete,
     mockedGet,
     mockedPost,
     mockedPut,
-    mockedDelete,
-} from "../../test/apiClientMock";
+} from "test/apiClientMock";
 
 jest.mock("../client");
 

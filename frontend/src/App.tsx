@@ -1,29 +1,31 @@
 import React from "react";
 import {
     BrowserRouter as Router,
+    Navigate,
     Route,
     Routes,
-    Navigate,
 } from "react-router-dom";
-import MainPage from "./pages/recipes/MainPage.tsx";
-import NotFoundPage from "./pages/not-found/NotFoundPage.tsx";
-import RegisterPage from "./pages/auth/RegisterPage.tsx";
-import LoginPage from "./pages/auth/LoginPage.tsx";
-import CreateRecipePage from "./pages/recipes/CreateRecipePage.tsx";
-import RecipeDetailsPage from "./pages/recipes/RecipeDetailsPage.tsx";
-import ChangeRecipePage from "./pages/recipes/ChangeRecipePage.tsx";
-import StatsPage from "./pages/statistics/StatsPage.tsx";
-import TypesPage from "./pages/recipe-types/TypesPage.tsx";
-import EditRecipeType from "./pages/recipe-types/EditRecipeType.tsx";
-import AddRecipeType from "./pages/recipe-types/AddTypePage.tsx";
-import IngredientsPage from "./pages/person-ingradients/IngredientsPage.tsx";
-import PrivateRoute from "./components/PrivateRoute.tsx";
-import UserRecipesPage from "./pages/user-recipes/UserRecipesPage.tsx";
-import MenuPage from "./pages/menu/MenuPage.tsx";
-import CreateMenuPage from "./pages/menu/CreateMenuPage.tsx";
-import MenuDetailsPage from "./pages/menu/MenuDetailsPage.tsx";
-import ChangeMenuPage from "./pages/menu/ChangeMenuPage.tsx";
-import UserMenuPage from "./pages/user-menu/UserMenuPage.tsx";
+
+import { PrivateRoute } from "components/layout/PrivateRoute";
+
+import LoginPage from "pages/auth/LoginPage";
+import RegisterPage from "pages/auth/RegisterPage";
+import ChangeMenuPage from "pages/menu/ChangeMenuPage";
+import CreateMenuPage from "pages/menu/CreateMenuPage";
+import MenuDetailsPage from "pages/menu/MenuDetailsPage";
+import MenuPage from "pages/menu/MenuPage";
+import NotFoundPage from "pages/not-found/NotFoundPage";
+import IngredientsPage from "pages/person-ingradients/IngredientsPage";
+import AddRecipeType from "pages/recipe-types/AddTypePage";
+import EditRecipeType from "pages/recipe-types/EditRecipeType";
+import TypesPage from "pages/recipe-types/TypesPage";
+import ChangeRecipePage from "pages/recipes/ChangeRecipePage";
+import CreateRecipePage from "pages/recipes/CreateRecipePage";
+import MainPage from "pages/recipes/MainPage";
+import RecipeDetailsPage from "pages/recipes/RecipeDetailsPage";
+import StatsPage from "pages/statistics/StatsPage";
+import UserMenuPage from "pages/user-menu/UserMenuPage";
+import UserRecipesPage from "pages/user-recipes/UserRecipesPage";
 
 const App: React.FC = () => {
     return (

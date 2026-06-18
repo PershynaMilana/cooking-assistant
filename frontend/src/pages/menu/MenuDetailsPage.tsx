@@ -1,25 +1,24 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import Header from "../../components/Header.tsx";
-import RecipeCard from "../../components/RecipeCard.tsx";
-import Modal from "../../components/Modal.tsx";
-import { jwtDecode } from "jwt-decode";
-import {
-    getMenuById,
-    deleteMenu as deleteMenuApi,
-} from "../../api/menusApi.ts";
-import { getApiErrorMessage } from "../../api/httpError.ts";
-import type { MenuDetails, MenuDetailRecipe } from "../../types/menu.ts";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-const getCurrentUserId = () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return null;
+import type { MenuDetailRecipe, MenuDetails } from "types/menu";
 
+import { getApiErrorMessage } from "api/httpError";
+import { deleteMenu as deleteMenuApi, getMenuById } from "api/menusApi";
+
+import { Header } from "components/layout/Header";
+import RecipeCard from "components/RecipeCard";
+import { Modal } from "components/ui/Modal";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
+
+// null on a missing token (via the shared util) or on a malformed token (caught here)
+const getUserIdSafe = (): number | null => {
     try {
-        const decoded: { id: number } = jwtDecode(token);
-        return decoded.id;
+        return getCurrentUserId();
     } catch (error) {
         console.error("Error decoding token:", error);
+
         return null;
     }
 };
@@ -38,16 +37,18 @@ const MenuDetailsPage: React.FC = () => {
         if (!id) return;
         try {
             const data = await getMenuById(id);
+
             setMenu(data);
-        } catch (error: unknown) {
-            setError(getApiErrorMessage(error));
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
     }, [id]);
 
     useEffect(() => {
-        const userId = getCurrentUserId();
+        const userId = getUserIdSafe();
+
         setCurrentUserId(userId);
-        fetchMenuDetails();
+        void fetchMenuDetails();
     }, [fetchMenuDetails]);
 
     if (error) {
@@ -68,18 +69,20 @@ const MenuDetailsPage: React.FC = () => {
     };
 
     const handleConfirmDelete = () => {
-        deleteMenu();
+        void deleteMenu();
         handleCloseModal();
     };
 
     // group recipes by type
     const groupedRecipes = menu.recipes.reduce(
-        (groups: { [key: string]: MenuDetailRecipe[] }, recipe) => {
+        (groups: Record<string, MenuDetailRecipe[]>, recipe) => {
             const { type_name } = recipe;
-            if (!groups[type_name]) {
+
+            if (!(type_name in groups)) {
                 groups[type_name] = [];
             }
             groups[type_name].push(recipe);
+
             return groups;
         },
         {},
@@ -90,25 +93,24 @@ const MenuDetailsPage: React.FC = () => {
         try {
             await deleteMenuApi(menu.menu.id);
             navigate("/menu");
-        } catch (error: unknown) {
-            setError(getApiErrorMessage(error));
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
     };
 
     // calculate missing ingredients
     const getAllMissingIngredients = () => {
-        if (!menu) return [];
         return menu.recipes
-            .flatMap((recipe) => recipe.missingIngredients || [])
+            .flatMap((recipe) => recipe.missingIngredients ?? [])
             .reduce(
                 (
-                    acc: { [key: string]: { quantity: number; unit: string } },
+                    acc: Record<string, { quantity: number; unit: string }>,
                     ingredient,
                 ) => {
                     const { ingredient_name, missing_quantity, unit_name } =
                         ingredient;
 
-                    if (!acc[ingredient_name]) {
+                    if (!(ingredient_name in acc)) {
                         acc[ingredient_name] = {
                             quantity: missing_quantity,
                             unit: unit_name,
@@ -116,6 +118,7 @@ const MenuDetailsPage: React.FC = () => {
                     } else {
                         acc[ingredient_name].quantity += missing_quantity;
                     }
+
                     return acc;
                 },
                 {},

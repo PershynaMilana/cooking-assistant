@@ -1,10 +1,13 @@
 import { screen } from "@testing-library/react";
-import UserMenuPage from "../UserMenuPage";
-import { getMenusByPerson } from "../../../api/menusApi";
-import { getMenuCategories } from "../../../api/menuCategoriesApi";
-import { renderWithRouter } from "../../../test/router";
-import { setAuthToken, mockJwtUser } from "../../../test/auth";
-import type { Menu } from "../../../types/menu";
+
+import type { Menu } from "types/menu";
+
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { getMenusByPerson } from "api/menusApi";
+
+import UserMenuPage from "pages/user-menu/UserMenuPage";
+import { mockJwtUser, setAuthToken } from "test/auth";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/menusApi");
 jest.mock("../../../api/menuCategoriesApi");

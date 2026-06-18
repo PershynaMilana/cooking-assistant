@@ -12,7 +12,7 @@ export interface UserIngredient {
 
 export interface PantryIngredient {
     id: number;
-    name?: string | "";
+    name?: string;
     ingredient_name?: string;
     unit_name: string;
     quantity_person_ingradient: number;

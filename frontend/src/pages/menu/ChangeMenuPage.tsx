@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Header from "../../components/Header.tsx";
-import { getMenuById, updateMenu } from "../../api/menusApi.ts";
-import { getMenuCategories } from "../../api/menuCategoriesApi.ts";
-import { getRecipes } from "../../api/recipesApi.ts";
-import type { MenuCategory } from "../../types/menu.ts";
-import type { RecipeListItem } from "../../types/recipe.ts";
+
+import type { MenuCategory } from "types/menu";
+import type { RecipeListItem } from "types/recipe";
+
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { getMenuById, updateMenu } from "api/menusApi";
+import { getRecipes } from "api/recipesApi";
+
+import { Header } from "components/layout/Header";
 
 const UpdateMenuPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -36,11 +39,11 @@ const UpdateMenuPage: React.FC = () => {
 
                 setMenuTitle(menu.title || "");
                 setMenuDescription(menu.menucontent || "");
-                setSelectedCategory(menu.categoryid || null);
+                setSelectedCategory(menu.categoryid ?? null);
 
-                setSelectedRecipes(recipes.map((recipe) => recipe.id) || []);
-            } catch (error: unknown) {
-                console.error("Error fetching menu data:", error);
+                setSelectedRecipes(recipes.map((recipe) => recipe.id));
+            } catch (err: unknown) {
+                console.error("Error fetching menu data:", err);
                 setError("Failed to load menu data. Please try again later.");
             }
         };
@@ -56,8 +59,8 @@ const UpdateMenuPage: React.FC = () => {
 
                 setCategories(categoriesData);
                 setAllRecipes(recipesData);
-            } catch (error: unknown) {
-                console.error("Error loading categories or recipes:", error);
+            } catch (err: unknown) {
+                console.error("Error loading categories or recipes:", err);
                 setError("Failed to load categories or recipes.");
             }
         };
@@ -70,7 +73,8 @@ const UpdateMenuPage: React.FC = () => {
             ]);
             setLoading(false);
         };
-        fetchData();
+
+        void fetchData();
     }, [id]);
 
     // form validation
@@ -114,6 +118,7 @@ const UpdateMenuPage: React.FC = () => {
 
         if (!localStorage.getItem("authToken")) {
             console.error("Authentication token not found.");
+
             return;
         }
 
@@ -126,13 +131,14 @@ const UpdateMenuPage: React.FC = () => {
                 categoryId: selectedCategory,
                 recipeIds: selectedRecipes,
             };
+
             console.log(data);
 
             await updateMenu(id, data);
 
             navigate("/menu");
-        } catch (error: unknown) {
-            console.error("Error updating menu:", error);
+        } catch (err: unknown) {
+            console.error("Error updating menu:", err);
             setError("Failed to update menu. Please try again later.");
         }
     };
@@ -141,7 +147,7 @@ const UpdateMenuPage: React.FC = () => {
     const toggleRecipeSelection = (recipeId: number) => {
         setSelectedRecipes((prevSelected) =>
             prevSelected.includes(recipeId)
-                ? prevSelected.filter((id) => id !== recipeId)
+                ? prevSelected.filter((selectedId) => selectedId !== recipeId)
                 : [...prevSelected, recipeId],
         );
     };
@@ -219,7 +225,7 @@ const UpdateMenuPage: React.FC = () => {
                         </label>
                         <select
                             id="edit-menu-category"
-                            value={selectedCategory || ""}
+                            value={selectedCategory ?? ""}
                             onChange={(e) => {
                                 setSelectedCategory(Number(e.target.value));
                                 validateForm();
@@ -255,9 +261,9 @@ const UpdateMenuPage: React.FC = () => {
                                 <button
                                     type="button"
                                     key={recipe.id}
-                                    onClick={() =>
-                                        toggleRecipeSelection(recipe.id)
-                                    }
+                                    onClick={() => {
+                                        toggleRecipeSelection(recipe.id);
+                                    }}
                                     className={`py-2 px-4 border rounded-md ${
                                         selectedRecipes.includes(recipe.id)
                                             ? "bg-blue-500 text-white"
@@ -279,7 +285,9 @@ const UpdateMenuPage: React.FC = () => {
                     <div>
                         <button
                             type="button"
-                            onClick={handleUpdateMenu}
+                            onClick={() => {
+                                void handleUpdateMenu();
+                            }}
                             className="w-full py-2 px-4 bg-green-500 text-white rounded-full"
                         >
                             Update Menu

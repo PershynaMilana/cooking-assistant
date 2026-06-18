@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RecipeTypeFilter from "../RecipeTypeFilter";
-import { getRecipeTypes } from "../../api/recipeTypesApi";
+
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import RecipeTypeFilter from "components/RecipeTypeFilter";
 
 jest.mock("../../api/recipeTypesApi");
 

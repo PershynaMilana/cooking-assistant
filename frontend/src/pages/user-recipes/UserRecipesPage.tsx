@@ -1,15 +1,17 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
-import RecipeCard from "../../components/RecipeCard.tsx";
-import Header from "../../components/Header.tsx";
-import SearchComponent from "../../components/SearchComponent.tsx";
-import RecipeTypeFilter from "../../components/RecipeTypeFilter.tsx";
-import DateFilterDropdown from "../../components/DateFilterDropdown.tsx";
-import { getRecipesByPerson } from "../../api/recipesApi";
-import { getRecipeTypes } from "../../api/recipeTypesApi";
-import { getApiErrorMessage } from "../../api/httpError";
-import { jwtDecode } from "jwt-decode";
-import { Link } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+
+import { getApiErrorMessage } from "api/httpError";
+import { getRecipesByPerson } from "api/recipesApi";
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import { Header } from "components/layout/Header";
+import RecipeCard from "components/RecipeCard";
+import RecipeTypeFilter from "components/RecipeTypeFilter";
+import { DateFilterDropdown } from "components/ui/DateFilterDropdown";
+import { SearchComponent } from "components/ui/SearchComponent";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
 
 interface Recipe {
     id: number;
@@ -43,8 +45,8 @@ const UserRecipesPage: React.FC = () => {
     const [maxCookingTime, setMaxCookingTime] = useState<string>("");
 
     const sortRecipes = useCallback(
-        (recipes: Recipe[]): Recipe[] => {
-            return recipes.sort((a, b) => {
+        (recipesToSort: Recipe[]): Recipe[] => {
+            return recipesToSort.sort((a, b) => {
                 if (sortOrder === "asc") {
                     return (
                         a.cooking_time - b.cooking_time ||
@@ -65,18 +67,17 @@ const UserRecipesPage: React.FC = () => {
         setError(null);
         setNoRecipes(false);
 
-        const token = localStorage.getItem("authToken");
-        if (!token) {
+        const userId = getCurrentUserId();
+
+        if (userId === null) {
             console.error("No auth token found.");
+
             return;
         }
 
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
-
         try {
             const data = await getRecipesByPerson(userId, {
-                ingredient_name: ingredientName || "",
+                ingredient_name: ingredientName ?? "",
                 type_ids:
                     selectedTypes.length > 0
                         ? selectedTypes.join(",")
@@ -92,10 +93,11 @@ const UserRecipesPage: React.FC = () => {
                 setNoRecipes(true);
             } else {
                 const sortedRecipes = sortRecipes(data);
+
                 setRecipes(sortedRecipes);
             }
-        } catch (error: unknown) {
-            setError(getApiErrorMessage(error));
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
     }, [
         ingredientName,
@@ -109,7 +111,7 @@ const UserRecipesPage: React.FC = () => {
     ]);
 
     useEffect(() => {
-        fetchRecipes();
+        void fetchRecipes();
     }, [fetchRecipes]);
 
     useEffect(() => {
@@ -119,19 +121,17 @@ const UserRecipesPage: React.FC = () => {
                     const data = await getRecipeTypes({
                         ids: selectedTypes.join(","),
                     });
+
                     setTypesDescriptions(data);
                 } else {
                     setTypesDescriptions([]);
                 }
-            } catch (error) {
-                console.error(
-                    "Error fetching recipe type descriptions.",
-                    error,
-                );
+            } catch (err) {
+                console.error("Error fetching recipe type descriptions.", err);
             }
         };
 
-        fetchTypesDescriptions();
+        void fetchTypesDescriptions();
     }, [selectedTypes]);
 
     const getTypesHeader = () => {
@@ -184,7 +184,9 @@ const UserRecipesPage: React.FC = () => {
                             type="number"
                             id="minCookingTime"
                             value={minCookingTime}
-                            onChange={(e) => setMinCookingTime(e.target.value)}
+                            onChange={(e) => {
+                                setMinCookingTime(e.target.value);
+                            }}
                             placeholder="min"
                             className="border rounded p-2 w-20"
                             min="0"
@@ -195,6 +197,7 @@ const UserRecipesPage: React.FC = () => {
                             }}
                             onInput={(e) => {
                                 const target = e.target as HTMLInputElement;
+
                                 target.value = target.value.replace(/\D/g, "");
                             }}
                         />
@@ -208,7 +211,9 @@ const UserRecipesPage: React.FC = () => {
                             type="number"
                             id="maxCookingTime"
                             value={maxCookingTime}
-                            onChange={(e) => setMaxCookingTime(e.target.value)}
+                            onChange={(e) => {
+                                setMaxCookingTime(e.target.value);
+                            }}
                             placeholder="min"
                             className="border rounded p-2 w-20"
                             min="1"
@@ -219,6 +224,7 @@ const UserRecipesPage: React.FC = () => {
                             }}
                             onInput={(e) => {
                                 const target = e.target as HTMLInputElement;
+
                                 target.value = target.value.replace(/\D/g, "");
                             }}
                         />
@@ -232,7 +238,9 @@ const UserRecipesPage: React.FC = () => {
                         <select
                             id="sortOrder"
                             value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
+                            onChange={(e) => {
+                                setSortOrder(e.target.value);
+                            }}
                             className="border rounded p-2"
                         >
                             <option value="asc">From fast to slow</option>

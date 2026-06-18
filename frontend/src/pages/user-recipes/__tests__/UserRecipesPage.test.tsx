@@ -1,10 +1,13 @@
 import { screen } from "@testing-library/react";
-import UserRecipesPage from "../UserRecipesPage";
-import { getRecipesByPerson } from "../../../api/recipesApi";
-import { getRecipeTypes } from "../../../api/recipeTypesApi";
-import { renderWithRouter } from "../../../test/router";
-import { setAuthToken, mockJwtUser } from "../../../test/auth";
-import type { RecipeListItem } from "../../../types/recipe";
+
+import type { RecipeListItem } from "types/recipe";
+
+import { getRecipesByPerson } from "api/recipesApi";
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import UserRecipesPage from "pages/user-recipes/UserRecipesPage";
+import { mockJwtUser, setAuthToken } from "test/auth";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/recipesApi");
 jest.mock("../../../api/recipeTypesApi");

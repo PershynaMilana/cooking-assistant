@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.37.0",
+  "version": "1.38.0",
   "private": true,
   "scripts": {
     "prepare": "husky",
@@ -29,6 +29,9 @@
     ],
     "frontend/**/*.{ts,tsx,css}": [
       "prettier --write"
+    ],
+    "frontend/**/*.{css,scss}": [
+      "stylelint --fix"
     ]
   },
   "overrides": {

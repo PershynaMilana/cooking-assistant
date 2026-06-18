@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface DateFilterDropdownProps {
     startDate: string;
@@ -7,7 +8,7 @@ interface DateFilterDropdownProps {
     setEndDate: (date: string) => void;
 }
 
-const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
+export const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
     startDate,
     endDate,
     setStartDate,
@@ -16,6 +17,7 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const [dateError, setDateError] = useState<string | null>(null);
     const filterRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -28,30 +30,37 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
         };
 
         document.addEventListener("mousedown", handleClickOutside);
-        return () =>
+
+        return () => {
             document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
     // validate dates
-    const validateDates = (start: string, end: string) => {
-        console.log("Validating dates", { start, end });
-        setDateError(null);
+    const validateDates = useCallback(
+        (start: string, end: string) => {
+            console.log("Validating dates", { start, end });
+            setDateError(null);
 
-        // check if start date is after end date
-        if (start && end && new Date(start) > new Date(end)) {
-            setDateError("Start date cannot be later than end date.");
-            return;
-        }
+            // check if start date is after end date
+            if (start && end && new Date(start) > new Date(end)) {
+                setDateError(t("dateFilter.startAfterEnd"));
 
-        // check if selected dates are not in the future
-        const today = new Date();
-        if (
-            (start && new Date(start) > today) ||
-            (end && new Date(end) > today)
-        ) {
-            setDateError("Please select a valid date range.");
-        }
-    };
+                return;
+            }
+
+            // check if selected dates are not in the future
+            const today = new Date();
+
+            if (
+                (start && new Date(start) > today) ||
+                (end && new Date(end) > today)
+            ) {
+                setDateError(t("dateFilter.invalidRange"));
+            }
+        },
+        [t],
+    );
 
     // handle start date change
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +79,7 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
         if (isOpen) {
             validateDates(startDate, endDate);
         }
-    }, [isOpen, startDate, endDate]);
+    }, [isOpen, startDate, endDate, validateDates]);
 
     // reset filters
     const resetFilters = () => {
@@ -83,10 +92,12 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
     return (
         <div ref={filterRef} className="relative">
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    setIsOpen(!isOpen);
+                }}
                 className="bg-purple-600 text-white p-2 rounded-lg"
             >
-                Sort by dates
+                {t("dateFilter.sortByDates")}
             </button>
             {isOpen && (
                 <div className="absolute bg-white border rounded-lg p-4 mt-2 shadow-lg w-64 z-10">
@@ -95,7 +106,7 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
                             htmlFor="startDate"
                             className="block text-gray-700"
                         >
-                            Start date:
+                            {t("dateFilter.startDate")}
                         </label>
                         <input
                             type="date"
@@ -110,7 +121,7 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
                             htmlFor="endDate"
                             className="block text-gray-700"
                         >
-                            End date:
+                            {t("dateFilter.endDate")}
                         </label>
                         <input
                             type="date"
@@ -130,12 +141,10 @@ const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
                         onClick={resetFilters}
                         className="text-purple-600 hover:underline w-full"
                     >
-                        Reset filters
+                        {t("dateFilter.reset")}
                     </button>
                 </div>
             )}
         </div>
     );
 };
-
-export default DateFilterDropdown;

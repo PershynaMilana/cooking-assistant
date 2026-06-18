@@ -1,14 +1,17 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import CreateRecipePage from "../CreateRecipePage";
-import { createRecipe } from "../../../api/recipesApi";
-import { getRecipeTypes } from "../../../api/recipeTypesApi";
-import { getIngredients } from "../../../api/ingredientsApi";
-import { mockNavigate, renderWithRouter } from "../../../test/router";
-import { setAuthToken, mockJwtUser } from "../../../test/auth";
+import type * as ReactRouterDom from "react-router-dom";
+
+import { getIngredients } from "api/ingredientsApi";
+import { createRecipe } from "api/recipesApi";
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import CreateRecipePage from "pages/recipes/CreateRecipePage";
+import { mockJwtUser, setAuthToken } from "test/auth";
+import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
+    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
 jest.mock("../../../api/recipesApi");
@@ -37,6 +40,7 @@ describe("CreateRecipePage", () => {
         jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE_TYPES);
         jest.mocked(getIngredients).mockResolvedValue(SAMPLE_INGREDIENTS);
         const mockedCreateRecipe = jest.mocked(createRecipe);
+
         mockedCreateRecipe.mockResolvedValue(undefined);
 
         renderWithRouter(<CreateRecipePage />);
@@ -44,6 +48,7 @@ describe("CreateRecipePage", () => {
         const ingredientButton = await screen.findByRole("button", {
             name: INGREDIENT_NAME,
         });
+
         await screen.findByRole("option", { name: TYPE_NAME });
 
         await userEvent.type(screen.getByLabelText("Title"), TITLE);

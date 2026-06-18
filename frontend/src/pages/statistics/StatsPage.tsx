@@ -1,11 +1,15 @@
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
-import { getRecipes } from "../../api/recipesApi";
-import type { RecipeWithIngredientNames } from "../../types/recipe";
-import Header from "../../components/Header.tsx";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import StatsReportSecond from "./StatsReportSecond.tsx";
+
+import type { RecipeWithIngredientNames } from "types/recipe";
+
+import { getRecipes } from "api/recipesApi";
+
+import { Header } from "components/layout/Header";
+
 import StatsReport from "./StatsReport";
+import StatsReportSecond from "./StatsReportSecond.tsx";
 
 interface Stat {
     typeName: string;
@@ -34,7 +38,8 @@ const StatsPage: React.FC = () => {
                 const recipes = await getRecipes();
 
                 // count recipes per type
-                const typeCounts: { [key: string]: number } = {};
+                const typeCounts: Record<string, number> = {};
+
                 recipes.forEach((recipe) => {
                     typeCounts[recipe.type_name] =
                         (typeCounts[recipe.type_name] || 0) + 1;
@@ -46,6 +51,7 @@ const StatsPage: React.FC = () => {
                         count: typeCounts[typeName],
                     }),
                 );
+
                 setStats(formattedStats);
 
                 // find recipes by cooking time
@@ -94,7 +100,7 @@ const StatsPage: React.FC = () => {
             }
         };
 
-        fetchStats();
+        void fetchStats();
     }, []);
 
     // chart options
@@ -149,7 +155,7 @@ const StatsPage: React.FC = () => {
                             <PDFDownloadLink
                                 document={
                                     <StatsReport
-                                        reportTime={reportTime || new Date()}
+                                        reportTime={reportTime ?? new Date()}
                                         stats={stats}
                                     />
                                 }
@@ -163,7 +169,7 @@ const StatsPage: React.FC = () => {
                             <PDFDownloadLink
                                 document={
                                     <StatsReportSecond
-                                        reportTime={reportTime || new Date()}
+                                        reportTime={reportTime ?? new Date()}
                                     />
                                 }
                                 fileName="Statistics_Second_Report.pdf"

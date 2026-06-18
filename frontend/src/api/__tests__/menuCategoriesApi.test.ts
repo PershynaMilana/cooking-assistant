@@ -1,7 +1,9 @@
-import { API_ROUTES } from "../endpoints";
-import { getMenuCategories } from "../menuCategoriesApi";
-import type { MenuCategory } from "../../types/menu";
-import { mockedGet } from "../../test/apiClientMock";
+import type { MenuCategory } from "types/menu";
+
+import { API_ROUTES } from "api/endpoints";
+import { getMenuCategories } from "api/menuCategoriesApi";
+
+import { mockedGet } from "test/apiClientMock";
 
 jest.mock("../client");
 

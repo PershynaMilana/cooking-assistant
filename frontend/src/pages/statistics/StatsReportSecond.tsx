@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useCallback } from "react";
 import {
     Document,
     Font,
@@ -7,12 +6,16 @@ import {
     Text,
     View,
 } from "@react-pdf/renderer";
-import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
-import { getMenus } from "../../api/menusApi";
-import { getRecipes } from "../../api/recipesApi";
-import { getRecipesStats } from "../../api/statsApi";
-import { getApiErrorMessage } from "../../api/httpError";
-import type { AverageCookingTime } from "../../types/stats";
+import React, { useCallback, useEffect, useState } from "react";
+
+import type { AverageCookingTime } from "types/stats";
+
+import { getApiErrorMessage } from "api/httpError";
+import { getMenus } from "api/menusApi";
+import { getRecipes } from "api/recipesApi";
+import { getRecipesStats } from "api/statsApi";
+
+import montserrat from "assets/fonts/Montserrat/Montserrat-Regular.ttf";
 
 Font.register({ family: "Montserrat", src: montserrat });
 
@@ -25,6 +28,7 @@ const formatDate = (date: Date) => {
         minute: "2-digit",
         second: "2-digit",
     };
+
     return date.toLocaleString("en-GB", options);
 };
 
@@ -104,14 +108,17 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
         setError(null);
         if (!token) {
             setError("No auth token found.");
+
             return;
         }
 
         try {
             const allMenus = await getMenus({});
+
             setMenusCount(allMenus.length);
 
             const categoryCounts: Record<string, number> = {};
+
             allMenus.forEach((menu: { categoryname: string }) => {
                 categoryCounts[menu.categoryname] =
                     (categoryCounts[menu.categoryname] || 0) + 1;
@@ -123,9 +130,11 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
                     menuCount,
                 }),
             );
+
             setMenuCountByCategory(categoryStats);
 
             const allRecipes = await getRecipes();
+
             setRecipesCount(allRecipes.length);
 
             const avgCookingTimes = await getRecipesStats();
@@ -148,6 +157,7 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
                         };
                     },
                 );
+
                 setAverageCookingTimes(formattedTimes);
             } else {
                 setAverageCookingTimes([]);
@@ -159,7 +169,7 @@ const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
 
     useEffect(() => {
         if (token) {
-            fetchStats();
+            void fetchStats();
         }
     }, [token, fetchStats]);
 

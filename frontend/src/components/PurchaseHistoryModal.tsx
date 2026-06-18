@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-import { getPurchaseHistory, updatePurchase } from "../api/userIngredientsApi";
-import type { Purchase } from "../types/userIngredient";
+import React, { useEffect, useState } from "react";
+
+import type { Purchase } from "types/userIngredient";
+
+import { getPurchaseHistory, updatePurchase } from "api/userIngredientsApi";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
 
 interface PurchaseHistoryModalProps {
     ingredientId: number;
@@ -21,18 +24,19 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
     useEffect(() => {
         const fetchHistory = async () => {
             setLoading(true);
-            const token = localStorage.getItem("authToken");
-
-            if (!token) {
-                setError("Token not found.");
-                setLoading(false);
-                return;
-            }
 
             try {
-                const userId = jwtDecode<{ id: number }>(token).id;
+                const userId = getCurrentUserId();
+
+                if (userId === null) {
+                    setError("Token not found.");
+                    setLoading(false);
+
+                    return;
+                }
 
                 const data = await getPurchaseHistory(userId, ingredientId);
+
                 console.log(data);
                 setPurchaseHistory(data);
             } catch {
@@ -42,7 +46,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
             }
         };
 
-        fetchHistory();
+        void fetchHistory();
     }, [ingredientId]);
 
     const handleQuantityChange = (id: number, newQuantity: number) => {
@@ -57,20 +61,23 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
 
     const saveChanges = async (id: number, newQuantity: number) => {
         setLoading(true);
-        const token = localStorage.getItem("authToken");
-
-        if (!token) {
-            setError("Token not found.");
-            setLoading(false);
-            return;
-        }
 
         try {
-            const userId = jwtDecode<{ id: number }>(token).id;
+            const userId = getCurrentUserId();
+
+            if (userId === null) {
+                setError("Token not found.");
+                setLoading(false);
+
+                return;
+            }
+
+            const token = localStorage.getItem("authToken");
+
             console.log(
                 `http://localhost:8080/api/user-ingredients/${userId}/history/${id}`,
                 newQuantity,
-                `Bearer ${token}`,
+                `Bearer ${token ?? ""}`,
             );
             await updatePurchase(userId, id, { quantity: newQuantity });
 
@@ -102,6 +109,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
         const today = new Date();
 
         const expirationDate = new Date(purchaseDateObj);
+
         expirationDate.setDate(purchaseDateObj.getDate() + daysToExpire);
 
         return today >= expirationDate; // if today is after expiration date
@@ -125,6 +133,7 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
                                 purchase.purchase_date,
                                 purchase.days_to_expire,
                             );
+
                             return (
                                 <li
                                     key={purchase.id}
@@ -141,18 +150,18 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
                                         type="number"
                                         className="w-16 text-center border rounded"
                                         value={purchase.quantity}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
                                             handleQuantityChange(
                                                 purchase.id,
                                                 +e.target.value,
-                                            )
-                                        }
-                                        onBlur={(e) =>
-                                            saveChanges(
+                                            );
+                                        }}
+                                        onBlur={(e) => {
+                                            void saveChanges(
                                                 purchase.id,
                                                 +e.target.value,
-                                            )
-                                        }
+                                            );
+                                        }}
                                     />
                                     <span>{purchase.unit_name}</span>
                                 </li>

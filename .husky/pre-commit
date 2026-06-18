@@ -6,3 +6,5 @@ npm --prefix backend run test:coverage
 npm --prefix frontend run typecheck
 npm --prefix frontend run lint
 npm --prefix frontend run lint:sonarjs
+npm --prefix frontend run stylelint
+npm --prefix frontend run test

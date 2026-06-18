@@ -1,8 +1,11 @@
 import { screen } from "@testing-library/react";
-import StatsPage from "../StatsPage";
-import { getRecipes } from "../../../api/recipesApi";
-import { renderWithRouter } from "../../../test/router";
-import type { RecipeWithIngredientNames } from "../../../types/recipe";
+
+import type { RecipeWithIngredientNames } from "types/recipe";
+
+import { getRecipes } from "api/recipesApi";
+
+import StatsPage from "pages/statistics/StatsPage";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/recipesApi");
 

@@ -1,22 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useSearchParams, useLocation } from "react-router-dom";
-import SearchIcon from "../assets/searchIcon.png";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation, useSearchParams } from "react-router-dom";
+
+import SearchIcon from "assets/searchIcon.png";
 
 interface SearchComponentProps {
     placeholder: string;
 }
 
-const SearchComponent: React.FC<SearchComponentProps> = ({
-    placeholder = "Search by ingredient",
+export const SearchComponent: React.FC<SearchComponentProps> = ({
+    placeholder,
 }) => {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [searchParams, setSearchParams] = useSearchParams();
     const inputRef = useRef<HTMLInputElement>(null);
     const location = useLocation();
+    const { t } = useTranslation();
 
     // set initial search term from URL search parameters
     useEffect(() => {
-        const initialSearchTerm = searchParams.get("ingredient_name") || "";
+        const initialSearchTerm = searchParams.get("ingredient_name") ?? "";
+
         setSearchTerm(initialSearchTerm);
     }, [searchParams]);
 
@@ -58,8 +62,8 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                 type="text"
                 value={searchTerm}
                 onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                placeholder={`Search by ${placeholder}`}
+                onKeyDown={handleKeyPress}
+                placeholder={`${t("search.placeholderPrefix")} ${placeholder}`}
                 className="w-full bg-transparent text-almost-black text-montserratMedium placeholder-gray-500 focus:outline-none"
                 ref={inputRef}
             />
@@ -68,11 +72,9 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                     onClick={handleReset}
                     className="absolute right-4 text-almost-white bg-dark-purple rounded-full p-2 text-montserratMedium"
                 >
-                    Reset Search
+                    {t("search.reset")}
                 </button>
             )}
         </div>
     );
 };
-
-export default SearchComponent;

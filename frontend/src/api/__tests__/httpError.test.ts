@@ -1,6 +1,7 @@
+import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { AxiosError, AxiosHeaders } from "axios";
-import type { InternalAxiosRequestConfig, AxiosResponse } from "axios";
-import { getApiErrorMessage } from "../httpError";
+
+import { getApiErrorMessage } from "api/httpError";
 
 const SERVER_MESSAGE = "Too many requests";
 const AXIOS_MESSAGE = "Request failed with status code 429";

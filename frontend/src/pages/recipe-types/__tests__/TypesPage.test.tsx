@@ -1,8 +1,11 @@
 import { screen } from "@testing-library/react";
-import TypesPage from "../TypesPage";
-import { getRecipeTypes } from "../../../api/recipeTypesApi";
-import { renderWithRouter } from "../../../test/router";
-import type { RecipeTypeSummary } from "../../../types/recipeType";
+
+import type { RecipeTypeSummary } from "types/recipeType";
+
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import TypesPage from "pages/recipe-types/TypesPage";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/recipeTypesApi");
 

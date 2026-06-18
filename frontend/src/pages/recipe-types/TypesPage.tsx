@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Header from "../../components/Header.tsx";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getRecipeTypes, deleteRecipeType } from "../../api/recipeTypesApi";
+
+import { deleteRecipeType, getRecipeTypes } from "api/recipeTypesApi";
+
+import { Header } from "components/layout/Header";
 
 interface RecipeType {
     id: number;
@@ -14,12 +16,13 @@ const TypesPage: React.FC = () => {
     const [selectedType, setSelectedType] = useState<RecipeType | null>(null);
 
     useEffect(() => {
-        fetchRecipeTypes();
+        void fetchRecipeTypes();
     }, []);
 
     const fetchRecipeTypes = async () => {
         try {
             const data = await getRecipeTypes();
+
             setRecipeTypes(data);
         } catch (error) {
             console.error("Error loading recipe types:", error);
@@ -35,7 +38,7 @@ const TypesPage: React.FC = () => {
         if (selectedType) {
             try {
                 await deleteRecipeType(selectedType.id);
-                fetchRecipeTypes();
+                void fetchRecipeTypes();
                 setIsModalOpen(false);
                 setSelectedType(null);
             } catch (error) {
@@ -70,13 +73,17 @@ const TypesPage: React.FC = () => {
                             <div className="flex space-x-2">
                                 <button
                                     className="bg-yellow-500 text-white py-2 px-4 rounded-full"
-                                    onClick={() => handleEditClick(type)}
+                                    onClick={() => {
+                                        handleEditClick(type);
+                                    }}
                                 >
                                     Edit
                                 </button>
                                 <button
                                     className="bg-red-500 text-white py-2 px-4 rounded-full"
-                                    onClick={() => handleDeleteClick(type)}
+                                    onClick={() => {
+                                        handleDeleteClick(type);
+                                    }}
                                 >
                                     Delete
                                 </button>
@@ -96,13 +103,17 @@ const TypesPage: React.FC = () => {
                             <div className="flex justify-end space-x-2">
                                 <button
                                     className="bg-red-500 text-white px-4 py-2 rounded"
-                                    onClick={handleDeleteConfirm}
+                                    onClick={() => {
+                                        void handleDeleteConfirm();
+                                    }}
                                 >
                                     Confirm
                                 </button>
                                 <button
                                     className="bg-gray-300 px-4 py-2 rounded"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => {
+                                        setIsModalOpen(false);
+                                    }}
                                 >
                                     Cancel
                                 </button>

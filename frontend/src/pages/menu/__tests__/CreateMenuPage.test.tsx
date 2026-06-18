@@ -1,14 +1,17 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import CreateMenuPage from "../CreateMenuPage";
-import { getMenuCategories } from "../../../api/menuCategoriesApi";
-import { getRecipes } from "../../../api/recipesApi";
-import { createMenu } from "../../../api/menusApi";
-import { mockNavigate, renderWithRouter } from "../../../test/router";
-import { setAuthToken, mockJwtUser } from "../../../test/auth";
+import type * as ReactRouterDom from "react-router-dom";
+
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { createMenu } from "api/menusApi";
+import { getRecipes } from "api/recipesApi";
+
+import CreateMenuPage from "pages/menu/CreateMenuPage";
+import { mockJwtUser, setAuthToken } from "test/auth";
+import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
+    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
 jest.mock("../../../api/menuCategoriesApi");
@@ -45,6 +48,7 @@ describe("CreateMenuPage", () => {
         jest.mocked(getMenuCategories).mockResolvedValue(SAMPLE_CATEGORIES);
         jest.mocked(getRecipes).mockResolvedValue(SAMPLE_RECIPES);
         const mockedCreateMenu = jest.mocked(createMenu);
+
         mockedCreateMenu.mockResolvedValue(undefined);
 
         renderWithRouter(<CreateMenuPage />);

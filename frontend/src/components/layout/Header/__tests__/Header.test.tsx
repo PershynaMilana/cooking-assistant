@@ -1,11 +1,14 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Header from "../Header";
-import { mockNavigate, renderWithRouter } from "../../test/router";
-import { setAuthToken } from "../../test/auth";
+import type * as ReactRouterDom from "react-router-dom";
+
+import { Header } from "components/layout/Header";
+
+import { setAuthToken } from "test/auth";
+import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
+    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
 
