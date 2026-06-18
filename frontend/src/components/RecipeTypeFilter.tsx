@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { getRecipeTypes } from "../api/recipeTypesApi";
+import React, { useEffect, useRef, useState } from "react";
+
+import { getRecipeTypes } from "api/recipeTypesApi";
 
 interface RecipeType {
     id: number;
@@ -25,6 +26,7 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
         const fetchTypes = async () => {
             try {
                 const data = await getRecipeTypes();
+
                 setTypes(data); // update state with recipe types
             } catch (error) {
                 // error handling
@@ -32,12 +34,13 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
             }
         };
 
-        fetchTypes();
+        void fetchTypes();
     }, []);
 
     // handle type selection change
     const handleCheckboxChange = (id: number) => {
         let updatedSelectedTypes;
+
         if (selectedTypes.includes(id)) {
             updatedSelectedTypes = selectedTypes.filter(
                 (typeId) => typeId !== id,
@@ -76,7 +79,9 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
         <div ref={filterRef} className="relative">
             <button
                 className="bg-purple-600 text-white p-2 rounded-lg"
-                onClick={() => setIsOpen(!isOpen)} // toggle filter open/close state
+                onClick={() => {
+                    setIsOpen(!isOpen);
+                }} // toggle filter open/close state
             >
                 Filter
             </button>
@@ -87,7 +92,9 @@ const RecipeTypeFilter: React.FC<RecipeTypeFilterProps> = ({
                             <input
                                 type="checkbox"
                                 checked={selectedTypes.includes(type.id)} // mark selected types
-                                onChange={() => handleCheckboxChange(type.id)} // handle selection change
+                                onChange={() => {
+                                    handleCheckboxChange(type.id);
+                                }} // handle selection change
                             />
                             <label className="ml-2">{type.type_name}</label>
                         </div>

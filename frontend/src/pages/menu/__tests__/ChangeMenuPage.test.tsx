@@ -1,10 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
-import ChangeMenuPage from "../ChangeMenuPage";
-import { getMenuById } from "../../../api/menusApi";
-import { getMenuCategories } from "../../../api/menuCategoriesApi";
-import { getRecipes } from "../../../api/recipesApi";
-import type { MenuDetails } from "../../../types/menu";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+
+import type { MenuDetails } from "types/menu";
+
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { getMenuById } from "api/menusApi";
+import { getRecipes } from "api/recipesApi";
+
+import ChangeMenuPage from "pages/menu/ChangeMenuPage";
 
 jest.mock("../../../api/menusApi");
 jest.mock("../../../api/menuCategoriesApi");

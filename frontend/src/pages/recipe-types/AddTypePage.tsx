@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import Header from "../../components/Header.tsx";
-import { createRecipeType } from "../../api/recipeTypesApi";
+
+import { createRecipeType } from "api/recipeTypesApi";
+
+import { Header } from "components/layout/Header";
 
 interface RecipeType {
     type_name: string;
@@ -22,6 +24,7 @@ const AddRecipeType: React.FC = () => {
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const { name, value } = e.target;
+
         setTypeData((prevData) => ({ ...prevData, [name]: value }));
         setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
     };
@@ -30,6 +33,7 @@ const AddRecipeType: React.FC = () => {
         e.preventDefault();
 
         const newErrors: { type_name?: string; description?: string } = {};
+
         if (!typeData.type_name) {
             newErrors.type_name = "Please fill out this field.";
         }
@@ -39,6 +43,7 @@ const AddRecipeType: React.FC = () => {
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+
             return;
         }
 
@@ -58,7 +63,12 @@ const AddRecipeType: React.FC = () => {
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
                     Add New Recipe Type
                 </h1>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form
+                    onSubmit={(e) => {
+                        void handleSubmit(e);
+                    }}
+                    className="space-y-4"
+                >
                     <div>
                         <label>
                             Name:

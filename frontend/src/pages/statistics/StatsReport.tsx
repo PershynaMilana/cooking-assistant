@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from "react";
 import {
     Document,
+    Font,
     Page,
+    StyleSheet,
     Text,
     View,
-    StyleSheet,
-    Font,
 } from "@react-pdf/renderer";
-import montserrat from "../../assets/fonts/Montserrat/Montserrat-Regular.ttf";
-import { getRecipes } from "../../api/recipesApi";
-import type { RecipeWithIngredientNames } from "../../types/recipe";
+import React, { useEffect, useState } from "react";
+
+import type { RecipeWithIngredientNames } from "types/recipe";
+
+import { getRecipes } from "api/recipesApi";
+
+import montserrat from "assets/fonts/Montserrat/Montserrat-Regular.ttf";
 
 Font.register({ family: "Montserrat", src: montserrat });
 
@@ -22,6 +25,7 @@ const formatDate = (date: Date) => {
         minute: "2-digit",
         second: "2-digit",
     };
+
     return date.toLocaleString("en-GB", options);
 };
 
@@ -102,7 +106,8 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                 const recipes = await getRecipes();
 
                 // count recipes per type
-                const typeCounts: { [key: string]: number } = {};
+                const typeCounts: Record<string, number> = {};
+
                 recipes.forEach((recipe) => {
                     typeCounts[recipe.type_name] =
                         (typeCounts[recipe.type_name] || 0) + 1;
@@ -114,6 +119,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
                         count: typeCounts[typeName],
                     }),
                 );
+
                 setStats(formattedStats);
 
                 // find recipes by cooking time
@@ -162,7 +168,7 @@ const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
             }
         };
 
-        fetchStats();
+        void fetchStats();
     }, []);
 
     return (

@@ -1,11 +1,14 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RegisterPage from "../RegisterPage";
-import { register } from "../../../api/authApi";
-import { mockNavigate, renderWithRouter } from "../../../test/router";
+import type * as ReactRouterDom from "react-router-dom";
+
+import { register } from "api/authApi";
+
+import RegisterPage from "pages/auth/RegisterPage";
+import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
+    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
 jest.mock("../../../api/authApi");
@@ -18,6 +21,7 @@ const PASSWORD = "secret1";
 describe("RegisterPage", () => {
     it("should register the user and navigate to login on submit", async () => {
         const mockedRegister = jest.mocked(register);
+
         mockedRegister.mockResolvedValue(undefined);
 
         renderWithRouter(<RegisterPage />);

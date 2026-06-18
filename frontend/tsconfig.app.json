@@ -5,6 +5,22 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "resolveJsonModule": true,
+
+    /* Bare path aliases (mirrored in vite.config.ts, jest.config.cjs, eslint resolver) */
+    "paths": {
+      "api/*": ["./src/api/*"],
+      "components/*": ["./src/components/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "utils/*": ["./src/utils/*"],
+      "types/*": ["./src/types/*"],
+      "constants/*": ["./src/constants/*"],
+      "config/*": ["./src/config/*"],
+      "i18n/*": ["./src/i18n/*"],
+      "pages/*": ["./src/pages/*"],
+      "assets/*": ["./src/assets/*"],
+      "test/*": ["./src/test/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

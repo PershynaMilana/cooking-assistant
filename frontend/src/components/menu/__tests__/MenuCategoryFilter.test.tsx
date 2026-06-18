@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MenuCategoryFilter from "../MenuCategoryFilter";
+
+import MenuCategoryFilter from "components/menu/MenuCategoryFilter";
 
 const CATEGORY_ID = 3;
 const CATEGORY_NAME = "Lunch";

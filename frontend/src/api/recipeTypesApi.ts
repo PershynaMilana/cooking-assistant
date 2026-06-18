@@ -1,10 +1,11 @@
-import { apiClient } from "./client";
-import { API_ROUTES } from "./endpoints";
 import type {
-    RecipeTypeSummary,
     RecipeTypeFormData,
     RecipeTypesQuery,
-} from "../types/recipeType";
+    RecipeTypeSummary,
+} from "types/recipeType";
+
+import { apiClient } from "./client";
+import { API_ROUTES } from "./endpoints";
 
 export async function getRecipeTypes(
     params?: RecipeTypesQuery,
@@ -13,6 +14,7 @@ export async function getRecipeTypes(
         API_ROUTES.recipeTypes.list,
         { params },
     );
+
     return response.data;
 }
 
@@ -22,6 +24,7 @@ export async function getRecipeTypeById(
     const response = await apiClient.get<RecipeTypeFormData>(
         API_ROUTES.recipeTypes.byId(id),
     );
+
     return response.data;
 }
 

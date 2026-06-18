@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../../components/Header";
-import { login as loginRequest } from "../../api/authApi";
+
+import { login as loginRequest } from "api/authApi";
+
+import { Header } from "components/layout/Header";
 
 const LoginPage: React.FC = () => {
     const [login, setLogin] = useState("");
@@ -15,6 +17,7 @@ const LoginPage: React.FC = () => {
 
         if (!login || !password) {
             setError("Please fill in all fields.");
+
             return;
         }
 
@@ -24,6 +27,7 @@ const LoginPage: React.FC = () => {
             console.log("http://localhost:8080/api/login", login, password);
 
             const { token } = data;
+
             localStorage.setItem("authToken", token);
             navigate("/main");
         } catch {
@@ -52,7 +56,9 @@ const LoginPage: React.FC = () => {
                             id="login-username"
                             type="text"
                             value={login}
-                            onChange={(e) => setLogin(e.target.value)}
+                            onChange={(e) => {
+                                setLogin(e.target.value);
+                            }}
                             className="mt-1 block w-full font-montserratRegular p-2 border border-gray-300 rounded-md"
                             placeholder="Enter username"
                         />
@@ -71,13 +77,17 @@ const LoginPage: React.FC = () => {
                                 id="login-password"
                                 type={showPassword ? "text" : "password"}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                }}
                                 className="mt-1 font-montserratRegular block w-full p-2 border border-gray-300 rounded-md"
                                 placeholder="Enter password"
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
+                                onClick={() => {
+                                    setShowPassword(!showPassword);
+                                }}
                                 className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-600"
                             >
                                 {showPassword ? "Hide" : "Show"}
@@ -91,7 +101,9 @@ const LoginPage: React.FC = () => {
                     {/* Login button */}
                     <button
                         type="button"
-                        onClick={handleLogin}
+                        onClick={() => {
+                            void handleLogin();
+                        }}
                         className="bg-dark-purple w-full font-montserratRegular text-center text-white py-2 px-4 rounded-full"
                     >
                         Log In

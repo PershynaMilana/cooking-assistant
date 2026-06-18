@@ -113,10 +113,32 @@ jobs:
       - name: Build frontend
         run: npm --prefix frontend run build
 
+  stylelint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: frontend/package-lock.json
+          install: npm --prefix frontend ci
+      - name: Run frontend Stylelint
+        run: npm --prefix frontend run stylelint
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          cache-dependency-path: frontend/package-lock.json
+          install: npm --prefix frontend ci
+      - name: Test frontend
+        run: npm --prefix frontend run test
+
   ci-success:
     name: ci-success
     if: always()
-    needs: [format, lint-backend, lint-frontend, typecheck-backend, typecheck-frontend, sonarjs-backend, sonarjs-frontend, test-backend, build-frontend]
+    needs: [format, lint-backend, lint-frontend, typecheck-backend, typecheck-frontend, sonarjs-backend, sonarjs-frontend, test-backend, build-frontend, stylelint-frontend, test-frontend]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any needed job failed

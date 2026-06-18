@@ -1,8 +1,10 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AddTypePage from "../AddTypePage";
-import { createRecipeType } from "../../../api/recipeTypesApi";
-import { renderWithRouter } from "../../../test/router";
+
+import { createRecipeType } from "api/recipeTypesApi";
+
+import AddTypePage from "pages/recipe-types/AddTypePage";
+import { renderWithRouter } from "test/router";
 
 jest.mock("../../../api/recipeTypesApi");
 
@@ -12,6 +14,7 @@ const DESCRIPTION = "Sweet dishes";
 describe("AddTypePage", () => {
     it("should create the recipe type on submit", async () => {
         const mockedCreate = jest.mocked(createRecipeType);
+
         mockedCreate.mockResolvedValue(undefined);
 
         renderWithRouter(<AddTypePage />);

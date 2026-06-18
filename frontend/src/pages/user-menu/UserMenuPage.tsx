@@ -1,15 +1,18 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
-import MenuCard from "../../components/menu/MenuCard.tsx";
-import Header from "../../components/Header.tsx";
-import SearchComponent from "../../components/SearchComponent.tsx";
-import MenuCategoryFilter from "../../components/menu/MenuCategoryFilter.tsx";
-import { jwtDecode } from "jwt-decode";
-import { Link } from "react-router-dom";
-import { getMenusByPerson } from "../../api/menusApi.ts";
-import { getMenuCategories } from "../../api/menuCategoriesApi.ts";
-import { getApiErrorMessage } from "../../api/httpError.ts";
-import type { Menu, MenuCategory } from "../../types/menu.ts";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+
+import type { Menu, MenuCategory } from "types/menu";
+
+import { getApiErrorMessage } from "api/httpError";
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { getMenusByPerson } from "api/menusApi";
+
+import { Header } from "components/layout/Header";
+import MenuCard from "components/menu/MenuCard";
+import MenuCategoryFilter from "components/menu/MenuCategoryFilter";
+import { SearchComponent } from "components/ui/SearchComponent";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
 
 const UserMenuPage: React.FC = () => {
     const [menus, setMenus] = useState<Menu[]>([]);
@@ -19,22 +22,21 @@ const UserMenuPage: React.FC = () => {
     const [noMenus, setNoMenus] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const menuName = searchParams.get("ingredient_name");
-    const token = localStorage.getItem("authToken");
 
     const fetchMenus = useCallback(async () => {
         setError(null);
         setNoMenus(false);
 
-        if (!token) {
+        const userId = getCurrentUserId();
+
+        if (userId === null) {
             console.error("No auth token found.");
+
             return;
         }
 
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
-
         try {
-            const encodedMenuName = encodeURIComponent(menuName || "");
+            const encodedMenuName = encodeURIComponent(menuName ?? "");
 
             const data = await getMenusByPerson(userId, {
                 menu_name: encodedMenuName,
@@ -49,27 +51,28 @@ const UserMenuPage: React.FC = () => {
             } else {
                 setMenus(data);
             }
-        } catch (error: unknown) {
-            setError(getApiErrorMessage(error));
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
-    }, [menuName, selectedCategories, token]);
+    }, [menuName, selectedCategories]);
 
     useEffect(() => {
-        fetchMenus();
+        void fetchMenus();
     }, [fetchMenus]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const data = await getMenuCategories();
+
                 setCategories(data);
-            } catch (error) {
-                console.error("Error fetching menu categories.", error);
+            } catch (err) {
+                console.error("Error fetching menu categories.", err);
             }
         };
 
-        fetchCategories();
-    }, [token]);
+        void fetchCategories();
+    }, []);
 
     return (
         <div>

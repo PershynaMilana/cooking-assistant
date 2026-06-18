@@ -23,7 +23,7 @@ export interface MenuDetailRecipe {
     type_name: string;
     cooking_time: number;
     creation_date: string;
-    missingIngredients: MissingIngredient[];
+    missingIngredients?: MissingIngredient[];
 }
 
 export interface MenuDetails {

@@ -1,13 +1,16 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import MenuCard from "../../components/menu/MenuCard.tsx";
-import Header from "../../components/Header.tsx";
-import SearchComponent from "../../components/SearchComponent.tsx";
-import MenuCategoryFilter from "../../components/menu/MenuCategoryFilter.tsx";
-import { getMenus } from "../../api/menusApi.ts";
-import { getMenuCategories } from "../../api/menuCategoriesApi.ts";
-import { getApiErrorMessage } from "../../api/httpError.ts";
-import type { Menu, MenuCategory } from "../../types/menu.ts";
+
+import type { Menu, MenuCategory } from "types/menu";
+
+import { getApiErrorMessage } from "api/httpError";
+import { getMenuCategories } from "api/menuCategoriesApi";
+import { getMenus } from "api/menusApi";
+
+import { Header } from "components/layout/Header";
+import MenuCard from "components/menu/MenuCard";
+import MenuCategoryFilter from "components/menu/MenuCategoryFilter";
+import { SearchComponent } from "components/ui/SearchComponent";
 
 const MenuPage: React.FC = () => {
     const [menus, setMenus] = useState<Menu[]>([]);
@@ -23,7 +26,7 @@ const MenuPage: React.FC = () => {
         setNoMenus(false);
 
         try {
-            const encodedMenuName = encodeURIComponent(menuName || "");
+            const encodedMenuName = encodeURIComponent(menuName ?? "");
 
             const data = await getMenus({
                 menu_name: encodedMenuName,
@@ -39,26 +42,27 @@ const MenuPage: React.FC = () => {
             } else {
                 setMenus(data);
             }
-        } catch (error: unknown) {
-            setError(getApiErrorMessage(error));
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
     }, [menuName, selectedCategories]);
 
     useEffect(() => {
-        fetchMenus();
+        void fetchMenus();
     }, [fetchMenus]);
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const data = await getMenuCategories();
+
                 setCategories(data);
-            } catch (error) {
-                console.error("Error fetching menu categories.", error);
+            } catch (err) {
+                console.error("Error fetching menu categories.", err);
             }
         };
 
-        fetchCategories();
+        void fetchCategories();
     }, []);
 
     return (

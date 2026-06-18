@@ -1,7 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
-const Header: React.FC = () => {
+export const Header: React.FC = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const token = localStorage.getItem("authToken");
 
@@ -20,7 +22,7 @@ const Header: React.FC = () => {
                                 to="/main"
                                 className="font-montserratRegular text-l"
                             >
-                                Home
+                                {t("header.home")}
                             </Link>
                         </li>
                         <li>
@@ -28,7 +30,7 @@ const Header: React.FC = () => {
                                 to="/my-recipes"
                                 className="font-montserratRegular text-l"
                             >
-                                My Recipes
+                                {t("header.myRecipes")}
                             </Link>
                         </li>
                         <li>
@@ -36,7 +38,7 @@ const Header: React.FC = () => {
                                 to="/stats"
                                 className="font-montserratRegular text-l"
                             >
-                                Statistics
+                                {t("header.statistics")}
                             </Link>
                         </li>
                         <li>
@@ -44,7 +46,7 @@ const Header: React.FC = () => {
                                 to="/types"
                                 className="font-montserratRegular text-l"
                             >
-                                Types
+                                {t("header.types")}
                             </Link>
                         </li>
                         <li>
@@ -52,7 +54,7 @@ const Header: React.FC = () => {
                                 to="/ingredients"
                                 className="font-montserratRegular text-l"
                             >
-                                My Ingredients
+                                {t("header.myIngredients")}
                             </Link>
                         </li>
                         {/* New "Menu" tab */}
@@ -61,7 +63,7 @@ const Header: React.FC = () => {
                                 to="/menu"
                                 className="font-montserratRegular text-l"
                             >
-                                Menu
+                                {t("header.menu")}
                             </Link>
                         </li>
                         <li>
@@ -69,7 +71,7 @@ const Header: React.FC = () => {
                                 to="/my-menus"
                                 className="font-montserratRegular text-l"
                             >
-                                My Menus
+                                {t("header.myMenus")}
                             </Link>
                         </li>
                     </div>
@@ -79,7 +81,7 @@ const Header: React.FC = () => {
                             onClick={handleLogout}
                             className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 mr-[3vw] rounded-full"
                         >
-                            Logout
+                            {t("header.logout")}
                         </button>
                     ) : (
                         <div className="flex space-x-14 mr-[5vw]">
@@ -88,7 +90,7 @@ const Header: React.FC = () => {
                                     to="/login"
                                     className="font-montserratRegular text-l"
                                 >
-                                    Login
+                                    {t("header.login")}
                                 </Link>
                             </li>
                             <li>
@@ -96,7 +98,7 @@ const Header: React.FC = () => {
                                     to="/registration"
                                     className="bg-dark-purple px-5 py-3 rounded-full font-montserratRegular text-l"
                                 >
-                                    Register
+                                    {t("header.register")}
                                 </Link>
                             </li>
                         </div>
@@ -106,5 +108,3 @@ const Header: React.FC = () => {
         </header>
     );
 };
-
-export default Header;

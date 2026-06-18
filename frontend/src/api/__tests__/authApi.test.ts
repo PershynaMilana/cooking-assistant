@@ -1,6 +1,7 @@
-import { API_ROUTES } from "../endpoints";
-import { login, register } from "../authApi";
-import { mockedPost } from "../../test/apiClientMock";
+import { login, register } from "api/authApi";
+import { API_ROUTES } from "api/endpoints";
+
+import { mockedPost } from "test/apiClientMock";
 
 jest.mock("../client");
 

@@ -1,25 +1,27 @@
-import { API_ROUTES } from "../endpoints";
-import {
-    getMenus,
-    getMenuById,
-    createMenu,
-    updateMenu,
-    deleteMenu,
-    getMenusByPerson,
-} from "../menusApi";
 import type {
+    CreateMenuRequest,
     Menu,
     MenuDetails,
     MenuListParams,
-    CreateMenuRequest,
     UpdateMenuRequest,
-} from "../../types/menu";
+} from "types/menu";
+
+import { API_ROUTES } from "api/endpoints";
 import {
+    createMenu,
+    deleteMenu,
+    getMenuById,
+    getMenus,
+    getMenusByPerson,
+    updateMenu,
+} from "api/menusApi";
+
+import {
+    mockedDelete,
     mockedGet,
     mockedPost,
     mockedPut,
-    mockedDelete,
-} from "../../test/apiClientMock";
+} from "test/apiClientMock";
 
 jest.mock("../client");
 

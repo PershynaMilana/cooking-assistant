@@ -1,16 +1,14 @@
+import type { LoginRequest, LoginResponse, RegisterRequest } from "types/auth";
+
 import { apiClient } from "./client";
 import { API_ROUTES } from "./endpoints";
-import type {
-    LoginRequest,
-    LoginResponse,
-    RegisterRequest,
-} from "../types/auth";
 
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
         API_ROUTES.auth.login,
         credentials,
     );
+
     return response.data;
 }
 

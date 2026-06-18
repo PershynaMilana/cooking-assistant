@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface MenuCategory {
     menu_category_id: number;
@@ -21,6 +21,7 @@ const MenuCategoryFilter: React.FC<MenuCategoryFilterProps> = ({
 
     const handleCheckboxChange = (id: number) => {
         let updatedSelectedCategories;
+
         if (selectedCategories.includes(id)) {
             // remove selected type if it's already in the list
             updatedSelectedCategories = selectedCategories.filter(
@@ -59,7 +60,9 @@ const MenuCategoryFilter: React.FC<MenuCategoryFilterProps> = ({
         <div ref={filterRef} className="relative">
             <button
                 className="bg-purple-600 text-white p-2 rounded-lg"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    setIsOpen(!isOpen);
+                }}
             >
                 Filter
             </button>
@@ -75,11 +78,11 @@ const MenuCategoryFilter: React.FC<MenuCategoryFilterProps> = ({
                                 checked={selectedCategories.includes(
                                     category.menu_category_id,
                                 )}
-                                onChange={() =>
+                                onChange={() => {
                                     handleCheckboxChange(
                                         category.menu_category_id,
-                                    )
-                                }
+                                    );
+                                }}
                             />
                             <label className="ml-2">
                                 {category.category_name}

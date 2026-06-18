@@ -1,6 +1,8 @@
 import { screen } from "@testing-library/react";
-import MenuCard from "../MenuCard";
-import { renderWithRouter } from "../../../test/router";
+
+import MenuCard from "components/menu/MenuCard";
+
+import { renderWithRouter } from "test/router";
 
 const TITLE = "Weekday menu";
 const CATEGORY = "Lunch";

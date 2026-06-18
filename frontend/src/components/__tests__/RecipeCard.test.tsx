@@ -1,6 +1,8 @@
 import { screen } from "@testing-library/react";
-import RecipeCard from "../RecipeCard";
-import { renderWithRouter } from "../../test/router";
+
+import RecipeCard from "components/RecipeCard";
+
+import { renderWithRouter } from "test/router";
 
 const TITLE = "Borscht";
 

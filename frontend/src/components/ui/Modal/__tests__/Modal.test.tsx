@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import Modal from "../Modal";
+
+import { Modal } from "components/ui/Modal";
 
 const TITLE = "Delete recipe";
 const MESSAGE = "Are you sure you want to delete this recipe?";

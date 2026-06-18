@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Header from "../../components/Header.tsx";
-import { getRecipeById, updateRecipe } from "../../api/recipesApi";
-import { getIngredients } from "../../api/ingredientsApi";
-import { getRecipeTypes } from "../../api/recipeTypesApi";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { getIngredients } from "api/ingredientsApi";
+import { getRecipeById, updateRecipe } from "api/recipesApi";
+import { getRecipeTypes } from "api/recipeTypesApi";
+
+import { Header } from "components/layout/Header";
 
 interface Ingredient {
     id: number;
@@ -57,9 +59,9 @@ const ChangeRecipePage: React.FC = () => {
             setAllTypes(types);
             setSelectedIngredients(recipeData.ingredients);
             setSelectedTypeId(recipeData.type_id);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(`Error loading recipe data, ${error.message}`);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(`Error loading recipe data, ${err.message}`);
             } else {
                 setError("Unknown error while loading data.");
             }
@@ -67,12 +69,13 @@ const ChangeRecipePage: React.FC = () => {
     }, [id]);
 
     useEffect(() => {
-        fetchRecipeDetails();
+        void fetchRecipeDetails();
     }, [fetchRecipeDetails]);
 
     const formatCookingTime = (timeInMinutes: number) => {
         const hours = Math.floor(timeInMinutes / 60);
         const minutes = timeInMinutes % 60;
+
         return `${hours}:${minutes.toString().padStart(2, "0")}`;
     };
 
@@ -98,6 +101,7 @@ const ChangeRecipePage: React.FC = () => {
     const toggleIngredientSelection = (ingredient: Ingredient) => {
         setSelectedIngredients((prevSelected) => {
             const existing = prevSelected.find((i) => i.id === ingredient.id);
+
             if (existing) {
                 return prevSelected.filter((i) => i.id !== ingredient.id);
             } else {
@@ -122,16 +126,20 @@ const ChangeRecipePage: React.FC = () => {
 
         if (!servings.trim()) {
             setError("Servings cannot be empty.");
+
             return;
         }
 
         const timeParts = cookingTime.split(":");
+
         if (timeParts.length !== 2) {
             setCookingTimeError("Enter time in format hh:mm");
+
             return;
         }
         const hours = parseInt(timeParts[0], 10);
         const minutes = parseInt(timeParts[1], 10);
+
         if (
             isNaN(hours) ||
             isNaN(minutes) ||
@@ -141,6 +149,7 @@ const ChangeRecipePage: React.FC = () => {
             minutes >= 60
         ) {
             setCookingTimeError("Enter valid time in format hh:mm");
+
             return;
         }
 
@@ -151,8 +160,8 @@ const ChangeRecipePage: React.FC = () => {
             cooking_time: hours * 60 + minutes,
             servings,
             ingredients: selectedIngredients.map(
-                ({ id, quantity_recipe_ingredients }) => ({
-                    id,
+                ({ id: recipeId, quantity_recipe_ingredients }) => ({
+                    id: recipeId,
                     quantity_recipe_ingredients,
                 }),
             ),
@@ -186,7 +195,9 @@ const ChangeRecipePage: React.FC = () => {
                             id="edit-recipe-title"
                             type="text"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={(e) => {
+                                setTitle(e.target.value);
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
                     </div>
@@ -200,7 +211,9 @@ const ChangeRecipePage: React.FC = () => {
                         <textarea
                             id="edit-recipe-description"
                             value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            onChange={(e) => {
+                                setContent(e.target.value);
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                             rows={4}
                         />
@@ -216,7 +229,9 @@ const ChangeRecipePage: React.FC = () => {
                             id="edit-recipe-cooking-time"
                             type="text"
                             value={cookingTime}
-                            onChange={(e) => setCookingTime(e.target.value)}
+                            onChange={(e) => {
+                                setCookingTime(e.target.value);
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         />
                         {cookingTimeError && (
@@ -235,9 +250,9 @@ const ChangeRecipePage: React.FC = () => {
                         <select
                             id="edit-recipe-type"
                             value={selectedTypeId ?? ""}
-                            onChange={(e) =>
-                                setSelectedTypeId(Number(e.target.value))
-                            }
+                            onChange={(e) => {
+                                setSelectedTypeId(Number(e.target.value));
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         >
                             <option value="" disabled>
@@ -257,9 +272,9 @@ const ChangeRecipePage: React.FC = () => {
                                 <button
                                     key={ingredient.id}
                                     type="button"
-                                    onClick={() =>
-                                        toggleIngredientSelection(ingredient)
-                                    }
+                                    onClick={() => {
+                                        toggleIngredientSelection(ingredient);
+                                    }}
                                     className={`${
                                         selectedIngredients.some(
                                             (i) => i.id === ingredient.id,
@@ -287,12 +302,12 @@ const ChangeRecipePage: React.FC = () => {
                                     value={
                                         ingredient.quantity_recipe_ingredients
                                     }
-                                    onChange={(e) =>
+                                    onChange={(e) => {
                                         updateIngredientQuantity(
                                             ingredient.id,
                                             parseInt(e.target.value, 10),
-                                        )
-                                    }
+                                        );
+                                    }}
                                     className="w-20 p-2 border border-gray-300 rounded-md"
                                 />
                                 <span className="text-gray-700">
@@ -313,7 +328,9 @@ const ChangeRecipePage: React.FC = () => {
                             id="edit-recipe-servings"
                             type="text"
                             value={servings}
-                            onChange={(e) => setServings(e.target.value)}
+                            onChange={(e) => {
+                                setServings(e.target.value);
+                            }}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                             placeholder="For example: 1 serving or full pot"
                         />
@@ -322,7 +339,9 @@ const ChangeRecipePage: React.FC = () => {
                     {error && <div className="text-red-500 mt-4">{error}</div>}
                     <button
                         type="button"
-                        onClick={handleUpdateRecipe}
+                        onClick={() => {
+                            void handleUpdateRecipe();
+                        }}
                         className="bg-blue-500 text-white px-4 py-2 rounded-md"
                     >
                         Update Recipe

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import Header from "../../components/Header.tsx";
 import { useNavigate } from "react-router-dom";
-import { register } from "../../api/authApi";
+
+import { register } from "api/authApi";
+
+import { Header } from "components/layout/Header";
 
 const RegisterPage: React.FC = () => {
     const [name, setName] = useState("");
@@ -58,6 +60,7 @@ const RegisterPage: React.FC = () => {
         // check if all fields are filled
         if (!name || !surname || !login || !password) {
             setError("Please fill in all fields.");
+
             return;
         }
 
@@ -183,7 +186,9 @@ const RegisterPage: React.FC = () => {
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
+                                onClick={() => {
+                                    setShowPassword(!showPassword);
+                                }}
                                 className="absolute inset-y-0 right-2 flex items-center text-gray-500"
                             >
                                 {showPassword ? "Hide" : "Show"}
@@ -200,7 +205,9 @@ const RegisterPage: React.FC = () => {
                     {/* Register button */}
                     <button
                         type="button"
-                        onClick={handleRegister}
+                        onClick={() => {
+                            void handleRegister();
+                        }}
                         className="bg-dark-purple w-full font-montserratRegular text-center text-white py-2 px-4 rounded-full"
                     >
                         Register

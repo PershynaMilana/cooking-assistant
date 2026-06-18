@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-import Header from "../../components/Header.tsx";
-import PurchaseHistoryModal from "../../components/PurchaseHistoryModal.tsx";
-import { getIngredients } from "../../api/ingredientsApi";
+import React, { useEffect, useState } from "react";
+
+import type { PantryIngredient as Ingredient } from "types/userIngredient";
+
+import { getIngredients } from "api/ingredientsApi";
 import {
+    deleteUserIngredient,
     getUserIngredients,
     saveUserIngredient,
     updateQuantities,
-    deleteUserIngredient,
-} from "../../api/userIngredientsApi";
-import type { PantryIngredient as Ingredient } from "../../types/userIngredient";
+} from "api/userIngredientsApi";
+
+import { Header } from "components/layout/Header";
+import PurchaseHistoryModal from "components/PurchaseHistoryModal";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
 
 const NO_AUTH_TOKEN = "No auth token found.";
 
@@ -46,7 +50,7 @@ const IngredientsPage: React.FC = () => {
     const closeHistoryModal = () => {
         setIsHistoryModalOpen(false);
         setSelectedHistoryIngredient(null);
-        fetchSelectedIngredients();
+        void fetchSelectedIngredients();
     };
 
     useEffect(() => {
@@ -55,6 +59,7 @@ const IngredientsPage: React.FC = () => {
 
             if (!token) {
                 console.error(NO_AUTH_TOKEN);
+
                 return;
             }
 
@@ -63,25 +68,24 @@ const IngredientsPage: React.FC = () => {
                 const sortedIngredients = ingredients.sort((a, b) =>
                     a.name.localeCompare(b.name),
                 );
+
                 setAllIngredients(sortedIngredients);
             } catch (error) {
                 console.error("Error loading ingredients:", error);
             }
         };
 
-        fetchIngredients();
+        void fetchIngredients();
     }, []);
 
     const fetchSelectedIngredients = async () => {
-        const token = localStorage.getItem("authToken");
+        const userId = getCurrentUserId();
 
-        if (!token) {
+        if (userId === null) {
             console.error(NO_AUTH_TOKEN);
+
             return;
         }
-
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
 
         try {
             const data = await getUserIngredients(userId);
@@ -105,7 +109,7 @@ const IngredientsPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchSelectedIngredients();
+        void fetchSelectedIngredients();
     }, []);
 
     const toggleIngredientSelection = (ingredientId: number) => {
@@ -117,14 +121,13 @@ const IngredientsPage: React.FC = () => {
     };
 
     const saveIngredients = async () => {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
+        const userId = getCurrentUserId();
+
+        if (userId === null) {
             console.error(NO_AUTH_TOKEN);
+
             return;
         }
-
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
 
         const newIngredients = allIngredients
             .filter(
@@ -158,6 +161,7 @@ const IngredientsPage: React.FC = () => {
 
     const handleQuantityChange = (id: number, newQuantity: number) => {
         const today = new Date().toISOString().split("T")[0];
+
         setUpdatedIngredients((prev) =>
             prev.map((ingredient) =>
                 ingredient.id === id
@@ -176,20 +180,20 @@ const IngredientsPage: React.FC = () => {
     };
 
     const saveUpdatedQuantities = async () => {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
+        const userId = getCurrentUserId();
+
+        if (userId === null) {
             console.error(NO_AUTH_TOKEN);
+
             return;
         }
-
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
 
         const changedIngredients = updatedIngredients.filter(
             (updatedIngredient) => {
                 const original = personIngredients.find(
                     (ingredient) => ingredient.id === updatedIngredient.id,
                 );
+
                 return (
                     original &&
                     original.quantity_person_ingradient !==
@@ -200,6 +204,7 @@ const IngredientsPage: React.FC = () => {
 
         if (changedIngredients.length === 0) {
             console.log("No changes to save.");
+
             return;
         }
 
@@ -218,6 +223,7 @@ const IngredientsPage: React.FC = () => {
     const confirmDeleteIngredient = (ingredient: Ingredient) => {
         if (!ingredient.id) {
             console.error("Ingredient ID is missing:", ingredient);
+
             return;
         }
         setSelectedIngredientToDelete(ingredient);
@@ -225,14 +231,13 @@ const IngredientsPage: React.FC = () => {
     };
 
     const handleDeleteConfirm = async () => {
-        const token = localStorage.getItem("authToken");
-        if (!token || !selectedIngredientToDelete) {
+        const userId = getCurrentUserId();
+
+        if (userId === null || !selectedIngredientToDelete) {
             console.error("No auth token found or ingredient not selected.");
+
             return;
         }
-
-        const decodedToken = jwtDecode<{ id: number }>(token);
-        const userId = decodedToken.id;
 
         try {
             await deleteUserIngredient(userId, selectedIngredientToDelete.id);
@@ -264,6 +269,7 @@ const IngredientsPage: React.FC = () => {
         const today = new Date();
 
         const expirationDate = new Date(purchaseDate);
+
         expirationDate.setDate(
             purchaseDate.getDate() + ingredient.days_to_expire,
         );
@@ -346,19 +352,21 @@ const IngredientsPage: React.FC = () => {
                                         </div>
                                         <div className="flex space-x-2 ml-auto">
                                             <button
-                                                onClick={() =>
-                                                    openHistoryModal(ingredient)
-                                                }
+                                                onClick={() => {
+                                                    openHistoryModal(
+                                                        ingredient,
+                                                    );
+                                                }}
                                                 className="bg-amber-500 text-white py-2 px-4 rounded-full"
                                             >
                                                 Details
                                             </button>
                                             <button
-                                                onClick={() =>
+                                                onClick={() => {
                                                     confirmDeleteIngredient(
                                                         ingredient,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                                 className="bg-red-500 text-white py-2 px-4 rounded-full"
                                             >
                                                 Delete
@@ -384,11 +392,11 @@ const IngredientsPage: React.FC = () => {
                                     <button
                                         key={ingredient.id}
                                         type="button"
-                                        onClick={() =>
+                                        onClick={() => {
                                             toggleIngredientSelection(
                                                 ingredient.id,
-                                            )
-                                        }
+                                            );
+                                        }}
                                         className={`py-2 px-4 rounded-full ${
                                             selectedIngredients.includes(
                                                 ingredient.id,
@@ -421,12 +429,12 @@ const IngredientsPage: React.FC = () => {
                                         value={
                                             ingredient.quantity_person_ingradient
                                         }
-                                        onChange={(e) =>
+                                        onChange={(e) => {
                                             handleQuantityChange(
                                                 ingredient.id,
                                                 +e.target.value,
-                                            )
-                                        }
+                                            );
+                                        }}
                                         className="border border-gray-300 rounded p-1 w-20 text-center"
                                     />
                                     <span className="text-gray-700">
@@ -436,7 +444,9 @@ const IngredientsPage: React.FC = () => {
                             </div>
                         ))}
                         <button
-                            onClick={saveUpdatedQuantities}
+                            onClick={() => {
+                                void saveUpdatedQuantities();
+                            }}
                             className="bg-green-500 text-white py-2 px-4 rounded-full mt-4 block mx-auto"
                         >
                             Save quantities
@@ -450,7 +460,7 @@ const IngredientsPage: React.FC = () => {
                         <button
                             onClick={() => {
                                 if (isEditing) {
-                                    saveIngredients();
+                                    void saveIngredients();
                                 }
                                 setIsEditing((prev) => !prev);
                             }}
@@ -475,19 +485,23 @@ const IngredientsPage: React.FC = () => {
                         <div className="bg-white p-6 rounded-lg shadow-lg">
                             <p className="mb-4 text-center">
                                 Are you sure you want to delete the ingredient "
-                                {selectedIngredientToDelete?.ingredient_name}"?
+                                {selectedIngredientToDelete.ingredient_name}"?
                             </p>
 
                             <div className="flex justify-center space-x-2">
                                 <button
                                     className="bg-red-500 text-white px-4 py-2 rounded-full"
-                                    onClick={handleDeleteConfirm}
+                                    onClick={() => {
+                                        void handleDeleteConfirm();
+                                    }}
                                 >
                                     Confirm
                                 </button>
                                 <button
                                     className="bg-green-500 text-white py-2 px-4 rounded-full"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => {
+                                        setIsModalOpen(false);
+                                    }}
                                 >
                                     Cancel
                                 </button>
@@ -502,7 +516,7 @@ const IngredientsPage: React.FC = () => {
                 <PurchaseHistoryModal
                     ingredientId={selectedHistoryIngredient.id}
                     ingredientName={
-                        selectedHistoryIngredient.ingredient_name || ""
+                        selectedHistoryIngredient.ingredient_name ?? ""
                     }
                     onClose={closeHistoryModal}
                 />

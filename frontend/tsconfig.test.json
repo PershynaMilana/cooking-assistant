@@ -1,5 +1,12 @@
 {
-  // editor + `tsc -b` type-check view of the tests; the sibling ./tsconfig.spec.json
-  // is the ts-jest runtime view, differing only by the CommonJS module options
-  "extends": "./tsconfig.test-base.json"
+  // editor + `tsc -b` type-check view of the tests; @swc/jest transforms tests at
+  // runtime (no type-check), so no separate CommonJS tsconfig is needed anymore
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["jest", "@testing-library/jest-dom"],
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src"],
+  "exclude": []
 }

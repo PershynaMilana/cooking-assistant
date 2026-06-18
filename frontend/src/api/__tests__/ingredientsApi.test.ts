@@ -1,7 +1,9 @@
-import { API_ROUTES } from "../endpoints";
-import { getIngredients } from "../ingredientsApi";
-import type { Ingredient } from "../../types/ingredient";
-import { mockedGet } from "../../test/apiClientMock";
+import type { Ingredient } from "types/ingredient";
+
+import { API_ROUTES } from "api/endpoints";
+import { getIngredients } from "api/ingredientsApi";
+
+import { mockedGet } from "test/apiClientMock";
 
 jest.mock("../client");
 

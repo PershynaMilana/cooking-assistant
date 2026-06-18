@@ -1,0 +1,11 @@
+{
+    "$schema": "https://swc.rs/schema.json",
+    "jsc": {
+        "parser": { "syntax": "typescript", "tsx": true, "decorators": false },
+        "transform": { "react": { "runtime": "automatic", "development": false } },
+        "target": "es2021",
+        "externalHelpers": false
+    },
+    "module": { "type": "commonjs" },
+    "sourceMaps": true
+}

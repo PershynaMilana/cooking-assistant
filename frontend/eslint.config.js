@@ -3,17 +3,31 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import deMorgan from "eslint-plugin-de-morgan";
+import importPlugin from "eslint-plugin-import";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import testingLibrary from "eslint-plugin-testing-library";
+import i18next from "eslint-plugin-i18next";
+import boundaries from "eslint-plugin-boundaries";
 import prettier from "eslint-config-prettier";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
     { ignores: ["dist", "coverage"] },
     {
-        extends: [js.configs.recommended, ...tseslint.configs.strict],
+        extends: [
+            js.configs.recommended,
+            ...tseslint.configs.strictTypeChecked,
+            ...tseslint.configs.stylisticTypeChecked,
+        ],
         files: ["**/*.{ts,tsx}"],
         languageOptions: {
             ecmaVersion: 2020,
             globals: globals.browser,
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
         plugins: {
             "react-hooks": reactHooks,
@@ -22,12 +36,119 @@ export default tseslint.config(
         rules: {
             ...reactHooks.configs.recommended.rules,
             "react-refresh/only-export-components": [
-                "warn",
+                "error",
                 { allowConstantExport: true },
+            ],
+            "react-hooks/exhaustive-deps": "error",
+            eqeqeq: ["error", "always"],
+            "@typescript-eslint/restrict-template-expressions": [
+                "error",
+                { allowNumber: true },
+            ],
+            "no-shadow": "off",
+            "@typescript-eslint/no-shadow": "error",
+            "no-param-reassign": "error",
+            "consistent-return": "error",
+            "no-nested-ternary": "error",
+            curly: ["error", "all"],
+            "@typescript-eslint/consistent-type-imports": "error",
+            "@typescript-eslint/naming-convention": [
+                "error",
+                { selector: "typeLike", format: ["PascalCase"] },
+            ],
+            "padding-line-between-statements": [
+                "error",
+                { blankLine: "always", prev: "*", next: "return" },
+                { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+                {
+                    blankLine: "any",
+                    prev: ["const", "let", "var"],
+                    next: ["const", "let", "var"],
+                },
             ],
         },
     },
     jsxA11y.flatConfigs.recommended,
+    deMorgan.configs.recommended,
+    {
+        ...importPlugin.flatConfigs.recommended,
+        files: ["**/*.{ts,tsx}"],
+        rules: {
+            ...importPlugin.flatConfigs.recommended.rules,
+            "import/order": "off", // handed off to simple-import-sort
+        },
+    },
+    {
+        files: ["**/*.{ts,tsx}"],
+        plugins: {
+            "simple-import-sort": simpleImportSort,
+        },
+        settings: {
+            "import/resolver": {
+                typescript: {
+                    alwaysTryTypes: true,
+                    project: "./tsconfig.app.json",
+                },
+            },
+        },
+        rules: {
+            "simple-import-sort/imports": [
+                "error",
+                {
+                    groups: [
+                        // side effects (CSS, polyfills, setup files)
+                        ["^\\u0000"],
+                        // external packages - starts with letter/@, but not our bare aliases
+                        ["^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|test|types|utils)/)@?\\w"],
+                        // config / constants / types layers
+                        ["^(?:config|constants|types)/"],
+                        // api layer
+                        ["^api/"],
+                        // hooks layer
+                        ["^hooks/"],
+                        // components / assets / i18n layers
+                        ["^(?:components|assets|i18n)/"],
+                        // utils layer
+                        ["^utils/"],
+                        // pages / test (infra) layers
+                        ["^(?:pages|test)/"],
+                        // relative same-folder (./)
+                        ["^\\."],
+                    ],
+                },
+            ],
+            "simple-import-sort/exports": "error",
+            "import/no-unresolved": "error",
+            // forbid ../ parent imports by syntax (bare aliases are required instead);
+            // import/no-relative-parent-imports judges by resolved dir and wrongly flags
+            // co-located tests importing their subject via an alias, so we gate on syntax
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [
+                        {
+                            regex: "^\\.\\./",
+                            message:
+                                "Use bare path aliases (api/*, components/*, ...) instead of ../ parent imports.",
+                        },
+                    ],
+                },
+            ],
+            "import/no-cycle": ["error", { maxDepth: 10 }],
+            "import/no-extraneous-dependencies": [
+                "error",
+                {
+                    devDependencies: [
+                        "**/*.test.{ts,tsx}",
+                        "**/__tests__/**",
+                        "src/test/**",
+                        "**/*.config.{ts,js,cjs}",
+                        "vite.config.ts",
+                    ],
+                },
+            ],
+        },
+    },
     // TODO R23 - включить ПОСЛЕ рефактора R10-R15 (когда файлы разбиты под лимиты).
     // Раскомментировать для энфорса размера файлов/сложности; пороги подкрутить на R23.
     // Размер файла - встроенные ESLint-правила. "Условие 3+ операндов → именованная const"
@@ -79,5 +200,100 @@ export default tseslint.config(
     //   },
     //   rules: { "local/no-complex-condition": "error" },
     // },
+    {
+        // layer boundaries (warn now, error in R23). default:allow so today's legal
+        // imports are clean; only the two arch concerns below are flagged on violation
+        files: ["src/**/*.{ts,tsx}"],
+        plugins: { boundaries },
+        settings: {
+            "boundaries/elements": [
+                { type: "config", pattern: "src/config/*" },
+                { type: "types", pattern: "src/types/*" },
+                { type: "constants", pattern: "src/constants/*" },
+                { type: "i18n", pattern: "src/i18n/**" },
+                { type: "utils", pattern: "src/utils/*" },
+                { type: "api", pattern: "src/api/**" },
+                { type: "hooks", pattern: "src/hooks/*" },
+                { type: "components", pattern: "src/components/**" },
+                { type: "pages", pattern: "src/pages/**" },
+            ],
+        },
+        rules: {
+            "boundaries/dependencies": [
+                "warn",
+                {
+                    checkAllOrigins: true,
+                    default: "allow",
+                    rules: [
+                        {
+                            from: { type: "components" },
+                            disallow: {
+                                to: { type: "pages" },
+                            },
+                            message: "Components must not import pages.",
+                        },
+                        {
+                            from: [
+                                { type: "components" },
+                                { type: "pages" },
+                                { type: "hooks" },
+                                { type: "utils" },
+                            ],
+                            disallow: {
+                                to: { origin: "external" },
+                                dependency: { module: "axios" },
+                            },
+                            message:
+                                "Use the api layer instead of importing axios directly.",
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+    {
+        // require translated strings only in the fully-i18n'd shared layers (0 warnings here);
+        // domain pages keep literal text until their slices, so they are NOT scoped
+        files: [
+            "src/components/ui/**/*.{ts,tsx}",
+            "src/components/layout/**/*.{ts,tsx}",
+            "src/i18n/**/*.{ts,tsx}",
+        ],
+        plugins: { i18next },
+        rules: {
+            "i18next/no-literal-string": ["warn", { mode: "jsx-text-only" }],
+        },
+    },
+    {
+        // shared layers use named exports + barrels; global enforcement is R23
+        // (hooks/ is excluded for now - it only holds the legacy dead useAuth default export)
+        files: [
+            "src/components/ui/**/*.{ts,tsx}",
+            "src/components/layout/**/*.{ts,tsx}",
+            "src/utils/**/*.{ts,tsx}",
+        ],
+        rules: {
+            "import/no-default-export": "error",
+        },
+    },
+    {
+        // jest.fn() mocks have no `this` binding, so unbound-method is a false positive in test code
+        files: [
+            "**/__tests__/**/*.{ts,tsx}",
+            "src/test/**/*.{ts,tsx}",
+            "src/**/__mocks__/**/*.{ts,tsx}",
+        ],
+        rules: {
+            "@typescript-eslint/unbound-method": "off",
+        },
+    },
+    {
+        // testing-library rules scoped to test files only
+        ...testingLibrary.configs["flat/react"],
+        files: [
+            "**/__tests__/**/*.{ts,tsx}",
+            "src/test/**/*.{ts,tsx}",
+        ],
+    },
     prettier,
 );

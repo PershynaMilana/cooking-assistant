@@ -1,20 +1,22 @@
-import { API_ROUTES } from "../endpoints";
-import {
-    getUserIngredients,
-    saveUserIngredient,
-    updateQuantities,
-    deleteUserIngredient,
-    getPurchaseHistory,
-    updatePurchase,
-} from "../userIngredientsApi";
 import type {
-    UserIngredient,
     Purchase,
     SaveUserIngredientsRequest,
-    UpdateQuantitiesRequest,
     UpdatePurchaseRequest,
-} from "../../types/userIngredient";
-import { mockedGet, mockedPut, mockedDelete } from "../../test/apiClientMock";
+    UpdateQuantitiesRequest,
+    UserIngredient,
+} from "types/userIngredient";
+
+import { API_ROUTES } from "api/endpoints";
+import {
+    deleteUserIngredient,
+    getPurchaseHistory,
+    getUserIngredients,
+    saveUserIngredient,
+    updatePurchase,
+    updateQuantities,
+} from "api/userIngredientsApi";
+
+import { mockedDelete, mockedGet, mockedPut } from "test/apiClientMock";
 
 jest.mock("../client");
 

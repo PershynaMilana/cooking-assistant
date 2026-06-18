@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
-import PrivateRoute from "../PrivateRoute";
-import { setAuthToken } from "../../test/auth";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+
+import { PrivateRoute } from "components/layout/PrivateRoute";
+
+import { setAuthToken } from "test/auth";
 
 const PROTECTED = "Protected content";
 const LOGIN = "Login page";

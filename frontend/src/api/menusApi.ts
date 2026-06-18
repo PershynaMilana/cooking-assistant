@@ -1,22 +1,25 @@
-import { apiClient } from "./client";
-import { API_ROUTES } from "./endpoints";
 import type {
+    CreateMenuRequest,
     Menu,
     MenuDetails,
     MenuListParams,
-    CreateMenuRequest,
     UpdateMenuRequest,
-} from "../types/menu";
+} from "types/menu";
+
+import { apiClient } from "./client";
+import { API_ROUTES } from "./endpoints";
 
 export async function getMenus(params: MenuListParams): Promise<Menu[]> {
     const response = await apiClient.get<Menu[]>(API_ROUTES.menu.list, {
         params,
     });
+
     return response.data;
 }
 
 export async function getMenuById(id: string | number): Promise<MenuDetails> {
     const response = await apiClient.get<MenuDetails>(API_ROUTES.menu.byId(id));
+
     return response.data;
 }
 
@@ -43,5 +46,6 @@ export async function getMenusByPerson(
         API_ROUTES.menu.byPerson(userId),
         { params },
     );
+
     return response.data;
 }

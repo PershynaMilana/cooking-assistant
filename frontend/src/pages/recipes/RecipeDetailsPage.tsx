@@ -1,12 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import Header from "../../components/Header.tsx";
-import Modal from "../../components/Modal.tsx";
-import { jwtDecode } from "jwt-decode";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+
 import {
-    getRecipeById,
     deleteRecipe as deleteRecipeRequest,
-} from "../../api/recipesApi";
+    getRecipeById,
+} from "api/recipesApi";
+
+import { Header } from "components/layout/Header";
+import { Modal } from "components/ui/Modal";
+
+import { getCurrentUserId } from "utils/getCurrentUserId";
 
 interface Ingredient {
     name: string;
@@ -26,15 +29,13 @@ interface Recipe {
     person_id: number;
 }
 
-const getCurrentUserId = () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return null;
-
+// null on a missing token (via the shared util) or on a malformed token (caught here)
+const getUserIdSafe = (): number | null => {
     try {
-        const decoded: { id: number } = jwtDecode(token);
-        return decoded.id;
+        return getCurrentUserId();
     } catch (error) {
         console.error("Error decoding token:", error);
+
         return null;
     }
 };
@@ -51,6 +52,7 @@ const RecipeDetailsPage: React.FC = () => {
         if (!id) return;
         try {
             const data = await getRecipeById(id);
+
             setRecipe(data);
         } catch {
             setError("Error fetching recipe details");
@@ -58,9 +60,10 @@ const RecipeDetailsPage: React.FC = () => {
     }, [id]);
 
     useEffect(() => {
-        const userId = getCurrentUserId();
+        const userId = getUserIdSafe();
+
         setCurrentUserId(userId);
-        fetchRecipeDetails();
+        void fetchRecipeDetails();
     }, [fetchRecipeDetails]);
 
     const isOwner = recipe?.person_id === currentUserId;
@@ -84,12 +87,12 @@ const RecipeDetailsPage: React.FC = () => {
     };
 
     const handleConfirmDelete = () => {
-        deleteRecipe();
+        void deleteRecipe();
         handleCloseModal();
     };
 
     useEffect(() => {
-        fetchRecipeDetails();
+        void fetchRecipeDetails();
     }, [fetchRecipeDetails]);
 
     const formatCookingTime = (timeInMinutes: number) => {
@@ -97,6 +100,7 @@ const RecipeDetailsPage: React.FC = () => {
         const minutes = timeInMinutes % 60;
         const hourStr = hours > 0 ? `${hours} hours ` : "";
         const minuteStr = `${minutes} minutes`;
+
         return hourStr + minuteStr;
     };
 

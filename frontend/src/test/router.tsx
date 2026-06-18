@@ -1,5 +1,5 @@
-import type { ReactElement } from "react";
 import { render } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 
 // shared navigate spy for tests that partially mock react-router-dom's

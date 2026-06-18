@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Header from "../../components/Header.tsx";
-import { getRecipeTypeById, updateRecipeType } from "../../api/recipeTypesApi";
+
+import { getRecipeTypeById, updateRecipeType } from "api/recipeTypesApi";
+
+import { Header } from "components/layout/Header";
 
 interface RecipeType {
     type_name: string;
@@ -24,6 +26,7 @@ const EditRecipeType: React.FC = () => {
         if (!id) return;
         try {
             const data = await getRecipeTypeById(id);
+
             setTypeData(data);
             setIsLoading(false);
         } catch (error) {
@@ -33,13 +36,14 @@ const EditRecipeType: React.FC = () => {
     }, [id]);
 
     useEffect(() => {
-        fetchRecipeType();
+        void fetchRecipeType();
     }, [fetchRecipeType]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const { name, value } = e.target;
+
         setTypeData((prevData) => ({ ...prevData, [name]: value }));
         setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
     };
@@ -47,6 +51,7 @@ const EditRecipeType: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const newErrors: { type_name?: string; description?: string } = {};
+
         if (!typeData.type_name) {
             newErrors.type_name = "Please fill out this field.";
         }
@@ -56,6 +61,7 @@ const EditRecipeType: React.FC = () => {
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+
             return;
         }
 
@@ -80,7 +86,12 @@ const EditRecipeType: React.FC = () => {
                 {isLoading ? (
                     <p>Loading...</p>
                 ) : (
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form
+                        onSubmit={(e) => {
+                            void handleSubmit(e);
+                        }}
+                        className="space-y-4"
+                    >
                         <div>
                             <label>
                                 Name:

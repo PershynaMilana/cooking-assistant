@@ -1,27 +1,29 @@
-import { API_ROUTES } from "../endpoints";
-import {
-    getRecipesByFilters,
-    getRecipesByPerson,
-    getRecipeById,
-    createRecipe,
-    updateRecipe,
-    deleteRecipe,
-    getRecipes,
-} from "../recipesApi";
 import type {
-    RecipeListItem,
-    RecipeWithIngredientNames,
+    CreateRecipeRequest,
     RecipeDetails,
     RecipeFilterParams,
-    CreateRecipeRequest,
+    RecipeListItem,
+    RecipeWithIngredientNames,
     UpdateRecipeRequest,
-} from "../../types/recipe";
+} from "types/recipe";
+
+import { API_ROUTES } from "api/endpoints";
 import {
+    createRecipe,
+    deleteRecipe,
+    getRecipeById,
+    getRecipes,
+    getRecipesByFilters,
+    getRecipesByPerson,
+    updateRecipe,
+} from "api/recipesApi";
+
+import {
+    mockedDelete,
     mockedGet,
     mockedPost,
     mockedPut,
-    mockedDelete,
-} from "../../test/apiClientMock";
+} from "test/apiClientMock";
 
 jest.mock("../client");
 

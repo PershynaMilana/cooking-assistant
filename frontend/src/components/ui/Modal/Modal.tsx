@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface ModalProps {
     isOpen: boolean; // modal open state
@@ -8,13 +9,15 @@ interface ModalProps {
     onConfirm: () => void; // function to confirm the action
 }
 
-const Modal: React.FC<ModalProps> = ({
+export const Modal: React.FC<ModalProps> = ({
     isOpen,
     title,
     message,
     onClose,
     onConfirm,
 }) => {
+    const { t } = useTranslation();
+
     if (!isOpen) {
         return null; // if modal is not open, render nothing
     }
@@ -45,18 +48,16 @@ const Modal: React.FC<ModalProps> = ({
                         onClick={onClose}
                         className="bg-gray-400 text-white px-4 py-2 rounded-full"
                     >
-                        Cancel
+                        {t("modal.cancel")}
                     </button>
                     <button
                         onClick={onConfirm}
                         className="bg-red-500 text-white px-4 py-2 rounded-full"
                     >
-                        Delete
+                        {t("modal.confirm")}
                     </button>
                 </div>
             </div>
         </div>
     );
 };
-
-export default Modal;

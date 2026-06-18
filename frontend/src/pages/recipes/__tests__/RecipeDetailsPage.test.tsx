@@ -1,8 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
-import RecipeDetailsPage from "../RecipeDetailsPage";
-import { getRecipeById } from "../../../api/recipesApi";
-import type { RecipeDetails } from "../../../types/recipe";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+
+import type { RecipeDetails } from "types/recipe";
+
+import { getRecipeById } from "api/recipesApi";
+
+import RecipeDetailsPage from "pages/recipes/RecipeDetailsPage";
 
 jest.mock("../../../api/recipesApi");
 
