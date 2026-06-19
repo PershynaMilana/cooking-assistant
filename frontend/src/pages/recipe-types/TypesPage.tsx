@@ -20,18 +20,29 @@ const TypesPage: React.FC = () => {
     const [selectedType, setSelectedType] = useState<RecipeTypeSummary | null>(
         null,
     );
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDeleteConfirm = async () => {
-        if (!selectedType) {
+        if (!selectedType || isDeleting) {
             return;
         }
+
+        setIsDeleting(true);
 
         try {
             await deleteRecipeType(selectedType.id);
             setSelectedType(null);
+            setDeleteError(null);
             await reload();
         } catch (error) {
-            console.error("Error deleting recipe type:", error);
+            setDeleteError(
+                error instanceof Error
+                    ? error.message
+                    : t("listPage.deleteError"),
+            );
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -59,6 +70,7 @@ const TypesPage: React.FC = () => {
                                 navigate(editRecipeTypePath(type.id));
                             }}
                             onDelete={() => {
+                                setDeleteError(null);
                                 setSelectedType(type);
                             }}
                             editLabel={t("listPage.editButton")}
@@ -75,11 +87,14 @@ const TypesPage: React.FC = () => {
                     name: selectedType?.type_name ?? "",
                 })}
                 onClose={() => {
+                    setDeleteError(null);
                     setSelectedType(null);
                 }}
                 onConfirm={() => {
                     void handleDeleteConfirm();
                 }}
+                error={deleteError}
+                isConfirmDisabled={isDeleting}
             />
         </>
     );

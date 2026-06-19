@@ -91,4 +91,27 @@ describe("useEditRecipeForm", () => {
 
         expect(jest.mocked(updateRecipe)).not.toHaveBeenCalled();
     });
+
+    it("should set error when fetching the recipe fails", async () => {
+        jest.mocked(getRecipeById).mockRejectedValue(
+            new Error("Network error"),
+        );
+
+        const { result } = renderHook(() => useEditRecipeForm("1"));
+
+        await flush();
+
+        expect(result.current.form.error).toBe("Network error");
+    });
+
+    it("should set isLoading to false after the recipe loads", async () => {
+        const { result } = renderHook(() => useEditRecipeForm("1"));
+
+        expect(result.current.isLoading).toBe(true);
+
+        await flush();
+
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.form.title).toBe("Borscht");
+    });
 });

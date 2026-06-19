@@ -191,4 +191,61 @@ describe("useMenuStatistics", () => {
 
         expect(result.current.error).toBe(MOCK_ERROR_NETWORK);
     });
+
+    it("should use the provided recipesCount and not fetch recipes", async () => {
+        setAuthToken();
+        jest.mocked(getMenus).mockResolvedValue([]);
+        jest.mocked(getRecipesStats).mockResolvedValue(EMPTY_STATS);
+
+        const { result } = renderHook(() => useMenuStatistics(5));
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(jest.mocked(getRecipes)).not.toHaveBeenCalled();
+        expect(result.current.recipesCount).toBe(5);
+    });
+
+    it("should treat a non-numeric average cooking time as 0 minutes", async () => {
+        setAuthToken();
+        jest.mocked(getMenus).mockResolvedValue([]);
+        jest.mocked(getRecipes).mockResolvedValue([]);
+        jest.mocked(getRecipesStats).mockResolvedValue({
+            averageCookingTimes: [
+                { typeName: "Unknown", averageCookingTime: "N/A" },
+            ],
+        });
+
+        const { result } = renderHook(() => useMenuStatistics());
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(result.current.averageCookingTimes[0].averageCookingTime).toBe(
+            "00:00",
+        );
+    });
+
+    it("should round a decimal average cooking time to the nearest minute", async () => {
+        setAuthToken();
+        jest.mocked(getMenus).mockResolvedValue([]);
+        jest.mocked(getRecipes).mockResolvedValue([]);
+        jest.mocked(getRecipesStats).mockResolvedValue({
+            averageCookingTimes: [
+                { typeName: "Soup", averageCookingTime: "90.5" },
+            ],
+        });
+
+        const { result } = renderHook(() => useMenuStatistics());
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(result.current.averageCookingTimes[0].averageCookingTime).toBe(
+            "01:31",
+        );
+    });
 });

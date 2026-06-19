@@ -20,8 +20,6 @@ const UserMenuPage: React.FC = () => {
     const fetcher = useCallback(
         (params: Parameters<typeof getMenusByPerson>[1]) => {
             if (userId === null) {
-                console.error("No auth token found.");
-
                 return Promise.resolve([]);
             }
 

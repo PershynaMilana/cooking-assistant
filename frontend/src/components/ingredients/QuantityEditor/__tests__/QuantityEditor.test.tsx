@@ -45,6 +45,22 @@ describe("QuantityEditor", () => {
         expect(onQuantityChange).toHaveBeenCalledWith(INGREDIENT.id, 37);
     });
 
+    it("should not call onQuantityChange when the input is cleared", async () => {
+        const onQuantityChange = jest.fn();
+
+        render(
+            <QuantityEditor
+                ingredients={[INGREDIENT]}
+                onQuantityChange={onQuantityChange}
+                onSave={jest.fn()}
+            />,
+        );
+
+        await userEvent.clear(screen.getByRole("spinbutton"));
+
+        expect(onQuantityChange).not.toHaveBeenCalled();
+    });
+
     it("should call onSave when the Save quantities button is clicked", async () => {
         const onSave = jest.fn();
 

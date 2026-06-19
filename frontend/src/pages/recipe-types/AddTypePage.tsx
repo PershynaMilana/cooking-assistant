@@ -23,6 +23,7 @@ const AddTypePage: React.FC = () => {
                     onFieldChange={form.setField}
                     onSubmit={form.handleSubmit}
                     submitLabel={t("form.addButton")}
+                    submitError={form.submitError}
                 />
             </div>
         </>

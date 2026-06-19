@@ -35,4 +35,34 @@ describe("Modal", () => {
 
         expect(asFragment()).toMatchSnapshot();
     });
+
+    it("should render the error when provided", () => {
+        render(
+            <Modal
+                isOpen
+                title={BTN_DELETE_RECIPE}
+                message={MESSAGE}
+                onClose={jest.fn()}
+                onConfirm={jest.fn()}
+                error="Something went wrong"
+            />,
+        );
+
+        expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+    });
+
+    it("should disable the confirm button when isConfirmDisabled is true", () => {
+        render(
+            <Modal
+                isOpen
+                title={BTN_DELETE_RECIPE}
+                message={MESSAGE}
+                onClose={jest.fn()}
+                onConfirm={jest.fn()}
+                isConfirmDisabled
+            />,
+        );
+
+        expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
+    });
 });

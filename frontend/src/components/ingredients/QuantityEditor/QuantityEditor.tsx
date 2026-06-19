@@ -32,10 +32,11 @@ export const QuantityEditor: React.FC<QuantityEditorProps> = ({
                             min="1"
                             value={ingredient.quantity_person_ingradient}
                             onChange={(e) => {
-                                onQuantityChange(
-                                    ingredient.id,
-                                    +e.target.value,
-                                );
+                                const value = parseInt(e.target.value, 10);
+
+                                if (!isNaN(value)) {
+                                    onQuantityChange(ingredient.id, value);
+                                }
                             }}
                             className="border border-gray-300 rounded p-1 w-20 text-center"
                         />

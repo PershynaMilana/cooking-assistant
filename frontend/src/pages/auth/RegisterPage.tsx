@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { ROUTES } from "constants/routes";
+
 import { register } from "api/authApi";
 
 import { Header } from "components/layout/Header";
@@ -77,7 +79,7 @@ const RegisterPage: React.FC = () => {
         try {
             await register({ name, surname, login, password });
 
-            navigate("/login");
+            navigate(ROUTES.login);
         } catch {
             setError("This user already exists.");
         }

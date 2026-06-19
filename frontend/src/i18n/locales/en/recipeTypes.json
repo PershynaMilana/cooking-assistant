@@ -19,6 +19,7 @@
         "editButton": "Edit",
         "deleteButton": "Delete",
         "deleteTitle": "Delete recipe type",
-        "deleteMessage": "Are you sure you want to delete the type \"{{name}}\"? All recipes of this type will also be deleted."
+        "deleteMessage": "Are you sure you want to delete the type \"{{name}}\"? All recipes of this type will also be deleted.",
+        "deleteError": "Failed to delete. Please try again."
     }
 }

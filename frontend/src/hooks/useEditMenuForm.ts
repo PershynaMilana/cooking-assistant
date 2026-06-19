@@ -32,9 +32,12 @@ export const useEditMenuForm = (id: string | undefined) => {
 
     const fetchAll = useCallback(async () => {
         if (!id) {
+            setLoading(false);
+
             return;
         }
 
+        setError(null);
         setLoading(true);
         try {
             const [[cats, recipes], { menu, recipes: menuRecipes }] =

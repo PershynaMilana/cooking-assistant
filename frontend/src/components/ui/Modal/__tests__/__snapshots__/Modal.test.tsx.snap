@@ -31,7 +31,7 @@ exports[`Modal should match snapshot when open 1`] = `
           Cancel
         </button>
         <button
-          class="bg-red-500 text-white px-4 py-2 rounded-full"
+          class="bg-red-500 text-white px-4 py-2 rounded-full disabled:opacity-50"
         >
           Delete
         </button>

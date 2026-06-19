@@ -19,6 +19,19 @@ const SAMPLE: RecipeTypeFormData = {
 };
 
 describe("EditRecipeType", () => {
+    it("should redirect to the types list when id is missing", () => {
+        render(
+            <MemoryRouter initialEntries={["/edit-unknown"]}>
+                <Routes>
+                    <Route path="/edit-unknown" element={<EditRecipeType />} />
+                    <Route path="/types" element={<div>Types List</div>} />
+                </Routes>
+            </MemoryRouter>,
+        );
+
+        expect(screen.getByText("Types List")).toBeInTheDocument();
+    });
+
     it("should load the recipe type and update it on submit", async () => {
         jest.mocked(getRecipeTypeById).mockResolvedValue(SAMPLE);
         const mockedUpdate = jest.mocked(updateRecipeType);

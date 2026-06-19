@@ -20,19 +20,23 @@ const ChangeRecipePage: React.FC = () => {
                 <h1 className="text-relative-h3 my-[7vh] font-bold">
                     {t("changeRecipePage.heading")}
                 </h1>
-                <RecipeForm
-                    form={ctrl.form}
-                    allIngredients={ctrl.allIngredients}
-                    allTypes={ctrl.allTypes}
-                    keyPrefix="changeRecipePage"
-                    idPrefix="edit-recipe"
-                    typeError={null}
-                    error={ctrl.form.error}
-                    submitLabel={t("changeRecipePage.updateButton")}
-                    onSubmit={() => {
-                        void handleSubmit();
-                    }}
-                />
+                {ctrl.isLoading ? (
+                    <p>{t("changeRecipePage.loading")}</p>
+                ) : (
+                    <RecipeForm
+                        form={ctrl.form}
+                        allIngredients={ctrl.allIngredients}
+                        allTypes={ctrl.allTypes}
+                        keyPrefix="changeRecipePage"
+                        idPrefix="edit-recipe"
+                        typeError={null}
+                        error={ctrl.form.error}
+                        submitLabel={t("changeRecipePage.updateButton")}
+                        onSubmit={() => {
+                            void handleSubmit();
+                        }}
+                    />
+                )}
             </div>
         </div>
     );

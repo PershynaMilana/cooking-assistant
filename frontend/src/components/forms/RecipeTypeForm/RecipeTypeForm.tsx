@@ -11,6 +11,7 @@ interface RecipeTypeFormProps {
     onFieldChange: (field: keyof RecipeTypeFormData, value: string) => void;
     onSubmit: () => unknown;
     submitLabel: string;
+    submitError?: string | null;
 }
 
 export const RecipeTypeForm: React.FC<RecipeTypeFormProps> = ({
@@ -19,6 +20,7 @@ export const RecipeTypeForm: React.FC<RecipeTypeFormProps> = ({
     onFieldChange,
     onSubmit,
     submitLabel,
+    submitError,
 }) => {
     const { t } = useTranslation("recipeTypes");
 
@@ -48,6 +50,9 @@ export const RecipeTypeForm: React.FC<RecipeTypeFormProps> = ({
                 }}
                 error={errors.description}
             />
+            {submitError && (
+                <p className="text-red-500 text-sm">{submitError}</p>
+            )}
             <button
                 type="submit"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md"

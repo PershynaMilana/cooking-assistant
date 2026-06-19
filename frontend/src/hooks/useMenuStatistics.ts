@@ -19,7 +19,7 @@ export interface MenuStatisticsResult {
 }
 
 export const useMenuStatistics = (
-    recipesCountProp?: number,
+    recipesCountProp: number | null = null,
 ): MenuStatisticsResult => {
     const [menusCount, setMenusCount] = useState(0);
     const [localRecipesCount, setLocalRecipesCount] = useState(0);
@@ -45,7 +45,7 @@ export const useMenuStatistics = (
         const fetchAll = async () => {
             setError(null);
             try {
-                const recipesNeeded = recipesCountRef.current === undefined;
+                const recipesNeeded = recipesCountRef.current === null;
                 const [allMenus, allRecipes, statsData] = await Promise.all([
                     getMenus({}),
                     recipesNeeded ? getRecipes() : Promise.resolve([]),
@@ -81,7 +81,7 @@ export const useMenuStatistics = (
                             return {
                                 typeName: item.typeName,
                                 averageCookingTime: formatCookingTimeInput(
-                                    isNaN(minutes) ? 0 : minutes,
+                                    isNaN(minutes) ? 0 : Math.round(minutes),
                                 ),
                             };
                         }),

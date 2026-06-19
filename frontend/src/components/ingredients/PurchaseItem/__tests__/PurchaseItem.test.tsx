@@ -86,4 +86,24 @@ describe("PurchaseItem", () => {
 
         expect(screen.getByRole("spinbutton")).toHaveAttribute("min", "1");
     });
+
+    it("should save the original value on blur after clearing (never 0)", async () => {
+        const { onSave } = setup(FRESH);
+        const input = screen.getByRole("spinbutton");
+
+        await userEvent.clear(input);
+        await userEvent.tab();
+
+        expect(onSave).toHaveBeenCalledWith(FRESH.id, FRESH.quantity);
+        expect(onSave).not.toHaveBeenCalledWith(FRESH.id, 0);
+    });
+
+    it("should not call onQuantityChange when the input is cleared", async () => {
+        const { onQuantityChange } = setup(FRESH);
+        const input = screen.getByRole("spinbutton");
+
+        await userEvent.clear(input);
+
+        expect(onQuantityChange).not.toHaveBeenCalled();
+    });
 });

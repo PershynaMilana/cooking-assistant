@@ -85,4 +85,60 @@ describe("useEditMenuForm", () => {
         });
         expect(mockNavigate).toHaveBeenCalledWith("/menu");
     });
+
+    it("should set loading to false immediately when there is no id", async () => {
+        const { result } = renderHook(() => useEditMenuForm(undefined));
+
+        await flush();
+
+        expect(result.current.loading).toBe(false);
+        expect(jest.mocked(getMenuById)).not.toHaveBeenCalled();
+    });
+
+    it("should set error when fetching the menu fails", async () => {
+        jest.mocked(getMenuById).mockRejectedValue(new Error("network"));
+
+        const { result } = renderHook(() => useEditMenuForm("1"));
+
+        await flush();
+
+        expect(result.current.error).not.toBeNull();
+        expect(result.current.loading).toBe(false);
+    });
+
+    it("should set error when submitting the menu update fails", async () => {
+        jest.mocked(updateMenu).mockRejectedValue(new Error("network"));
+
+        const { result } = renderHook(() => useEditMenuForm("1"));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.error).not.toBeNull();
+    });
+
+    it("should clear load error before a second fetch", async () => {
+        jest.mocked(getMenuById)
+            .mockRejectedValueOnce(new Error("Network error"))
+            .mockResolvedValue(MENU);
+
+        const { result, rerender } = renderHook(
+            ({ id }: { id: string }) => useEditMenuForm(id),
+            { initialProps: { id: "1" } },
+        );
+
+        await flush();
+
+        expect(result.current.error).not.toBeNull();
+
+        rerender({ id: "2" });
+
+        await flush();
+
+        expect(result.current.error).toBeNull();
+        expect(result.current.form.menuTitle).toBe(MENU_TITLE);
+    });
 });

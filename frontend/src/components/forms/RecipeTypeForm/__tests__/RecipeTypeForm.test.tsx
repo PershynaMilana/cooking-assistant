@@ -70,4 +70,35 @@ describe("RecipeTypeForm", () => {
 
         expect(screen.getByText("Required")).toBeInTheDocument();
     });
+
+    it("should render the submit error when provided", () => {
+        render(
+            <RecipeTypeForm
+                typeData={DATA}
+                errors={{}}
+                onFieldChange={jest.fn()}
+                onSubmit={jest.fn()}
+                submitLabel="Add"
+                submitError="Name already taken."
+            />,
+        );
+
+        expect(screen.getByText("Name already taken.")).toBeInTheDocument();
+    });
+
+    it("should not render a submit error when submitError is absent", () => {
+        render(
+            <RecipeTypeForm
+                typeData={DATA}
+                errors={{}}
+                onFieldChange={jest.fn()}
+                onSubmit={jest.fn()}
+                submitLabel="Add"
+            />,
+        );
+
+        expect(
+            screen.queryByText("Name already taken."),
+        ).not.toBeInTheDocument();
+    });
 });

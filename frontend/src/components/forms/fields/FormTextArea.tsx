@@ -11,7 +11,6 @@ interface FormTextAreaProps {
     error?: string | null;
 }
 
-// labelled multi-line text input with an inline error.
 export const FormTextArea: React.FC<FormTextAreaProps> = ({
     id,
     label,

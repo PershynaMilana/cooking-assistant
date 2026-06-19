@@ -17,7 +17,6 @@ interface FormSelectProps {
     error?: string | null;
 }
 
-// labelled select with a disabled placeholder option and an inline error.
 export const FormSelect: React.FC<FormSelectProps> = ({
     id,
     label,

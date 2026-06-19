@@ -80,6 +80,30 @@ describe("errorHandler", () => {
         expect(next).not.toHaveBeenCalled();
     });
 
+    it("should use 500 when the error object has a numeric status of 0", () => {
+        const err = Object.assign({}, { status: 0 });
+        const req = {} as Request;
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        errorHandler(err, req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
+    });
+
+    it("should return Server error when the Error message is empty with a 4xx status", () => {
+        const err = Object.assign(new Error(""), { status: 422 });
+        const req = {} as Request;
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        errorHandler(err, req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(422);
+        expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
+    });
+
     it("should pass the error to next when headers were sent", () => {
         const err = new Error("Too late");
         const req = {} as Request;

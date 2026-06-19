@@ -33,10 +33,18 @@ export const PurchaseItem: React.FC<PurchaseItemProps> = ({
                 className="w-16 text-center border rounded"
                 value={purchase.quantity}
                 onChange={(e) => {
-                    onQuantityChange(purchase.id, +e.target.value);
+                    const qty = parseInt(e.target.value, 10);
+
+                    if (!isNaN(qty)) {
+                        onQuantityChange(purchase.id, qty);
+                    }
                 }}
                 onBlur={(e) => {
-                    void onSave(purchase.id, +e.target.value);
+                    const qty = parseInt(e.target.value, 10);
+
+                    if (!isNaN(qty)) {
+                        void onSave(purchase.id, qty);
+                    }
                 }}
             />
             <span>{purchase.unit_name}</span>

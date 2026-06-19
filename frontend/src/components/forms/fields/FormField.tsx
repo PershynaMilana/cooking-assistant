@@ -11,8 +11,6 @@ interface FormFieldProps {
     error?: string | null;
 }
 
-// labelled single-line text input with an inline error. The shared building block
-// for every text field across the forms.
 export const FormField: React.FC<FormFieldProps> = ({
     id,
     label,

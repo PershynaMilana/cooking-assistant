@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "constants/routes";
 import type { RecipeTypeErrors, RecipeTypeFormData } from "types/recipeType";
 
+import { getApiErrorMessage } from "api/httpError";
 import {
     createRecipeType,
     getRecipeTypeById,
@@ -23,6 +24,8 @@ export const useRecipeTypeForm = (id?: string) => {
     const [typeData, setTypeData] = useState<RecipeTypeFormData>(EMPTY_FORM);
     const [errors, setErrors] = useState<RecipeTypeErrors>({});
     const [isLoading, setIsLoading] = useState(Boolean(id));
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!id) {
@@ -30,12 +33,15 @@ export const useRecipeTypeForm = (id?: string) => {
         }
 
         const load = async () => {
+            setLoadError(null);
+            setIsLoading(true);
+
             try {
                 const data = await getRecipeTypeById(id);
 
                 setTypeData(data);
             } catch (error) {
-                console.error("Error loading recipe type:", error);
+                setLoadError(getApiErrorMessage(error));
             } finally {
                 setIsLoading(false);
             }
@@ -69,6 +75,8 @@ export const useRecipeTypeForm = (id?: string) => {
     }, [t, typeData]);
 
     const handleSubmit = useCallback(async () => {
+        setSubmitError(null);
+
         if (!validate()) {
             return;
         }
@@ -82,9 +90,17 @@ export const useRecipeTypeForm = (id?: string) => {
 
             navigate(ROUTES.recipeTypes);
         } catch (error) {
-            console.error("Error saving recipe type:", error);
+            setSubmitError(getApiErrorMessage(error));
         }
     }, [id, navigate, typeData, validate]);
 
-    return { typeData, errors, isLoading, setField, handleSubmit };
+    return {
+        typeData,
+        errors,
+        isLoading,
+        loadError,
+        submitError,
+        setField,
+        handleSubmit,
+    };
 };

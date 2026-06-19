@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -21,11 +21,14 @@ export const useEditRecipeForm = (id: string | undefined) => {
     const { setInitialValues, setError } = form;
     const { allIngredients, allTypes } = useRecipeFormData();
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(Boolean(id));
 
     const fetchRecipeDetails = useCallback(async () => {
         if (!id) {
             return;
         }
+
+        setIsLoading(true);
 
         try {
             const recipeData = await getRecipeById(id);
@@ -34,7 +37,7 @@ export const useEditRecipeForm = (id: string | undefined) => {
                 title: recipeData.title,
                 content: recipeData.content,
                 cookingTime: formatCookingTimeInput(recipeData.cooking_time),
-                servings: recipeData.servings || "",
+                servings: recipeData.servings,
                 selectedTypeId: recipeData.type_id,
                 selectedIngredients: recipeData.ingredients.map((i) => ({
                     id: i.id,
@@ -45,6 +48,8 @@ export const useEditRecipeForm = (id: string | undefined) => {
             });
         } catch (err: unknown) {
             setError(getApiErrorMessage(err));
+        } finally {
+            setIsLoading(false);
         }
     }, [id, setInitialValues, setError]);
 
@@ -92,5 +97,5 @@ export const useEditRecipeForm = (id: string | undefined) => {
         }
     }, [form, id, navigate, t]);
 
-    return { form, allIngredients, allTypes, handleSubmit };
+    return { form, allIngredients, allTypes, handleSubmit, isLoading };
 };

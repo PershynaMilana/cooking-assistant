@@ -87,4 +87,115 @@ describe("useRecipeTypeForm", () => {
 
         expect(jest.mocked(updateRecipeType)).toHaveBeenCalledWith("5", SAMPLE);
     });
+
+    it("should set loadError when fetching the type fails", async () => {
+        jest.mocked(getRecipeTypeById).mockRejectedValue(
+            new Error("Network error"),
+        );
+
+        const { result } = renderHook(() => useRecipeTypeForm("5"));
+
+        await flush();
+
+        expect(result.current.loadError).not.toBeNull();
+        expect(result.current.isLoading).toBe(false);
+    });
+
+    it("should set submitError when saving fails", async () => {
+        jest.mocked(createRecipeType).mockRejectedValue(new Error("Conflict"));
+
+        const { result } = renderHook(() => useRecipeTypeForm());
+
+        act(() => {
+            result.current.setField("type_name", "Dessert");
+        });
+        act(() => {
+            result.current.setField("description", "Sweet");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.submitError).not.toBeNull();
+    });
+
+    it("should clear submitError on the next submit attempt", async () => {
+        jest.mocked(createRecipeType)
+            .mockRejectedValueOnce(new Error("Conflict"))
+            .mockResolvedValue(undefined);
+
+        const { result } = renderHook(() => useRecipeTypeForm());
+
+        act(() => {
+            result.current.setField("type_name", "Dessert");
+        });
+        act(() => {
+            result.current.setField("description", "Sweet");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.submitError).not.toBeNull();
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.submitError).toBeNull();
+    });
+
+    it("should clear submitError when resubmitting with validation errors", async () => {
+        jest.mocked(createRecipeType).mockRejectedValue(new Error("Conflict"));
+
+        const { result } = renderHook(() => useRecipeTypeForm());
+
+        act(() => {
+            result.current.setField("type_name", "Dessert");
+        });
+        act(() => {
+            result.current.setField("description", "Sweet");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.submitError).not.toBeNull();
+
+        act(() => {
+            result.current.setField("description", "");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.submitError).toBeNull();
+        expect(result.current.errors.description).toBeDefined();
+    });
+
+    it("should reset loadError when the id changes", async () => {
+        jest.mocked(getRecipeTypeById)
+            .mockRejectedValueOnce(new Error("Not found"))
+            .mockResolvedValue(SAMPLE);
+
+        const { result, rerender } = renderHook(
+            ({ id }: { id: string }) => useRecipeTypeForm(id),
+            { initialProps: { id: "5" } },
+        );
+
+        await flush();
+
+        expect(result.current.loadError).not.toBeNull();
+
+        rerender({ id: "7" });
+
+        await flush();
+
+        expect(result.current.loadError).toBeNull();
+        expect(result.current.typeData.type_name).toBe("Soup");
+    });
 });
