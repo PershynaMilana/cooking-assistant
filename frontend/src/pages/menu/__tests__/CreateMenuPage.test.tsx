@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
@@ -8,15 +8,16 @@ import { getRecipes } from "api/recipesApi";
 
 import CreateMenuPage from "pages/menu/CreateMenuPage";
 import { mockJwtUser, setAuthToken } from "test/auth";
+import { ROUTE_MENU } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("../../../api/menuCategoriesApi");
-jest.mock("../../../api/recipesApi");
-jest.mock("../../../api/menusApi");
+jest.mock("api/menuCategoriesApi");
+jest.mock("api/recipesApi");
+jest.mock("api/menusApi");
 jest.mock("jwt-decode");
 
 const PERSON_ID = 7;
@@ -78,6 +79,6 @@ describe("CreateMenuPage", () => {
             personId: PERSON_ID,
             recipeIds: [RECIPE_ID],
         });
-        expect(mockNavigate).toHaveBeenCalledWith("/menu");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENU);
     });
 });

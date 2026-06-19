@@ -1,120 +1,42 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 
-import {
-    deleteRecipe as deleteRecipeRequest,
-    getRecipeById,
-} from "api/recipesApi";
+import { useRecipeDetails } from "hooks/useRecipeDetails";
 
 import { Header } from "components/layout/Header";
+import { RecipeIngredientsList } from "components/recipes/RecipeIngredientsList";
+import { RecipeMetaInfo } from "components/recipes/RecipeMetaInfo";
+import { RecipeOwnerActions } from "components/recipes/RecipeOwnerActions";
 import { Modal } from "components/ui/Modal";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
-interface Ingredient {
-    name: string;
-    quantity_recipe_ingredients: number;
-    unit_name: string;
-}
-
-interface Recipe {
-    id: number;
-    title: string;
-    content: string;
-    ingredients: Ingredient[];
-    type_name: string;
-    cooking_time: number;
-    creation_date: string;
-    servings: string;
-    person_id: number;
-}
-
-// null on a missing token (via the shared util) or on a malformed token (caught here)
-const getUserIdSafe = (): number | null => {
-    try {
-        return getCurrentUserId();
-    } catch (error) {
-        console.error("Error decoding token:", error);
-
-        return null;
-    }
-};
+import { splitCookingTime } from "utils/cookingTimeUtils";
+import { formatDate } from "utils/dateUtils";
 
 const RecipeDetailsPage: React.FC = () => {
+    const { t, i18n } = useTranslation("recipes");
     const { id } = useParams<{ id: string }>();
-    const [recipe, setRecipe] = useState<Recipe | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const { recipe, error, isOwner, deleteRecipe } = useRecipeDetails(id);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-    const navigate = useNavigate();
-
-    const fetchRecipeDetails = useCallback(async () => {
-        if (!id) return;
-        try {
-            const data = await getRecipeById(id);
-
-            setRecipe(data);
-        } catch {
-            setError("Error fetching recipe details");
-        }
-    }, [id]);
-
-    useEffect(() => {
-        const userId = getUserIdSafe();
-
-        setCurrentUserId(userId);
-        void fetchRecipeDetails();
-    }, [fetchRecipeDetails]);
-
-    const isOwner = recipe?.person_id === currentUserId;
-
-    const deleteRecipe = async () => {
-        if (!id) return;
-        try {
-            await deleteRecipeRequest(id);
-            navigate("/main");
-        } catch {
-            setError("Error deleting recipe");
-        }
-    };
-
-    const handleOpenModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-    };
-
-    const handleConfirmDelete = () => {
-        void deleteRecipe();
-        handleCloseModal();
-    };
-
-    useEffect(() => {
-        void fetchRecipeDetails();
-    }, [fetchRecipeDetails]);
-
-    const formatCookingTime = (timeInMinutes: number) => {
-        const hours = Math.floor(timeInMinutes / 60);
-        const minutes = timeInMinutes % 60;
-        const hourStr = hours > 0 ? `${hours} hours ` : "";
-        const minuteStr = `${minutes} minutes`;
-
-        return hourStr + minuteStr;
-    };
 
     if (error) {
-        return <div className="text-red-500">Error: {error}</div>;
+        return (
+            <div className="text-red-500">
+                {t("recipeDetailsPage.error", { message: error })}
+            </div>
+        );
     }
 
     if (!recipe) {
-        return <div>Loading...</div>;
+        return <div>{t("recipeDetailsPage.loading")}</div>;
     }
 
-    const formattedDate = new Date(recipe.creation_date).toLocaleDateString(
-        "en-GB",
-    );
+    const formattedDate = formatDate(recipe.creation_date, i18n.language);
+    const { hours, minutes } = splitCookingTime(recipe.cooking_time);
+    const formattedCookingTime =
+        hours > 0
+            ? t("recipeDetailsPage.cookingTimeHoursMinutes", { hours, minutes })
+            : t("recipeDetailsPage.cookingTimeMinutes", { minutes });
 
     return (
         <div>
@@ -124,75 +46,47 @@ const RecipeDetailsPage: React.FC = () => {
                     {recipe.title}
                 </h1>
 
-                <h3 className="text-relative-ps text-lg font-semibold mt-4 font-montserratMedium">
-                    <strong>Recipe type:</strong> {recipe.type_name}
-                </h3>
+                <RecipeMetaInfo recipe={recipe} />
 
-                <p className="text-relative-ps my-[3vh] font-montserratMedium font-semibold ">
-                    Ingredients count - {recipe.ingredients.length} items
-                </p>
-
-                <p className="text-relative-ps mt-[3vh] mb-[1vh] font-montserratMedium font-semibold ">
-                    <strong>Description:</strong>
-                </p>
-                <p className="text-relative-ps font-montserratRegular">
-                    {recipe.content}
-                </p>
-
-                <h3 className="text-relative-ps text-lg font-semibold mt-4 font-montserratMedium">
-                    Ingredients:
-                </h3>
-                <ul className="text-relative-ps list-disc font-montserratRegular pl-[3vw]">
-                    {recipe.ingredients
-                        .slice()
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map((ingredient, index) => (
-                            <li key={index}>
-                                {ingredient.name} -{" "}
-                                {ingredient.quantity_recipe_ingredients}{" "}
-                                {ingredient.unit_name}
-                            </li>
-                        ))}
-                </ul>
+                <RecipeIngredientsList
+                    ingredients={recipe.ingredients}
+                    heading={t("recipeDetailsPage.ingredients")}
+                />
 
                 <p className="text-relative-ps mt-4 font-montserratRegular">
-                    <strong>Cooking time:</strong>{" "}
-                    {formatCookingTime(recipe.cooking_time)}
+                    <strong>{t("recipeDetailsPage.cookingTime")}</strong>{" "}
+                    {formattedCookingTime}
                 </p>
                 <p className="text-relative-ps mt-4 font-montserratRegular">
-                    <strong>Creation date:</strong> {formattedDate}
+                    <strong>{t("recipeDetailsPage.creationDate")}</strong>{" "}
+                    {formattedDate}
                 </p>
-
                 <p className="text-relative-ps mt-4 font-montserratRegular">
-                    <strong>
-                        Servings (for which the recipe is calculated):
-                    </strong>{" "}
+                    <strong>{t("recipeDetailsPage.servings")}</strong>{" "}
                     {recipe.servings}
                 </p>
 
                 {isOwner && (
-                    <>
-                        <button
-                            onClick={handleOpenModal}
-                            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
-                        >
-                            Delete recipe
-                        </button>
-                        <Link to={`/change-recipe/${recipe.id}`}>
-                            <button className="bg-yellow-500 text-white py-2 px-4 ml-[1vw] rounded-full">
-                                Edit recipe
-                            </button>
-                        </Link>
-                    </>
+                    <RecipeOwnerActions
+                        recipeId={recipe.id}
+                        onDelete={() => {
+                            setIsModalOpen(true);
+                        }}
+                    />
                 )}
             </div>
 
             <Modal
                 isOpen={isModalOpen}
-                title="Delete confirmation"
-                message="Are you sure you want to delete this recipe?"
-                onClose={handleCloseModal}
-                onConfirm={handleConfirmDelete}
+                title={t("recipeDetailsPage.deleteTitle")}
+                message={t("recipeDetailsPage.deleteMessage")}
+                onClose={() => {
+                    setIsModalOpen(false);
+                }}
+                onConfirm={() => {
+                    void deleteRecipe();
+                    setIsModalOpen(false);
+                }}
             />
         </div>
     );

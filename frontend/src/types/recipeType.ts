@@ -9,6 +9,11 @@ export interface RecipeTypeFormData {
     description: string;
 }
 
+export interface RecipeTypeErrors {
+    type_name?: string;
+    description?: string;
+}
+
 export interface RecipeTypesQuery {
     ids?: string;
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+﻿import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
@@ -8,7 +8,7 @@ import { getRecipeTypeById, updateRecipeType } from "api/recipeTypesApi";
 
 import EditRecipeType from "pages/recipe-types/EditRecipeType";
 
-jest.mock("../../../api/recipeTypesApi");
+jest.mock("api/recipeTypesApi");
 
 const ID = "5";
 const TYPE_NAME = "Dessert";

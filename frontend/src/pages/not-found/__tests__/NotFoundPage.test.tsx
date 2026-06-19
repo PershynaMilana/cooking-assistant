@@ -1,8 +1,9 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
 import NotFoundPage from "pages/not-found/NotFoundPage";
+import { ROUTE_MAIN } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -20,6 +21,6 @@ describe("NotFoundPage", () => {
             screen.getByRole("button", { name: "GO TO HOMEPAGE" }),
         );
 
-        expect(mockNavigate).toHaveBeenCalledWith("/main");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
     });
 });

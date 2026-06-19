@@ -1,13 +1,14 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import type { RecipeTypeSummary } from "types/recipeType";
 
-import { getRecipeTypes } from "api/recipeTypesApi";
+import { deleteRecipeType, getRecipeTypes } from "api/recipeTypesApi";
 
 import TypesPage from "pages/recipe-types/TypesPage";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/recipeTypesApi");
+jest.mock("api/recipeTypesApi");
 
 const TYPE_NAME = "Soup";
 const SAMPLE: RecipeTypeSummary[] = [
@@ -21,5 +22,22 @@ describe("TypesPage", () => {
         renderWithRouter(<TypesPage />);
 
         expect(await screen.findByText(TYPE_NAME)).toBeInTheDocument();
+    });
+
+    it("should delete the selected type after confirming in the modal", async () => {
+        jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE);
+        jest.mocked(deleteRecipeType).mockResolvedValue(undefined);
+
+        renderWithRouter(<TypesPage />);
+
+        await screen.findByText(TYPE_NAME);
+
+        await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+
+        const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+
+        await userEvent.click(deleteButtons[deleteButtons.length - 1]);
+
+        expect(jest.mocked(deleteRecipeType)).toHaveBeenCalledWith(1);
     });
 });

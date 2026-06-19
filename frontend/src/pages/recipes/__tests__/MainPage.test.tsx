@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 
 import { getRecipesByFilters } from "api/recipesApi";
 import { getRecipeTypes } from "api/recipeTypesApi";
@@ -6,8 +6,8 @@ import { getRecipeTypes } from "api/recipeTypesApi";
 import MainPage from "pages/recipes/MainPage";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/recipesApi");
-jest.mock("../../../api/recipeTypesApi");
+jest.mock("api/recipesApi");
+jest.mock("api/recipeTypesApi");
 
 const RECIPE_TITLE_1 = "Borscht";
 const RECIPE_TITLE_2 = "Varenyky";

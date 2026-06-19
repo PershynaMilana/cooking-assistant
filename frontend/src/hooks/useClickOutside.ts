@@ -1,0 +1,23 @@
+import type { RefObject } from "react";
+import { useEffect } from "react";
+
+// calls `handler` whenever a mousedown lands outside the referenced element.
+// reusable across any dropdown/popover/menu that should close on outside click.
+export const useClickOutside = <T extends HTMLElement>(
+    ref: RefObject<T | null>,
+    handler: () => void,
+): void => {
+    useEffect(() => {
+        const handleMouseDown = (event: MouseEvent) => {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                handler();
+            }
+        };
+
+        document.addEventListener("mousedown", handleMouseDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, [ref, handler]);
+};

@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useSearchParams } from "react-router-dom";
 
+import { SEARCH_PARAM_INGREDIENT_NAME } from "constants/queryParams";
+import { ROUTES } from "constants/routes";
+
 import SearchIcon from "assets/searchIcon.png";
 
 interface SearchComponentProps {
@@ -19,14 +22,15 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
 
     // set initial search term from URL search parameters
     useEffect(() => {
-        const initialSearchTerm = searchParams.get("ingredient_name") ?? "";
+        const initialSearchTerm =
+            searchParams.get(SEARCH_PARAM_INGREDIENT_NAME) ?? "";
 
         setSearchTerm(initialSearchTerm);
     }, [searchParams]);
 
     // clear search when navigating to home page
     useEffect(() => {
-        if (location.pathname === "/") {
+        if (location.pathname === ROUTES.home) {
             setSearchTerm("");
             setSearchParams({});
         }
@@ -38,7 +42,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
-            setSearchParams({ ingredient_name: searchTerm });
+            setSearchParams({ [SEARCH_PARAM_INGREDIENT_NAME]: searchTerm });
             if (inputRef.current) {
                 inputRef.current.blur();
             }
@@ -56,7 +60,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
     return (
         <div className="flex items-center w-full bg-perfect-pink my-[3vh] rounded-full p-2 relative">
             <div className="pr-3">
-                <img src={SearchIcon} alt="Search Icon" />
+                <img src={SearchIcon} alt={t("search.iconAlt")} />
             </div>
             <input
                 type="text"

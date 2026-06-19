@@ -1,0 +1,33 @@
+{
+    "statsPage": {
+        "heading": "Recipe Statistics",
+        "recipeTypesSummary": "Recipe Types Summary",
+        "recipeDetails": "Recipe Details",
+        "fastestRecipes": "Fastest Recipes:",
+        "slowestRecipes": "Slowest Recipes:",
+        "mostIngredients": "Recipes with Most Ingredients:",
+        "leastIngredients": "Recipes with Least Ingredients:",
+        "downloadReport1": "Statistics Report PDF",
+        "downloadReport2": "Statistics Report PDF - Option 2",
+        "cookingTimeUnit": " min",
+        "ingredientsUnit": " ingredients"
+    },
+    "statsReport": {
+        "recipeTypes": "Recipe Types:",
+        "fastestRecipes": "Fastest Recipes:",
+        "slowestRecipes": "Slowest Recipes:",
+        "mostIngredients": "Recipes with Most Ingredients:",
+        "leastIngredients": "Recipes with Least Ingredients:",
+        "cookingTimeUnit": " min",
+        "ingredientsUnit": " ingredients"
+    },
+    "statsReportSecond": {
+        "title": "Statistics Report",
+        "totalMenus": "Total number of menus: {{count}}",
+        "totalRecipes": "Total number of recipes: {{count}}",
+        "avgCookingTime": "Average cooking time by recipe types:",
+        "menusByCategory": "Number of menus per category:",
+        "error": "Error: {{message}}",
+        "timeUnit": " min"
+    }
+}

@@ -61,11 +61,11 @@ export async function getPurchaseHistory(
 
 export async function updatePurchase(
     userId: number,
-    ingredientId: number,
+    purchaseId: number,
     body: UpdatePurchaseRequest,
 ): Promise<void> {
     await apiClient.put(
-        API_ROUTES.userIngredients.history(userId, ingredientId),
+        API_ROUTES.userIngredients.history(userId, purchaseId),
         body,
     );
 }

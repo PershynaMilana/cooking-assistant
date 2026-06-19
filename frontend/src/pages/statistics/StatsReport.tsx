@@ -1,239 +1,62 @@
-import {
-    Document,
-    Font,
-    Page,
-    StyleSheet,
-    Text,
-    View,
-} from "@react-pdf/renderer";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 import type { RecipeWithIngredientNames } from "types/recipe";
 
-import { getRecipes } from "api/recipesApi";
+import type { RecipeTypeStat } from "hooks/useRecipeStatistics";
 
-import montserrat from "assets/fonts/Montserrat/Montserrat-Regular.ttf";
-
-Font.register({ family: "Montserrat", src: montserrat });
-
-const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-    };
-
-    return date.toLocaleString("en-GB", options);
-};
-
-const styles = StyleSheet.create({
-    page: {
-        fontFamily: "Montserrat",
-        flexDirection: "column",
-        padding: 20,
-    },
-    section: {
-        fontFamily: "Montserrat",
-        marginBottom: 10,
-    },
-    title: {
-        fontFamily: "Montserrat",
-        fontSize: 20,
-        marginBottom: 10,
-        fontWeight: "bold",
-    },
-    subtitle: {
-        fontFamily: "Montserrat",
-        fontSize: 14,
-        marginBottom: 5,
-        fontWeight: "semibold",
-        marginTop: 20,
-    },
-    text: {
-        fontFamily: "Montserrat",
-        fontSize: 12,
-        marginBottom: 3,
-    },
-    line: {
-        borderBottom: "1px solid black",
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    date: {
-        fontSize: 12,
-        textAlign: "right",
-        marginTop: 5,
-        marginRight: 20,
-    },
-    listItem: {
-        fontFamily: "Montserrat",
-        marginLeft: 10,
-        fontSize: 12,
-    },
-});
+import { PdfRecipeList } from "./PdfRecipeList";
+import { PdfReportLayout } from "./PdfReportLayout";
+import { PdfStatList } from "./PdfStatList";
 
 interface StatsReportProps {
     reportTime: Date;
-    stats?: Stat[];
+    stats: RecipeTypeStat[];
+    fastestRecipes: RecipeWithIngredientNames[];
+    slowestRecipes: RecipeWithIngredientNames[];
+    mostIngredientsRecipes: RecipeWithIngredientNames[];
+    leastIngredientsRecipes: RecipeWithIngredientNames[];
 }
 
-interface Stat {
-    typeName: string;
-    count: number;
-}
-
-const StatsReport: React.FC<StatsReportProps> = ({ reportTime }) => {
-    const [stats, setStats] = useState<Stat[]>([]);
-    const [fastestRecipes, setFastestRecipes] = useState<
-        RecipeWithIngredientNames[]
-    >([]);
-    const [slowestRecipes, setSlowestRecipes] = useState<
-        RecipeWithIngredientNames[]
-    >([]);
-    const [mostIngredientsRecipes, setMostIngredientsRecipes] = useState<
-        RecipeWithIngredientNames[]
-    >([]);
-    const [leastIngredientsRecipes, setLeastIngredientsRecipes] = useState<
-        RecipeWithIngredientNames[]
-    >([]);
-
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const recipes = await getRecipes();
-
-                // count recipes per type
-                const typeCounts: Record<string, number> = {};
-
-                recipes.forEach((recipe) => {
-                    typeCounts[recipe.type_name] =
-                        (typeCounts[recipe.type_name] || 0) + 1;
-                });
-
-                const formattedStats = Object.keys(typeCounts).map(
-                    (typeName) => ({
-                        typeName,
-                        count: typeCounts[typeName],
-                    }),
-                );
-
-                setStats(formattedStats);
-
-                // find recipes by cooking time
-                if (recipes.length > 0) {
-                    const minTime = Math.min(
-                        ...recipes.map((recipe) => recipe.cooking_time),
-                    );
-                    const maxTime = Math.max(
-                        ...recipes.map((recipe) => recipe.cooking_time),
-                    );
-
-                    setFastestRecipes(
-                        recipes.filter(
-                            (recipe) => recipe.cooking_time === minTime,
-                        ),
-                    );
-                    setSlowestRecipes(
-                        recipes.filter(
-                            (recipe) => recipe.cooking_time === maxTime,
-                        ),
-                    );
-
-                    // find recipes by number of ingredients
-                    const maxIngredients = Math.max(
-                        ...recipes.map((recipe) => recipe.ingredients.length),
-                    );
-                    const minIngredients = Math.min(
-                        ...recipes.map((recipe) => recipe.ingredients.length),
-                    );
-
-                    setMostIngredientsRecipes(
-                        recipes.filter(
-                            (recipe) =>
-                                recipe.ingredients.length === maxIngredients,
-                        ),
-                    );
-                    setLeastIngredientsRecipes(
-                        recipes.filter(
-                            (recipe) =>
-                                recipe.ingredients.length === minIngredients,
-                        ),
-                    );
-                }
-            } catch (error) {
-                console.error("Error fetching statistics:", error);
-            }
-        };
-
-        void fetchStats();
-    }, []);
+export const StatsReport: React.FC<StatsReportProps> = ({
+    reportTime,
+    stats,
+    fastestRecipes,
+    slowestRecipes,
+    mostIngredientsRecipes,
+    leastIngredientsRecipes,
+}) => {
+    const { t, i18n } = useTranslation("stats");
 
     return (
-        <Document>
-            <Page size="A4" style={styles.page}>
-                <View style={styles.section}>
-                    <Text style={styles.subtitle}>Recipe Types:</Text>
-                    {stats.map((stat) => (
-                        <Text key={stat.typeName} style={styles.text}>
-                            {stat.typeName}: {stat.count}
-                        </Text>
-                    ))}
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={styles.subtitle}>Fastest Recipes:</Text>
-                    {fastestRecipes.map((recipe) => (
-                        <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.cooking_time} min)
-                        </Text>
-                    ))}
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={styles.subtitle}>Slowest Recipes:</Text>
-                    {slowestRecipes.map((recipe) => (
-                        <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.cooking_time} min)
-                        </Text>
-                    ))}
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={styles.subtitle}>
-                        Recipes with Most Ingredients:
-                    </Text>
-                    {mostIngredientsRecipes.map((recipe) => (
-                        <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.ingredients.length}{" "}
-                            ingredients)
-                        </Text>
-                    ))}
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={styles.subtitle}>
-                        Recipes with Least Ingredients:
-                    </Text>
-                    {leastIngredientsRecipes.map((recipe) => (
-                        <Text key={recipe.id} style={styles.listItem}>
-                            {recipe.title} ({recipe.ingredients.length}{" "}
-                            ingredients)
-                        </Text>
-                    ))}
-                </View>
-
-                {/* Line before the date */}
-                <View style={styles.line} />
-
-                <View style={styles.section}>
-                    <Text style={styles.date}>{formatDate(reportTime)}</Text>
-                </View>
-            </Page>
-        </Document>
+        <PdfReportLayout reportTime={reportTime} language={i18n.language}>
+            <PdfStatList
+                title={t("statsReport.recipeTypes")}
+                items={stats.map((s) => ({
+                    label: s.typeName,
+                    value: s.count,
+                }))}
+            />
+            <PdfRecipeList
+                title={t("statsReport.fastestRecipes")}
+                recipes={fastestRecipes}
+                variant="time"
+            />
+            <PdfRecipeList
+                title={t("statsReport.slowestRecipes")}
+                recipes={slowestRecipes}
+                variant="time"
+            />
+            <PdfRecipeList
+                title={t("statsReport.mostIngredients")}
+                recipes={mostIngredientsRecipes}
+                variant="ingredients"
+            />
+            <PdfRecipeList
+                title={t("statsReport.leastIngredients")}
+                recipes={leastIngredientsRecipes}
+                variant="ingredients"
+            />
+        </PdfReportLayout>
     );
 };
-
-export default StatsReport;

@@ -1,0 +1,1 @@
+export { RecipeTypeChart } from "./RecipeTypeChart";

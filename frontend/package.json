@@ -1,13 +1,14 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "1.38.0",
+  "version": "1.39.0",
   "type": "module",
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:sonarjs": "eslint . --config eslint.sonarjs.config.js",
     "stylelint": "stylelint \"src/**/*.{css,scss}\"",
     "stylelint:fix": "stylelint \"src/**/*.{css,scss}\" --fix",

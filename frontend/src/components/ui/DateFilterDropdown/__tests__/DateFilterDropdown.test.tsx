@@ -1,7 +1,9 @@
-import { render, screen } from "@testing-library/react";
+﻿import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { DateFilterDropdown } from "components/ui/DateFilterDropdown";
+
+import { BTN_RESET_FILTERS } from "test/constants";
 
 const TOGGLE = "Sort by dates";
 const START_LABEL = "Start date:";
@@ -38,7 +40,7 @@ describe("DateFilterDropdown", () => {
 
         await userEvent.click(screen.getByRole("button", { name: TOGGLE }));
         await userEvent.click(
-            screen.getByRole("button", { name: "Reset filters" }),
+            screen.getByRole("button", { name: BTN_RESET_FILTERS }),
         );
 
         expect(setStartDate).toHaveBeenCalledWith("");

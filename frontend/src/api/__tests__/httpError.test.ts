@@ -35,7 +35,11 @@ describe("getApiErrorMessage", () => {
         expect(getApiErrorMessage(error)).toBe(AXIOS_MESSAGE);
     });
 
-    it("should return a default message for a non-axios error", () => {
-        expect(getApiErrorMessage(new Error("boom"))).toBe(UNKNOWN);
+    it("should return the error message for a plain Error instance", () => {
+        expect(getApiErrorMessage(new Error("boom"))).toBe("boom");
+    });
+
+    it("should return a default message for a non-Error non-axios throw", () => {
+        expect(getApiErrorMessage("raw string")).toBe(UNKNOWN);
     });
 });

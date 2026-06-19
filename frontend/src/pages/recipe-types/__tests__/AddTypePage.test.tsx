@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { createRecipeType } from "api/recipeTypesApi";
@@ -6,7 +6,7 @@ import { createRecipeType } from "api/recipeTypesApi";
 import AddTypePage from "pages/recipe-types/AddTypePage";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/recipeTypesApi");
+jest.mock("api/recipeTypesApi");
 
 const TYPE_NAME = "Dessert";
 const DESCRIPTION = "Sweet dishes";
@@ -30,5 +30,18 @@ describe("AddTypePage", () => {
             type_name: TYPE_NAME,
             description: DESCRIPTION,
         });
+    });
+
+    it("should show validation errors and not submit an empty form", async () => {
+        const mockedCreate = jest.mocked(createRecipeType);
+
+        renderWithRouter(<AddTypePage />);
+
+        await userEvent.click(screen.getByRole("button", { name: "Add" }));
+
+        expect(screen.getAllByText("Please fill out this field.")).toHaveLength(
+            2,
+        );
+        expect(mockedCreate).not.toHaveBeenCalled();
     });
 });

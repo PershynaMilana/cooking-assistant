@@ -1,0 +1,24 @@
+{
+    "addPage": {
+        "heading": "Add New Recipe Type"
+    },
+    "editPage": {
+        "heading": "Edit Recipe Type",
+        "loading": "Loading..."
+    },
+    "form": {
+        "nameLabel": "Name:",
+        "descriptionLabel": "Description:",
+        "addButton": "Add",
+        "saveButton": "Save",
+        "requiredError": "Please fill out this field."
+    },
+    "listPage": {
+        "heading": "Recipe Types",
+        "addButton": "Add",
+        "editButton": "Edit",
+        "deleteButton": "Delete",
+        "deleteTitle": "Delete recipe type",
+        "deleteMessage": "Are you sure you want to delete the type \"{{name}}\"? All recipes of this type will also be deleted."
+    }
+}

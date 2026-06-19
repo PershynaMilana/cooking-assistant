@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { ROUTES } from "constants/routes";
+import { AUTH_TOKEN_KEY } from "constants/storage";
+
 import { login as loginRequest } from "api/authApi";
+import { getApiErrorMessage } from "api/httpError";
 
 import { Header } from "components/layout/Header";
 
@@ -24,14 +28,12 @@ const LoginPage: React.FC = () => {
         try {
             const data = await loginRequest({ login, password });
 
-            console.log("http://localhost:8080/api/login", login, password);
-
             const { token } = data;
 
-            localStorage.setItem("authToken", token);
-            navigate("/main");
-        } catch {
-            setError("Incorrect username or password.");
+            localStorage.setItem(AUTH_TOKEN_KEY, token);
+            navigate(ROUTES.main);
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
         }
     };
 
