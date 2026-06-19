@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import React from "react";
 import {
     BrowserRouter as Router,
@@ -5,6 +6,8 @@ import {
     Route,
     Routes,
 } from "react-router-dom";
+
+import { ROUTES } from "constants/routes";
 
 import { PrivateRoute } from "components/layout/PrivateRoute";
 
@@ -27,156 +30,49 @@ import StatsPage from "pages/statistics/StatsPage";
 import UserMenuPage from "pages/user-menu/UserMenuPage";
 import UserRecipesPage from "pages/user-recipes/UserRecipesPage";
 
-const App: React.FC = () => {
-    return (
-        <Routes>
-            <Route path="/" element={<Navigate to="/main" replace />} />
+interface AppRoute {
+    path: string;
+    element: ReactElement;
+}
 
-            {/* auth */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/registration" element={<RegisterPage />} />
+// every authenticated route, rendered once under a single <PrivateRoute> layout
+const PRIVATE_ROUTES: AppRoute[] = [
+    { path: ROUTES.main, element: <MainPage /> },
+    { path: ROUTES.myRecipes, element: <UserRecipesPage /> },
+    { path: ROUTES.myMenus, element: <UserMenuPage /> },
+    { path: ROUTES.recipeTypes, element: <TypesPage /> },
+    { path: ROUTES.editRecipeType, element: <EditRecipeType /> },
+    { path: ROUTES.addRecipeType, element: <AddRecipeType /> },
+    { path: ROUTES.addRecipe, element: <CreateRecipePage /> },
+    { path: ROUTES.recipeDetails, element: <RecipeDetailsPage /> },
+    { path: ROUTES.changeRecipe, element: <ChangeRecipePage /> },
+    { path: ROUTES.stats, element: <StatsPage /> },
+    { path: ROUTES.ingredients, element: <IngredientsPage /> },
+    { path: ROUTES.menu, element: <MenuPage /> },
+    { path: ROUTES.addMenu, element: <CreateMenuPage /> },
+    { path: ROUTES.menuDetails, element: <MenuDetailsPage /> },
+    { path: ROUTES.changeMenu, element: <ChangeMenuPage /> },
+];
 
-            {/* main */}
-            <Route
-                path="/main"
-                element={
-                    <PrivateRoute>
-                        <MainPage />{" "}
-                    </PrivateRoute>
-                }
-            />
+const App: React.FC = () => (
+    <Routes>
+        <Route
+            path={ROUTES.home}
+            element={<Navigate to={ROUTES.main} replace />}
+        />
 
-            {/* user recipes */}
-            <Route
-                path="/my-recipes"
-                element={
-                    <PrivateRoute>
-                        <UserRecipesPage />{" "}
-                    </PrivateRoute>
-                }
-            />
+        <Route path={ROUTES.login} element={<LoginPage />} />
+        <Route path={ROUTES.registration} element={<RegisterPage />} />
 
-            {/* user menus */}
-            <Route
-                path="/my-menus"
-                element={
-                    <PrivateRoute>
-                        <UserMenuPage />{" "}
-                    </PrivateRoute>
-                }
-            />
+        <Route element={<PrivateRoute />}>
+            {PRIVATE_ROUTES.map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+            ))}
+        </Route>
 
-            {/* types */}
-            <Route
-                path="/types"
-                element={
-                    <PrivateRoute>
-                        <TypesPage />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/types/:id"
-                element={
-                    <PrivateRoute>
-                        <EditRecipeType />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/add-type"
-                element={
-                    <PrivateRoute>
-                        <AddRecipeType />
-                    </PrivateRoute>
-                }
-            />
-
-            {/* recipes */}
-            <Route
-                path="/add-recipe"
-                element={
-                    <PrivateRoute>
-                        <CreateRecipePage />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/recipe/:id"
-                element={
-                    <PrivateRoute>
-                        <RecipeDetailsPage />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/change-recipe/:id"
-                element={
-                    <PrivateRoute>
-                        <ChangeRecipePage />
-                    </PrivateRoute>
-                }
-            />
-
-            {/* stats */}
-            <Route
-                path="/stats"
-                element={
-                    <PrivateRoute>
-                        <StatsPage />
-                    </PrivateRoute>
-                }
-            />
-
-            {/* user-ingredients */}
-            <Route
-                path="/ingredients"
-                element={
-                    <PrivateRoute>
-                        <IngredientsPage />
-                    </PrivateRoute>
-                }
-            />
-
-            {/* menu */}
-            <Route
-                path="/menu"
-                element={
-                    <PrivateRoute>
-                        <MenuPage />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/add-menu"
-                element={
-                    <PrivateRoute>
-                        <CreateMenuPage />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/menu/:id"
-                element={
-                    <PrivateRoute>
-                        <MenuDetailsPage />
-                    </PrivateRoute>
-                }
-            />
-            <Route
-                path="/change-menu/:id"
-                element={
-                    <PrivateRoute>
-                        <ChangeMenuPage />
-                    </PrivateRoute>
-                }
-            />
-
-            {/* 404 */}
-            <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-    );
-};
+        <Route path={ROUTES.notFound} element={<NotFoundPage />} />
+    </Routes>
+);
 
 const AppWrapper: React.FC = () => (
     <Router>

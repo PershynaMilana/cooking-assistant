@@ -73,3 +73,35 @@ export interface UpdateRecipeRequest {
     servings: string;
     ingredients: UpdateRecipeIngredient[];
 }
+
+export interface RecipeFormIngredient {
+    id: number;
+    name: string;
+    quantity: number;
+    unit_name: string;
+}
+
+export interface RecipeFormInitialValues {
+    title: string;
+    content: string;
+    cookingTime: string;
+    servings: string;
+    selectedTypeId: number | null;
+    selectedIngredients: RecipeFormIngredient[];
+}
+
+export interface RecipeFormCreateMessages {
+    errorTitle: string;
+    errorDescription: string;
+    errorIngredients: string;
+    errorType: string;
+    errorCookingTimeFormat: string;
+    errorCookingTimeInvalid: string;
+    errorServings: string;
+}
+
+export interface RecipeFormChangeMessages {
+    errorCookingTimeFormat: string;
+    errorCookingTimeInvalid: string;
+    errorServings: string;
+}

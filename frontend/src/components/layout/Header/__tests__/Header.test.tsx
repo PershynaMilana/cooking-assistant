@@ -2,6 +2,8 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
+import { AUTH_TOKEN_KEY } from "constants/storage";
+
 import { Header } from "components/layout/Header";
 
 import { setAuthToken } from "test/auth";
@@ -29,7 +31,7 @@ describe("Header", () => {
 
         await userEvent.click(screen.getByRole("button", { name: "Logout" }));
 
-        expect(localStorage.getItem("authToken")).toBeNull();
+        expect(localStorage.getItem(AUTH_TOKEN_KEY)).toBeNull();
         expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
 });

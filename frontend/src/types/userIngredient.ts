@@ -5,7 +5,7 @@ export interface UserIngredient {
     quantity_person_ingradient: number;
     storage_condition?: string;
     seasonality?: string;
-    days_to_expire?: number;
+    days_to_expire?: number | null;
     allergens?: string[];
     purchase_date?: string;
 }
@@ -18,7 +18,7 @@ export interface PantryIngredient {
     quantity_person_ingradient: number;
     storage_condition?: string;
     seasonality?: string;
-    days_to_expire?: number;
+    days_to_expire?: number | null;
     allergens?: string[];
     purchase_date?: string;
 }

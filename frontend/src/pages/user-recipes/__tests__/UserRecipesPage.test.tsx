@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 
 import type { RecipeListItem } from "types/recipe";
 
@@ -9,8 +9,8 @@ import UserRecipesPage from "pages/user-recipes/UserRecipesPage";
 import { mockJwtUser, setAuthToken } from "test/auth";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/recipesApi");
-jest.mock("../../../api/recipeTypesApi");
+jest.mock("api/recipesApi");
+jest.mock("api/recipeTypesApi");
 jest.mock("jwt-decode");
 
 const TITLE = "Borscht";

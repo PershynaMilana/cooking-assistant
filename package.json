@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.38.0",
+  "version": "1.39.0",
   "private": true,
   "scripts": {
     "prepare": "husky",
@@ -22,17 +22,6 @@
     "patch": "npm version patch --no-git-tag-version",
     "minor": "npm version minor --no-git-tag-version",
     "major": "npm version major --no-git-tag-version"
-  },
-  "lint-staged": {
-    "backend/**/*.ts": [
-      "prettier --write"
-    ],
-    "frontend/**/*.{ts,tsx,css}": [
-      "prettier --write"
-    ],
-    "frontend/**/*.{css,scss}": [
-      "./frontend/node_modules/.bin/stylelint --fix"
-    ]
   },
   "overrides": {
     "shell-quote": "^1.8.4"

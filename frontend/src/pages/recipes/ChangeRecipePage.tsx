@@ -1,352 +1,42 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 
-import { getIngredients } from "api/ingredientsApi";
-import { getRecipeById, updateRecipe } from "api/recipesApi";
-import { getRecipeTypes } from "api/recipeTypesApi";
+import { useEditRecipeForm } from "hooks/useEditRecipeForm";
 
+import { RecipeForm } from "components/forms/RecipeForm";
 import { Header } from "components/layout/Header";
 
-interface Ingredient {
-    id: number;
-    name: string;
-    unit_name: string;
-}
-
-interface RecipeType {
-    id: number;
-    type_name: string;
-}
-
 const ChangeRecipePage: React.FC = () => {
+    const { t } = useTranslation("recipes");
     const { id } = useParams<{ id: string }>();
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
-    const [cookingTime, setCookingTime] = useState("");
-    const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
-    const [allTypes, setAllTypes] = useState<RecipeType[]>([]);
-    const [selectedIngredients, setSelectedIngredients] = useState<
-        {
-            id: number;
-            name: string;
-            quantity_recipe_ingredients: number;
-            unit_name: string;
-        }[]
-    >([]);
-    const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [cookingTimeError, setCookingTimeError] = useState<string | null>(
-        null,
-    );
-    const [servings, setServings] = useState<string>("");
-
-    const navigate = useNavigate();
-
-    const fetchRecipeDetails = useCallback(async () => {
-        if (!id) return;
-        try {
-            const [recipeData, ingredients, types] = await Promise.all([
-                getRecipeById(id),
-                getIngredients(),
-                getRecipeTypes(),
-            ]);
-
-            setTitle(recipeData.title);
-            setContent(recipeData.content);
-            setCookingTime(formatCookingTime(recipeData.cooking_time));
-            setServings(recipeData.servings || "");
-            setAllIngredients(ingredients);
-            setAllTypes(types);
-            setSelectedIngredients(recipeData.ingredients);
-            setSelectedTypeId(recipeData.type_id);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(`Error loading recipe data, ${err.message}`);
-            } else {
-                setError("Unknown error while loading data.");
-            }
-        }
-    }, [id]);
-
-    useEffect(() => {
-        void fetchRecipeDetails();
-    }, [fetchRecipeDetails]);
-
-    const formatCookingTime = (timeInMinutes: number) => {
-        const hours = Math.floor(timeInMinutes / 60);
-        const minutes = timeInMinutes % 60;
-
-        return `${hours}:${minutes.toString().padStart(2, "0")}`;
-    };
-
-    const updateIngredientQuantity = (
-        ingredientId: number,
-        quantity_recipe_ingredients: number,
-    ) => {
-        setSelectedIngredients((prev) =>
-            prev.map((ingredient) =>
-                ingredient.id === ingredientId
-                    ? {
-                          ...ingredient,
-                          quantity_recipe_ingredients: Math.max(
-                              1,
-                              quantity_recipe_ingredients,
-                          ),
-                      }
-                    : ingredient,
-            ),
-        );
-    };
-
-    const toggleIngredientSelection = (ingredient: Ingredient) => {
-        setSelectedIngredients((prevSelected) => {
-            const existing = prevSelected.find((i) => i.id === ingredient.id);
-
-            if (existing) {
-                return prevSelected.filter((i) => i.id !== ingredient.id);
-            } else {
-                return [
-                    ...prevSelected,
-                    {
-                        id: ingredient.id,
-                        name: ingredient.name,
-                        quantity_recipe_ingredients: 1,
-                        unit_name: ingredient.unit_name,
-                    },
-                ];
-            }
-        });
-    };
-
-    const handleUpdateRecipe = async () => {
-        setError(null);
-        setCookingTimeError(null);
-
-        if (!id) return;
-
-        if (!servings.trim()) {
-            setError("Servings cannot be empty.");
-
-            return;
-        }
-
-        const timeParts = cookingTime.split(":");
-
-        if (timeParts.length !== 2) {
-            setCookingTimeError("Enter time in format hh:mm");
-
-            return;
-        }
-        const hours = parseInt(timeParts[0], 10);
-        const minutes = parseInt(timeParts[1], 10);
-
-        if (
-            isNaN(hours) ||
-            isNaN(minutes) ||
-            hours < 0 ||
-            hours > 99 ||
-            minutes < 0 ||
-            minutes >= 60
-        ) {
-            setCookingTimeError("Enter valid time in format hh:mm");
-
-            return;
-        }
-
-        const updatedRecipe = {
-            title,
-            content,
-            type_id: selectedTypeId,
-            cooking_time: hours * 60 + minutes,
-            servings,
-            ingredients: selectedIngredients.map(
-                ({ id: recipeId, quantity_recipe_ingredients }) => ({
-                    id: recipeId,
-                    quantity_recipe_ingredients,
-                }),
-            ),
-        };
-
-        try {
-            await updateRecipe(id, updatedRecipe);
-
-            navigate("/");
-        } catch {
-            setError("Error updating recipe.");
-        }
-    };
+    const ctrl = useEditRecipeForm(id);
+    const { handleSubmit } = ctrl;
 
     return (
         <div>
             <Header />
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-bold">
-                    Edit Recipe
+                    {t("changeRecipePage.heading")}
                 </h1>
-                <form className="space-y-4">
-                    <div>
-                        <label
-                            htmlFor="edit-recipe-title"
-                            className="block text-sm font-medium"
-                        >
-                            Title
-                        </label>
-                        <input
-                            id="edit-recipe-title"
-                            type="text"
-                            value={title}
-                            onChange={(e) => {
-                                setTitle(e.target.value);
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="edit-recipe-description"
-                            className="block text-sm font-medium"
-                        >
-                            Description
-                        </label>
-                        <textarea
-                            id="edit-recipe-description"
-                            value={content}
-                            onChange={(e) => {
-                                setContent(e.target.value);
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                            rows={4}
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="edit-recipe-cooking-time"
-                            className="block text-sm font-medium"
-                        >
-                            Cooking Time (hh:mm)
-                        </label>
-                        <input
-                            id="edit-recipe-cooking-time"
-                            type="text"
-                            value={cookingTime}
-                            onChange={(e) => {
-                                setCookingTime(e.target.value);
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        />
-                        {cookingTimeError && (
-                            <div className="text-red-500">
-                                {cookingTimeError}
-                            </div>
-                        )}
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="edit-recipe-type"
-                            className="block text-sm font-medium"
-                        >
-                            Recipe Type
-                        </label>
-                        <select
-                            id="edit-recipe-type"
-                            value={selectedTypeId ?? ""}
-                            onChange={(e) => {
-                                setSelectedTypeId(Number(e.target.value));
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        >
-                            <option value="" disabled>
-                                Select recipe type
-                            </option>
-                            {allTypes.map((type) => (
-                                <option key={type.id} value={type.id}>
-                                    {type.type_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <p className="block text-sm font-medium">Ingredients</p>
-                        <div className="flex flex-wrap gap-2">
-                            {allIngredients.map((ingredient) => (
-                                <button
-                                    key={ingredient.id}
-                                    type="button"
-                                    onClick={() => {
-                                        toggleIngredientSelection(ingredient);
-                                    }}
-                                    className={`${
-                                        selectedIngredients.some(
-                                            (i) => i.id === ingredient.id,
-                                        )
-                                            ? "bg-green-500 text-white"
-                                            : "bg-gray-300"
-                                    } px-4 py-2 rounded-md`}
-                                >
-                                    {ingredient.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <h4 className="font-bold mt-4">Selected Ingredients</h4>
-                        {selectedIngredients.map((ingredient) => (
-                            <div
-                                key={ingredient.id}
-                                className="flex items-center space-x-2"
-                            >
-                                <span>{ingredient.name}</span>
-                                <input
-                                    type="number"
-                                    min={1}
-                                    value={
-                                        ingredient.quantity_recipe_ingredients
-                                    }
-                                    onChange={(e) => {
-                                        updateIngredientQuantity(
-                                            ingredient.id,
-                                            parseInt(e.target.value, 10),
-                                        );
-                                    }}
-                                    className="w-20 p-2 border border-gray-300 rounded-md"
-                                />
-                                <span className="text-gray-700">
-                                    {ingredient.unit_name}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="edit-recipe-servings"
-                            className="block text-sm font-medium"
-                        >
-                            Servings (for which container the recipe is
-                            calculated):
-                        </label>
-                        <input
-                            id="edit-recipe-servings"
-                            type="text"
-                            value={servings}
-                            onChange={(e) => {
-                                setServings(e.target.value);
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                            placeholder="For example: 1 serving or full pot"
-                        />
-                    </div>
-
-                    {error && <div className="text-red-500 mt-4">{error}</div>}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            void handleUpdateRecipe();
+                {ctrl.isLoading ? (
+                    <p>{t("changeRecipePage.loading")}</p>
+                ) : (
+                    <RecipeForm
+                        form={ctrl.form}
+                        allIngredients={ctrl.allIngredients}
+                        allTypes={ctrl.allTypes}
+                        keyPrefix="changeRecipePage"
+                        idPrefix="edit-recipe"
+                        typeError={null}
+                        error={ctrl.form.error}
+                        submitLabel={t("changeRecipePage.updateButton")}
+                        onSubmit={() => {
+                            void handleSubmit();
                         }}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                    >
-                        Update Recipe
-                    </button>
-                </form>
+                    />
+                )}
             </div>
         </div>
     );

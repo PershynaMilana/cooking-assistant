@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 
 import type { Menu } from "types/menu";
 
@@ -9,8 +9,8 @@ import UserMenuPage from "pages/user-menu/UserMenuPage";
 import { mockJwtUser, setAuthToken } from "test/auth";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/menusApi");
-jest.mock("../../../api/menuCategoriesApi");
+jest.mock("api/menusApi");
+jest.mock("api/menuCategoriesApi");
 jest.mock("jwt-decode");
 
 const TITLE = "Weekday menu";

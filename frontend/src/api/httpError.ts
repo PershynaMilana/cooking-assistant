@@ -15,5 +15,9 @@ export function getApiErrorMessage(error: unknown): string {
         return error.message;
     }
 
+    if (error instanceof Error) {
+        return error.message;
+    }
+
     return "Unknown error";
 }

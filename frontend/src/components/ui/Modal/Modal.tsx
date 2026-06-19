@@ -2,11 +2,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 interface ModalProps {
-    isOpen: boolean; // modal open state
-    title: string; // modal title
-    message: string; // message displayed in the modal
-    onClose: () => void; // function to close the modal
-    onConfirm: () => void; // function to confirm the action
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onClose: () => void;
+    onConfirm: () => void;
+    error?: string | null;
+    isConfirmDisabled?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -15,6 +17,8 @@ export const Modal: React.FC<ModalProps> = ({
     message,
     onClose,
     onConfirm,
+    error,
+    isConfirmDisabled,
 }) => {
     const { t } = useTranslation();
 
@@ -41,6 +45,11 @@ export const Modal: React.FC<ModalProps> = ({
                 {/* Centered title text */}
                 <p className="mb-6 text-center">{message}</p>{" "}
                 {/* Centered message text */}
+                {error && (
+                    <p className="text-red-500 text-sm text-center mb-4">
+                        {error}
+                    </p>
+                )}
                 <div className="flex justify-center space-x-4">
                     {" "}
                     {/* Center-align buttons */}
@@ -52,7 +61,8 @@ export const Modal: React.FC<ModalProps> = ({
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="bg-red-500 text-white px-4 py-2 rounded-full"
+                        disabled={isConfirmDisabled}
+                        className="bg-red-500 text-white px-4 py-2 rounded-full disabled:opacity-50"
                     >
                         {t("modal.confirm")}
                     </button>

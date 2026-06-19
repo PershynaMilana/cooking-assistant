@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 
 import type { Menu } from "types/menu";
 
@@ -8,8 +8,8 @@ import { getMenus } from "api/menusApi";
 import MenuPage from "pages/menu/MenuPage";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/menusApi");
-jest.mock("../../../api/menuCategoriesApi");
+jest.mock("api/menusApi");
+jest.mock("api/menuCategoriesApi");
 
 const TITLE = "Weekday menu";
 const SAMPLE: Menu[] = [

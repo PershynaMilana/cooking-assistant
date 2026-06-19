@@ -1,297 +1,33 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
-import { getApiErrorMessage } from "api/httpError";
 import { getRecipesByFilters } from "api/recipesApi";
-import { getRecipeTypes } from "api/recipeTypesApi";
 
-import { Header } from "components/layout/Header";
-import RecipeCard from "components/RecipeCard";
-import RecipeTypeFilter from "components/RecipeTypeFilter";
-import { DateFilterDropdown } from "components/ui/DateFilterDropdown";
-import { SearchComponent } from "components/ui/SearchComponent";
+import { useRecipeList } from "hooks/useRecipeList";
 
-// interface describing the structure of a recipe object
-interface Recipe {
-    id: number;
-    title: string;
-    type_name: string;
-    creation_date: string;
-    cooking_time: number;
-}
-
-// interface describing the structure of a recipe type object
-interface RecipeType {
-    id: number;
-    type_name: string;
-    description: string;
-}
+import { RecipeListView } from "components/recipes/RecipeListView";
 
 const MainPage: React.FC = () => {
-    // states for storing recipes list, selected types, type descriptions, etc.
-    const [recipes, setRecipes] = useState<Recipe[]>([]);
-    const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
-    const [typesDescriptions, setTypesDescriptions] = useState<RecipeType[]>(
-        [],
-    );
-    const [error, setError] = useState<string | null>(null);
-    const [noRecipes, setNoRecipes] = useState<boolean>(false);
-    const [searchParams] = useSearchParams();
-    const ingredientName = searchParams.get("ingredient_name");
+    const { t } = useTranslation("recipes");
+    const list = useRecipeList(getRecipesByFilters);
 
-    // states for date and cooking time filters
-    const [startDate, setStartDate] = useState<string>("");
-    const [endDate, setEndDate] = useState<string>("");
-    const [sortOrder, setSortOrder] = useState<string>("asc");
+    const heading =
+        list.filters.selectedTypes.length > 0
+            ? t("mainPage.recipesBy", { types: list.typesHeader })
+            : t("mainPage.allRecipes");
 
-    const [minCookingTime, setMinCookingTime] = useState<string>("");
-    const [maxCookingTime, setMaxCookingTime] = useState<string>("");
-
-    // function to sort recipes by cooking time and title
-    const sortRecipes = useCallback(
-        (recipesToSort: Recipe[]): Recipe[] => {
-            return recipesToSort.sort((a, b) => {
-                if (sortOrder === "asc") {
-                    return (
-                        a.cooking_time - b.cooking_time ||
-                        a.title.localeCompare(b.title)
-                    );
-                } else {
-                    return (
-                        b.cooking_time - a.cooking_time ||
-                        a.title.localeCompare(b.title)
-                    );
-                }
-            });
-        },
-        [sortOrder],
-    );
-
-    // function to fetch recipes from server with filters
-    const fetchRecipes = useCallback(async () => {
-        setError(null);
-        setNoRecipes(false);
-
-        try {
-            const data = await getRecipesByFilters({
-                ingredient_name: ingredientName ?? "",
-                type_ids:
-                    selectedTypes.length > 0
-                        ? selectedTypes.join(",")
-                        : undefined,
-                start_date: startDate || undefined,
-                end_date: endDate || undefined,
-                min_cooking_time: minCookingTime || undefined,
-                max_cooking_time: maxCookingTime || undefined,
-                sort_order: sortOrder,
-            });
-
-            if (data.length === 0) {
-                setNoRecipes(true);
-            } else {
-                const sortedRecipes = sortRecipes(data);
-
-                setRecipes(sortedRecipes);
-            }
-        } catch (err: unknown) {
-            setError(getApiErrorMessage(err));
-        }
-    }, [
-        ingredientName,
-        selectedTypes,
-        startDate,
-        endDate,
-        minCookingTime,
-        maxCookingTime,
-        sortOrder,
-        sortRecipes,
-    ]);
-
-    // fetch recipes on first render or filters change
-    useEffect(() => {
-        void fetchRecipes();
-    }, [fetchRecipes]);
-
-    // fetch recipe type descriptions
-    useEffect(() => {
-        const fetchTypesDescriptions = async () => {
-            try {
-                if (selectedTypes.length > 0) {
-                    const data = await getRecipeTypes({
-                        ids: selectedTypes.join(","),
-                    });
-
-                    setTypesDescriptions(data);
-                } else {
-                    setTypesDescriptions([]);
-                }
-            } catch (err) {
-                console.error("Error fetching recipe type descriptions.", err);
-            }
-        };
-
-        void fetchTypesDescriptions();
-    }, [selectedTypes]);
-
-    // function to generate header from selected recipe types
-    const getTypesHeader = () => {
-        return typesDescriptions
-            .filter((type) => selectedTypes.includes(type.id))
-            .map((type) => type.type_name)
-            .join(", ");
-    };
-
-    // function to display selected recipe type descriptions
-    const getFilteredDescriptions = () => {
-        return typesDescriptions
-            .filter((type) => selectedTypes.includes(type.id))
-            .map((type) => (
-                <p key={type.id} className="text-gray-600">
-                    <strong>{type.type_name}:</strong> {type.description}
-                </p>
-            ));
-    };
+    const emptyMessage =
+        list.filters.selectedTypes.length > 0
+            ? t("mainPage.noSuchRecipes")
+            : t("mainPage.createFirst");
 
     return (
-        <div>
-            <Header />
-            <div className="mx-[15vw]">
-                {/* Filters and search section */}
-                <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-                    <SearchComponent placeholder={"ingredient"} />
-                    <div className="ml-4 mt-4 sm:mt-0">
-                        <RecipeTypeFilter
-                            selectedTypes={selectedTypes}
-                            onChange={setSelectedTypes}
-                        />
-                    </div>
-                </div>
-
-                {/* Date and cooking time filter section */}
-                <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-                    <DateFilterDropdown
-                        startDate={startDate}
-                        endDate={endDate}
-                        setStartDate={setStartDate}
-                        setEndDate={setEndDate}
-                    />
-
-                    {/* Min cooking time input */}
-                    <div className="flex items-center mb-2 sm:mb-0">
-                        <label htmlFor="minCookingTime" className="mr-2">
-                            Min cooking time:
-                        </label>
-                        <input
-                            type="number"
-                            id="minCookingTime"
-                            value={minCookingTime}
-                            onChange={(e) => {
-                                setMinCookingTime(e.target.value);
-                            }}
-                            placeholder="min"
-                            className="border rounded p-2 w-20"
-                            min="0"
-                            onKeyDown={(e) => {
-                                if (e.key === "+" || e.key === "-") {
-                                    e.preventDefault();
-                                }
-                            }}
-                            onInput={(e) => {
-                                const target = e.target as HTMLInputElement;
-
-                                target.value = target.value.replace(/\D/g, "");
-                            }}
-                        />
-                    </div>
-
-                    {/* Max cooking time input */}
-                    <div className="flex items-center mb-2 sm:mb-0">
-                        <label htmlFor="maxCookingTime" className="mr-2">
-                            Max cooking time:
-                        </label>
-                        <input
-                            type="number"
-                            id="maxCookingTime"
-                            value={maxCookingTime}
-                            onChange={(e) => {
-                                setMaxCookingTime(e.target.value);
-                            }}
-                            placeholder="min"
-                            className="border rounded p-2 w-20"
-                            min="1"
-                            onKeyDown={(e) => {
-                                if (e.key === "+" || e.key === "-") {
-                                    e.preventDefault();
-                                }
-                            }}
-                            onInput={(e) => {
-                                const target = e.target as HTMLInputElement;
-
-                                target.value = target.value.replace(/\D/g, "");
-                            }}
-                        />
-                    </div>
-
-                    {/* Sort order selection */}
-                    <div className="flex items-center mb-2 sm:mb-0">
-                        <label htmlFor="sortOrder" className="mr-2">
-                            Sort by time:
-                        </label>
-                        <select
-                            id="sortOrder"
-                            value={sortOrder}
-                            onChange={(e) => {
-                                setSortOrder(e.target.value);
-                            }}
-                            className="border rounded p-2"
-                        >
-                            <option value="asc">From fast to long</option>
-                            <option value="desc">From long to fast</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Recipes list header */}
-                <h1 className="text-relative-h3 font-normal font-montserratMedium p-4">
-                    {selectedTypes.length > 0
-                        ? `Recipes: ${getTypesHeader()}`
-                        : "All Recipes"}
-                </h1>
-
-                {/* Display type descriptions if selected */}
-                {selectedTypes.length > 0 && (
-                    <div className="mb-4">{getFilteredDescriptions()}</div>
-                )}
-
-                {/* If no recipes */}
-                {noRecipes ? (
-                    <div className="text-center text-gray-600 mb-4">
-                        {selectedTypes.length > 0
-                            ? "No such recipes created."
-                            : "Create your first recipe!"}
-                    </div>
-                ) : (
-                    // recipes grid
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {recipes.map((recipe) => (
-                            <RecipeCard
-                                key={recipe.id}
-                                id={recipe.id}
-                                title={recipe.title}
-                                typeName={recipe.type_name}
-                                creationDate={recipe.creation_date}
-                                cookingTime={recipe.cooking_time}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {/* Display error message */}
-                {error && (
-                    <div className="text-red-500 mb-4">Error: {error}</div>
-                )}
-            </div>
-        </div>
+        <RecipeListView
+            {...list}
+            heading={heading}
+            emptyMessage={emptyMessage}
+            searchPlaceholder={t("mainPage.searchPlaceholder")}
+        />
     );
 };
 

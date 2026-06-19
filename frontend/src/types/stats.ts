@@ -4,5 +4,10 @@ export interface AverageCookingTime {
 }
 
 export interface RecipesStatsResponse {
-    averageCookingTimes: AverageCookingTime[];
+    averageCookingTimes: AverageCookingTime[] | null;
+}
+
+export interface MenuCategoryStat {
+    categoryname: string;
+    menuCount: number;
 }

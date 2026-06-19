@@ -1,274 +1,49 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
-import type { MenuCategory } from "types/menu";
-import type { RecipeListItem } from "types/recipe";
+import { useCreateMenuForm } from "hooks/useCreateMenuForm";
 
-import { getMenuCategories } from "api/menuCategoriesApi";
-import { createMenu } from "api/menusApi";
-import { getRecipes } from "api/recipesApi";
-
+import { MenuFormFields } from "components/forms/MenuFormFields";
 import { Header } from "components/layout/Header";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 const CreateMenuPage: React.FC = () => {
-    const [menuTitle, setMenuTitle] = useState("");
-    const [menuDescription, setMenuDescription] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(
-        null,
-    );
-    const [categories, setCategories] = useState<MenuCategory[]>([]);
-    const [allRecipes, setAllRecipes] = useState<RecipeListItem[]>([]);
-    const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
-
-    const [menuTitleError, setMenuTitleError] = useState<string | null>(null);
-    const [menuDescriptionError, setMenuDescriptionError] = useState<
-        string | null
-    >(null);
-    const [categoryError, setCategoryError] = useState<string | null>(null);
-    const [recipesError, setRecipesError] = useState<string | null>(null);
-
-    const navigate = useNavigate();
-
-    // fetch menu categories
-    const fetchCategories = async () => {
-        try {
-            const data = await getMenuCategories();
-
-            setCategories(data);
-        } catch (error: unknown) {
-            console.error("Error fetching categories:", error);
-        }
-    };
-
-    // fetch recipes
-    const fetchRecipes = async () => {
-        try {
-            const data = await getRecipes();
-
-            setAllRecipes(data);
-        } catch (error: unknown) {
-            console.error("Error fetching recipes:", error);
-        }
-    };
-
-    useEffect(() => {
-        void fetchCategories();
-        void fetchRecipes();
-    }, []);
-
-    // form validation
-    const validateForm = () => {
-        let valid = true;
-
-        if (!menuTitle.trim()) {
-            setMenuTitleError("Menu title cannot be empty.");
-            valid = false;
-        } else {
-            setMenuTitleError(null);
-        }
-
-        if (!menuDescription.trim()) {
-            setMenuDescriptionError("Menu description cannot be empty.");
-            valid = false;
-        } else {
-            setMenuDescriptionError(null);
-        }
-
-        if (!selectedCategory) {
-            setCategoryError("Please select a menu category.");
-            valid = false;
-        } else {
-            setCategoryError(null);
-        }
-
-        if (selectedRecipes.length === 0) {
-            setRecipesError("Please select at least one recipe.");
-            valid = false;
-        } else {
-            setRecipesError(null);
-        }
-
-        return valid;
-    };
-
-    // create menu
-    const handleCreateMenu = async () => {
-        if (!validateForm()) return;
-
-        const userId = getCurrentUserId();
-
-        if (userId === null) {
-            console.error("No auth token found.");
-
-            return;
-        }
-
-        if (selectedCategory === null) {
-            return;
-        }
-
-        try {
-            await createMenu({
-                menuTitle,
-                menuContent: menuDescription,
-                categoryId: selectedCategory,
-                personId: userId,
-                recipeIds: selectedRecipes,
-            });
-
-            navigate("/menu");
-        } catch (error: unknown) {
-            console.error("Error creating menu:", error);
-        }
-    };
-
-    // handle recipe selection
-    const toggleRecipeSelection = (recipeId: number) => {
-        setSelectedRecipes((prevSelected) => {
-            if (prevSelected.includes(recipeId)) {
-                return prevSelected.filter((id) => id !== recipeId);
-            } else {
-                return [...prevSelected, recipeId];
-            }
-        });
-    };
+    const { t } = useTranslation("menu");
+    const ctrl = useCreateMenuForm();
+    const { handleSubmit } = ctrl;
 
     return (
         <div>
             <Header />
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
-                    Add New Menu
+                    {t("createMenuPage.heading")}
                 </h1>
                 <form className="space-y-4">
-                    {/* Menu title */}
-                    <div>
-                        <label
-                            htmlFor="create-menu-title"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Menu title
-                        </label>
-                        <input
-                            id="create-menu-title"
-                            type="text"
-                            value={menuTitle}
-                            onChange={(e) => {
-                                setMenuTitle(e.target.value);
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        />
-                        {menuTitleError && (
-                            <div className="text-red-500 text-sm mt-1">
-                                {menuTitleError}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Menu description */}
-                    <div>
-                        <label
-                            htmlFor="create-menu-description"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Menu description
-                        </label>
-                        <textarea
-                            id="create-menu-description"
-                            value={menuDescription}
-                            onChange={(e) => {
-                                setMenuDescription(e.target.value);
-                            }}
-                            rows={4}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        />
-                        {menuDescriptionError && (
-                            <div className="text-red-500 text-sm mt-1">
-                                {menuDescriptionError}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Menu category */}
-                    <div>
-                        <label
-                            htmlFor="create-menu-category"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Menu category
-                        </label>
-                        <select
-                            id="create-menu-category"
-                            value={selectedCategory ?? ""}
-                            onChange={(e) => {
-                                setSelectedCategory(Number(e.target.value));
-                            }}
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                        >
-                            <option value="" disabled>
-                                Select a menu category
-                            </option>
-                            {categories.map((category) => (
-                                <option
-                                    key={category.menu_category_id}
-                                    value={category.menu_category_id}
-                                >
-                                    {category.category_name}
-                                </option>
-                            ))}
-                        </select>
-                        {categoryError && (
-                            <div className="text-red-500 text-sm mt-1">
-                                {categoryError}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Recipes */}
-                    <div>
-                        <p className="block text-sm font-medium text-gray-700">
-                            Recipes
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {allRecipes.map((recipe) => (
-                                <button
-                                    key={recipe.id}
-                                    type="button"
-                                    onClick={() => {
-                                        toggleRecipeSelection(recipe.id);
-                                    }}
-                                    className={`py-2 px-4 border rounded-md ${
-                                        selectedRecipes.includes(recipe.id)
-                                            ? "bg-blue-500 text-white"
-                                            : "bg-white"
-                                    }`}
-                                >
-                                    {recipe.title}
-                                </button>
-                            ))}
-                        </div>
-                        {recipesError && (
-                            <div className="text-red-500 text-sm mt-1">
-                                {recipesError}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Create menu button */}
+                    <MenuFormFields
+                        form={ctrl.form}
+                        categories={ctrl.categories}
+                        allRecipes={ctrl.allRecipes}
+                        idPrefix="create-menu"
+                        keyPrefix="createMenuPage"
+                    />
                     <div>
                         <button
                             type="button"
                             onClick={() => {
-                                void handleCreateMenu();
+                                void handleSubmit();
                             }}
                             className="w-full py-2 bg-green-500 text-white rounded-md"
                         >
-                            Create Menu
+                            {t("createMenuPage.createButton")}
                         </button>
                     </div>
                 </form>
+
+                {ctrl.fetchError && (
+                    <div className="text-red-500 text-sm mt-4">
+                        {ctrl.fetchError}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -134,6 +134,21 @@ export default tseslint.config(
                     ],
                 },
             ],
+            "no-restricted-syntax": [
+                "error",
+                {
+                    selector:
+                        "BinaryExpression[operator='==='][right.type='Identifier'][right.name='undefined']",
+                    message:
+                        "Prefer null. Use === null instead of === undefined.",
+                },
+                {
+                    selector:
+                        "BinaryExpression[operator='!=='][right.type='Identifier'][right.name='undefined']",
+                    message:
+                        "Prefer null. Use !== null instead of !== undefined.",
+                },
+            ],
             "import/no-cycle": ["error", { maxDepth: 10 }],
             "import/no-extraneous-dependencies": [
                 "error",

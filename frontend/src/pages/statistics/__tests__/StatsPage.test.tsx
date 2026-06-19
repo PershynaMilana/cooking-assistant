@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 
 import type { RecipeWithIngredientNames } from "types/recipe";
 
@@ -7,7 +7,7 @@ import { getRecipes } from "api/recipesApi";
 import StatsPage from "pages/statistics/StatsPage";
 import { renderWithRouter } from "test/router";
 
-jest.mock("../../../api/recipesApi");
+jest.mock("api/recipesApi");
 
 // react-apexcharts and @react-pdf/renderer cannot render under jsdom (canvas /
 // PDF), so they are stubbed out; StyleSheet.create covers module-level calls in

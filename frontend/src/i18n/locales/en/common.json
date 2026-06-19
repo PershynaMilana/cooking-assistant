@@ -17,7 +17,8 @@
     },
     "search": {
         "placeholderPrefix": "Search by",
-        "reset": "Reset Search"
+        "reset": "Reset Search",
+        "iconAlt": "Search icon"
     },
     "dateFilter": {
         "sortByDates": "Sort by dates",
@@ -26,5 +27,11 @@
         "reset": "Reset filters",
         "startAfterEnd": "Start date cannot be later than end date.",
         "invalidRange": "Please select a valid date range."
+    },
+    "notFound": {
+        "title": "Oops....",
+        "subtitle": "It looks like you got lost",
+        "description": "The page you are looking for does not exist or has been moved. We suggest you return to the homepage.",
+        "goHome": "GO TO HOMEPAGE"
     }
 }

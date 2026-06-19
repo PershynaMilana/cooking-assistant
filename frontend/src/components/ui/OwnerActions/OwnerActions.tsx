@@ -1,0 +1,33 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+interface OwnerActionsProps {
+    // navigation target for the edit link
+    editTo: string;
+    onDelete: () => void;
+    editLabel: string;
+    deleteLabel: string;
+}
+
+// edit (link) + delete (button) action pair shared by the recipe and menu detail
+// pages. Presentational: labels and the edit target are supplied by domain adapters.
+export const OwnerActions: React.FC<OwnerActionsProps> = ({
+    editTo,
+    onDelete,
+    editLabel,
+    deleteLabel,
+}) => (
+    <>
+        <Link to={editTo}>
+            <button className="mt-6 mr-[1vw] bg-yellow-500 text-white py-2 px-4 rounded-full">
+                {editLabel}
+            </button>
+        </Link>
+        <button
+            onClick={onDelete}
+            className="mt-6 bg-red-500 text-white py-2 px-4 rounded-full"
+        >
+            {deleteLabel}
+        </button>
+    </>
+);

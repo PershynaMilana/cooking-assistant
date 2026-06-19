@@ -1,0 +1,32 @@
+{
+    "page": {
+        "heading": "My Ingredients",
+        "noIngredients": "You currently have no ingredients.",
+        "allergens": "Allergens:",
+        "shelfLife": "Shelf life:",
+        "shelfLifeDays": "{{days}} days.",
+        "noExpiration": "No expiration.",
+        "storageConditions": "Storage conditions:",
+        "season": "Season:",
+        "purchaseDate": "Purchase date:",
+        "purchaseDateUnknown": "Unknown",
+        "detailsButton": "Details",
+        "deleteButton": "Delete",
+        "editButton": "Edit ingredients",
+        "saveButton": "Save",
+        "editQuantitiesButton": "Edit quantities",
+        "saveQuantitiesButton": "Save quantities",
+        "deleteConfirmMessage": "Are you sure you want to delete the ingredient \"{{name}}\"?",
+        "confirmButton": "Confirm",
+        "cancelButton": "Cancel"
+    },
+    "purchaseModal": {
+        "title": "Purchase History: {{name}}",
+        "loading": "Loading...",
+        "noHistory": "No purchase history available.",
+        "closeButton": "Close",
+        "errorLoading": "Error loading purchase history.",
+        "errorSaving": "Error saving changes.",
+        "errorNoToken": "Token not found."
+    }
+}

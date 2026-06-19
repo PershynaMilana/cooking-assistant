@@ -1,0 +1,69 @@
+{
+    "menuCard": {
+        "category": "Category: ",
+        "learnMore": "Learn more"
+    },
+    "categoryFilter": {
+        "filter": "Filter",
+        "reset": "Reset filters"
+    },
+    "menuPage": {
+        "allMenus": "All menus",
+        "menusByCategories": "Menus by categories: {{names}}",
+        "noMenus": "No menus found for the selected filters.",
+        "error": "Error: {{message}}",
+        "searchPlaceholder": "menu title"
+    },
+    "userMenuPage": {
+        "allMenus": "All Menus",
+        "menusByCategories": "Menus by categories: {{names}}",
+        "noMenus": "No menus found for the selected filters.",
+        "addMenu": "Add Menu",
+        "error": "Error: {{message}}",
+        "searchPlaceholder": "menu title"
+    },
+    "createMenuPage": {
+        "heading": "Add New Menu",
+        "titleLabel": "Menu title",
+        "descriptionLabel": "Menu description",
+        "categoryLabel": "Menu category",
+        "categoryPlaceholder": "Select a menu category",
+        "recipesLabel": "Recipes",
+        "createButton": "Create Menu",
+        "errorTitle": "Menu title cannot be empty.",
+        "errorDescription": "Menu description cannot be empty.",
+        "errorCategory": "Please select a menu category.",
+        "errorRecipes": "Please select at least one recipe.",
+        "errorCreate": "Failed to create menu. Please try again.",
+        "errorLoadData": "Failed to load categories or recipes."
+    },
+    "changeMenuPage": {
+        "heading": "Edit Menu",
+        "titleLabel": "Menu title",
+        "descriptionLabel": "Menu description",
+        "categoryLabel": "Menu category",
+        "categoryPlaceholder": "Select a menu category",
+        "recipesLabel": "Recipes",
+        "updateButton": "Update Menu",
+        "loading": "Loading data...",
+        "errorTitle": "Menu title cannot be empty.",
+        "errorDescription": "Menu description cannot be empty.",
+        "errorCategory": "Please select a menu category.",
+        "errorRecipes": "Please select at least one recipe.",
+        "errorLoadMenu": "Failed to load menu data. Please try again later.",
+        "errorLoadData": "Failed to load categories or recipes.",
+        "errorUpdate": "Failed to update menu. Please try again later."
+    },
+    "menuDetailsPage": {
+        "menuCategory": "Menu category:",
+        "menuDescription": "Menu description:",
+        "recipes": "Recipes:",
+        "missingIngredients": "Missing ingredients:",
+        "editButton": "Edit menu",
+        "deleteButton": "Delete menu",
+        "loading": "Loading...",
+        "deleteTitle": "Confirm Deletion",
+        "deleteMessage": "Are you sure you want to delete this menu?",
+        "error": "Error: {{message}}"
+    }
+}

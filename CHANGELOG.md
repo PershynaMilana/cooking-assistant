@@ -22,6 +22,23 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.39 - 2026-06-18
+
+### Frontend
+- Changed: refactored the recipes domain — filter and sort logic extracted into `useRecipeFilters` and `useRecipes` hooks, cooking-time formatting moved to `cookingTimeUtils`, `RecipeCard` and `RecipeTypeFilter` migrated to self-contained component folders, all visible strings translated via a new `recipes` i18n namespace.
+- Changed: refactored the menu domain — filter state extracted into `useMenuFilters`, form state into `useMenuForm`, `MenuCard` and `MenuCategoryFilter` migrated to self-contained component folders, all visible strings translated via a new `menu` i18n namespace.
+- Changed: refactored the ingredients domain — `IngredientsPage` decomposed from 528 lines into four focused sub-components (`IngredientList`, `IngredientSelector`, `QuantityEditor`, `DeleteConfirmModal`), pantry and quantity logic extracted into `useIngredientsData` and `useQuantityUpdates` hooks, expiration calculation deduplicated into `ingredientExpirationUtils`, `PurchaseHistoryModal` migrated to a self-contained component folder, all visible strings translated via a new `ingredients` i18n namespace.
+- Changed: refactored the statistics domain — duplicate fetch and calculation logic extracted into `useRecipeStatistics` hook (shared between `StatsPage` and `StatsReport`), `StatsReport` converted from self-fetching to a pure props-based PDF component, all visible strings translated via a new `stats` i18n namespace.
+- Added: `lint:fix` script in frontend that runs `eslint --fix` to auto-sort imports by group.
+- Changed: moved lint-staged configuration to a dedicated `lint-staged.config.js` in the project root; frontend TypeScript files now go through `eslint --fix` before `prettier` on every commit, auto-correcting import order.
+- Changed: finished the recipe-types screens - add, edit, and list now share one form, move between pages without full-page reloads, reuse the shared confirmation dialog for deletion, and are fully translated via a new `recipeTypes` namespace.
+- Changed: extracted shared UI building blocks (a generic card, list-page layout, owner-action bar, checkbox filter, toggle-button group, and form fields) so the recipe and menu screens no longer duplicate each other; all forms now live under a single `forms` folder.
+- Changed: centralised every route path, the auth-token storage key, and search-parameter keys into one `constants` module, and moved date and cooking-time formatting into shared, locale-aware helpers.
+- Changed: translated the remaining hardcoded text - the "page not found" screen, the statistics PDF reports, and the search box - and made every date (recipe/menu cards and details, the pantry, purchase history, and PDF reports) follow the active language, registering a Cyrillic-capable PDF font so Russian/Ukrainian will render correctly once those languages are added.
+- Fixed: the recipe and menu detail pages no longer show an untranslated "Error:" prefix when something fails to load.
+- Security: removed a debug log on the login screen that printed the entered username and password to the browser console.
+
+
 ## 1.38 - 2026-06-17
 
 Frontend:

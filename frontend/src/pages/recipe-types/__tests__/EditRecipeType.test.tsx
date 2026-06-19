@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+﻿import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
@@ -8,7 +8,7 @@ import { getRecipeTypeById, updateRecipeType } from "api/recipeTypesApi";
 
 import EditRecipeType from "pages/recipe-types/EditRecipeType";
 
-jest.mock("../../../api/recipeTypesApi");
+jest.mock("api/recipeTypesApi");
 
 const ID = "5";
 const TYPE_NAME = "Dessert";
@@ -19,6 +19,19 @@ const SAMPLE: RecipeTypeFormData = {
 };
 
 describe("EditRecipeType", () => {
+    it("should redirect to the types list when id is missing", () => {
+        render(
+            <MemoryRouter initialEntries={["/edit-unknown"]}>
+                <Routes>
+                    <Route path="/edit-unknown" element={<EditRecipeType />} />
+                    <Route path="/types" element={<div>Types List</div>} />
+                </Routes>
+            </MemoryRouter>,
+        );
+
+        expect(screen.getByText("Types List")).toBeInTheDocument();
+    });
+
     it("should load the recipe type and update it on submit", async () => {
         jest.mocked(getRecipeTypeById).mockResolvedValue(SAMPLE);
         const mockedUpdate = jest.mocked(updateRecipeType);

@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+﻿import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
@@ -8,15 +8,16 @@ import { getRecipeTypes } from "api/recipeTypesApi";
 
 import CreateRecipePage from "pages/recipes/CreateRecipePage";
 import { mockJwtUser, setAuthToken } from "test/auth";
+import { LABEL_COOKING_TIME, ROUTE_HOME } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("../../../api/recipesApi");
-jest.mock("../../../api/recipeTypesApi");
-jest.mock("../../../api/ingredientsApi");
+jest.mock("api/recipesApi");
+jest.mock("api/recipeTypesApi");
+jest.mock("api/ingredientsApi");
 jest.mock("jwt-decode");
 
 const PERSON_ID = 7;
@@ -53,10 +54,7 @@ describe("CreateRecipePage", () => {
 
         await userEvent.type(screen.getByLabelText("Title"), TITLE);
         await userEvent.type(screen.getByLabelText("Description"), DESCRIPTION);
-        await userEvent.type(
-            screen.getByLabelText("Cooking Time (hh:mm)"),
-            "0:30",
-        );
+        await userEvent.type(screen.getByLabelText(LABEL_COOKING_TIME), "0:30");
         await userEvent.type(
             screen.getByLabelText(
                 "Servings (for which container is the recipe calculated):",
@@ -82,6 +80,6 @@ describe("CreateRecipePage", () => {
                 ingredients: [{ id: INGREDIENT_ID, quantity: 1 }],
             }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith("/");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_HOME);
     });
 });
