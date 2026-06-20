@@ -19,7 +19,7 @@ export default class PgPantryRepository implements PantryRepository {
          i.days_to_expire,
          i.seasonality,
          i.storage_condition,
-         pi.purchase_date -- Add purchase_date field
+         pi.purchase_date
        FROM person_ingredients pi
        JOIN ingredients i ON pi.ingredient_id = i.id
        JOIN unit_measurement um ON i.id_unit_measurement = um.id
@@ -146,17 +146,29 @@ export default class PgPantryRepository implements PantryRepository {
                         [userId, ingredient.id, addedQuantity],
                     );
                 } else if (addedQuantity < 0) {
-                    // a decrease is consumption: update the stock without logging a purchase
-                    await client.query(
-                        `UPDATE person_ingredients
+                    if (ingredient.quantity_person_ingradient === 0) {
+                        await client.query(
+                            `DELETE FROM ingredient_purchases
+           WHERE person_id = $1 AND ingredient_id = $2`,
+                            [userId, ingredient.id],
+                        );
+                        await client.query(
+                            `DELETE FROM person_ingredients
+           WHERE person_id = $1 AND ingredient_id = $2`,
+                            [userId, ingredient.id],
+                        );
+                    } else {
+                        await client.query(
+                            `UPDATE person_ingredients
            SET quantity_person_ingradient = $1
            WHERE person_id = $2 AND ingredient_id = $3`,
-                        [
-                            ingredient.quantity_person_ingradient,
-                            userId,
-                            ingredient.id,
-                        ],
-                    );
+                            [
+                                ingredient.quantity_person_ingradient,
+                                userId,
+                                ingredient.id,
+                            ],
+                        );
+                    }
                 }
             }
 

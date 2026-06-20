@@ -3,17 +3,13 @@ import React from "react";
 import { Header } from "components/layout/Header";
 
 interface ListPageLayoutProps {
-    // filter/search controls rendered above the heading
     filterSlot: React.ReactNode;
-    // optional call-to-action (e.g. an "Add" link) between filters and heading
     actionSlot?: React.ReactNode;
     heading: string;
-    // optional content between the heading and the grid (e.g. type descriptions)
     afterHeading?: React.ReactNode;
     isEmpty: boolean;
     emptyMessage: string;
     error: string | null;
-    // the card grid items
     children: React.ReactNode;
 }
 

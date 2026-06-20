@@ -1,5 +1,6 @@
-import React from "react";
-import Chart from "react-apexcharts";
+import React, { Suspense } from "react";
+
+const Chart = React.lazy(() => import("./LazyChart"));
 
 import type { RecipeTypeStat } from "hooks/useRecipeStatistics";
 
@@ -24,12 +25,14 @@ export const RecipeTypeChart: React.FC<RecipeTypeChartProps> = ({ stats }) => {
     const series = stats.map((stat) => stat.count);
 
     return (
-        <Chart
-            options={options}
-            series={series}
-            type="pie"
-            width="500"
-            height="auto"
-        />
+        <Suspense fallback={<div style={{ width: 500, height: 300 }} />}>
+            <Chart
+                options={options}
+                series={series}
+                type="pie"
+                width="500"
+                height="auto"
+            />
+        </Suspense>
     );
 };

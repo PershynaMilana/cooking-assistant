@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { Suspense } from "react";
 
 import { RecipeTypeChart } from "components/stats/RecipeTypeChart";
 
@@ -10,7 +11,9 @@ jest.mock("react-apexcharts", () => ({
 describe("RecipeTypeChart", () => {
     it("should render without errors", () => {
         const { container } = render(
-            <RecipeTypeChart stats={[{ typeName: "Soup", count: 2 }]} />,
+            <Suspense fallback={null}>
+                <RecipeTypeChart stats={[{ typeName: "Soup", count: 2 }]} />
+            </Suspense>,
         );
 
         expect(container).toBeInTheDocument();

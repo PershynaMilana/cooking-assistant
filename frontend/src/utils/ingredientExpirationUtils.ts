@@ -1,4 +1,3 @@
-// Returns true when the ingredient's shelf life has ended.
 // Both params are optional because the API fields are optional.
 export const isExpired = (
     purchaseDate: string | undefined,

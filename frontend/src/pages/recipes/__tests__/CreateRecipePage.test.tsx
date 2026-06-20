@@ -7,7 +7,7 @@ import { createRecipe } from "api/recipesApi";
 import { getRecipeTypes } from "api/recipeTypesApi";
 
 import CreateRecipePage from "pages/recipes/CreateRecipePage";
-import { LABEL_COOKING_TIME, ROUTE_HOME } from "test/constants";
+import { LABEL_COOKING_TIME, ROUTE_MAIN } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -70,10 +70,10 @@ describe("CreateRecipePage", () => {
                 title: TITLE,
                 content: DESCRIPTION,
                 type_id: TYPE_ID,
-                servings: SERVINGS,
+                servings: Number(SERVINGS),
                 ingredients: [{ id: INGREDIENT_ID, quantity: 1 }],
             }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_HOME);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
     });
 });

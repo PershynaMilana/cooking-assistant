@@ -132,8 +132,8 @@ jobs:
         with:
           cache-dependency-path: frontend/package-lock.json
           install: npm --prefix frontend ci
-      - name: Test frontend
-        run: npm --prefix frontend run test
+      - name: Test frontend with coverage
+        run: npm --prefix frontend run test:coverage
 
   ci-success:
     name: ci-success

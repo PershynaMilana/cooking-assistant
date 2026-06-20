@@ -23,6 +23,5 @@ const DATE_LOCALE_BY_LANGUAGE: Record<string, string> = {
 
 export const DEFAULT_DATE_LOCALE = DATE_LOCALE_BY_LANGUAGE[DEFAULT_LANGUAGE];
 
-// BCP-47 locale for a given app language, falling back to the default locale
 export const dateLocaleFor = (language: string): string =>
     DATE_LOCALE_BY_LANGUAGE[language] ?? DEFAULT_DATE_LOCALE;

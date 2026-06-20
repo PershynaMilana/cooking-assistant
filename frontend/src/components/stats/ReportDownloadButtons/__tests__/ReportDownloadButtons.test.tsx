@@ -1,29 +1,23 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import { ReportDownloadButtons } from "components/stats/ReportDownloadButtons";
 
-jest.mock("@react-pdf/renderer", () => ({
-    PDFDownloadLink: () => null,
-    Document: () => null,
-    Page: () => null,
-    Text: () => null,
-    View: () => null,
-    StyleSheet: { create: (styles: unknown) => styles },
-    Font: { register: () => undefined },
-}));
-
 describe("ReportDownloadButtons", () => {
-    it("should render without errors", () => {
-        const { container } = render(
+    it("should render both download buttons", () => {
+        render(
             <ReportDownloadButtons
-                document1={<div />}
-                document2={<div />}
                 label1="Report 1"
                 label2="Report 2"
-                onGenerate={jest.fn()}
+                onDownload1={jest.fn()}
+                onDownload2={jest.fn()}
             />,
         );
 
-        expect(container).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: "Report 1" }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", { name: "Report 2" }),
+        ).toBeInTheDocument();
     });
 });

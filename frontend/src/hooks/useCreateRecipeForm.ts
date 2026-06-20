@@ -47,10 +47,11 @@ export const useCreateRecipeForm = () => {
                 })),
                 type_id: form.selectedTypeId,
                 cooking_time: parseCookingTime(form.cookingTime) ?? 0,
-                servings: form.servings,
+                servings:
+                    form.servings !== "" ? Number(form.servings) : undefined,
             });
 
-            navigate(ROUTES.home);
+            navigate(ROUTES.main);
         } catch (err: unknown) {
             form.setError(getApiErrorMessage(err));
         }

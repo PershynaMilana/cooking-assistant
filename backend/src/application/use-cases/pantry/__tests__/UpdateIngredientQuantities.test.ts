@@ -70,4 +70,30 @@ describe("UpdateIngredientQuantities", () => {
         );
         expect(result).toBeUndefined();
     });
+
+    it("should accept quantity of 0 and pass it to the repository", async () => {
+        const { useCase, pantryRepository } = setup();
+        pantryRepository.updateQuantities.mockResolvedValue(undefined);
+
+        await useCase.execute(7, [{ id: 3, quantity_person_ingradient: 0 }]);
+
+        expect(pantryRepository.updateQuantities).toHaveBeenCalledWith(7, [
+            { id: 3, quantity_person_ingradient: 0 },
+        ]);
+    });
+
+    it("should throw a 400 ValidationError when a quantity is negative", async () => {
+        const { useCase, pantryRepository } = setup();
+
+        const error = await catchError(
+            useCase.execute(7, [{ id: 3, quantity_person_ingradient: -1 }]),
+        );
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "0.quantity_person_ingradient: Quantity must be 0 or more",
+            400,
+        );
+        expect(pantryRepository.updateQuantities).not.toHaveBeenCalled();
+    });
 });

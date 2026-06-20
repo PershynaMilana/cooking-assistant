@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 
 interface CardProps {
     title: string;
-    // navigation target for the primary action button
     to: string;
     actionLabel: string;
-    // domain-specific body (meta rows, free text, ...)
     children: React.ReactNode;
 }
 

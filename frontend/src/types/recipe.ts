@@ -31,7 +31,7 @@ export interface RecipeDetails {
     type_name: string;
     cooking_time: number;
     creation_date: string;
-    servings: string;
+    servings: number | null;
     person_id: number;
     // computed by the backend (r.person_id = current user) so the client can gate
     // Edit/Delete without decoding the session
@@ -59,7 +59,7 @@ export interface CreateRecipeRequest {
     ingredients: CreateRecipeIngredient[];
     type_id: number | null;
     cooking_time: number;
-    servings: string;
+    servings: number | undefined;
 }
 
 export interface UpdateRecipeIngredient {
@@ -72,7 +72,7 @@ export interface UpdateRecipeRequest {
     content: string;
     type_id: number | null;
     cooking_time: number;
-    servings: string;
+    servings: number | undefined;
     ingredients: UpdateRecipeIngredient[];
 }
 

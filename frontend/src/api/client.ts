@@ -24,7 +24,9 @@ export function handleAuthError(error: AxiosError): Promise<never> {
     const isSkipped = SKIP_REDIRECT_URLS.some((url) => requestUrl === url);
     const isProtectedPath = !PUBLIC_PATHS.includes(window.location.pathname);
 
-    if (isAuthError && !isSkipped && isProtectedPath) {
+    const shouldRedirect = isAuthError && !isSkipped && isProtectedPath;
+
+    if (shouldRedirect) {
         redirectToLogin();
     }
 

@@ -22,6 +22,25 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.41 - 2026-06-20
+
+### Backend
+- Fixed: Editing a menu now preselects the saved category and its recipes correctly.
+- Fixed: Menu name search with special characters now works correctly; the server was decoding search terms a second time, which broke searches containing percent-signs and accented letters.
+- Fixed: Setting a pantry ingredient's quantity to 0 now removes it from the pantry instead of leaving a row with zero quantity.
+- Fixed: The update-pantry endpoint now correctly accepts 0 as a valid quantity (previously it rejected 0 with a validation error).
+
+### Frontend
+- Fixed: After creating or editing a recipe, the app now navigates to the main recipe list instead of briefly bouncing through the home redirect.
+- Fixed: The recipe servings field is sent to the server as a number, not a string.
+- Fixed: The pantry quantity editor now allows 0 as input, so you can remove an ingredient by setting its quantity to zero.
+- Fixed: The search bar no longer risks clearing itself in a loop when navigating to the home page with no active search.
+- Added: Pages, the chart, and the PDF renderer now load on demand instead of all at once; the initial page load is significantly faster.
+- Changed: Renamed the `person-ingradients` source folder to `person-ingredients` (corrected spelling).
+- Changed: ESLint architectural boundary rule promoted from warning to error - importing across disallowed layers now blocks CI.
+- Changed: Frontend build added to the pre-push hook so a broken build cannot be pushed.
+- Changed: CI test job now enforces an 80% coverage threshold (statements, branches, functions, and lines).
+
 ## 1.40 - 2026-06-20
 
 ### Backend

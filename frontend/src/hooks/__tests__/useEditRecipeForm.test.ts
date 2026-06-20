@@ -35,7 +35,7 @@ const RECIPE: RecipeDetails = {
     type_name: "Soup",
     cooking_time: 90,
     creation_date: "2024-01-01",
-    servings: "4",
+    servings: 4,
     person_id: 3,
     isOwner: true,
 };
@@ -78,7 +78,7 @@ describe("useEditRecipeForm", () => {
             "1",
             expect.objectContaining({ title: "Borscht", cooking_time: 90 }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith("/");
+        expect(mockNavigate).toHaveBeenCalledWith("/main");
     });
 
     it("should not update when there is no id", async () => {

@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 interface OwnerActionsProps {
-    // navigation target for the edit link
     editTo: string;
     onDelete: () => void;
     editLabel: string;

@@ -20,7 +20,6 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
     const location = useLocation();
     const { t } = useTranslation();
 
-    // set initial search term from URL search parameters
     useEffect(() => {
         const initialSearchTerm =
             searchParams.get(SEARCH_PARAM_INGREDIENT_NAME) ?? "";
@@ -28,9 +27,8 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
         setSearchTerm(initialSearchTerm);
     }, [searchParams]);
 
-    // clear search when navigating to home page
     useEffect(() => {
-        if (location.pathname === ROUTES.home) {
+        if (location.pathname === ROUTES.home && location.search !== "") {
             setSearchTerm("");
             setSearchParams({});
         }

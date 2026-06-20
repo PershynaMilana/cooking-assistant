@@ -10,26 +10,11 @@ function toMenuFilters(filters: unknown): MenuFilters {
     return (filters ?? {}) as MenuFilters;
 }
 
-// the current frontend pre-encodes menu_name before axios encodes the query again,
-// so the value arrives still encoded once; decode defensively (never throw on a
-// literal "%") until the frontend refactor drops its encodeURIComponent calls
-function decodeMenuName(value: string): string {
-    try {
-        return decodeURIComponent(value);
-    } catch {
-        return value;
-    }
-}
-
 export default class PgMenuRepository implements MenuRepository {
     constructor(private pool: Pool) {}
 
     async findAll(filters: unknown): Promise<unknown[]> {
-        let { menu_name } = toMenuFilters(filters);
-        const { category_ids } = toMenuFilters(filters);
-        if (menu_name) {
-            menu_name = decodeMenuName(menu_name);
-        }
+        const { menu_name, category_ids } = toMenuFilters(filters);
 
         let query = `
       SELECT
@@ -167,6 +152,7 @@ export default class PgMenuRepository implements MenuRepository {
         m.menu_title AS title,
         m.menu_content AS menuContent,
         mc.category_name AS categoryName,
+        m.category_id,
         m.person_id AS personId,
         (m.person_id = $2) AS "isOwner"
       FROM menu m
@@ -299,11 +285,7 @@ export default class PgMenuRepository implements MenuRepository {
     }
 
     async searchByPerson(id: number, filters: unknown): Promise<unknown[]> {
-        let { menu_name } = toMenuFilters(filters);
-        const { category_ids } = toMenuFilters(filters);
-        if (menu_name) {
-            menu_name = decodeMenuName(menu_name);
-        }
+        const { menu_name, category_ids } = toMenuFilters(filters);
 
         let query = `
       SELECT

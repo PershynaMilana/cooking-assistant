@@ -11,7 +11,7 @@ const makeRecipe = (
     missingIngredients?: MenuDetailRecipe["missingIngredients"],
 ): MenuDetailRecipe =>
     ({
-        id,
+        recipe_id: id,
         title: `Recipe ${id}`,
         type_name,
         missingIngredients,

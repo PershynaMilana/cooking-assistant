@@ -3,3 +3,4 @@ if [ "$branch" = "main" ]; then
   echo "Error: direct push to main is not allowed. Use a release/X.Y branch and open a PR."
   exit 1
 fi
+npm --prefix frontend run build

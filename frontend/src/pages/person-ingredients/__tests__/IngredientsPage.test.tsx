@@ -11,7 +11,7 @@ import {
     saveUserIngredient,
 } from "api/userIngredientsApi";
 
-import IngredientsPage from "pages/person-ingradients/IngredientsPage";
+import IngredientsPage from "pages/person-ingredients/IngredientsPage";
 import { BTN_EDIT_INGREDIENTS } from "test/constants";
 import { renderWithRouter } from "test/router";
 

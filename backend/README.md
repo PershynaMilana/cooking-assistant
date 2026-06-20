@@ -7,7 +7,8 @@ serves the [frontend](../frontend/README.md) at http://localhost:8080 (CORS-rest
 
 - Node.js + TypeScript + Express 5 - HTTP server
 - PostgreSQL via `pg` (connection pool, raw SQL, no ORM)
-- jsonwebtoken + bcryptjs - auth and password hashing
+- jsonwebtoken + bcryptjs - auth (httpOnly cookie session) and password hashing
+- cookie-parser - reads the auth cookie on every request
 - helmet + express-rate-limit - security headers and brute-force guard on auth
 - pino + pino-http - structured app and request logging
 - zod - request and environment validation
@@ -36,19 +37,26 @@ This file is gitignored and not in the repo. Copy the template and fill in real 
 cp .env.example .env     # PowerShell: Copy-Item .env.example .env
 ```
 
-[.env.example](.env.example) lists every key:
+[.env.example](.env.example) ships with working local defaults; here is what each key is (fill in your own
+values rather than copying any shown here):
 
 ```
-JWT_SECRET_KEY=replace_with_a_random_string_of_at_least_32_characters
-DB_USER=postgres
-DB_PASSWORD=12345678
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=cooking_helper
-PORT=3000
-LOG_LEVEL=info
-CORS_ORIGIN=http://localhost:8080
+JWT_SECRET_KEY=<random string, at least 32 characters>
+DB_USER=<your postgres user>
+DB_PASSWORD=<your postgres password>
+DB_HOST=<db host>
+DB_PORT=<db port>
+DB_NAME=<your database name>
+NODE_ENV=<development | production>
+PORT=<backend port>
+LOG_LEVEL=<pino log level, e.g. info>
+CORS_ORIGIN=<allowed frontend origin>
+COOKIE_DOMAIN=<empty in dev; shared parent domain in production>
 ```
+
+`NODE_ENV=production` turns on the `Secure` flag of the auth cookie. `COOKIE_DOMAIN` is left empty in dev
+(a host-only cookie); in production set the shared parent domain (e.g. `.example.com`) so `app.*` and
+`api.*` subdomains share the session cookie. See [src/config/cookie.ts](src/config/cookie.ts).
 
 `JWT_SECRET_KEY` is used by [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) (verifies
 tokens) and [src/infrastructure/security/JwtTokenService.ts](src/infrastructure/security/JwtTokenService.ts)
@@ -61,20 +69,9 @@ When you add a new env key, add it (without a value) to [.env.example](.env.exam
 
 ### 2. PostgreSQL connection - [src/config/env.ts](src/config/env.ts) and [src/db.ts](src/db.ts)
 
-Credentials are read from the `DB_*` variables above, with the historical hardcoded values as fallback
-defaults:
-
-```ts
-{
-  user: "postgres",
-  password: "12345678",
-  host: "localhost",
-  port: 5432,
-  database: "cooking_helper",
-}
-```
-
-Set the `DB_*` keys in `.env` if your Postgres differs - no need to edit [src/db.ts](src/db.ts).
+Credentials are read from the `DB_*` variables above. Each one falls back to a conventional local-Postgres
+default when unset (the exact fallbacks live in [src/config/env.ts](src/config/env.ts)). Set the `DB_*`
+keys in `.env` to match your own Postgres - no need to edit [src/db.ts](src/db.ts).
 
 ### 3. Database - [migrations/](migrations/) + [src/scripts/seed.ts](src/scripts/seed.ts)
 
@@ -87,11 +84,12 @@ Pick the path that matches your situation:
 
 #### A. Fresh / empty database (new machine, prod, a teammate cloning the repo)
 
-1. Create an empty database named `cooking_helper`. Any one of these:
-   - **pgAdmin**: right-click *Databases* → *Create* → *Database* → name it `cooking_helper`.
-   - **psql**: `psql -U postgres -c "CREATE DATABASE cooking_helper;"`
+1. Create an empty database whose name matches your `DB_NAME`. Any one of these (substitute your own
+   `DB_USER` / `DB_NAME`):
+   - **pgAdmin**: right-click *Databases* → *Create* → *Database* → give it your `DB_NAME`.
+   - **psql**: `psql -U <DB_USER> -c "CREATE DATABASE <DB_NAME>;"`
    - **createdb** (only works if the Postgres `bin/` folder is on your PATH, otherwise use the full path to it):
-     `createdb -U postgres cooking_helper`
+     `createdb -U <DB_USER> <DB_NAME>`
 2. `npm run migrate` - builds every table from the files in [migrations/](migrations/).
 3. `npm run seed` - loads reference + sample data (units, recipe types, menu categories, sample ingredients).
 
@@ -162,7 +160,9 @@ migrations are the single source of truth for the schema (its old content is in 
 ### 4. CORS - [src/app.ts](src/app.ts)
 
 The allowed origin comes from the `CORS_ORIGIN` env var (default `http://localhost:8080`). Set it to the
-frontend's URL for non-local deploys; no code change needed.
+frontend's URL for non-local deploys; no code change needed. CORS runs with `credentials: true` and the app
+mounts `cookie-parser`, so the browser can send the httpOnly auth cookie cross-origin (see
+[Auth flow](#auth-flow)).
 
 ## Structure
 
@@ -183,16 +183,18 @@ backend/
     ├── index.ts              runtime entry; listens on 3000 and shuts down server + pg pool cleanly
     ├── composition-root.ts   dependency injection: buildControllers(deps), plus real pg wiring
     ├── db.ts                 pg.Pool connection (reads DB_* env via config/env.ts)
-    ├── config/env.ts         typed env loading and JWT secret guard
+    ├── config/env.ts         typed env loading and JWT secret guard (isProduction, cookieDomain, corsOrigin)
     ├── config/logger.ts      shared pino logger, LOG_LEVEL-aware and silent in tests
+    ├── config/cookie.ts      AUTH_COOKIE_NAME + AUTH_COOKIE_OPTIONS (httpOnly, sameSite, secure, maxAge)
     │
     ├── domain/               innermost layer (no framework/db deps)
-    │   ├── entities/         domain objects
+    │   ├── entities/         Recipe, Menu (only entities that enforce an invariant)
     │   ├── errors/           AppError + NotFoundError / ValidationError / UnauthorizedError (carry HTTP status)
     │   └── repositories/     repository interfaces (TypeScript interface)
     │
     ├── application/
     │   ├── ports/            service interfaces: PasswordHasher, TokenService
+    │   ├── validation/       zod request schemas (*.schemas.ts), the validate() helper, assertRecipesExist
     │   └── use-cases/        one class per operation (recipes/, recipe-types/, menus/, menu-categories/, pantry/, users/)
     │
     ├── infrastructure/
@@ -200,7 +202,7 @@ backend/
     │   └── security/         BcryptPasswordHasher, JwtTokenService
     │
     ├── middleware/
-    │   ├── jwtMiddleware.ts  authenticateToken - verifies Bearer JWT, attaches req.user
+    │   ├── jwtMiddleware.ts  authenticateToken - verifies the JWT from the authToken cookie, attaches req.user
     │   ├── rateLimit.ts      authLimiter - rate limits register/login outside tests
     │   └── errorHandler.ts   turns thrown errors into { error } responses (mounted last)
     │
@@ -208,9 +210,10 @@ backend/
     │   └── *.routes.ts
     │
     ├── controller/           thin HTTP adapters (DI classes) that call use cases
-    │   └── *.controller.ts
+    │   ├── *.controller.ts
+    │   └── requestUser.ts    getUserId(req) helper - returns req.user.id (never body/params)
     │
-    ├── types/                ambient .d.ts files
+    ├── types/                ambient .d.ts files (express.d.ts req.user, env.d.ts, node-pg-migrate.d.ts)
     └── test/                 Jest setup, fake deps/test app helpers, and HTTP integration tests
 ```
 
@@ -219,11 +222,12 @@ backend/
 Dependencies point inward (Dependency Rule). The real graph is built in
 [src/composition-root.ts](src/composition-root.ts) and consumed by [src/index.ts](src/index.ts). Tests can
 reuse `buildControllers(deps)` with fakes and pass the result to [src/app.ts](src/app.ts). The app factory
-mounts `helmet`, pino request logging, CORS, the 100kb JSON body parser, the public health check, domain
-routers, and then the error handler in that order.
+mounts `helmet`, pino request logging, CORS (with credentials), `cookie-parser`, the 100kb JSON body
+parser, the public health check, domain routers, and then the error handler in that order.
 
 - **routes/** - factory functions `(controller) => router`; map `METHOD /path` directly to a
-  controller handler, guard with `authenticateToken` (except `/health`, `/register`, and `/login`).
+  controller handler, guard with `authenticateToken` (the only public routes are `/health`, `/register`,
+  `/login`, and `/logout`).
 - **controller/** - thin classes; a handler reads `req`, calls a use case, sends the response. No try/catch.
 - **application/validation/** - zod request schemas and the shared `validate()` helper. Schemas describe
   request shape only (types, required scalars, formats, ranges, array item shape).
@@ -252,17 +256,30 @@ integration tests live in [src/test/integration/](src/test/integration/) and use
 
 ## Auth flow
 
-1. `POST /api/login` verifies the password via `BcryptPasswordHasher` and signs a JWT (payload `{ id }`,
-   `expiresIn: "24h"`) via `JwtTokenService`.
-2. Client sends `Authorization: Bearer <token>` on later requests.
-3. [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) verifies with `JWT_SECRET_KEY`,
-   attaches `req.user`, calls `next()`.
-4. The current user's id always comes from `req.user.id` (never from the request body/params).
+Auth is an **httpOnly cookie** (`authToken`) - the token is never in a response body and the client never
+reads it. Cookie name and options live in [src/config/cookie.ts](src/config/cookie.ts).
+
+1. `POST /api/login` verifies the password via `BcryptPasswordHasher` and signs an HS256 JWT (payload
+   `{ id }`, `expiresIn: "24h"`) via `JwtTokenService`. The controller sets it with
+   `res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS)` (`httpOnly`, `sameSite: "lax"`, `secure` in
+   production, `domain` from `COOKIE_DOMAIN`, `maxAge` 24h) and responds `{ message: "Logged in" }`.
+2. The browser sends the cookie automatically on later requests (`cookie-parser` + CORS `credentials: true`).
+3. [src/middleware/jwtMiddleware.ts](src/middleware/jwtMiddleware.ts) reads the JWT from
+   `req.cookies[AUTH_COOKIE_NAME]`, verifies it with `JWT_SECRET_KEY` (HS256 only) - `401` if the cookie is
+   missing, `403` if it is invalid/expired - then attaches `req.user = { id }` and calls `next()`.
+4. `GET /api/me` (protected) returns `{ id }` so the client can check its session. `POST /api/logout`
+   (public) clears the cookie and returns `{ message: "Logged out" }`.
+5. The current user's id always comes from `req.user.id` via the `getUserId(req)` helper
+   ([src/controller/requestUser.ts](src/controller/requestUser.ts)), never from the request body/params.
+6. `/register` and `/login` are rate-limited by `authLimiter` (10 requests / 15 min per IP, `429` on
+   excess); there is no per-account lockout, and login returns the same generic error for unknown user vs
+   wrong password (anti-enumeration). pino redacts the `cookie` and `authorization` headers from logs.
 
 ## API reference
 
-All endpoints under `/api`. Everything except `/health`, `/register`, and `/login` requires
-`Authorization: Bearer <token>`.
+All endpoints under `/api`. Public routes: `/health`, `/register`, `/login`, `/logout`. Every other route
+requires the `authToken` session cookie (sent automatically by the browser); there is no `Authorization`
+header. Routes that act on "the current user" take the id from the cookie, not from a path segment.
 
 ### Health ([src/routes/health.routes.ts](src/routes/health.routes.ts))
 | Method | Path | Purpose |
@@ -272,8 +289,10 @@ All endpoints under `/api`. Everything except `/health`, `/register`, and `/logi
 ### Auth ([src/routes/user.routes.ts](src/routes/user.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
-| POST | `/register` | Create a user (`name`, `surname`, `login`, `password`) |
-| POST | `/login` | Authenticate, returns `{ token }` |
+| POST | `/register` | Create a user (`name`, `surname`, `login`, `password`); rate-limited |
+| POST | `/login` | Authenticate, set the `authToken` cookie, return `{ message: "Logged in" }`; rate-limited |
+| POST | `/logout` | Clear the `authToken` cookie, return `{ message: "Logged out" }` (public) |
+| GET | `/me` | Return the current user's id `{ id }` from the cookie (session check) |
 | GET | `/user` | List all users |
 
 ### Recipes ([src/routes/recipe.routes.ts](src/routes/recipe.routes.ts))
@@ -286,27 +305,25 @@ All endpoints under `/api`. Everything except `/health`, `/register`, and `/logi
 | DELETE | `/recipe/:id` | Delete a recipe |
 | GET | `/ingredients` | List all known ingredients |
 | GET | `/recipes-by-filters` | Filter (type, ingredients, time, date) |
-| GET | `/recipes-filters-person/:id` | Filter a user's recipes |
+| GET | `/recipes-filters-person` | Filter the current user's recipes (user from cookie) |
 | GET | `/recipes-stats` | Aggregated stats for the analytics page |
 
 ### Recipe types ([src/routes/type.routes.ts](src/routes/type.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/recipe-types` | List all |
-| POST | `/recipe-types` | Create |
-| GET | `/recipe-type/:id` | Single |
-| PUT | `/recipe-type/:id` | Update |
-| DELETE | `/recipe-type/:id` | Delete |
+
+> Recipe-type create/update/delete were removed in the 1.40 lockdown - only the read-only list remains.
 
 ### User pantry ([src/routes/userIngredients.routes.ts](src/routes/userIngredients.routes.ts))
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET | `/user-ingredients/:id` | Get a user's pantry |
-| PUT | `/user-ingredients/:id` | Add/replace pantry items |
-| DELETE | `/user-ingredients/:userId/:ingredientId` | Remove a pantry item |
-| PUT | `/user-ingredients/update-quantities/:userId` | Bulk update quantities |
-| GET | `/user-ingredients/:userId/history/:ingredientId` | Purchase history |
-| PUT | `/user-ingredients/:userId/history/:purchaseId` | Update a purchase entry |
+| GET | `/user-ingredients` | Get the current user's pantry |
+| PUT | `/user-ingredients` | Add/replace pantry items |
+| PUT | `/user-ingredients/update-quantities` | Bulk update quantities (qty 0 deletes the row) |
+| GET | `/user-ingredients/history/:ingredientId` | Purchase history for one ingredient |
+| PUT | `/user-ingredients/history/:purchaseId` | Update a purchase entry |
+| DELETE | `/user-ingredients/:ingredientId` | Remove a pantry item |
 
 ### Menus ([src/routes/menu.routes.ts](src/routes/menu.routes.ts))
 | Method | Path | Purpose |
@@ -316,7 +333,7 @@ All endpoints under `/api`. Everything except `/health`, `/register`, and `/logi
 | GET | `/menu/:id` | Menu details + recipes |
 | PUT | `/menu/:id` | Update a menu |
 | DELETE | `/menu/:id` | Delete a menu |
-| GET | `/menu-filters-person/:id` | A user's menus |
+| GET | `/menu-filters-person` | The current user's menus (user from cookie) |
 
 ### Menu categories ([src/routes/menuCategory.routes.ts](src/routes/menuCategory.routes.ts))
 | Method | Path | Purpose |

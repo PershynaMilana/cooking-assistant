@@ -10,14 +10,15 @@ export const parseCookingTime = (value: string): number | null => {
     const hours = parseInt(parts[0], 10);
     const minutes = parseInt(parts[1], 10);
 
-    if (
+    const isInvalid =
         isNaN(hours) ||
         isNaN(minutes) ||
         hours < 0 ||
         hours > 99 ||
         minutes < 0 ||
-        minutes >= 60
-    ) {
+        minutes >= 60;
+
+    if (isInvalid) {
         return null;
     }
 
@@ -36,7 +37,6 @@ export const splitCookingTime = (totalMinutes: number): CookingTimeParts => ({
     minutes: totalMinutes % 60,
 });
 
-// Formats total minutes to a "hh:mm" string for form input fields.
 export const formatCookingTimeInput = (totalMinutes: number): string => {
     const { hours, minutes } = splitCookingTime(totalMinutes);
 

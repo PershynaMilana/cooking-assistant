@@ -24,7 +24,7 @@ const RECIPE: RecipeDetails = {
     type_name: "Soup",
     cooking_time: 60,
     creation_date: "2024-01-01",
-    servings: "4",
+    servings: 4,
     person_id: 3,
     isOwner: true,
 };

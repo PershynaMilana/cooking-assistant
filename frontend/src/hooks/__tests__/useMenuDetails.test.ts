@@ -21,6 +21,7 @@ const MENU: MenuDetails = {
         title: "Weekday menu",
         categoryname: "Lunch",
         menucontent: "quick",
+        category_id: 2,
         personid: 5,
         isOwner: true,
     },

@@ -37,7 +37,10 @@ export const useEditRecipeForm = (id: string | undefined) => {
                 title: recipeData.title,
                 content: recipeData.content,
                 cookingTime: formatCookingTimeInput(recipeData.cooking_time),
-                servings: recipeData.servings,
+                servings:
+                    recipeData.servings !== null
+                        ? String(recipeData.servings)
+                        : "",
                 selectedTypeId: recipeData.type_id,
                 selectedIngredients: recipeData.ingredients.map((i) => ({
                     id: i.id,
@@ -82,7 +85,8 @@ export const useEditRecipeForm = (id: string | undefined) => {
                 content: form.content,
                 type_id: form.selectedTypeId,
                 cooking_time: parseCookingTime(form.cookingTime) ?? 0,
-                servings: form.servings,
+                servings:
+                    form.servings !== "" ? Number(form.servings) : undefined,
                 ingredients: form.selectedIngredients.map(
                     ({ id: recipeId, quantity }) => ({
                         id: recipeId,
@@ -91,7 +95,7 @@ export const useEditRecipeForm = (id: string | undefined) => {
                 ),
             });
 
-            navigate(ROUTES.home);
+            navigate(ROUTES.main);
         } catch (err: unknown) {
             form.setError(getApiErrorMessage(err));
         }

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import React from "react";
+import React, { Suspense } from "react";
 import {
     BrowserRouter as Router,
     Navigate,
@@ -9,31 +9,41 @@ import {
 
 import { ROUTES } from "constants/routes";
 
+import { PageSpinner } from "components/layout/PageSpinner";
 import { PrivateRoute } from "components/layout/PrivateRoute";
 
-import LoginPage from "pages/auth/LoginPage";
-import RegisterPage from "pages/auth/RegisterPage";
-import ChangeMenuPage from "pages/menu/ChangeMenuPage";
-import CreateMenuPage from "pages/menu/CreateMenuPage";
-import MenuDetailsPage from "pages/menu/MenuDetailsPage";
-import MenuPage from "pages/menu/MenuPage";
-import NotFoundPage from "pages/not-found/NotFoundPage";
-import IngredientsPage from "pages/person-ingradients/IngredientsPage";
-import TypesPage from "pages/recipe-types/TypesPage";
-import ChangeRecipePage from "pages/recipes/ChangeRecipePage";
-import CreateRecipePage from "pages/recipes/CreateRecipePage";
-import MainPage from "pages/recipes/MainPage";
-import RecipeDetailsPage from "pages/recipes/RecipeDetailsPage";
-import StatsPage from "pages/statistics/StatsPage";
-import UserMenuPage from "pages/user-menu/UserMenuPage";
-import UserRecipesPage from "pages/user-recipes/UserRecipesPage";
+const LoginPage = React.lazy(() => import("pages/auth/LoginPage"));
+const RegisterPage = React.lazy(() => import("pages/auth/RegisterPage"));
+const ChangeMenuPage = React.lazy(() => import("pages/menu/ChangeMenuPage"));
+const CreateMenuPage = React.lazy(() => import("pages/menu/CreateMenuPage"));
+const MenuDetailsPage = React.lazy(() => import("pages/menu/MenuDetailsPage"));
+const MenuPage = React.lazy(() => import("pages/menu/MenuPage"));
+const NotFoundPage = React.lazy(() => import("pages/not-found/NotFoundPage"));
+const IngredientsPage = React.lazy(
+    () => import("pages/person-ingredients/IngredientsPage"),
+);
+const TypesPage = React.lazy(() => import("pages/recipe-types/TypesPage"));
+const ChangeRecipePage = React.lazy(
+    () => import("pages/recipes/ChangeRecipePage"),
+);
+const CreateRecipePage = React.lazy(
+    () => import("pages/recipes/CreateRecipePage"),
+);
+const MainPage = React.lazy(() => import("pages/recipes/MainPage"));
+const RecipeDetailsPage = React.lazy(
+    () => import("pages/recipes/RecipeDetailsPage"),
+);
+const StatsPage = React.lazy(() => import("pages/statistics/StatsPage"));
+const UserMenuPage = React.lazy(() => import("pages/user-menu/UserMenuPage"));
+const UserRecipesPage = React.lazy(
+    () => import("pages/user-recipes/UserRecipesPage"),
+);
 
 interface AppRoute {
     path: string;
     element: ReactElement;
 }
 
-// every authenticated route, rendered once under a single <PrivateRoute> layout
 const PRIVATE_ROUTES: AppRoute[] = [
     { path: ROUTES.main, element: <MainPage /> },
     { path: ROUTES.myRecipes, element: <UserRecipesPage /> },
@@ -56,23 +66,22 @@ const App: React.FC = () => (
             path={ROUTES.home}
             element={<Navigate to={ROUTES.main} replace />}
         />
-
         <Route path={ROUTES.login} element={<LoginPage />} />
         <Route path={ROUTES.registration} element={<RegisterPage />} />
-
         <Route element={<PrivateRoute />}>
             {PRIVATE_ROUTES.map(({ path, element }) => (
                 <Route key={path} path={path} element={element} />
             ))}
         </Route>
-
         <Route path={ROUTES.notFound} element={<NotFoundPage />} />
     </Routes>
 );
 
 const AppWrapper: React.FC = () => (
     <Router>
-        <App />
+        <Suspense fallback={<PageSpinner />}>
+            <App />
+        </Suspense>
     </Router>
 );
 
