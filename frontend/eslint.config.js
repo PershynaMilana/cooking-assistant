@@ -59,7 +59,11 @@ export default tseslint.config(
             "padding-line-between-statements": [
                 "error",
                 { blankLine: "always", prev: "*", next: "return" },
-                { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+                {
+                    blankLine: "always",
+                    prev: ["const", "let", "var"],
+                    next: "*",
+                },
                 {
                     blankLine: "any",
                     prev: ["const", "let", "var"],
@@ -99,7 +103,9 @@ export default tseslint.config(
                         // side effects (CSS, polyfills, setup files)
                         ["^\\u0000"],
                         // external packages - starts with letter/@, but not our bare aliases
-                        ["^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|test|types|utils)/)@?\\w"],
+                        [
+                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|test|types|utils)/)@?\\w",
+                        ],
                         // config / constants / types layers
                         ["^(?:config|constants|types)/"],
                         // api layer
@@ -164,57 +170,64 @@ export default tseslint.config(
             ],
         },
     },
-    // TODO R23 - включить ПОСЛЕ рефактора R10-R15 (когда файлы разбиты под лимиты).
-    // Раскомментировать для энфорса размера файлов/сложности; пороги подкрутить на R23.
-    // Размер файла - встроенные ESLint-правила. "Условие 3+ операндов → именованная const"
-    // и rule-of-three остаются ревью/промт-конвенцией (CONTEXT/CLAUDE.md), не линтом.
-    // {
-    //   files: ["**/*.{ts,tsx}"],
-    //   rules: {
-    //     "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
-    //     "max-lines-per-function": ["error", { max: 150, skipBlankLines: true, skipComments: true }],
-    //     complexity: ["error", 15],
-    //   },
-    // },
-    // {
-    //   files: ["src/pages/**/*.{ts,tsx}"], // страницы тоньше (только композиция)
-    //   rules: {
-    //     "max-lines": ["error", { max: 120, skipBlankLines: true, skipComments: true }],
-    //   },
-    // },
-    // TODO R23 - кастомное правило "условие 3+ операндов → именованная const" (включить вместе с лимитами).
-    // Скоуп: тесты if / ternary / while / for. Дотюнить при включении (исключения - eslint-disable).
-    // {
-    //   files: ["src/**/*.{ts,tsx}"],
-    //   plugins: {
-    //     local: {
-    //       rules: {
-    //         "no-complex-condition": {
-    //           meta: {
-    //             type: "suggestion",
-    //             messages: { complex: "Условие из 3+ операндов: вынеси в именованную константу." },
-    //           },
-    //           create(context) {
-    //             const count = (n) =>
-    //               n && n.type === "LogicalExpression" ? count(n.left) + count(n.right) : 1;
-    //             const check = (t) => {
-    //               if (t && t.type === "LogicalExpression" && count(t) >= 3)
-    //                 context.report({ node: t, messageId: "complex" });
-    //             };
-    //             return {
-    //               IfStatement: (n) => check(n.test),
-    //               ConditionalExpression: (n) => check(n.test),
-    //               WhileStatement: (n) => check(n.test),
-    //               DoWhileStatement: (n) => check(n.test),
-    //               ForStatement: (n) => check(n.test),
-    //             };
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    //   rules: { "local/no-complex-condition": "error" },
-    // },
+    {
+        files: ["**/*.{ts,tsx}"],
+        ignores: ["**/__tests__/**/*.{ts,tsx}"],
+        rules: {
+            "max-lines": [
+                "error",
+                { max: 150, skipBlankLines: true, skipComments: true },
+            ],
+            "max-lines-per-function": [
+                "error",
+                { max: 150, skipBlankLines: true, skipComments: true },
+            ],
+            complexity: ["error", 15],
+        },
+    },
+    {
+        files: ["src/pages/**/*.{ts,tsx}"],
+        ignores: ["src/pages/**/__tests__/**/*.{ts,tsx}"],
+        rules: {
+            "max-lines": [
+                "error",
+                { max: 120, skipBlankLines: true, skipComments: true },
+            ],
+        },
+    },
+    {
+        files: ["src/**/*.{ts,tsx}"],
+        plugins: {
+            local: {
+                rules: {
+                    "no-complex-condition": {
+                        meta: {
+                            type: "suggestion",
+                            messages: { complex: "Условие из 3+ операндов: вынеси в именованную константу." },
+                        },
+                        create(context) {
+                            const count = (n) =>
+                                n && n.type === "LogicalExpression"
+                                    ? count(n.left) + count(n.right)
+                                    : 1;
+                            const check = (t) => {
+                                if (t && t.type === "LogicalExpression" && count(t) >= 3)
+                                    context.report({ node: t, messageId: "complex" });
+                            };
+                            return {
+                                IfStatement: (n) => check(n.test),
+                                ConditionalExpression: (n) => check(n.test),
+                                WhileStatement: (n) => check(n.test),
+                                DoWhileStatement: (n) => check(n.test),
+                                ForStatement: (n) => check(n.test),
+                            };
+                        },
+                    },
+                },
+            },
+        },
+        rules: { "local/no-complex-condition": "error" },
+    },
     {
         // layer boundaries (warn now, error in R23). default:allow so today's legal
         // imports are clean; only the two arch concerns below are flagged on violation
@@ -235,7 +248,7 @@ export default tseslint.config(
         },
         rules: {
             "boundaries/dependencies": [
-                "warn",
+                "error",
                 {
                     checkAllOrigins: true,
                     default: "allow",
@@ -305,10 +318,7 @@ export default tseslint.config(
     {
         // testing-library rules scoped to test files only
         ...testingLibrary.configs["flat/react"],
-        files: [
-            "**/__tests__/**/*.{ts,tsx}",
-            "src/test/**/*.{ts,tsx}",
-        ],
+        files: ["**/__tests__/**/*.{ts,tsx}", "src/test/**/*.{ts,tsx}"],
     },
     prettier,
 );

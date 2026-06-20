@@ -20,7 +20,6 @@ const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
     second: "2-digit",
 };
 
-// long date with time, used for report timestamps
 export const formatDateTime = (
     date: Date | string,
     language: string = DEFAULT_LANGUAGE,

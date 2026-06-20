@@ -50,7 +50,6 @@ export const DateFilterDropdown: React.FC<DateFilterDropdownProps> = ({
         validateDates(startDate, e.target.value);
     };
 
-    // validate dates when dropdown is opened
     useEffect(() => {
         if (isOpen) {
             validateDates(startDate, endDate);

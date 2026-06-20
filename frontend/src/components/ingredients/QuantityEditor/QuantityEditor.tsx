@@ -29,7 +29,7 @@ export const QuantityEditor: React.FC<QuantityEditorProps> = ({
                     <div className="flex items-center gap-2">
                         <input
                             type="number"
-                            min="1"
+                            min="0"
                             value={ingredient.quantity_person_ingradient}
                             onChange={(e) => {
                                 const value = parseInt(e.target.value, 10);

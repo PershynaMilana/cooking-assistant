@@ -8,7 +8,6 @@ export default function createMenuCategoryRouter(
 ): Router {
     const router = express.Router();
 
-    // getting all menu categories
     router.get(
         "/menu-categories",
         authenticateToken,

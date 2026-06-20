@@ -36,6 +36,7 @@ const SAMPLE_DETAILS: MenuDetails = {
         title: "Weekday",
         categoryname: "Lunch",
         menucontent: "quick",
+        category_id: 2,
         isOwner: true,
     },
     recipes: [],

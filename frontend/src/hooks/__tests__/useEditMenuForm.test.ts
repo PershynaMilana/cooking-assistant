@@ -27,13 +27,12 @@ const MENU: MenuDetails = {
         title: MENU_TITLE,
         categoryname: "Lunch",
         menucontent: "quick meals",
-        categoryid: 2,
+        category_id: 2,
         personid: 7,
         isOwner: true,
     },
     recipes: [
         {
-            id: 5,
             recipe_id: 5,
             title: "Borscht",
             type_name: "Soup",

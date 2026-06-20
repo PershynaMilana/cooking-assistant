@@ -62,7 +62,7 @@ const SAMPLE_DETAILS: RecipeDetails = {
     type_name: "Soup",
     cooking_time: 60,
     creation_date: "2024-01-01",
-    servings: "4",
+    servings: 4,
     person_id: PERSON_ID,
     isOwner: true,
 };
@@ -72,14 +72,14 @@ const CREATE_BODY: CreateRecipeRequest = {
     ingredients: [{ id: 1, quantity: 2 }],
     type_id: 2,
     cooking_time: 60,
-    servings: "4",
+    servings: 4,
 };
 const UPDATE_BODY: UpdateRecipeRequest = {
     title: "Borscht",
     content: "boil",
     type_id: 2,
     cooking_time: 60,
-    servings: "4",
+    servings: 4,
     ingredients: [{ id: 1, quantity_recipe_ingredients: 2 }],
 };
 

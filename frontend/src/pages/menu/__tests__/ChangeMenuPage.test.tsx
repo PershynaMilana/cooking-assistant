@@ -49,7 +49,7 @@ const SAMPLE: MenuDetails = {
         title: TITLE,
         categoryname: "Lunch",
         menucontent: "quick",
-        categoryid: CATEGORY_ID,
+        category_id: CATEGORY_ID,
         isOwner: true,
     },
     recipes: [],

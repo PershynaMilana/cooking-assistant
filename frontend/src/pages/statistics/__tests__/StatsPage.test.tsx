@@ -9,22 +9,10 @@ import { renderWithRouter } from "test/router";
 
 jest.mock("api/recipesApi");
 
-// react-apexcharts and @react-pdf/renderer cannot render under jsdom (canvas /
-// PDF), so they are stubbed out; StyleSheet.create covers module-level calls in
-// the StatsReport components imported by the page
+// react-apexcharts cannot render under jsdom (canvas), so it is stubbed out
 jest.mock("react-apexcharts", () => ({
     __esModule: true,
     default: () => null,
-}));
-jest.mock("@react-pdf/renderer", () => ({
-    PDFDownloadLink: () => null,
-    Document: () => null,
-    Page: () => null,
-    Text: () => null,
-    View: () => null,
-    Image: () => null,
-    StyleSheet: { create: (styles: unknown) => styles },
-    Font: { register: () => undefined },
 }));
 
 const TYPE_NAME = "Soup";

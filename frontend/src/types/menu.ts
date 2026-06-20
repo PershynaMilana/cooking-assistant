@@ -17,7 +17,6 @@ export interface MissingIngredient {
 }
 
 export interface MenuDetailRecipe {
-    id: number;
     recipe_id: number;
     title: string;
     type_name: string;
@@ -32,7 +31,7 @@ export interface MenuDetails {
         title: string;
         categoryname: string;
         menucontent: string;
-        categoryid?: number;
+        category_id: number;
         personid?: number;
         isOwner: boolean;
     };

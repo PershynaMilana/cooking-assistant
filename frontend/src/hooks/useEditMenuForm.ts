@@ -51,8 +51,8 @@ export const useEditMenuForm = (id: string | undefined) => {
             setInitialValues({
                 menuTitle: menu.title || "",
                 menuDescription: menu.menucontent || "",
-                selectedCategory: menu.categoryid ?? null,
-                selectedRecipes: menuRecipes.map((r) => r.id),
+                selectedCategory: menu.category_id,
+                selectedRecipes: menuRecipes.map((r) => r.recipe_id),
             });
         } catch {
             setError(t("changeMenuPage.errorLoadData"));

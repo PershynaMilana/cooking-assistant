@@ -14,7 +14,7 @@ import {
     ERROR_COOKING_TIME_FORMAT,
     LABEL_COOKING_TIME,
     MOCK_ERROR_SERVER,
-    ROUTE_HOME,
+    ROUTE_MAIN,
 } from "test/constants";
 import { mockNavigate } from "test/router";
 
@@ -37,7 +37,7 @@ const SAMPLE: RecipeDetails = {
     type_name: "Soup",
     cooking_time: 60,
     creation_date: "2024-01-01",
-    servings: "4",
+    servings: 4,
     person_id: 3,
     isOwner: true,
 };
@@ -111,7 +111,7 @@ describe("ChangeRecipePage", () => {
             screen.getByRole("button", { name: UPDATE_RECIPE }),
         );
 
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_HOME);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
     });
 
     it("should display an error message when updateRecipe fails", async () => {

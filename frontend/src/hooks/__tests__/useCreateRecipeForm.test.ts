@@ -91,6 +91,6 @@ describe("useCreateRecipeForm", () => {
                 type_id: 3,
             }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith("/");
+        expect(mockNavigate).toHaveBeenCalledWith("/main");
     });
 });

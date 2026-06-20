@@ -5,7 +5,7 @@ shopping list of what you are missing. React + TypeScript on the front, Express 
 
 ## What it does
 
-- Accounts with JWT auth (24h tokens, bcrypt-hashed passwords)
+- Accounts with JWT auth carried in an httpOnly session cookie (24h tokens, bcrypt-hashed passwords)
 - Recipes: create/edit/delete with ingredients, quantities, units, cooking time, servings
 - Pantry: per-user inventory with quantities, purchase dates, expiry, allergens, seasonality
 - Menus: bundle recipes by meal type; the app computes which ingredients you are missing
@@ -21,9 +21,9 @@ You need Node 18+, PostgreSQL 14+, and a Postgres client (pgAdmin / DBeaver / ps
 git clone <repository-url>
 cd cooking-assistant
 
-# 2. Database - create an EMPTY database named "cooking_helper"
-#    pgAdmin:  right-click Databases -> Create -> Database -> "cooking_helper"
-#    or psql:  psql -U postgres -c "CREATE DATABASE cooking_helper;"
+# 2. Database - create an EMPTY database (its name must match DB_NAME in backend/.env)
+#    pgAdmin:  right-click Databases -> Create -> Database -> <your DB_NAME>
+#    or psql:  psql -U <DB_USER> -c "CREATE DATABASE <DB_NAME>;"
 
 # 3. Backend env
 cp backend/.env.example backend/.env     # PowerShell: Copy-Item backend/.env.example backend/.env
@@ -43,7 +43,7 @@ npm start
 
 Open http://localhost:8080, register, and you are in.
 
-> **Already have a `cooking_helper` from the old `database.sql` setup?** Don't run a plain `npm run migrate` on
+> **Already have a database from the old `database.sql` setup?** Don't run a plain `npm run migrate` on
 > it (the tables already exist - it would error). Instead adopt the migrations once, without touching your data:
 > `npm run migrate -- up --fake`. Full database guide (schema changes, seeding, rollbacks) is in
 > [backend/README.md](backend/README.md).
@@ -70,6 +70,8 @@ npm install              # installs root + backend + frontend (postinstall hook)
 npm start                # boot backend + frontend together (alias: npm run dev)
 npm run start:backend    # backend only (tsx watch -> :3000)
 npm run start:frontend   # frontend only (vite -> :8080)
+npm test                 # run both Jest suites
+npm run verify           # full local gate: format:check + lint + sonarjs + typecheck + test + build
 ```
 
 ## Versioning and changelog
@@ -98,15 +100,16 @@ open a PR for review. No git tags.
 - **Branch from `main`** named after the release (`release/X.Y`); never commit straight to `main` (a `pre-push` hook blocks it). Open a PR for review.
 - **One commit = code change + version bump + changelog entry**, bundled together. Commit title: `<version>: <short description>` (e.g. `1.27: fix purchase-edit stock recalculation`).
 - **PR description: short and to the point** - an `Added:` and/or `Fixed:` bullet list of what changed in user-facing terms. Omit a section if it has nothing. No "Checks" line, no git tags, no co-author trailer.
-- **Quality gates must pass to merge:** CI runs a Prettier check, ESLint, a `tsc` typecheck, a SonarJS lint, and the Jest test suite. The same checks run locally on `pre-commit` (Husky + lint-staged).
+- **Quality gates must pass to merge:** CI runs a Prettier check plus, on both sides, ESLint, a `tsc` typecheck, a SonarJS lint, and Jest with coverage (80% gate); the frontend also runs a production build and Stylelint. A `ci-success` job aggregates them all. The full suite also runs locally on `pre-commit` (Husky + lint-staged), and `pre-push` blocks pushing to `main` and runs the frontend build. Reproduce CI in one command with `npm run verify`.
 
 ## Tech stack
 
-- Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, jwt-decode, ApexCharts, @react-pdf/renderer, jsPDF
-- Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `zod`, `helmet`, `pino`, `tsx`
+- Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, i18next + react-i18next, ApexCharts, @react-pdf/renderer, jsPDF
+- Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `cookie-parser`, `zod`, `helmet`, `pino`, `tsx`
 - Database: PostgreSQL 14+
+- Tests: Jest on both sides - backend ts-jest + Supertest, frontend @swc/jest + React Testing Library + jsdom (80% coverage gate each)
 
-The backend has a Jest + ts-jest test suite (`npm --prefix backend test`); the frontend has no tests yet. Frontend changes are validated by running both apps locally and clicking through.
+Both sides have a Jest test suite with an 80% coverage gate: backend (`npm --prefix backend test`) uses ts-jest + Supertest with fake repositories; frontend (`npm --prefix frontend test`) uses @swc/jest + React Testing Library + jsdom (~108 test files). Run `npm test` from the root to run both.
 
 ## License
 

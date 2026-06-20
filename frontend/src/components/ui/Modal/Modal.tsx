@@ -23,12 +23,12 @@ export const Modal: React.FC<ModalProps> = ({
     const { t } = useTranslation();
 
     if (!isOpen) {
-        return null; // if modal is not open, render nothing
+        return null;
     }
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
-            onClose(); // close modal if clicking on overlay
+            onClose();
         }
     };
 
@@ -42,9 +42,7 @@ export const Modal: React.FC<ModalProps> = ({
                 <h2 className="text-lg font-semibold font-montserratRegular mb-4 text-center">
                     {title}
                 </h2>{" "}
-                {/* Centered title text */}
                 <p className="mb-6 text-center">{message}</p>{" "}
-                {/* Centered message text */}
                 {error && (
                     <p className="text-red-500 text-sm text-center mb-4">
                         {error}
@@ -52,7 +50,6 @@ export const Modal: React.FC<ModalProps> = ({
                 )}
                 <div className="flex justify-center space-x-4">
                     {" "}
-                    {/* Center-align buttons */}
                     <button
                         onClick={onClose}
                         className="bg-gray-400 text-white px-4 py-2 rounded-full"

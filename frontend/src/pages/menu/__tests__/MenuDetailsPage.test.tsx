@@ -25,6 +25,7 @@ const SAMPLE: MenuDetails = {
         title: TITLE,
         categoryname: "Lunch",
         menucontent: "quick",
+        category_id: 2,
         personid: OWNER_ID,
         isOwner: true,
     },
