@@ -7,7 +7,6 @@ import { createMenu } from "api/menusApi";
 import { getRecipes } from "api/recipesApi";
 
 import CreateMenuPage from "pages/menu/CreateMenuPage";
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { ROUTE_MENU } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
@@ -18,9 +17,7 @@ jest.mock("react-router-dom", () => ({
 jest.mock("api/menuCategoriesApi");
 jest.mock("api/recipesApi");
 jest.mock("api/menusApi");
-jest.mock("jwt-decode");
 
-const PERSON_ID = 7;
 const CATEGORY_ID = 2;
 const CATEGORY_NAME = "Lunch";
 const RECIPE_ID = 5;
@@ -44,8 +41,6 @@ const SAMPLE_RECIPES = [
 
 describe("CreateMenuPage", () => {
     it("should create the menu and navigate to the menu list on submit", async () => {
-        setAuthToken();
-        mockJwtUser(PERSON_ID);
         jest.mocked(getMenuCategories).mockResolvedValue(SAMPLE_CATEGORIES);
         jest.mocked(getRecipes).mockResolvedValue(SAMPLE_RECIPES);
         const mockedCreateMenu = jest.mocked(createMenu);
@@ -76,7 +71,6 @@ describe("CreateMenuPage", () => {
             menuTitle: MENU_TITLE,
             menuContent: MENU_DESC,
             categoryId: CATEGORY_ID,
-            personId: PERSON_ID,
             recipeIds: [RECIPE_ID],
         });
         expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENU);

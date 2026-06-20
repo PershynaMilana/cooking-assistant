@@ -7,8 +7,6 @@ import { deleteMenu, getMenuById } from "api/menusApi";
 
 import { useMenuDetails } from "hooks/useMenuDetails";
 
-import { getUserIdSafe } from "utils/getCurrentUserId";
-
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -16,16 +14,15 @@ jest.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
 }));
 jest.mock("api/menusApi");
-jest.mock("utils/getCurrentUserId");
 
-const OWNER_ID = 5;
 const MENU: MenuDetails = {
     menu: {
         id: 1,
         title: "Weekday menu",
         categoryname: "Lunch",
         menucontent: "quick",
-        personid: OWNER_ID,
+        personid: 5,
+        isOwner: true,
     },
     recipes: [],
 };
@@ -37,9 +34,8 @@ const flush = async () => {
 };
 
 describe("useMenuDetails", () => {
-    it("should load the menu and mark the owner", async () => {
+    it("should load the menu and expose isOwner:true when the backend returns isOwner:true", async () => {
         jest.mocked(getMenuById).mockResolvedValue(MENU);
-        jest.mocked(getUserIdSafe).mockReturnValue(OWNER_ID);
 
         const { result } = renderHook(() => useMenuDetails("1"));
 
@@ -49,20 +45,19 @@ describe("useMenuDetails", () => {
         expect(result.current.isOwner).toBe(true);
     });
 
-    it("should not mark a non-owner as owner", async () => {
-        jest.mocked(getMenuById).mockResolvedValue(MENU);
-        jest.mocked(getUserIdSafe).mockReturnValue(99);
+    it("should not mark as owner when the menu fails to load", async () => {
+        jest.mocked(getMenuById).mockRejectedValue(new Error("404"));
 
         const { result } = renderHook(() => useMenuDetails("1"));
 
         await flush();
 
+        expect(result.current.menu).toBeNull();
         expect(result.current.isOwner).toBe(false);
     });
 
     it("should delete the menu and navigate to the menu list", async () => {
         jest.mocked(getMenuById).mockResolvedValue(MENU);
-        jest.mocked(getUserIdSafe).mockReturnValue(OWNER_ID);
         jest.mocked(deleteMenu).mockResolvedValue(undefined);
 
         const { result } = renderHook(() => useMenuDetails("1"));

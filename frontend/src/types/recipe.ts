@@ -33,6 +33,9 @@ export interface RecipeDetails {
     creation_date: string;
     servings: string;
     person_id: number;
+    // computed by the backend (r.person_id = current user) so the client can gate
+    // Edit/Delete without decoding the session
+    isOwner: boolean;
 }
 
 export interface RecipeFilterParams {
@@ -53,7 +56,6 @@ export interface CreateRecipeIngredient {
 export interface CreateRecipeRequest {
     title: string;
     content: string;
-    person_id: number;
     ingredients: CreateRecipeIngredient[];
     type_id: number | null;
     cooking_time: number;

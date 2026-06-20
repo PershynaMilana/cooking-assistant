@@ -1,21 +1,44 @@
 import type { ReactNode } from "react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, Outlet } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
-import { AUTH_TOKEN_KEY } from "constants/storage";
+
+import { getMe } from "api/authApi";
+import { isAxiosError } from "api/client";
+
+type SessionState = "checking" | "authed" | "unauthed" | "error";
 
 interface PrivateRouteProps {
-    // optional: when used as a layout route (no children) it renders an <Outlet/>
     children?: ReactNode;
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const { t } = useTranslation();
+    const [session, setSession] = useState<SessionState>("checking");
 
-    if (!token) {
-        return <Navigate to={ROUTES.login} replace />;
-    }
+    useEffect(() => {
+        getMe()
+            .then(() => {
+                setSession("authed");
+            })
+            .catch((err: unknown) => {
+                const status = isAxiosError(err)
+                    ? err.response?.status
+                    : undefined;
+
+                if (status === 401 || status === 403) {
+                    setSession("unauthed");
+                } else {
+                    setSession("error");
+                }
+            });
+    }, []);
+
+    if (session === "checking") return <div className="min-h-screen" />;
+    if (session === "unauthed") return <Navigate to={ROUTES.login} replace />;
+    if (session === "error") return <div>{t("sessionError")}</div>;
 
     return <>{children ?? <Outlet />}</>;
 };

@@ -9,63 +9,45 @@ import type {
 import { apiClient } from "./client";
 import { API_ROUTES } from "./endpoints";
 
-export async function getUserIngredients(
-    userId: number,
-): Promise<UserIngredient[]> {
+export async function getUserIngredients(): Promise<UserIngredient[]> {
     const response = await apiClient.get<UserIngredient[]>(
-        API_ROUTES.userIngredients.byPerson(userId),
-        { params: { userId } },
+        API_ROUTES.userIngredients.list,
     );
 
     return response.data;
 }
 
 export async function saveUserIngredient(
-    userId: number,
     body: SaveUserIngredientsRequest,
 ): Promise<void> {
-    await apiClient.put(API_ROUTES.userIngredients.byPerson(userId), body, {
-        params: { userId },
-    });
+    await apiClient.put(API_ROUTES.userIngredients.list, body);
 }
 
 export async function updateQuantities(
-    userId: number,
     body: UpdateQuantitiesRequest,
 ): Promise<void> {
-    await apiClient.put(
-        API_ROUTES.userIngredients.updateQuantities(userId),
-        body,
-    );
+    await apiClient.put(API_ROUTES.userIngredients.updateQuantities, body);
 }
 
 export async function deleteUserIngredient(
-    userId: number,
     ingredientId: number,
 ): Promise<void> {
-    await apiClient.delete(
-        API_ROUTES.userIngredients.item(userId, ingredientId),
-    );
+    await apiClient.delete(API_ROUTES.userIngredients.item(ingredientId));
 }
 
 export async function getPurchaseHistory(
-    userId: number,
     ingredientId: number,
 ): Promise<Purchase[]> {
     const response = await apiClient.get<Purchase[]>(
-        API_ROUTES.userIngredients.history(userId, ingredientId),
+        API_ROUTES.userIngredients.history(ingredientId),
     );
 
     return response.data;
 }
 
 export async function updatePurchase(
-    userId: number,
     purchaseId: number,
     body: UpdatePurchaseRequest,
 ): Promise<void> {
-    await apiClient.put(
-        API_ROUTES.userIngredients.history(userId, purchaseId),
-        body,
-    );
+    await apiClient.put(API_ROUTES.userIngredients.history(purchaseId), body);
 }

@@ -11,10 +11,15 @@ export default class GetRecipeById {
         >,
     ) {}
 
-    async execute(id: string | number): Promise<unknown> {
+    async execute(
+        id: string | number,
+        currentUserId: number,
+    ): Promise<unknown> {
         const recipeId = validate(idSchema, id);
-        const recipe =
-            await this.recipeRepository.findByIdWithIngredients(recipeId);
+        const recipe = await this.recipeRepository.findByIdWithIngredients(
+            recipeId,
+            currentUserId,
+        );
         if (!recipe) {
             throw new NotFoundError("Recipe not found");
         }

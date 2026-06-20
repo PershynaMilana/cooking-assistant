@@ -9,13 +9,10 @@ export default function createUserRouter(
 ): Router {
     const router = express.Router();
 
-    // registration
     router.post("/register", authLimiter, userController.registerUser);
-
-    // login
     router.post("/login", authLimiter, userController.loginUser);
-
-    // get users
+    router.post("/logout", userController.logout);
+    router.get("/me", authenticateToken, userController.me);
     router.get("/user", authenticateToken, userController.getUsers);
 
     return router;

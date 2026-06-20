@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp, authHeader } from "../helpers/testApp";
+import { buildTestApp, authCookie } from "../helpers/testApp";
 
 function makeRecipeBody() {
     return {
@@ -29,7 +29,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .post("/api/recipe")
-            .set("Authorization", authHeader(7))
+            .set("Cookie", authCookie(7))
             .send(makeRecipeBody());
 
         expect(res.status).toBe(200);
@@ -47,7 +47,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/recipes")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(recipes);
@@ -60,7 +60,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/recipe/12")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(recipe);
@@ -73,7 +73,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/ingredients")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(ingredients);
@@ -86,7 +86,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .put("/api/recipe/12")
-            .set("Authorization", authHeader(7))
+            .set("Cookie", authCookie(7))
             .send(makeRecipeBody());
 
         expect(res.status).toBe(200);
@@ -101,7 +101,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .put("/api/recipe/12")
-            .set("Authorization", authHeader(7))
+            .set("Cookie", authCookie(7))
             .send(makeRecipeBody());
 
         expect(res.status).toBe(404);
@@ -114,7 +114,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .delete("/api/recipe/12")
-            .set("Authorization", authHeader(7));
+            .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ message: "Recipe successfully deleted" });
@@ -128,7 +128,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/recipes-by-filters?ingredient_name=tomato")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(recipes);
@@ -139,7 +139,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/recipes-by-filters?type_ids=abc")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(400);
         expect(res.body).toEqual({
@@ -154,8 +154,8 @@ describe("recipe routes", () => {
         deps.recipeRepository.searchByPerson.mockResolvedValue(recipes);
 
         const res = await request(app)
-            .get("/api/recipes-filters-person/999?ingredient_name=tomato")
-            .set("Authorization", authHeader(7));
+            .get("/api/recipes-filters-person?ingredient_name=tomato")
+            .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(recipes);
@@ -171,7 +171,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/recipes-stats")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(stats);
@@ -183,7 +183,7 @@ describe("recipe routes", () => {
 
         const res = await request(app)
             .get("/api/recipe/99")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(404);
         expect(res.body).toEqual({ error: "Recipe not found" });

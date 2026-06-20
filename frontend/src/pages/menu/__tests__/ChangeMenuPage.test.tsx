@@ -50,6 +50,7 @@ const SAMPLE: MenuDetails = {
         categoryname: "Lunch",
         menucontent: "quick",
         categoryid: CATEGORY_ID,
+        isOwner: true,
     },
     recipes: [],
 };

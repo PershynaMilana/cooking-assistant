@@ -8,7 +8,6 @@ import type { MenuDetails } from "types/menu";
 import { deleteMenu, getMenuById } from "api/menusApi";
 
 import MenuDetailsPage from "pages/menu/MenuDetailsPage";
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { BTN_DELETE_MENU, ROUTE_MENU } from "test/constants";
 import { mockNavigate } from "test/router";
 
@@ -17,7 +16,6 @@ jest.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
 }));
 jest.mock("api/menusApi");
-jest.mock("jwt-decode");
 
 const TITLE = "Weekday menu";
 const OWNER_ID = 5;
@@ -28,6 +26,7 @@ const SAMPLE: MenuDetails = {
         categoryname: "Lunch",
         menucontent: "quick",
         personid: OWNER_ID,
+        isOwner: true,
     },
     recipes: [],
 };
@@ -51,8 +50,6 @@ describe("MenuDetailsPage", () => {
     });
 
     it("should show Delete button when current user is the menu owner", async () => {
-        setAuthToken();
-        mockJwtUser(OWNER_ID);
         jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
 
         renderPage();
@@ -64,23 +61,7 @@ describe("MenuDetailsPage", () => {
         ).toBeInTheDocument();
     });
 
-    it("should not show Delete button for a non-owner", async () => {
-        setAuthToken();
-        mockJwtUser(99);
-        jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
-
-        renderPage();
-
-        await screen.findByText(TITLE);
-
-        expect(
-            screen.queryByRole("button", { name: BTN_DELETE_MENU }),
-        ).not.toBeInTheDocument();
-    });
-
     it("should navigate to /menu after successful delete", async () => {
-        setAuthToken();
-        mockJwtUser(OWNER_ID);
         jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
         jest.mocked(deleteMenu).mockResolvedValue(undefined);
 

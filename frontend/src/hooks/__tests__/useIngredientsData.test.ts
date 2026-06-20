@@ -9,21 +9,21 @@ import {
 
 import { useIngredientsData } from "hooks/useIngredientsData";
 
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { MOCK_ERROR_NETWORK } from "test/constants";
 
 jest.mock("api/ingredientsApi");
 jest.mock("api/userIngredientsApi");
-jest.mock("jwt-decode");
-
-const USER_ID = 5;
 
 const setup = () => {
-    setAuthToken();
-    mockJwtUser(USER_ID);
     jest.mocked(getIngredients).mockResolvedValue([]);
     jest.mocked(getUserIngredients).mockResolvedValue([]);
 };
+
+const makeUnauthorizedError = () =>
+    Object.assign(new Error(), {
+        isAxiosError: true,
+        response: { status: 401 },
+    });
 
 describe("useIngredientsData", () => {
     describe("saveNewIngredients", () => {
@@ -46,9 +46,11 @@ describe("useIngredientsData", () => {
             expect(returnValue).toBe(true);
         });
 
-        it("should return false when no auth token", async () => {
-            jest.mocked(getIngredients).mockResolvedValue([]);
-            jest.mocked(getUserIngredients).mockResolvedValue([]);
+        it("should return false when saveUserIngredient API fails", async () => {
+            setup();
+            jest.mocked(saveUserIngredient).mockRejectedValue(
+                new Error(MOCK_ERROR_NETWORK),
+            );
 
             const { result } = renderHook(() => useIngredientsData());
 
@@ -65,10 +67,10 @@ describe("useIngredientsData", () => {
             expect(returnValue).toBe(false);
         });
 
-        it("should return false when saveUserIngredient API fails", async () => {
+        it("should return false when the api responds with 401", async () => {
             setup();
             jest.mocked(saveUserIngredient).mockRejectedValue(
-                new Error(MOCK_ERROR_NETWORK),
+                makeUnauthorizedError(),
             );
 
             const { result } = renderHook(() => useIngredientsData());
@@ -107,9 +109,11 @@ describe("useIngredientsData", () => {
             expect(returnValue).toBe(true);
         });
 
-        it("should return false when no auth token", async () => {
-            jest.mocked(getIngredients).mockResolvedValue([]);
-            jest.mocked(getUserIngredients).mockResolvedValue([]);
+        it("should return false when deleteUserIngredient API fails", async () => {
+            setup();
+            jest.mocked(deleteUserIngredient).mockRejectedValue(
+                new Error(MOCK_ERROR_NETWORK),
+            );
 
             const { result } = renderHook(() => useIngredientsData());
 
@@ -126,10 +130,10 @@ describe("useIngredientsData", () => {
             expect(returnValue).toBe(false);
         });
 
-        it("should return false when deleteUserIngredient API fails", async () => {
+        it("should return false when the api responds with 401", async () => {
             setup();
             jest.mocked(deleteUserIngredient).mockRejectedValue(
-                new Error(MOCK_ERROR_NETWORK),
+                makeUnauthorizedError(),
             );
 
             const { result } = renderHook(() => useIngredientsData());

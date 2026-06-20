@@ -1,21 +1,34 @@
-import type { AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosInstance } from "axios";
 import axios from "axios";
+export { isAxiosError } from "axios";
 
 import { API_BASE_URL } from "config/env";
-import { AUTH_TOKEN_KEY } from "constants/storage";
+import { PUBLIC_PATHS } from "constants/routes";
+
+import { API_ROUTES } from "./endpoints";
+import { redirectToLogin } from "./redirect";
 
 export const apiClient: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
+    withCredentials: true,
 });
 
-apiClient.interceptors.request.use(
-    (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-        const token = localStorage.getItem(AUTH_TOKEN_KEY);
+const AUTH_ERROR_STATUSES = [401, 403];
+const SKIP_REDIRECT_URLS = [API_ROUTES.auth.me];
 
-        if (token) {
-            config.headers.set("Authorization", `Bearer ${token}`);
-        }
+export function handleAuthError(error: AxiosError): Promise<never> {
+    const status = error.response?.status;
+    const requestUrl = error.config?.url ?? "";
+    const isAuthError =
+        typeof status === "number" && AUTH_ERROR_STATUSES.includes(status);
+    const isSkipped = SKIP_REDIRECT_URLS.some((url) => requestUrl === url);
+    const isProtectedPath = !PUBLIC_PATHS.includes(window.location.pathname);
 
-        return config;
-    },
-);
+    if (isAuthError && !isSkipped && isProtectedPath) {
+        redirectToLogin();
+    }
+
+    return Promise.reject(error);
+}
+
+apiClient.interceptors.response.use((response) => response, handleAuthError);

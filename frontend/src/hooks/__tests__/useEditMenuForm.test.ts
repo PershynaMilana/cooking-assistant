@@ -29,6 +29,7 @@ const MENU: MenuDetails = {
         menucontent: "quick meals",
         categoryid: 2,
         personid: 7,
+        isOwner: true,
     },
     recipes: [
         {

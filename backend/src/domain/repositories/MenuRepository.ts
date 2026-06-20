@@ -3,7 +3,10 @@ import type { Menu } from "@domain/entities/Menu";
 export interface MenuRepository {
     findAll(filters: unknown): Promise<unknown[]>;
     create(menu: Menu, recipeIds: number[]): Promise<unknown>;
-    findByIdWithRecipes(id: string | number): Promise<unknown | null>;
+    findByIdWithRecipes(
+        id: string | number,
+        personId: number,
+    ): Promise<unknown | null>;
     update(
         id: string | number,
         personId: number,

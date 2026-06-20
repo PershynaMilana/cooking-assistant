@@ -1,12 +1,12 @@
 import request from "supertest";
 
-import { buildTestApp, authHeader } from "../helpers/testApp";
+import { buildTestApp, authCookie } from "../helpers/testApp";
 
 describe("user ingredient routes", () => {
     it("should return 401 without a token", async () => {
         const { app } = buildTestApp();
 
-        const res = await request(app).get("/api/user-ingredients/7");
+        const res = await request(app).get("/api/user-ingredients");
 
         expect(res.status).toBe(401);
     });
@@ -17,8 +17,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.findByUser.mockResolvedValue(ingredients);
 
         const res = await request(app)
-            .get("/api/user-ingredients/999")
-            .set("Authorization", authHeader(7));
+            .get("/api/user-ingredients")
+            .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(ingredients);
@@ -30,8 +30,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.addIngredients.mockResolvedValue(undefined);
 
         const res = await request(app)
-            .put("/api/user-ingredients/999")
-            .set("Authorization", authHeader(7))
+            .put("/api/user-ingredients")
+            .set("Cookie", authCookie(7))
             .send({ ingredients: [{ id: 3, quantity_person_ingradient: 2 }] });
 
         expect(res.status).toBe(200);
@@ -48,8 +48,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.deleteIngredient.mockResolvedValue(true);
 
         const res = await request(app)
-            .delete("/api/user-ingredients/999/3")
-            .set("Authorization", authHeader(7));
+            .delete("/api/user-ingredients/3")
+            .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
@@ -66,8 +66,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.updateQuantities.mockResolvedValue(undefined);
 
         const res = await request(app)
-            .put("/api/user-ingredients/update-quantities/999")
-            .set("Authorization", authHeader(7))
+            .put("/api/user-ingredients/update-quantities")
+            .set("Cookie", authCookie(7))
             .send({
                 updatedIngredients: [{ id: 3, quantity_person_ingradient: 4 }],
             });
@@ -83,8 +83,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.updatePurchaseQuantity.mockResolvedValue(true);
 
         const res = await request(app)
-            .put("/api/user-ingredients/999/history/11")
-            .set("Authorization", authHeader(7))
+            .put("/api/user-ingredients/history/11")
+            .set("Cookie", authCookie(7))
             .send({ quantity: 4 });
 
         expect(res.status).toBe(200);
@@ -102,8 +102,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.findPurchaseHistory.mockResolvedValue(history);
 
         const res = await request(app)
-            .get("/api/user-ingredients/999/history/3")
-            .set("Authorization", authHeader(7));
+            .get("/api/user-ingredients/history/3")
+            .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(history);
@@ -118,8 +118,8 @@ describe("user ingredient routes", () => {
         deps.pantryRepository.updatePurchaseQuantity.mockResolvedValue(null);
 
         const res = await request(app)
-            .put("/api/user-ingredients/999/history/99")
-            .set("Authorization", authHeader(7))
+            .put("/api/user-ingredients/history/99")
+            .set("Cookie", authCookie(7))
             .send({ quantity: 4 });
 
         expect(res.status).toBe(404);

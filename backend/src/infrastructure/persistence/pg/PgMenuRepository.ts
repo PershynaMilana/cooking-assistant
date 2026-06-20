@@ -80,14 +80,17 @@ export default class PgMenuRepository implements MenuRepository {
             );
             const menuId = menuResult.rows[0].menu_id;
 
-            const recipeInsertPromises = recipeIds.map((recipeId) =>
-                client.query(
-                    `INSERT INTO menu_recipe (menu_id, recipe_id)
-                 VALUES ($1, $2)`,
-                    [menuId, recipeId],
-                ),
-            );
-            await Promise.all(recipeInsertPromises);
+            if (recipeIds.length > 0) {
+                const { placeholders, params } = this.buildMenuRecipeInsert(
+                    menuId,
+                    recipeIds,
+                );
+
+                await client.query(
+                    `INSERT INTO menu_recipe (menu_id, recipe_id) VALUES ${placeholders}`,
+                    params,
+                );
+            }
 
             await client.query("COMMIT");
             return menuId;
@@ -132,10 +135,15 @@ export default class PgMenuRepository implements MenuRepository {
                 "DELETE FROM menu_recipe WHERE menu_id = $1";
             await client.query(deleteRecipesQuery, [id]);
 
-            for (const recipeId of recipeIds) {
+            if (recipeIds.length > 0) {
+                const { placeholders, params } = this.buildMenuRecipeInsert(
+                    id,
+                    recipeIds,
+                );
+
                 await client.query(
-                    "INSERT INTO menu_recipe (menu_id, recipe_id) VALUES ($1, $2)",
-                    [id, recipeId],
+                    `INSERT INTO menu_recipe (menu_id, recipe_id) VALUES ${placeholders}`,
+                    params,
                 );
             }
 
@@ -149,19 +157,23 @@ export default class PgMenuRepository implements MenuRepository {
         }
     }
 
-    async findByIdWithRecipes(id: string | number): Promise<unknown | null> {
+    async findByIdWithRecipes(
+        id: string | number,
+        personId: number,
+    ): Promise<unknown | null> {
         const menuQuery = `
       SELECT
         m.menu_id AS id,
         m.menu_title AS title,
         m.menu_content AS menuContent,
         mc.category_name AS categoryName,
-        m.person_id AS personId
+        m.person_id AS personId,
+        (m.person_id = $2) AS "isOwner"
       FROM menu m
       LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
       WHERE m.menu_id = $1
     `;
-        const menuResult = await this.pool.query(menuQuery, [id]);
+        const menuResult = await this.pool.query(menuQuery, [id, personId]);
 
         if (menuResult.rows.length === 0) {
             return null;
@@ -217,7 +229,7 @@ export default class PgMenuRepository implements MenuRepository {
       `;
             const missingIngredientsResult = await this.pool.query(
                 missingIngredientsQuery,
-                [menu.personid, recipeIds],
+                [personId, recipeIds],
             );
 
             for (const row of missingIngredientsResult.rows) {
@@ -272,6 +284,18 @@ export default class PgMenuRepository implements MenuRepository {
         } finally {
             client.release();
         }
+    }
+
+    private buildMenuRecipeInsert(
+        menuId: number | string,
+        recipeIds: number[],
+    ): { placeholders: string; params: Array<number | string> } {
+        const placeholders = recipeIds
+            .map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+            .join(", ");
+        const params = recipeIds.flatMap((recipeId) => [menuId, recipeId]);
+
+        return { placeholders, params };
     }
 
     async searchByPerson(id: number, filters: unknown): Promise<unknown[]> {

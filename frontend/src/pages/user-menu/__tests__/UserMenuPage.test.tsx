@@ -6,12 +6,10 @@ import { getMenuCategories } from "api/menuCategoriesApi";
 import { getMenusByPerson } from "api/menusApi";
 
 import UserMenuPage from "pages/user-menu/UserMenuPage";
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { renderWithRouter } from "test/router";
 
 jest.mock("api/menusApi");
 jest.mock("api/menuCategoriesApi");
-jest.mock("jwt-decode");
 
 const TITLE = "Weekday menu";
 const SAMPLE: Menu[] = [
@@ -20,8 +18,6 @@ const SAMPLE: Menu[] = [
 
 describe("UserMenuPage", () => {
     it("should render the user's menus loaded from the api", async () => {
-        setAuthToken();
-        mockJwtUser();
         jest.mocked(getMenusByPerson).mockResolvedValue(SAMPLE);
         jest.mocked(getMenuCategories).mockResolvedValue([]);
 

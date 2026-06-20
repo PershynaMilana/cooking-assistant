@@ -34,6 +34,7 @@ export interface MenuDetails {
         menucontent: string;
         categoryid?: number;
         personid?: number;
+        isOwner: boolean;
     };
     recipes: MenuDetailRecipe[];
 }
@@ -47,7 +48,6 @@ export interface CreateMenuRequest {
     menuTitle: string;
     menuContent: string;
     categoryId: number;
-    personId: number;
     recipeIds: number[];
 }
 

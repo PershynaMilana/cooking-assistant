@@ -26,7 +26,6 @@ import {
 jest.mock("../client");
 
 const ID = 7;
-const PERSON_ID = 3;
 const PARAMS: MenuListParams = { menu_name: "weekday" };
 const SAMPLE_MENUS: Menu[] = [
     { id: 1, title: "Weekday", categoryname: "Lunch", menucontent: "quick" },
@@ -37,6 +36,7 @@ const SAMPLE_DETAILS: MenuDetails = {
         title: "Weekday",
         categoryname: "Lunch",
         menucontent: "quick",
+        isOwner: true,
     },
     recipes: [],
 };
@@ -44,7 +44,6 @@ const CREATE_BODY: CreateMenuRequest = {
     menuTitle: "Weekday",
     menuContent: "quick",
     categoryId: 2,
-    personId: PERSON_ID,
     recipeIds: [5],
 };
 const UPDATE_BODY: UpdateMenuRequest = {
@@ -78,12 +77,11 @@ describe("menusApi", () => {
     it("should get menus by person with the query params and return the data", async () => {
         mockedGet.mockResolvedValue({ data: SAMPLE_MENUS });
 
-        const result = await getMenusByPerson(PERSON_ID, PARAMS);
+        const result = await getMenusByPerson(PARAMS);
 
-        expect(mockedGet).toHaveBeenCalledWith(
-            API_ROUTES.menu.byPerson(PERSON_ID),
-            { params: PARAMS },
-        );
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.menu.byPerson, {
+            params: PARAMS,
+        });
         expect(result).toEqual(SAMPLE_MENUS);
     });
 

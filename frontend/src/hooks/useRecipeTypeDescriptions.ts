@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { logger } from "config/logger";
 import type { RecipeTypeSummary } from "types/recipeType";
 
 import { getRecipeTypes } from "api/recipeTypesApi";
@@ -24,7 +25,7 @@ export const useRecipeTypeDescriptions = (selectedTypes: number[]) => {
                     );
                 }
             } catch (err) {
-                console.error("Error fetching recipe type descriptions.", err);
+                logger.error("Error fetching recipe type descriptions.", err);
             }
         };
 

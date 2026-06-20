@@ -6,10 +6,7 @@ import { updateQuantities } from "api/userIngredientsApi";
 
 import { useQuantityUpdates } from "hooks/useQuantityUpdates";
 
-import { mockJwtUser, setAuthToken } from "test/auth";
-
 jest.mock("api/userIngredientsApi");
-jest.mock("jwt-decode");
 
 const INGREDIENT: PantryIngredient = {
     id: 10,
@@ -80,9 +77,6 @@ describe("useQuantityUpdates", () => {
     });
 
     it("should not call API when quantities are unchanged on saveUpdatedQuantities", async () => {
-        setAuthToken();
-        mockJwtUser(5);
-
         const onSaved = jest.fn().mockResolvedValue(undefined);
         const { result } = renderHook(() =>
             useQuantityUpdates([INGREDIENT], onSaved),
@@ -100,9 +94,6 @@ describe("useQuantityUpdates", () => {
     });
 
     it("should exit edit mode without API call when no changes made", async () => {
-        setAuthToken();
-        mockJwtUser(5);
-
         const { result } = renderHook(() =>
             useQuantityUpdates([INGREDIENT], jest.fn()),
         );
@@ -120,8 +111,6 @@ describe("useQuantityUpdates", () => {
     });
 
     it("should call updateQuantities only for changed ingredients", async () => {
-        setAuthToken();
-        mockJwtUser(5);
         jest.mocked(updateQuantities).mockResolvedValue(undefined);
 
         const onSaved = jest.fn().mockResolvedValue(undefined);
@@ -142,7 +131,6 @@ describe("useQuantityUpdates", () => {
         });
 
         expect(jest.mocked(updateQuantities)).toHaveBeenCalledWith(
-            5,
             expect.objectContaining({
                 updatedIngredients: [
                     expect.objectContaining({ id: INGREDIENT.id }),
@@ -152,8 +140,6 @@ describe("useQuantityUpdates", () => {
     });
 
     it("should call onSaved callback after successful save", async () => {
-        setAuthToken();
-        mockJwtUser(5);
         jest.mocked(updateQuantities).mockResolvedValue(undefined);
 
         const onSaved = jest.fn().mockResolvedValue(undefined);
@@ -177,8 +163,6 @@ describe("useQuantityUpdates", () => {
     });
 
     it("should exit edit mode after successful save", async () => {
-        setAuthToken();
-        mockJwtUser(5);
         jest.mocked(updateQuantities).mockResolvedValue(undefined);
 
         const onSaved = jest.fn().mockResolvedValue(undefined);

@@ -39,13 +39,11 @@ export async function deleteMenu(id: string | number): Promise<void> {
 }
 
 export async function getMenusByPerson(
-    userId: number,
     params: MenuListParams,
 ): Promise<Menu[]> {
-    const response = await apiClient.get<Menu[]>(
-        API_ROUTES.menu.byPerson(userId),
-        { params },
-    );
+    const response = await apiClient.get<Menu[]>(API_ROUTES.menu.byPerson, {
+        params,
+    });
 
     return response.data;
 }

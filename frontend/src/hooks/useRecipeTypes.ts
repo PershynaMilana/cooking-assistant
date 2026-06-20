@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { logger } from "config/logger";
 import type { RecipeTypeSummary } from "types/recipeType";
 
 import { getRecipeTypes } from "api/recipeTypesApi";
@@ -13,7 +14,7 @@ export const useRecipeTypes = () => {
 
             setTypes(data);
         } catch (err) {
-            console.error("Error fetching recipe types:", err);
+            logger.error("Error fetching recipe types:", err);
         }
     }, []);
 

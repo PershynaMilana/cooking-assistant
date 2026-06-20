@@ -63,6 +63,7 @@ export default class MenuController {
     getById: RequestHandler = async (req, res) => {
         const menu = await this.getMenuByIdUseCase.execute(
             req.params.id as string,
+            getUserId(req),
         );
         res.status(200).json(menu);
     };

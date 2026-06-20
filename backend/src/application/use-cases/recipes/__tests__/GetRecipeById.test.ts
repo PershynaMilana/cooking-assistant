@@ -14,20 +14,21 @@ describe("GetRecipeById", () => {
         const { useCase, recipeRepository } = setup();
         recipeRepository.findByIdWithIngredients.mockResolvedValue(null);
 
-        const error = await catchError(useCase.execute(12));
+        const error = await catchError(useCase.execute(12, 7));
 
         expect(error).toBeAppError(NotFoundError, "Recipe not found", 404);
     });
 
-    it("should return the recipe when it exists", async () => {
+    it("should return the recipe and pass the requesting user to the repository", async () => {
         const { useCase, recipeRepository } = setup();
-        const recipe = { id: 12, title: "Tomato soup" };
+        const recipe = { id: 12, title: "Tomato soup", isOwner: true };
         recipeRepository.findByIdWithIngredients.mockResolvedValue(recipe);
 
-        const result = await useCase.execute(12);
+        const result = await useCase.execute(12, 7);
 
         expect(recipeRepository.findByIdWithIngredients).toHaveBeenCalledWith(
             12,
+            7,
         );
         expect(result).toEqual(recipe);
     });

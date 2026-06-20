@@ -8,44 +8,48 @@ export default function createUserIngredientsRouter(
 ): Router {
     const router = express.Router();
 
+    // the user always comes from the auth cookie, never from the path
+
     // get user ingredients
     router.get(
-        "/user-ingredients/:id",
+        "/user-ingredients",
         authenticateToken,
         userIngredientsController.getUserIngredients,
     );
 
     // update user ingredients
     router.put(
-        "/user-ingredients/:id",
+        "/user-ingredients",
         authenticateToken,
         userIngredientsController.updateUserIngredients,
     );
 
-    // delete ingredient for specific user
-    router.delete(
-        "/user-ingredients/:userId/:ingredientId",
-        authenticateToken,
-        userIngredientsController.deleteUserIngredient,
-    );
-
     // update ingredient quantities
     router.put(
-        "/user-ingredients/update-quantities/:userId",
+        "/user-ingredients/update-quantities",
         authenticateToken,
         userIngredientsController.updateIngredientQuantities,
     );
 
+    // update one purchase record
     router.put(
-        "/user-ingredients/:userId/history/:purchaseId",
+        "/user-ingredients/history/:purchaseId",
         authenticateToken,
         userIngredientsController.updatePurchaseQuantity,
     );
 
+    // get purchase history for one ingredient
     router.get(
-        "/user-ingredients/:userId/history/:ingredientId",
+        "/user-ingredients/history/:ingredientId",
         authenticateToken,
         userIngredientsController.getPurchaseHistory,
+    );
+
+    // delete one ingredient
+    router.delete(
+        "/user-ingredients/:ingredientId",
+        authenticateToken,
+        userIngredientsController.deleteUserIngredient,
     );
 
     return router;

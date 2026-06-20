@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { logger } from "config/logger";
 import type { MenuCategory } from "types/menu";
 
 import { getMenuCategories } from "api/menuCategoriesApi";
@@ -14,7 +15,7 @@ export const useMenuCategories = () => {
 
                 setCategories(data);
             } catch (err) {
-                console.error("Error fetching menu categories.", err);
+                logger.error("Error fetching menu categories.", err);
             }
         };
 

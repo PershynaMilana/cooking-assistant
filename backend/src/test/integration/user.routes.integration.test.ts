@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp, authHeader } from "../helpers/testApp";
+import { buildTestApp, authCookie } from "../helpers/testApp";
 
 describe("user routes", () => {
     it("should return 401 without a token", async () => {
@@ -39,7 +39,7 @@ describe("user routes", () => {
         });
     });
 
-    it("should login a user without a token", async () => {
+    it("should log in and set an httpOnly session cookie", async () => {
         const { app, deps } = buildTestApp();
         deps.userRepository.findByLogin.mockResolvedValue({
             id: 7,
@@ -55,7 +55,43 @@ describe("user routes", () => {
         });
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ token: "token-value" });
+        // token lives only in the cookie, never in the response body
+        expect(res.body).toEqual({ message: "Logged in" });
+
+        const setCookie = String(res.headers["set-cookie"]);
+
+        expect(setCookie).toContain("authToken=token-value");
+        expect(setCookie).toContain("HttpOnly");
+        expect(setCookie).toContain("SameSite=Lax");
+    });
+
+    it("should clear the session cookie on logout", async () => {
+        const { app } = buildTestApp();
+
+        const res = await request(app).post("/api/logout");
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ message: "Logged out" });
+        expect(String(res.headers["set-cookie"])).toContain("authToken=;");
+    });
+
+    it("should return the current user id for an authenticated request", async () => {
+        const { app } = buildTestApp();
+
+        const res = await request(app)
+            .get("/api/me")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual({ id: 1 });
+    });
+
+    it("should return 401 on GET /api/me without a token", async () => {
+        const { app } = buildTestApp();
+
+        const res = await request(app).get("/api/me");
+
+        expect(res.status).toBe(401);
     });
 
     it("should return users for an authenticated request", async () => {
@@ -65,7 +101,7 @@ describe("user routes", () => {
 
         const res = await request(app)
             .get("/api/user")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(users);

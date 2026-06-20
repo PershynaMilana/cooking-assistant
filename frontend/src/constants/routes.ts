@@ -10,8 +10,6 @@ export const ROUTES = {
     changeRecipe: "/change-recipe/:id",
 
     recipeTypes: "/types",
-    addRecipeType: "/add-type",
-    editRecipeType: "/types/:id",
 
     ingredients: "/ingredients",
     stats: "/stats",
@@ -34,11 +32,10 @@ export const recipeDetailsPath = (id: string | number): string =>
 export const changeRecipePath = (id: string | number): string =>
     withId(ROUTES.changeRecipe, id);
 
-export const editRecipeTypePath = (id: string | number): string =>
-    withId(ROUTES.editRecipeType, id);
-
 export const menuDetailsPath = (id: string | number): string =>
     withId(ROUTES.menuDetails, id);
 
 export const changeMenuPath = (id: string | number): string =>
     withId(ROUTES.changeMenu, id);
+
+export const PUBLIC_PATHS: string[] = [ROUTES.login, ROUTES.registration];

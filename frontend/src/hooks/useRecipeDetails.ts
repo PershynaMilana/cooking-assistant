@@ -7,13 +7,10 @@ import type { RecipeDetails } from "types/recipe";
 
 import { deleteRecipe, getRecipeById } from "api/recipesApi";
 
-import { getUserIdSafe } from "utils/getCurrentUserId";
-
 export const useRecipeDetails = (id: string | undefined) => {
     const { t } = useTranslation("recipes");
     const [recipe, setRecipe] = useState<RecipeDetails | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const navigate = useNavigate();
 
     const fetchErrorRef = useRef("");
@@ -33,7 +30,6 @@ export const useRecipeDetails = (id: string | undefined) => {
     }, [id]);
 
     useEffect(() => {
-        setCurrentUserId(getUserIdSafe());
         void fetchRecipeDetails();
     }, [fetchRecipeDetails]);
 
@@ -50,7 +46,7 @@ export const useRecipeDetails = (id: string | undefined) => {
         }
     }, [id, navigate, t]);
 
-    const isOwner = recipe !== null && recipe.person_id === currentUserId;
+    const isOwner = recipe?.isOwner ?? false;
 
     return { recipe, error, isOwner, deleteRecipe: handleDelete };
 };

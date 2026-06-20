@@ -7,8 +7,6 @@ import { getRecipes } from "api/recipesApi";
 
 import { useCreateMenuForm } from "hooks/useCreateMenuForm";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -18,9 +16,6 @@ jest.mock("react-router-dom", () => ({
 jest.mock("api/menuCategoriesApi");
 jest.mock("api/menusApi");
 jest.mock("api/recipesApi");
-jest.mock("utils/getCurrentUserId");
-
-const PERSON_ID = 7;
 
 const flush = async () => {
     await act(async () => {
@@ -41,7 +36,6 @@ describe("useCreateMenuForm", () => {
     beforeEach(() => {
         jest.mocked(getMenuCategories).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([]);
-        jest.mocked(getCurrentUserId).mockReturnValue(PERSON_ID);
     });
 
     it("should load categories and recipes", async () => {
@@ -98,27 +92,8 @@ describe("useCreateMenuForm", () => {
             menuTitle: "Weekday",
             menuContent: "Quick meals",
             categoryId: 2,
-            personId: PERSON_ID,
             recipeIds: [5],
         });
         expect(mockNavigate).toHaveBeenCalledWith("/menu");
-    });
-
-    it("should not create the menu when there is no authenticated user", async () => {
-        jest.mocked(getCurrentUserId).mockReturnValue(null);
-
-        const { result } = renderHook(() => useCreateMenuForm());
-
-        await flush();
-
-        act(() => {
-            fillValid(result.current.form);
-        });
-
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(createMenu)).not.toHaveBeenCalled();
     });
 });

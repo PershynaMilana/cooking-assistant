@@ -6,13 +6,10 @@ import { getPurchaseHistory, updatePurchase } from "api/userIngredientsApi";
 
 import { usePurchaseHistory } from "hooks/usePurchaseHistory";
 
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { MOCK_ERROR_SERVER } from "test/constants";
 
 jest.mock("api/userIngredientsApi");
-jest.mock("jwt-decode");
 
-const USER_ID = 7;
 const INGREDIENT_ID = 3;
 
 const HISTORY: Purchase[] = [
@@ -33,21 +30,7 @@ const HISTORY: Purchase[] = [
 ];
 
 describe("usePurchaseHistory", () => {
-    it("should set error and not fetch when no auth token", async () => {
-        const { result } = renderHook(() => usePurchaseHistory(INGREDIENT_ID));
-
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(result.current.error).toBe("Token not found.");
-        expect(jest.mocked(getPurchaseHistory)).not.toHaveBeenCalled();
-    });
-
     it("should set loading true during fetch then false after", async () => {
-        setAuthToken();
-        mockJwtUser(USER_ID);
-
         let resolveHistory!: (v: Purchase[]) => void;
         const historyPromise = new Promise<Purchase[]>((res) => {
             resolveHistory = res;
@@ -68,8 +51,6 @@ describe("usePurchaseHistory", () => {
     });
 
     it("should load purchase history for the given ingredientId", async () => {
-        setAuthToken();
-        mockJwtUser(USER_ID);
         jest.mocked(getPurchaseHistory).mockResolvedValue(HISTORY);
 
         const { result } = renderHook(() => usePurchaseHistory(INGREDIENT_ID));
@@ -79,15 +60,12 @@ describe("usePurchaseHistory", () => {
         });
 
         expect(jest.mocked(getPurchaseHistory)).toHaveBeenCalledWith(
-            USER_ID,
             INGREDIENT_ID,
         );
         expect(result.current.purchaseHistory).toHaveLength(2);
     });
 
     it("should call updatePurchase with new quantity on saveChange", async () => {
-        setAuthToken();
-        mockJwtUser(USER_ID);
         jest.mocked(getPurchaseHistory).mockResolvedValue(HISTORY);
         jest.mocked(updatePurchase).mockResolvedValue(undefined);
 
@@ -101,14 +79,12 @@ describe("usePurchaseHistory", () => {
             await result.current.saveChange(1, 10);
         });
 
-        expect(jest.mocked(updatePurchase)).toHaveBeenCalledWith(USER_ID, 1, {
+        expect(jest.mocked(updatePurchase)).toHaveBeenCalledWith(1, {
             quantity: 10,
         });
     });
 
     it("should set error when saveChange API fails", async () => {
-        setAuthToken();
-        mockJwtUser(USER_ID);
         jest.mocked(getPurchaseHistory).mockResolvedValue(HISTORY);
         jest.mocked(updatePurchase).mockRejectedValue(
             new Error(MOCK_ERROR_SERVER),

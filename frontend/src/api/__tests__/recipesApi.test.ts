@@ -64,11 +64,11 @@ const SAMPLE_DETAILS: RecipeDetails = {
     creation_date: "2024-01-01",
     servings: "4",
     person_id: PERSON_ID,
+    isOwner: true,
 };
 const CREATE_BODY: CreateRecipeRequest = {
     title: "Borscht",
     content: "boil",
-    person_id: PERSON_ID,
     ingredients: [{ id: 1, quantity: 2 }],
     type_id: 2,
     cooking_time: 60,
@@ -98,12 +98,11 @@ describe("recipesApi", () => {
     it("should get recipes by person with the query params and return the data", async () => {
         mockedGet.mockResolvedValue({ data: SAMPLE_LIST });
 
-        const result = await getRecipesByPerson(PERSON_ID, FILTERS);
+        const result = await getRecipesByPerson(FILTERS);
 
-        expect(mockedGet).toHaveBeenCalledWith(
-            API_ROUTES.recipes.byPerson(PERSON_ID),
-            { params: FILTERS },
-        );
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.byPerson, {
+            params: FILTERS,
+        });
         expect(result).toEqual(SAMPLE_LIST);
     });
 

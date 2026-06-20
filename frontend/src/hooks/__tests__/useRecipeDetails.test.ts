@@ -7,8 +7,6 @@ import { deleteRecipe, getRecipeById } from "api/recipesApi";
 
 import { useRecipeDetails } from "hooks/useRecipeDetails";
 
-import { getUserIdSafe } from "utils/getCurrentUserId";
-
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -16,9 +14,7 @@ jest.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
 }));
 jest.mock("api/recipesApi");
-jest.mock("utils/getCurrentUserId");
 
-const OWNER_ID = 3;
 const RECIPE: RecipeDetails = {
     id: 1,
     title: "Borscht",
@@ -29,7 +25,8 @@ const RECIPE: RecipeDetails = {
     cooking_time: 60,
     creation_date: "2024-01-01",
     servings: "4",
-    person_id: OWNER_ID,
+    person_id: 3,
+    isOwner: true,
 };
 
 const flush = async () => {
@@ -39,9 +36,8 @@ const flush = async () => {
 };
 
 describe("useRecipeDetails", () => {
-    it("should load the recipe and mark the owner", async () => {
+    it("should load the recipe and mark the owner from the backend flag", async () => {
         jest.mocked(getRecipeById).mockResolvedValue(RECIPE);
-        jest.mocked(getUserIdSafe).mockReturnValue(OWNER_ID);
 
         const { result } = renderHook(() => useRecipeDetails("1"));
 
@@ -52,8 +48,10 @@ describe("useRecipeDetails", () => {
     });
 
     it("should not mark a non-owner as owner", async () => {
-        jest.mocked(getRecipeById).mockResolvedValue(RECIPE);
-        jest.mocked(getUserIdSafe).mockReturnValue(99);
+        jest.mocked(getRecipeById).mockResolvedValue({
+            ...RECIPE,
+            isOwner: false,
+        });
 
         const { result } = renderHook(() => useRecipeDetails("1"));
 
@@ -64,7 +62,6 @@ describe("useRecipeDetails", () => {
 
     it("should set an error when the recipe fails to load", async () => {
         jest.mocked(getRecipeById).mockRejectedValue(new Error("boom"));
-        jest.mocked(getUserIdSafe).mockReturnValue(OWNER_ID);
 
         const { result } = renderHook(() => useRecipeDetails("1"));
 
@@ -76,7 +73,6 @@ describe("useRecipeDetails", () => {
 
     it("should delete the recipe and navigate to the main page", async () => {
         jest.mocked(getRecipeById).mockResolvedValue(RECIPE);
-        jest.mocked(getUserIdSafe).mockReturnValue(OWNER_ID);
         jest.mocked(deleteRecipe).mockResolvedValue(undefined);
 
         const { result } = renderHook(() => useRecipeDetails("1"));
