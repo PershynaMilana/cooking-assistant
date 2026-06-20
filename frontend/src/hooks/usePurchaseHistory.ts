@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import type { Purchase } from "types/userIngredient";
 
 import { getApiErrorMessage } from "api/httpError";
 import { getPurchaseHistory, updatePurchase } from "api/userIngredientsApi";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 export const usePurchaseHistory = (ingredientId: number) => {
-    const { t } = useTranslation("ingredients");
     const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -19,16 +15,7 @@ export const usePurchaseHistory = (ingredientId: number) => {
             setLoading(true);
 
             try {
-                const userId = getCurrentUserId();
-
-                if (userId === null) {
-                    setError(t("purchaseModal.errorNoToken"));
-                    setLoading(false);
-
-                    return;
-                }
-
-                const data = await getPurchaseHistory(userId, ingredientId);
+                const data = await getPurchaseHistory(ingredientId);
 
                 setPurchaseHistory(data);
             } catch (err: unknown) {
@@ -39,7 +26,7 @@ export const usePurchaseHistory = (ingredientId: number) => {
         };
 
         void fetchHistory();
-    }, [ingredientId, t]);
+    }, [ingredientId]);
 
     const handleQuantityChange = useCallback(
         (id: number, newQuantity: number) => {
@@ -54,37 +41,25 @@ export const usePurchaseHistory = (ingredientId: number) => {
         [],
     );
 
-    const saveChange = useCallback(
-        async (id: number, newQuantity: number) => {
-            setLoading(true);
+    const saveChange = useCallback(async (id: number, newQuantity: number) => {
+        setLoading(true);
 
-            try {
-                const userId = getCurrentUserId();
+        try {
+            await updatePurchase(id, { quantity: newQuantity });
 
-                if (userId === null) {
-                    setError(t("purchaseModal.errorNoToken"));
-                    setLoading(false);
-
-                    return;
-                }
-
-                await updatePurchase(userId, id, { quantity: newQuantity });
-
-                setPurchaseHistory((prev) =>
-                    prev.map((purchase) =>
-                        purchase.id === id
-                            ? { ...purchase, quantity: newQuantity }
-                            : purchase,
-                    ),
-                );
-            } catch (err: unknown) {
-                setError(getApiErrorMessage(err));
-            } finally {
-                setLoading(false);
-            }
-        },
-        [t],
-    );
+            setPurchaseHistory((prev) =>
+                prev.map((purchase) =>
+                    purchase.id === id
+                        ? { ...purchase, quantity: newQuantity }
+                        : purchase,
+                ),
+            );
+        } catch (err: unknown) {
+            setError(getApiErrorMessage(err));
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     return {
         purchaseHistory,

@@ -9,13 +9,11 @@ import { getRecipesStats } from "api/statsApi";
 
 import { useMenuStatistics } from "hooks/useMenuStatistics";
 
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { MOCK_ERROR_NETWORK } from "test/constants";
 
 jest.mock("api/menusApi");
 jest.mock("api/recipesApi");
 jest.mock("api/statsApi");
-jest.mock("jwt-decode");
 
 const MENU = (category: string): Menu => ({
     id: 1,
@@ -27,23 +25,7 @@ const MENU = (category: string): Menu => ({
 const EMPTY_STATS: RecipesStatsResponse = { averageCookingTimes: [] };
 
 describe("useMenuStatistics", () => {
-    beforeEach(() => {
-        mockJwtUser(1);
-    });
-
-    it("should set error and not fetch when no auth token in localStorage", async () => {
-        const { result } = renderHook(() => useMenuStatistics());
-
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(result.current.error).toBe("No auth token found.");
-        expect(jest.mocked(getMenus)).not.toHaveBeenCalled();
-    });
-
     it("should count total menus", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([
             MENU("Lunch"),
             MENU("Dinner"),
@@ -62,7 +44,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should count total recipes", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([
             {
@@ -94,7 +75,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should aggregate menu count by category", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([
             MENU("Lunch"),
             MENU("Lunch"),
@@ -121,7 +101,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should format average cooking time as HH:MM from float minutes", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([]);
         jest.mocked(getRecipesStats).mockResolvedValue({
@@ -142,7 +121,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should pad single-digit hours and minutes with leading zero", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([]);
         jest.mocked(getRecipesStats).mockResolvedValue({
@@ -163,7 +141,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should set averageCookingTimes to empty array when stats response is not an array", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([]);
         jest.mocked(getRecipesStats).mockResolvedValue({
@@ -180,7 +157,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should set error message on API failure", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockRejectedValue(new Error(MOCK_ERROR_NETWORK));
 
         const { result } = renderHook(() => useMenuStatistics());
@@ -193,7 +169,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should use the provided recipesCount and not fetch recipes", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipesStats).mockResolvedValue(EMPTY_STATS);
 
@@ -208,7 +183,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should treat a non-numeric average cooking time as 0 minutes", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([]);
         jest.mocked(getRecipesStats).mockResolvedValue({
@@ -229,7 +203,6 @@ describe("useMenuStatistics", () => {
     });
 
     it("should round a decimal average cooking time to the nearest minute", async () => {
-        setAuthToken();
         jest.mocked(getMenus).mockResolvedValue([]);
         jest.mocked(getRecipes).mockResolvedValue([]);
         jest.mocked(getRecipesStats).mockResolvedValue({

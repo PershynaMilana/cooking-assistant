@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { logger } from "config/logger";
 import type { RecipeWithIngredientNames } from "types/recipe";
 
 import { getRecipes } from "api/recipesApi";
@@ -95,7 +96,7 @@ export const useRecipeStatistics = (): RecipeStatisticsResult => {
                     );
                 }
             } catch (error) {
-                console.error("Error fetching statistics:", error);
+                logger.error("Error fetching statistics:", error);
             }
         };
 

@@ -16,16 +16,18 @@ function makeInput(overrides = {}) {
 
 function setup() {
     const menuRepository = { create: jest.fn() };
-    const useCase = new CreateMenu(menuRepository);
+    const recipeRepository = { findExistingIds: jest.fn() };
+    const useCase = new CreateMenu(menuRepository, recipeRepository);
 
-    return { useCase, menuRepository };
+    return { useCase, menuRepository, recipeRepository };
 }
 
 describe("CreateMenu", () => {
     it("should create a menu entity with recipe ids and return the repository result", async () => {
-        const { useCase, menuRepository } = setup();
+        const { useCase, menuRepository, recipeRepository } = setup();
         const input = makeInput();
         const createdMenu = { id: 9, menuTitle: input.menuTitle };
+        recipeRepository.findExistingIds.mockResolvedValue(input.recipeIds);
         menuRepository.create.mockResolvedValue(createdMenu);
 
         const result = await useCase.execute(input);
@@ -44,6 +46,31 @@ describe("CreateMenu", () => {
             input.recipeIds,
         );
         expect(result).toEqual(createdMenu);
+    });
+
+    it("should create a menu from a public recipe owned by another user", async () => {
+        const { useCase, menuRepository, recipeRepository } = setup();
+        const input = makeInput();
+        recipeRepository.findExistingIds.mockResolvedValue(input.recipeIds);
+        menuRepository.create.mockResolvedValue({ id: 9 });
+
+        await useCase.execute(input);
+
+        expect(menuRepository.create).toHaveBeenCalled();
+    });
+
+    it("should throw a 400 ValidationError when a recipe does not exist", async () => {
+        const { useCase, menuRepository, recipeRepository } = setup();
+        recipeRepository.findExistingIds.mockResolvedValue([3]);
+
+        const error = await catchError(useCase.execute(makeInput()));
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "One or more recipes do not exist",
+            400,
+        );
+        expect(menuRepository.create).not.toHaveBeenCalled();
     });
 
     it("should throw a 400 ValidationError when recipe ids are duplicated", async () => {

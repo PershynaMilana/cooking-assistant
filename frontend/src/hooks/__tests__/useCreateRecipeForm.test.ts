@@ -7,8 +7,6 @@ import { getRecipeTypes } from "api/recipeTypesApi";
 
 import { useCreateRecipeForm } from "hooks/useCreateRecipeForm";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -18,9 +16,6 @@ jest.mock("react-router-dom", () => ({
 jest.mock("api/recipesApi");
 jest.mock("api/ingredientsApi");
 jest.mock("api/recipeTypesApi");
-jest.mock("utils/getCurrentUserId");
-
-const PERSON_ID = 7;
 
 const flush = async () => {
     await act(async () => {
@@ -45,7 +40,6 @@ describe("useCreateRecipeForm", () => {
     beforeEach(() => {
         jest.mocked(getIngredients).mockResolvedValue([]);
         jest.mocked(getRecipeTypes).mockResolvedValue([]);
-        jest.mocked(getCurrentUserId).mockReturnValue(PERSON_ID);
     });
 
     it("should load the ingredient and type options", async () => {
@@ -94,28 +88,9 @@ describe("useCreateRecipeForm", () => {
         expect(jest.mocked(createRecipe)).toHaveBeenCalledWith(
             expect.objectContaining({
                 title: "Soup",
-                person_id: PERSON_ID,
                 type_id: 3,
             }),
         );
         expect(mockNavigate).toHaveBeenCalledWith("/");
-    });
-
-    it("should not create the recipe when there is no authenticated user", async () => {
-        jest.mocked(getCurrentUserId).mockReturnValue(null);
-
-        const { result } = renderHook(() => useCreateRecipeForm());
-
-        await flush();
-
-        act(() => {
-            fillValid(result.current.form);
-        });
-
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(createRecipe)).not.toHaveBeenCalled();
     });
 });

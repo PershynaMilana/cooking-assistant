@@ -12,8 +12,6 @@ import { getRecipes } from "api/recipesApi";
 
 import { useMenuForm } from "hooks/useMenuForm";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 export const useCreateMenuForm = () => {
     const { t } = useTranslation("menu");
     const navigate = useNavigate();
@@ -53,9 +51,7 @@ export const useCreateMenuForm = () => {
             return;
         }
 
-        const userId = getCurrentUserId();
-
-        if (userId === null || form.selectedCategory === null) {
+        if (form.selectedCategory === null) {
             return;
         }
 
@@ -64,7 +60,6 @@ export const useCreateMenuForm = () => {
                 menuTitle: form.menuTitle,
                 menuContent: form.menuDescription,
                 categoryId: form.selectedCategory,
-                personId: userId,
                 recipeIds: form.selectedRecipes,
             });
 

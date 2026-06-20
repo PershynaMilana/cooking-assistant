@@ -3,6 +3,8 @@ import type { RequestHandler } from "express";
 import type GetUsers from "@application/use-cases/users/GetUsers";
 import type LoginUser from "@application/use-cases/users/LoginUser";
 import type RegisterUser from "@application/use-cases/users/RegisterUser";
+import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from "@config/cookie";
+import { getUserId } from "@controller/requestUser";
 
 interface UserControllerDependencies {
     registerUser: RegisterUser;
@@ -39,8 +41,22 @@ export default class UserController {
 
     loginUser: RequestHandler = async (req, res) => {
         const { login, password } = req.body;
-        const token = await this.loginUserUseCase.execute({ login, password });
-        res.json(token);
+        const { token } = await this.loginUserUseCase.execute({
+            login,
+            password,
+        });
+
+        res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
+        res.json({ message: "Logged in" });
+    };
+
+    logout: RequestHandler = (_req, res) => {
+        res.clearCookie(AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS);
+        res.json({ message: "Logged out" });
+    };
+
+    me: RequestHandler = (req, res) => {
+        res.json({ id: getUserId(req) });
     };
 
     getUsers: RequestHandler = async (_req, res) => {

@@ -10,22 +10,13 @@ import { useRecipeList } from "hooks/useRecipeList";
 
 import { RecipeListView } from "components/recipes/RecipeListView";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 const UserRecipesPage: React.FC = () => {
     const { t } = useTranslation("recipes");
 
-    const userId = getCurrentUserId();
-
     const fetcher = useCallback(
-        (params: Parameters<typeof getRecipesByPerson>[1]) => {
-            if (userId === null) {
-                return Promise.resolve([]);
-            }
-
-            return getRecipesByPerson(userId, params);
-        },
-        [userId],
+        (params: Parameters<typeof getRecipesByPerson>[0]) =>
+            getRecipesByPerson(params),
+        [],
     );
 
     const list = useRecipeList(fetcher);

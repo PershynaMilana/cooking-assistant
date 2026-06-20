@@ -45,9 +45,9 @@ export default function createRecipeRouter(
         recipeController.searchRecipes,
     );
 
-    // filter by date, user
+    // filter by date for the authenticated user
     router.get(
-        "/recipes-filters-person/:id",
+        "/recipes-filters-person",
         authenticateToken,
         recipeController.searchPersonRecipes,
     );

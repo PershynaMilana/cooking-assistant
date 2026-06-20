@@ -12,18 +12,12 @@ import {
 
 import { useIngredientCatalog } from "hooks/useIngredientCatalog";
 
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { MOCK_ERROR_NETWORK } from "test/constants";
 
 jest.mock("api/ingredientsApi");
 jest.mock("api/userIngredientsApi");
-jest.mock("jwt-decode");
-
-const USER_ID = 5;
 
 const setup = () => {
-    setAuthToken();
-    mockJwtUser(USER_ID);
     jest.mocked(getIngredients).mockResolvedValue([]);
     jest.mocked(getUserIngredients).mockResolvedValue([]);
     jest.mocked(updateQuantities).mockResolvedValue(undefined);

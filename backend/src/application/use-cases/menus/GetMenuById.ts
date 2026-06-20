@@ -8,9 +8,15 @@ export default class GetMenuById {
         private menuRepository: Pick<MenuRepository, "findByIdWithRecipes">,
     ) {}
 
-    async execute(id: string | number | null): Promise<unknown> {
+    async execute(
+        id: string | number | null,
+        personId: number,
+    ): Promise<unknown> {
         const menuId = validate(idSchema, id);
-        const menu = await this.menuRepository.findByIdWithRecipes(menuId);
+        const menu = await this.menuRepository.findByIdWithRecipes(
+            menuId,
+            personId,
+        );
         if (!menu) {
             throw new NotFoundError("Menu not found");
         }

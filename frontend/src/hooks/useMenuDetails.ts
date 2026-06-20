@@ -7,13 +7,10 @@ import type { MenuDetails } from "types/menu";
 import { getApiErrorMessage } from "api/httpError";
 import { deleteMenu as deleteMenuApi, getMenuById } from "api/menusApi";
 
-import { getUserIdSafe } from "utils/getCurrentUserId";
-
 export const useMenuDetails = (id: string | undefined) => {
     const navigate = useNavigate();
     const [menu, setMenu] = useState<MenuDetails | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
     const fetchMenuDetails = useCallback(async () => {
         if (!id) {
@@ -30,7 +27,6 @@ export const useMenuDetails = (id: string | undefined) => {
     }, [id]);
 
     useEffect(() => {
-        setCurrentUserId(getUserIdSafe());
         void fetchMenuDetails();
     }, [fetchMenuDetails]);
 
@@ -47,7 +43,7 @@ export const useMenuDetails = (id: string | undefined) => {
         }
     };
 
-    const isOwner = menu?.menu.personid === currentUserId;
+    const isOwner = menu?.menu.isOwner ?? false;
 
     return { menu, error, isOwner, deleteMenu };
 };

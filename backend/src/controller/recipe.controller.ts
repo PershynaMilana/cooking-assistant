@@ -82,6 +82,7 @@ export default class RecipeController {
     getRecipeWithIngredients: RequestHandler = async (req, res) => {
         const recipe = await this.getRecipeByIdUseCase.execute(
             req.params.id as string,
+            getUserId(req),
         );
         res.json(recipe);
     };

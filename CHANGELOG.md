@@ -22,6 +22,21 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.40 - 2026-06-20
+
+### Backend
+- Security: Your login session is now kept in a secure, httpOnly cookie set by the server, so it can no longer be read or stolen by scripts in the browser; signing out clears it.
+- Security: You can no longer open or change another user's menu — every menu is private to the person who created it, and its "missing ingredients" are now worked out against your own pantry.
+- Security: When you build a menu, the recipes you add are now checked to make sure they actually exist.
+- Removed: Creating, editing, and deleting recipe types is temporarily withdrawn pending a future, safer system; recipe types are now a fixed reference list you can still browse and pick from when adding a recipe.
+
+### Frontend
+- Changed: Rebuilt the login and registration screens on the shared form components, added a password show/hide control, and translated every label, button, and validation message via a new `auth` namespace.
+- Fixed: The registration form now blocks submission while any field is still invalid (previously an invalid form could slip through).
+- Security: The app no longer keeps your login token in the browser - your session lives only in the secure cookie - and an expired session now returns you to the login screen instead of showing a broken page.
+- Removed: The recipe-type management screens (add, edit, delete) are gone while that feature is temporarily withdrawn; the read-only recipe-type list remains.
+
+
 ## 1.39 - 2026-06-18
 
 ### Frontend

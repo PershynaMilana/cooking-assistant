@@ -20,6 +20,7 @@ export const createMenuSchema = z.object({
             required_error: "Recipe IDs are required",
             invalid_type_error: "Recipe IDs must be an array",
         })
+        .max(500, { message: "Menu cannot contain more than 500 recipes" })
         .refine((ids) => new Set(ids).size === ids.length, {
             message: "Recipe IDs must be unique",
         }),

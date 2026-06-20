@@ -7,8 +7,9 @@ module.exports = {
     clearMocks: true,
     restoreMocks: true,
     moduleNameMapper: {
-        // env mock must win for both relative and bare `config/env` imports
+        // env and logger mocks must win for both relative and bare `config/*` imports
         "^(.*/)?config/env$": "<rootDir>/src/test/envMock.ts",
+        "^(.*/)?config/logger$": "<rootDir>/src/test/loggerMock.ts",
         "\\.(css|less|scss|sass)$": "identity-obj-proxy",
         "\\.(svg|png|jpg|jpeg|gif|webp|avif|ttf|woff|woff2|eot)$":
             "<rootDir>/src/test/fileMock.ts",
@@ -28,7 +29,7 @@ module.exports = {
     transform: {
         "^.+\\.(t|j)sx?$": ["@swc/jest"],
     },
-    transformIgnorePatterns: ["/node_modules/(?!(axios|jwt-decode)/)"],
+    transformIgnorePatterns: ["/node_modules/(?!(axios)/)"],
     collectCoverageFrom: [
         "src/**/*.{ts,tsx}",
         "!src/**/__tests__/**",

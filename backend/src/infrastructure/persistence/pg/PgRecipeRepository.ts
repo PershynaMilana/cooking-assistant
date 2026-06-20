@@ -67,9 +67,11 @@ export default class PgRecipeRepository implements RecipeRepository {
 
     async findByIdWithIngredients(
         recipeId: string | number,
+        currentUserId: number,
     ): Promise<unknown | null> {
         const recipe = await this.pool.query(
             `SELECT r.*,
+                  (r.person_id = $2) AS "isOwner",
                   json_agg(
                       json_build_object(
                           'id', i.id,
@@ -86,7 +88,7 @@ export default class PgRecipeRepository implements RecipeRepository {
                   LEFT JOIN recipe_types rt ON r.type_id = rt.id
            WHERE r.id = $1
            GROUP BY r.id, rt.type_name`,
-            [recipeId],
+            [recipeId, currentUserId],
         );
 
         return recipe.rows[0] || null;
@@ -300,6 +302,15 @@ export default class PgRecipeRepository implements RecipeRepository {
         const recipes = await this.pool.query(baseQuery, params);
 
         return recipes.rows;
+    }
+
+    async findExistingIds(ids: number[]): Promise<number[]> {
+        const result = await this.pool.query(
+            `SELECT id FROM recipes WHERE id = ANY($1)`,
+            [ids],
+        );
+
+        return result.rows.map((row) => row.id);
     }
 
     async deleteById(

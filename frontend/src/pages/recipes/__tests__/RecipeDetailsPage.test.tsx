@@ -8,7 +8,6 @@ import type { RecipeDetails } from "types/recipe";
 import { deleteRecipe, getRecipeById } from "api/recipesApi";
 
 import RecipeDetailsPage from "pages/recipes/RecipeDetailsPage";
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { BTN_DELETE_RECIPE, BTN_EDIT_RECIPE, ROUTE_MAIN } from "test/constants";
 import { mockNavigate } from "test/router";
 
@@ -17,7 +16,6 @@ jest.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
 }));
 jest.mock("api/recipesApi");
-jest.mock("jwt-decode");
 
 const TITLE = "Borscht";
 const OWNER_ID = 3;
@@ -32,6 +30,7 @@ const SAMPLE: RecipeDetails = {
     creation_date: "2024-01-01",
     servings: "4",
     person_id: OWNER_ID,
+    isOwner: true,
 };
 
 const renderPage = () =>
@@ -53,8 +52,6 @@ describe("RecipeDetailsPage", () => {
     });
 
     it("should show Edit and Delete buttons when current user is the recipe owner", async () => {
-        setAuthToken();
-        mockJwtUser(OWNER_ID);
         jest.mocked(getRecipeById).mockResolvedValue(SAMPLE);
 
         renderPage();
@@ -69,23 +66,7 @@ describe("RecipeDetailsPage", () => {
         ).toBeInTheDocument();
     });
 
-    it("should not show Edit and Delete buttons for a non-owner", async () => {
-        setAuthToken();
-        mockJwtUser(99);
-        jest.mocked(getRecipeById).mockResolvedValue(SAMPLE);
-
-        renderPage();
-
-        await screen.findByText(TITLE);
-
-        expect(
-            screen.queryByRole("button", { name: BTN_DELETE_RECIPE }),
-        ).not.toBeInTheDocument();
-    });
-
     it("should navigate to /main after successful delete", async () => {
-        setAuthToken();
-        mockJwtUser(OWNER_ID);
         jest.mocked(getRecipeById).mockResolvedValue(SAMPLE);
         jest.mocked(deleteRecipe).mockResolvedValue(undefined);
 

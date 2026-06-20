@@ -12,13 +12,11 @@ import {
 } from "api/userIngredientsApi";
 
 import IngredientsPage from "pages/person-ingradients/IngredientsPage";
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { BTN_EDIT_INGREDIENTS } from "test/constants";
 import { renderWithRouter } from "test/router";
 
 jest.mock("api/ingredientsApi");
 jest.mock("api/userIngredientsApi");
-jest.mock("jwt-decode");
 
 const INGREDIENT_NAME = "Potato";
 const USER_INGREDIENTS: UserIngredient[] = [
@@ -35,8 +33,6 @@ const ALL_INGREDIENTS: Ingredient[] = [
 ];
 
 const setup = () => {
-    setAuthToken();
-    mockJwtUser();
     jest.mocked(getIngredients).mockResolvedValue(ALL_INGREDIENTS);
     jest.mocked(getUserIngredients).mockResolvedValue(USER_INGREDIENTS);
 

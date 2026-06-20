@@ -30,16 +30,13 @@ function createRecipeRepository(): jest.Mocked<RecipeRepository> {
         searchByPerson: jest.fn(),
         getStats: jest.fn(),
         findAllIngredients: jest.fn(),
+        findExistingIds: jest.fn(),
     } as unknown as jest.Mocked<RecipeRepository>;
 }
 
 function createRecipeTypeRepository(): jest.Mocked<RecipeTypeRepository> {
     return {
         findAll: jest.fn(),
-        findById: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        deleteById: jest.fn(),
     } as unknown as jest.Mocked<RecipeTypeRepository>;
 }
 

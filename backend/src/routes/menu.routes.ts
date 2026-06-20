@@ -23,9 +23,9 @@ export default function createMenuRouter(
     // delete menu
     router.delete("/menu/:id", authenticateToken, menuController.remove);
 
-    // getting menu by person
+    // getting menus for the authenticated user
     router.get(
-        "/menu-filters-person/:id",
+        "/menu-filters-person",
         authenticateToken,
         menuController.searchByPerson,
     );

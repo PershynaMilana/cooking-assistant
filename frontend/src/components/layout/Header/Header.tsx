@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { ROUTES } from "constants/routes";
-import { AUTH_TOKEN_KEY } from "constants/storage";
+import { PUBLIC_PATHS, ROUTES } from "constants/routes";
+
+import { logout as logoutRequest } from "api/authApi";
 
 const NAV_LINKS = [
     { to: ROUTES.main, labelKey: "header.home" },
@@ -18,11 +19,18 @@ const NAV_LINKS = [
 export const Header: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const { pathname } = useLocation();
+    const isOnAuthPage = PUBLIC_PATHS.includes(pathname);
 
-    const handleLogout = () => {
-        localStorage.removeItem(AUTH_TOKEN_KEY);
-        navigate(ROUTES.login);
+    const [logoutError, setLogoutError] = useState<string | null>(null);
+
+    const handleLogout = async () => {
+        try {
+            await logoutRequest();
+            navigate(ROUTES.login);
+        } catch {
+            setLogoutError(t("header.logoutError"));
+        }
     };
 
     return (
@@ -42,13 +50,22 @@ export const Header: React.FC = () => {
                         ))}
                     </div>
 
-                    {token ? (
-                        <button
-                            onClick={handleLogout}
-                            className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 mr-[3vw] rounded-full"
-                        >
-                            {t("header.logout")}
-                        </button>
+                    {!isOnAuthPage ? (
+                        <div className="flex items-center gap-3 mr-[3vw]">
+                            {logoutError && (
+                                <span className="font-montserratRegular text-sm text-red-300">
+                                    {logoutError}
+                                </span>
+                            )}
+                            <button
+                                onClick={() => {
+                                    void handleLogout();
+                                }}
+                                className="bg-dark-purple font-montserratRegular px-8 py-2 -mt-1 rounded-full"
+                            >
+                                {t("header.logout")}
+                            </button>
+                        </div>
                     ) : (
                         <div className="flex space-x-14 mr-[5vw]">
                             <li>

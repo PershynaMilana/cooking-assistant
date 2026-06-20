@@ -13,11 +13,7 @@ import GetAllMenus from "@application/use-cases/menus/GetAllMenus";
 import GetMenuById from "@application/use-cases/menus/GetMenuById";
 import SearchPersonMenus from "@application/use-cases/menus/SearchPersonMenus";
 import UpdateMenu from "@application/use-cases/menus/UpdateMenu";
-import CreateRecipeType from "@application/use-cases/recipe-types/CreateRecipeType";
-import DeleteRecipeType from "@application/use-cases/recipe-types/DeleteRecipeType";
 import GetAllRecipeTypes from "@application/use-cases/recipe-types/GetAllRecipeTypes";
-import GetRecipeTypeById from "@application/use-cases/recipe-types/GetRecipeTypeById";
-import UpdateRecipeType from "@application/use-cases/recipe-types/UpdateRecipeType";
 import CreateRecipe from "@application/use-cases/recipes/CreateRecipe";
 import DeleteRecipe from "@application/use-cases/recipes/DeleteRecipe";
 import GetAllIngredients from "@application/use-cases/recipes/GetAllIngredients";
@@ -84,10 +80,6 @@ export function buildControllers({
 }: RepositoryDeps): Controllers {
     const recipeTypeController = new RecipeTypeController({
         getAllRecipeTypes: new GetAllRecipeTypes(recipeTypeRepository),
-        getRecipeTypeById: new GetRecipeTypeById(recipeTypeRepository),
-        createRecipeType: new CreateRecipeType(recipeTypeRepository),
-        updateRecipeType: new UpdateRecipeType(recipeTypeRepository),
-        deleteRecipeType: new DeleteRecipeType(recipeTypeRepository),
     });
 
     const recipeController = new RecipeController({
@@ -104,9 +96,9 @@ export function buildControllers({
 
     const menuController = new MenuController({
         getAllMenus: new GetAllMenus(menuRepository),
-        createMenu: new CreateMenu(menuRepository),
+        createMenu: new CreateMenu(menuRepository, recipeRepository),
         getMenuById: new GetMenuById(menuRepository),
-        updateMenu: new UpdateMenu(menuRepository),
+        updateMenu: new UpdateMenu(menuRepository, recipeRepository),
         deleteMenu: new DeleteMenu(menuRepository),
         searchPersonMenus: new SearchPersonMenus(menuRepository),
     });

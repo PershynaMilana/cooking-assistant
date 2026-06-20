@@ -11,7 +11,6 @@ import { useRecipeForm } from "hooks/useRecipeForm";
 import { useRecipeFormData } from "hooks/useRecipeFormData";
 
 import { parseCookingTime } from "utils/cookingTimeUtils";
-import { getCurrentUserId } from "utils/getCurrentUserId";
 
 export const useCreateRecipeForm = () => {
     const { t } = useTranslation("recipes");
@@ -38,19 +37,10 @@ export const useCreateRecipeForm = () => {
             return;
         }
 
-        const userId = getCurrentUserId();
-
-        if (userId === null) {
-            console.error("No auth token found.");
-
-            return;
-        }
-
         try {
             await createRecipe({
                 title: form.title,
                 content: form.content,
-                person_id: userId,
                 ingredients: form.selectedIngredients.map((i) => ({
                     id: i.id,
                     quantity: i.quantity,

@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
@@ -34,6 +35,7 @@ export function createApp(controllers: Controllers): Express {
         }),
     );
     app.use(express.json({ limit: "100kb" }));
+    app.use(cookieParser());
 
     app.use("/api", createHealthRouter());
     app.use("/api", createUserRouter(controllers.userController));

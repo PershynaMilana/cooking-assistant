@@ -10,22 +10,13 @@ import { useMenuList } from "hooks/useMenuList";
 
 import { MenuListView } from "components/menu/MenuListView";
 
-import { getCurrentUserId } from "utils/getCurrentUserId";
-
 const UserMenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
 
-    const userId = getCurrentUserId();
-
     const fetcher = useCallback(
-        (params: Parameters<typeof getMenusByPerson>[1]) => {
-            if (userId === null) {
-                return Promise.resolve([]);
-            }
-
-            return getMenusByPerson(userId, params);
-        },
-        [userId],
+        (params: Parameters<typeof getMenusByPerson>[0]) =>
+            getMenusByPerson(params),
+        [],
     );
 
     const list = useMenuList(fetcher);

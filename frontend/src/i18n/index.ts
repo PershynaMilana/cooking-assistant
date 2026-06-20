@@ -1,6 +1,9 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
+import { logger } from "config/logger";
+
+import auth from "i18n/locales/en/auth.json";
 import common from "i18n/locales/en/common.json";
 import ingredients from "i18n/locales/en/ingredients.json";
 import menu from "i18n/locales/en/menu.json";
@@ -13,7 +16,15 @@ import stats from "i18n/locales/en/stats.json";
 i18n.use(initReactI18next)
     .init({
         resources: {
-            en: { common, recipes, recipeTypes, menu, ingredients, stats },
+            en: {
+                common,
+                recipes,
+                recipeTypes,
+                menu,
+                ingredients,
+                stats,
+                auth,
+            },
         },
         lng: "en",
         fallbackLng: "en",
@@ -21,6 +32,6 @@ i18n.use(initReactI18next)
         interpolation: { escapeValue: false },
         react: { useSuspense: false },
     })
-    .catch(console.error);
+    .catch(logger.error);
 
 export default i18n;

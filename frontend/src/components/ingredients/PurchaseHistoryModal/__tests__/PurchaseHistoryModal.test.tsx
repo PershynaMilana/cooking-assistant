@@ -6,11 +6,9 @@ import { getPurchaseHistory } from "api/userIngredientsApi";
 
 import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
 
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { renderWithRouter } from "test/router";
 
 jest.mock("api/userIngredientsApi");
-jest.mock("jwt-decode");
 
 const SAMPLE_HISTORY: Purchase[] = [
     {
@@ -24,8 +22,6 @@ const SAMPLE_HISTORY: Purchase[] = [
 
 describe("PurchaseHistoryModal", () => {
     it("should render purchase history loaded from the api", async () => {
-        setAuthToken();
-        mockJwtUser(1);
         jest.mocked(getPurchaseHistory).mockResolvedValue(SAMPLE_HISTORY);
 
         renderWithRouter(

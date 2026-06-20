@@ -1,4 +1,5 @@
 {
+    "sessionError": "Could not verify session. Please refresh the page.",
     "modal": {
         "cancel": "Cancel",
         "confirm": "Delete"
@@ -13,7 +14,8 @@
         "myMenus": "My Menus",
         "login": "Login",
         "register": "Register",
-        "logout": "Logout"
+        "logout": "Logout",
+        "logoutError": "Logout failed. Please try again."
     },
     "search": {
         "placeholderPrefix": "Search by",

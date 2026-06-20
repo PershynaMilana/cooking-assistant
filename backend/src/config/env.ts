@@ -26,6 +26,7 @@ const envStringSchema = (fallback: string) =>
     z.preprocess(emptyToUndefined, z.string().default(fallback));
 
 const envSchema = z.object({
+    NODE_ENV: envStringSchema("development"),
     PORT: envNumberSchema(3000),
     DB_USER: envStringSchema("postgres"),
     DB_PASSWORD: envStringSchema("12345678"),
@@ -33,6 +34,7 @@ const envSchema = z.object({
     DB_PORT: envNumberSchema(5432),
     DB_NAME: envStringSchema("cooking_helper"),
     CORS_ORIGIN: envStringSchema("http://localhost:8080"),
+    COOKIE_DOMAIN: z.preprocess(emptyToUndefined, z.string().optional()),
     JWT_SECRET_KEY: z.preprocess(
         emptyToUndefined,
         z.string().min(32, "must be at least 32 characters").optional(),
@@ -69,6 +71,8 @@ const env = parsedEnv.data;
 
 export const config = {
     port: env.PORT,
+    nodeEnv: env.NODE_ENV,
+    isProduction: env.NODE_ENV === "production",
     db: {
         user: env.DB_USER,
         password: env.DB_PASSWORD,
@@ -77,6 +81,7 @@ export const config = {
         database: env.DB_NAME,
     },
     corsOrigin: env.CORS_ORIGIN,
+    cookieDomain: env.COOKIE_DOMAIN,
     logLevel: env.LOG_LEVEL ?? "info",
 };
 

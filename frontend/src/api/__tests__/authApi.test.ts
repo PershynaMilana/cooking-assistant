@@ -1,11 +1,10 @@
-import { login, register } from "api/authApi";
+import { login, logout, register } from "api/authApi";
 import { API_ROUTES } from "api/endpoints";
 
 import { mockedPost } from "test/apiClientMock";
 
 jest.mock("../client");
 
-const TOKEN = "jwt-token";
 const CREDENTIALS = { login: "tester", password: "secret1" };
 const REGISTRATION = {
     name: "Test",
@@ -15,16 +14,15 @@ const REGISTRATION = {
 };
 
 describe("authApi", () => {
-    it("should post credentials to the login endpoint and return the token", async () => {
-        mockedPost.mockResolvedValue({ data: { token: TOKEN } });
+    it("should post credentials to the login endpoint", async () => {
+        mockedPost.mockResolvedValue({ data: { message: "Logged in" } });
 
-        const result = await login(CREDENTIALS);
+        await login(CREDENTIALS);
 
         expect(mockedPost).toHaveBeenCalledWith(
             API_ROUTES.auth.login,
             CREDENTIALS,
         );
-        expect(result).toEqual({ token: TOKEN });
     });
 
     it("should post the registration data to the register endpoint", async () => {
@@ -36,5 +34,13 @@ describe("authApi", () => {
             API_ROUTES.auth.register,
             REGISTRATION,
         );
+    });
+
+    it("should post to the logout endpoint", async () => {
+        mockedPost.mockResolvedValue({ data: { message: "Logged out" } });
+
+        await logout();
+
+        expect(mockedPost).toHaveBeenCalledWith(API_ROUTES.auth.logout);
     });
 });

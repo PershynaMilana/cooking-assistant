@@ -1,7 +1,6 @@
 import {
     changeMenuPath,
     changeRecipePath,
-    editRecipeTypePath,
     menuDetailsPath,
     recipeDetailsPath,
     ROUTES,
@@ -14,10 +13,6 @@ describe("route path builders", () => {
 
     it("should build a change recipe path from a string id", () => {
         expect(changeRecipePath("42")).toBe("/change-recipe/42");
-    });
-
-    it("should build an edit recipe type path", () => {
-        expect(editRecipeTypePath(3)).toBe("/types/3");
     });
 
     it("should build a menu details path", () => {

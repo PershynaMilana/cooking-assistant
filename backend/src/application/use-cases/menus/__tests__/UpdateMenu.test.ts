@@ -14,15 +14,17 @@ function makeInput() {
 
 function setup() {
     const menuRepository = { update: jest.fn() };
-    const useCase = new UpdateMenu(menuRepository);
+    const recipeRepository = { findExistingIds: jest.fn() };
+    const useCase = new UpdateMenu(menuRepository, recipeRepository);
 
-    return { useCase, menuRepository };
+    return { useCase, menuRepository, recipeRepository };
 }
 
 describe("UpdateMenu", () => {
     it("should update a menu entity with recipe ids", async () => {
-        const { useCase, menuRepository } = setup();
+        const { useCase, menuRepository, recipeRepository } = setup();
         const input = makeInput();
+        recipeRepository.findExistingIds.mockResolvedValue(input.recipeIds);
         menuRepository.update.mockResolvedValue(true);
 
         const result = await useCase.execute(9, 7, input);
@@ -48,12 +50,29 @@ describe("UpdateMenu", () => {
     });
 
     it("should throw a 404 NotFoundError when the menu does not belong to the user", async () => {
-        const { useCase, menuRepository } = setup();
+        const { useCase, menuRepository, recipeRepository } = setup();
+        recipeRepository.findExistingIds.mockResolvedValue(
+            makeInput().recipeIds,
+        );
         menuRepository.update.mockResolvedValue(false);
 
         const error = await catchError(useCase.execute(9, 7, makeInput()));
 
         expect(error).toBeAppError(NotFoundError, "Menu not found", 404);
+    });
+
+    it("should throw a 400 ValidationError when a recipe does not exist", async () => {
+        const { useCase, menuRepository, recipeRepository } = setup();
+        recipeRepository.findExistingIds.mockResolvedValue([3]);
+
+        const error = await catchError(useCase.execute(9, 7, makeInput()));
+
+        expect(error).toBeAppError(
+            ValidationError,
+            "One or more recipes do not exist",
+            400,
+        );
+        expect(menuRepository.update).not.toHaveBeenCalled();
     });
 
     it("should throw a 400 ValidationError when recipe ids are duplicated", async () => {

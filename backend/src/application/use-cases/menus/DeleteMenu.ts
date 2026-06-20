@@ -8,11 +8,7 @@ export default class DeleteMenu {
 
     async execute(id: string | number | null, personId: number): Promise<void> {
         const menuId = validate(idSchema, id);
-        const validPersonId = validate(idSchema, personId);
-        const deleted = await this.menuRepository.deleteById(
-            menuId,
-            validPersonId,
-        );
+        const deleted = await this.menuRepository.deleteById(menuId, personId);
         if (!deleted) {
             throw new NotFoundError("Menu not found");
         }

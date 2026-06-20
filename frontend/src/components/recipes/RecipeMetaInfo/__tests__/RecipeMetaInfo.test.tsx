@@ -13,6 +13,7 @@ const RECIPE = {
     creation_date: "2024-01-01",
     servings: "4",
     person_id: 3,
+    isOwner: true,
 };
 
 describe("RecipeMetaInfo", () => {

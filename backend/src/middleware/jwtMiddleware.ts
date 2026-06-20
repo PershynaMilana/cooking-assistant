@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
+import { AUTH_COOKIE_NAME } from "@config/cookie";
 import { requireJwtSecret } from "@config/env";
 
 function isUserPayload(
@@ -9,18 +10,22 @@ function isUserPayload(
     id: number;
 } {
     const isObjectPayload = typeof decoded === "object" && decoded !== null;
-    return isObjectPayload && typeof decoded.id === "number";
+    return (
+        isObjectPayload &&
+        typeof decoded.id === "number" &&
+        Number.isInteger(decoded.id) &&
+        decoded.id > 0
+    );
 }
 
 const authenticateToken: RequestHandler = (req, res, next) => {
-    const [scheme, token] = req.headers.authorization?.split(" ") ?? [];
+    const token = req.cookies?.[AUTH_COOKIE_NAME]?.trim() ?? "";
 
-    if (scheme !== "Bearer" || !token) {
+    if (!token) {
         res.status(401).json({ error: "No token, access denied" });
         return;
     }
 
-    // a missing secret is a server misconfiguration: the AppError(500) propagates to errorHandler
     const secret = requireJwtSecret();
 
     jwt.verify(token, secret, { algorithms: ["HS256"] }, (err, decoded) => {

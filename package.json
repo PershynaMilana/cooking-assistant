@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.39.0",
+  "version": "1.40.0",
   "private": true,
   "scripts": {
     "prepare": "husky",
@@ -16,7 +16,7 @@
     "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
     "lint:sonarjs": "npm --prefix backend run lint:sonarjs && npm --prefix frontend run lint:sonarjs",
     "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck",
-    "test": "npm --prefix backend run test",
+    "test": "npm --prefix backend run test && npm --prefix frontend run test",
     "build": "npm --prefix frontend run build",
     "verify": "npm run format:check && npm run lint && npm run lint:sonarjs && npm run typecheck && npm run test && npm run build",
     "patch": "npm version patch --no-git-tag-version",

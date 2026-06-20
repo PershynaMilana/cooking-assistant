@@ -7,7 +7,6 @@ import { createRecipe } from "api/recipesApi";
 import { getRecipeTypes } from "api/recipeTypesApi";
 
 import CreateRecipePage from "pages/recipes/CreateRecipePage";
-import { mockJwtUser, setAuthToken } from "test/auth";
 import { LABEL_COOKING_TIME, ROUTE_HOME } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
@@ -18,9 +17,7 @@ jest.mock("react-router-dom", () => ({
 jest.mock("api/recipesApi");
 jest.mock("api/recipeTypesApi");
 jest.mock("api/ingredientsApi");
-jest.mock("jwt-decode");
 
-const PERSON_ID = 7;
 const TYPE_ID = 3;
 const TYPE_NAME = "Soup";
 const INGREDIENT_ID = 11;
@@ -36,8 +33,6 @@ const SAMPLE_INGREDIENTS = [
 
 describe("CreateRecipePage", () => {
     it("should create the recipe and navigate home on submit", async () => {
-        setAuthToken();
-        mockJwtUser(PERSON_ID);
         jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE_TYPES);
         jest.mocked(getIngredients).mockResolvedValue(SAMPLE_INGREDIENTS);
         const mockedCreateRecipe = jest.mocked(createRecipe);
@@ -74,7 +69,6 @@ describe("CreateRecipePage", () => {
             expect.objectContaining({
                 title: TITLE,
                 content: DESCRIPTION,
-                person_id: PERSON_ID,
                 type_id: TYPE_ID,
                 servings: SERVINGS,
                 ingredients: [{ id: INGREDIENT_ID, quantity: 1 }],

@@ -1,7 +1,7 @@
 import request from "supertest";
 
 import { ValidationError } from "@domain/errors/AppError";
-import { buildTestApp, authHeader } from "../helpers/testApp";
+import { buildTestApp, authCookie } from "../helpers/testApp";
 
 describe("menu category routes", () => {
     it("should return 401 without a token", async () => {
@@ -19,7 +19,7 @@ describe("menu category routes", () => {
 
         const res = await request(app)
             .get("/api/menu-categories")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(categories);
@@ -33,7 +33,7 @@ describe("menu category routes", () => {
 
         const res = await request(app)
             .get("/api/menu-categories")
-            .set("Authorization", authHeader());
+            .set("Cookie", authCookie());
 
         expect(res.status).toBe(400);
         expect(res.body).toEqual({ error: "Category query is invalid" });

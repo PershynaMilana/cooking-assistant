@@ -20,8 +20,8 @@ import { mockedDelete, mockedGet, mockedPut } from "test/apiClientMock";
 
 jest.mock("../client");
 
-const USER_ID = 3;
 const INGREDIENT_ID = 5;
+const PURCHASE_ID = 11;
 const SAMPLE_USER_INGREDIENTS: UserIngredient[] = [
     {
         ingredient_id: 5,
@@ -52,58 +52,54 @@ const QUANTITIES_BODY: UpdateQuantitiesRequest = {
 const PURCHASE_BODY: UpdatePurchaseRequest = { quantity: 50 };
 
 describe("userIngredientsApi", () => {
-    it("should get the user ingredients with the user id params and return the data", async () => {
+    it("should get the user ingredients and return the data", async () => {
         mockedGet.mockResolvedValue({ data: SAMPLE_USER_INGREDIENTS });
 
-        const result = await getUserIngredients(USER_ID);
+        const result = await getUserIngredients();
 
-        expect(mockedGet).toHaveBeenCalledWith(
-            API_ROUTES.userIngredients.byPerson(USER_ID),
-            { params: { userId: USER_ID } },
-        );
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.userIngredients.list);
         expect(result).toEqual(SAMPLE_USER_INGREDIENTS);
     });
 
-    it("should put saved user ingredients to the by-person endpoint", async () => {
+    it("should put saved user ingredients to the list endpoint", async () => {
         mockedPut.mockResolvedValue({ data: undefined });
 
-        await saveUserIngredient(USER_ID, SAVE_BODY);
+        await saveUserIngredient(SAVE_BODY);
 
         expect(mockedPut).toHaveBeenCalledWith(
-            API_ROUTES.userIngredients.byPerson(USER_ID),
+            API_ROUTES.userIngredients.list,
             SAVE_BODY,
-            { params: { userId: USER_ID } },
         );
     });
 
     it("should put updated quantities to the update-quantities endpoint", async () => {
         mockedPut.mockResolvedValue({ data: undefined });
 
-        await updateQuantities(USER_ID, QUANTITIES_BODY);
+        await updateQuantities(QUANTITIES_BODY);
 
         expect(mockedPut).toHaveBeenCalledWith(
-            API_ROUTES.userIngredients.updateQuantities(USER_ID),
+            API_ROUTES.userIngredients.updateQuantities,
             QUANTITIES_BODY,
         );
     });
 
-    it("should delete a user ingredient by user and ingredient id", async () => {
+    it("should delete a user ingredient by ingredient id", async () => {
         mockedDelete.mockResolvedValue({ data: undefined });
 
-        await deleteUserIngredient(USER_ID, INGREDIENT_ID);
+        await deleteUserIngredient(INGREDIENT_ID);
 
         expect(mockedDelete).toHaveBeenCalledWith(
-            API_ROUTES.userIngredients.item(USER_ID, INGREDIENT_ID),
+            API_ROUTES.userIngredients.item(INGREDIENT_ID),
         );
     });
 
     it("should get the purchase history and return the data", async () => {
         mockedGet.mockResolvedValue({ data: SAMPLE_PURCHASES });
 
-        const result = await getPurchaseHistory(USER_ID, INGREDIENT_ID);
+        const result = await getPurchaseHistory(INGREDIENT_ID);
 
         expect(mockedGet).toHaveBeenCalledWith(
-            API_ROUTES.userIngredients.history(USER_ID, INGREDIENT_ID),
+            API_ROUTES.userIngredients.history(INGREDIENT_ID),
         );
         expect(result).toEqual(SAMPLE_PURCHASES);
     });
@@ -111,10 +107,10 @@ describe("userIngredientsApi", () => {
     it("should put an updated purchase to the history endpoint", async () => {
         mockedPut.mockResolvedValue({ data: undefined });
 
-        await updatePurchase(USER_ID, INGREDIENT_ID, PURCHASE_BODY);
+        await updatePurchase(PURCHASE_ID, PURCHASE_BODY);
 
         expect(mockedPut).toHaveBeenCalledWith(
-            API_ROUTES.userIngredients.history(USER_ID, INGREDIENT_ID),
+            API_ROUTES.userIngredients.history(PURCHASE_ID),
             PURCHASE_BODY,
         );
     });

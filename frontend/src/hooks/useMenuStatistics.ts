@@ -8,7 +8,6 @@ import { getRecipes } from "api/recipesApi";
 import { getRecipesStats } from "api/statsApi";
 
 import { formatCookingTimeInput } from "utils/cookingTimeUtils";
-import { getUserIdSafe } from "utils/getCurrentUserId";
 
 export interface MenuStatisticsResult {
     menusCount: number;
@@ -36,12 +35,6 @@ export const useMenuStatistics = (
     recipesCountRef.current = recipesCountProp;
 
     useEffect(() => {
-        if (getUserIdSafe() === null) {
-            setError("No auth token found.");
-
-            return;
-        }
-
         const fetchAll = async () => {
             setError(null);
             try {

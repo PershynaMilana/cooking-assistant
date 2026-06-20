@@ -22,11 +22,10 @@ export async function getRecipesByFilters(
 }
 
 export async function getRecipesByPerson(
-    userId: number,
     params: RecipeFilterParams,
 ): Promise<RecipeListItem[]> {
     const response = await apiClient.get<RecipeListItem[]>(
-        API_ROUTES.recipes.byPerson(userId),
+        API_ROUTES.recipes.byPerson,
         { params },
     );
 

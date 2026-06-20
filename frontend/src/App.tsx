@@ -19,8 +19,6 @@ import MenuDetailsPage from "pages/menu/MenuDetailsPage";
 import MenuPage from "pages/menu/MenuPage";
 import NotFoundPage from "pages/not-found/NotFoundPage";
 import IngredientsPage from "pages/person-ingradients/IngredientsPage";
-import AddRecipeType from "pages/recipe-types/AddTypePage";
-import EditRecipeType from "pages/recipe-types/EditRecipeType";
 import TypesPage from "pages/recipe-types/TypesPage";
 import ChangeRecipePage from "pages/recipes/ChangeRecipePage";
 import CreateRecipePage from "pages/recipes/CreateRecipePage";
@@ -41,8 +39,6 @@ const PRIVATE_ROUTES: AppRoute[] = [
     { path: ROUTES.myRecipes, element: <UserRecipesPage /> },
     { path: ROUTES.myMenus, element: <UserMenuPage /> },
     { path: ROUTES.recipeTypes, element: <TypesPage /> },
-    { path: ROUTES.editRecipeType, element: <EditRecipeType /> },
-    { path: ROUTES.addRecipeType, element: <AddRecipeType /> },
     { path: ROUTES.addRecipe, element: <CreateRecipePage /> },
     { path: ROUTES.recipeDetails, element: <RecipeDetailsPage /> },
     { path: ROUTES.changeRecipe, element: <ChangeRecipePage /> },

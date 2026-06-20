@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { logger } from "config/logger";
 import type { Ingredient } from "types/ingredient";
 import type { PantryIngredient } from "types/userIngredient";
 
@@ -9,10 +10,6 @@ import {
     getUserIngredients,
     saveUserIngredient,
 } from "api/userIngredientsApi";
-
-import { getUserIdSafe } from "utils/getCurrentUserId";
-
-const NO_AUTH = "No auth token found.";
 
 export const useIngredientsData = () => {
     const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
@@ -25,12 +22,6 @@ export const useIngredientsData = () => {
 
     useEffect(() => {
         const fetchAll = async () => {
-            if (getUserIdSafe() === null) {
-                console.error(NO_AUTH);
-
-                return;
-            }
-
             try {
                 const ingredients = await getIngredients();
 
@@ -40,7 +31,7 @@ export const useIngredientsData = () => {
                     ),
                 );
             } catch (error) {
-                console.error("Error loading ingredients:", error);
+                logger.error("Error loading ingredients:", error);
             }
         };
 
@@ -48,16 +39,8 @@ export const useIngredientsData = () => {
     }, []);
 
     const fetchPersonIngredients = useCallback(async () => {
-        const userId = getUserIdSafe();
-
-        if (userId === null) {
-            console.error(NO_AUTH);
-
-            return;
-        }
-
         try {
-            const data = await getUserIngredients(userId);
+            const data = await getUserIngredients();
 
             setPersonIngredients(
                 data.map((item) => ({
@@ -69,7 +52,7 @@ export const useIngredientsData = () => {
                 data.map((ingredient) => ingredient.ingredient_id),
             );
         } catch (error) {
-            console.error("Error loading selected ingredients:", error);
+            logger.error("Error loading selected ingredients:", error);
         }
     }, []);
 
@@ -78,14 +61,6 @@ export const useIngredientsData = () => {
     }, [fetchPersonIngredients]);
 
     const saveNewIngredients = useCallback(async (): Promise<boolean> => {
-        const userId = getUserIdSafe();
-
-        if (userId === null) {
-            console.error(NO_AUTH);
-
-            return false;
-        }
-
         const newIngredients = allIngredients
             .filter(
                 (ingredient) =>
@@ -101,12 +76,12 @@ export const useIngredientsData = () => {
             }));
 
         try {
-            await saveUserIngredient(userId, { ingredients: newIngredients });
+            await saveUserIngredient({ ingredients: newIngredients });
             await fetchPersonIngredients();
 
             return true;
         } catch (error) {
-            console.error("Error saving ingredients:", error);
+            logger.error("Error saving ingredients:", error);
 
             return false;
         }
@@ -119,16 +94,8 @@ export const useIngredientsData = () => {
 
     const removeIngredient = useCallback(
         async (ingredientId: number): Promise<boolean> => {
-            const userId = getUserIdSafe();
-
-            if (userId === null) {
-                console.error(NO_AUTH);
-
-                return false;
-            }
-
             try {
-                await deleteUserIngredient(userId, ingredientId);
+                await deleteUserIngredient(ingredientId);
                 setPersonIngredients((prev) =>
                     prev.filter((item) => item.id !== ingredientId),
                 );
@@ -138,7 +105,7 @@ export const useIngredientsData = () => {
 
                 return true;
             } catch (error) {
-                console.error("Error deleting ingredient and history:", error);
+                logger.error("Error deleting ingredient and history:", error);
 
                 return false;
             }

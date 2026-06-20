@@ -1,12 +1,9 @@
 import { useCallback, useState } from "react";
 
+import { logger } from "config/logger";
 import type { PantryIngredient } from "types/userIngredient";
 
 import { updateQuantities } from "api/userIngredientsApi";
-
-import { getUserIdSafe } from "utils/getCurrentUserId";
-
-const NO_AUTH = "No auth token found.";
 
 export const useQuantityUpdates = (
     personIngredients: PantryIngredient[],
@@ -46,15 +43,6 @@ export const useQuantityUpdates = (
     );
 
     const saveUpdatedQuantities = useCallback(async () => {
-        const userId = getUserIdSafe();
-
-        if (userId === null) {
-            console.error(NO_AUTH);
-            setIsEditingQuantity(false);
-
-            return;
-        }
-
         const changedIngredients = updatedIngredients.filter(
             (updatedIngredient) => {
                 const original = personIngredients.find(
@@ -76,13 +64,13 @@ export const useQuantityUpdates = (
         }
 
         try {
-            await updateQuantities(userId, {
+            await updateQuantities({
                 updatedIngredients: changedIngredients,
             });
             setIsEditingQuantity(false);
             await onSaved();
         } catch (error) {
-            console.error("Error saving ingredient quantities:", error);
+            logger.error("Error saving ingredient quantities:", error);
             setIsEditingQuantity(false);
         }
     }, [updatedIngredients, personIngredients, onSaved]);
