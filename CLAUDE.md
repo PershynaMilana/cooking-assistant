@@ -105,7 +105,8 @@ Optionally note the side when only one changed: `1.4 (frontend): ...`. The versi
 
 Hard rules:
 
-- Do NOT create git tags.
+- Do NOT create git tags for versions. Exception: a `v*` deploy tag (e.g. `v2.0`) triggers the production
+  deploy pipeline - only the user creates these, never Claude.
 - Do NOT add a `Co-Authored-By` trailer to commits.
 - Do NOT commit directly to `main`. Branch from `main`, named after the release (for example `release/1.4`), commit there, push, and open a PR for review.
 - Never `git push` without explicit user permission.
@@ -145,6 +146,39 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR and o
 2. Backend `.env` is gitignored. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and fill it in. It holds `JWT_SECRET_KEY` (read lazily through [backend/src/config/env.ts](backend/src/config/env.ts) by JWT auth code) plus the `DB_*` keys, `NODE_ENV`, `PORT`, optional `LOG_LEVEL` for pino, `CORS_ORIGIN` (the allowed frontend origin), and `COOKIE_DOMAIN` (empty in dev for a host-only auth cookie; the shared parent domain in production so subdomains share the session - `Secure` flips on automatically when `NODE_ENV=production`). Without `JWT_SECRET_KEY`, login and every protected route return a 500 configuration error. Tests set a long `JWT_SECRET_KEY` in [backend/src/test/jest.setup.ts](backend/src/test/jest.setup.ts). When you add a new env key, add it (without a value) to `.env.example` too.
 3. CORS in [backend/src/app.ts](backend/src/app.ts) allows the origin from the `CORS_ORIGIN` env var (default `http://localhost:8080`, via `config.corsOrigin`) and runs with `credentials: true`; the app mounts `cookie-parser` so the browser can send the httpOnly auth cookie cross-origin. For a different frontend port or a deployed origin, set `CORS_ORIGIN` in `.env` - no code change.
 4. Database setup uses `node-pg-migrate` (configured to reuse the same `config.db` as the app, so there is no separate `DATABASE_URL`). On a fresh DB run `npm run migrate` (or `migrate up`) then `npm run seed` from the root or `backend/`. `seed` is idempotent (guards against existing rows), so it is safe to re-run. A DB that already has the schema from the legacy `database.sql` adopts the migrations without re-creating anything via `npm run migrate -- up --fake` (marks the initial migration as applied; data is untouched). New migrations are scaffolded with `npm --prefix backend run migrate:create <name>` (SQL files with `-- Up Migration` / `-- Down Migration` markers). The legacy `database.sql` has been removed - migrations are the only source of truth for the schema (its old content lives in git history if ever needed).
+
+## Production deployment
+
+**Live:** https://cooking-assistant.app
+
+**Trigger:** push a `v*` tag (e.g. `v2.0`) - user does this, never Claude. GitHub Actions
+([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) then:
+1. Builds `cooking-backend` Docker image via `tsup` + `node`, pushes to GHCR.
+2. Builds `cooking-frontend` Docker image via Vite + nginx, pushes to GHCR.
+3. Runs DB migrations + seed as an Azure Container Apps Job (`cooking-migration-job`).
+4. Updates both Azure Container Apps with the new images.
+
+**Infrastructure (Germany West Central):**
+- Container Apps Environment: `cooking-assistant-env`
+- Backend Container App: `cooking-backend`
+- Frontend Container App: `cooking-frontend`
+- Migration Job: `cooking-migration-job`
+- DB: Neon PostgreSQL 16 (Frankfurt, free tier) - connection via `DB_*` env vars
+- Images: `ghcr.io/pershynamilana/cooking-{backend,frontend}`
+- SSL: Azure managed certificates on both custom domains
+
+**Config at runtime** (Azure Container App env vars, never in repo): `JWT_SECRET_KEY`, `DB_*`,
+`NODE_ENV`, `CORS_ORIGIN`, `COOKIE_DOMAIN`, `LOG_LEVEL`, `DB_SSL=true`.
+
+**OIDC auth** (GitHub → Azure, no stored password): federated credential scoped to `refs/tags/v*`.
+GitHub repo secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`.
+GitHub repo variables: `AZURE_RG`, `BACKEND_APP`, `FRONTEND_APP`, `MIGRATION_JOB`, `API_DOMAIN`.
+
+**Cookie in prod**: `httpOnly`, `secure` (auto when `NODE_ENV=production`), `sameSite: Lax`,
+`domain: .cooking-assistant.app` (leading dot so the app and api subdomains share the session).
+
+**When adding env vars**: add to `.env.example`, set in Azure Container App configuration, never commit
+values. Switching Postgres providers = change 5 `DB_*` env vars in the Container App, no code change.
 
 ## Database workflow
 

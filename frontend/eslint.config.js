@@ -254,10 +254,8 @@ export default tseslint.config(
                     default: "allow",
                     rules: [
                         {
-                            from: { type: "components" },
-                            disallow: {
-                                to: { type: "pages" },
-                            },
+                            from: [{ type: "components" }],
+                            disallow: [{ type: "pages" }],
                             message: "Components must not import pages.",
                         },
                         {
@@ -267,10 +265,7 @@ export default tseslint.config(
                                 { type: "hooks" },
                                 { type: "utils" },
                             ],
-                            disallow: {
-                                to: { origin: "external" },
-                                dependency: { module: "axios" },
-                            },
+                            disallow: [{ specifier: "axios" }],
                             message:
                                 "Use the api layer instead of importing axios directly.",
                         },
