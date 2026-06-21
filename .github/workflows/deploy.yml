@@ -94,7 +94,9 @@ jobs:
           az containerapp job update \
             --name "${{ vars.MIGRATION_JOB }}" \
             --resource-group "${{ vars.AZURE_RG }}" \
-            --image "$BACKEND_TAG"
+            --image "$BACKEND_TAG" \
+            --command "/bin/sh" \
+            --args "-c,node dist/scripts/migrate.js up && node dist/scripts/seed.js"
 
           EXEC=$(az containerapp job start \
             --name "${{ vars.MIGRATION_JOB }}" \

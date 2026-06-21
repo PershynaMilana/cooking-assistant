@@ -22,6 +22,11 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.5 - 2026-06-21
+
+### Project
+- Fixed: Migration job now runs the correct command (migrate + seed) instead of the web server on each deploy.
+
 ## 2.4 - 2026-06-21
 
 ### Project
