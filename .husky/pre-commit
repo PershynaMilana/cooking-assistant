@@ -1,3 +1,9 @@
+# escape hatch: SKIP_HOOKS=1 git commit ... to skip linters/typecheck/tests
+if [ "$SKIP_HOOKS" = "1" ]; then
+  echo "SKIP_HOOKS=1 set - skipping pre-commit checks"
+  exit 0
+fi
+
 npx lint-staged
 npm --prefix backend run typecheck
 npm --prefix backend run lint

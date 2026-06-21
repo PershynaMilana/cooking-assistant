@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "main": "src/index.ts",
   "engines": {
     "node": ">=20"
