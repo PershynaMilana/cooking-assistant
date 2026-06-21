@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.1 - 2026-06-21
+
+### Project
+- Fixed: Deploying a release tag (`v*`) from the `main` branch was blocked by the pre-push hook.
+
+
 ## 2.0 - 2026-06-21
 
 ### Project
