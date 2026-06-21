@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.0 - 2026-06-21
+
+### Project
+- Added: Cooking Assistant is publicly available at https://cooking-assistant.app
+
+
 ## 1.43 - 2026-06-21
 
 ### Backend

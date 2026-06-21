@@ -3,6 +3,8 @@
 Full-stack app for running a home kitchen: track your pantry, write recipes, plan menus, and get a
 shopping list of what you are missing. React + TypeScript on the front, Express + PostgreSQL on the back.
 
+**Live:** https://cooking-assistant.app
+
 ## What it does
 
 - Accounts with JWT auth carried in an httpOnly session cookie (24h tokens, bcrypt-hashed passwords)
@@ -95,6 +97,21 @@ open a PR for review. No git tags.
 > project that was more overhead than value, so we consolidated to the single version + single
 > changelog described above. See the note at the top of [CHANGELOG.md](CHANGELOG.md).
 
+## Production deployment
+
+Deployment is tag-triggered: push a `v*` tag and [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+builds both Docker images, pushes them to GHCR, runs DB migrations as an Azure Container Apps Job, then
+updates the two Container Apps.
+
+```bash
+git tag v2.0
+git push origin v2.0
+```
+
+Infrastructure: Azure Container Apps (Germany West Central, scale-to-zero), Neon PostgreSQL (Frankfurt),
+GHCR for images, Azure managed certificates for HTTPS. Secrets and env vars live in the Container App
+configuration - never in the repo.
+
 ## How we work (contributing)
 
 - **Branch from `main`** named after the release (`release/X.Y`); never commit straight to `main` (a `pre-push` hook blocks it). Open a PR for review.
@@ -104,9 +121,10 @@ open a PR for review. No git tags.
 
 ## Tech stack
 
-- Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, i18next + react-i18next, ApexCharts, @react-pdf/renderer, jsPDF
-- Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `cookie-parser`, `zod`, `helmet`, `pino`, `tsx`
-- Database: PostgreSQL 14+
+- Frontend: React 18, TypeScript, Vite 5, React Router v6, Tailwind CSS, axios, i18next + react-i18next, ApexCharts, @react-pdf/renderer, jsPDF; served by nginx in production
+- Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `cookie-parser`, `zod`, `helmet`, `pino`, `tsx` (dev) / `tsup` + `node` (prod)
+- Database: PostgreSQL 16 (Neon managed, free tier)
+- Infra: Docker multi-stage builds, GHCR, GitHub Actions, Azure Container Apps, Azure managed SSL
 - Tests: Jest on both sides - backend ts-jest + Supertest, frontend @swc/jest + React Testing Library + jsdom (80% coverage gate each)
 
 Both sides have a Jest test suite with an 80% coverage gate: backend (`npm --prefix backend test`) uses ts-jest + Supertest with fake repositories; frontend (`npm --prefix frontend test`) uses @swc/jest + React Testing Library + jsdom (~108 test files). Run `npm test` from the root to run both.

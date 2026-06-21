@@ -5,6 +5,8 @@ React 18 + TypeScript + Vite client for the [Cooking Assistant](../README.md) pl
 the client never sees or stores a token - it just sends requests with credentials and lets the browser
 carry the cookie.
 
+**Live:** https://cooking-assistant.app
+
 ## Tech stack
 
 - **React 18 + TypeScript** - UI
@@ -41,6 +43,19 @@ npm run test:coverage# jest --coverage (enforces the 80% threshold)
 
 Type errors only surface at `npm run build` / `npm run typecheck` (`tsc -b`), not at `npm run dev`. Run
 one of them before opening a PR.
+
+## Production (Docker + nginx)
+
+In production the frontend is a static bundle served by nginx. The [Dockerfile](Dockerfile) two stages:
+
+1. **builder** - sets `ARG VITE_API_URL` (baked into the Vite bundle at build time), runs `npm run build`,
+   produces `dist/`.
+2. **runner** - copies `dist/` into `nginx:alpine`, uses [nginx.conf](nginx.conf) which sets the SPA
+   fallback (`try_files $uri $uri/ /index.html`) so React Router deep-links work, plus 1-year
+   cache headers for content-hashed assets.
+
+`VITE_API_URL` is passed as a Docker build-arg from GitHub Actions (value: `https://api.cooking-assistant.app`).
+Once baked in it cannot be changed at runtime - to point the bundle at a different API, rebuild the image.
 
 ## Environment
 

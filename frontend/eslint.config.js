@@ -254,9 +254,9 @@ export default tseslint.config(
                     default: "allow",
                     rules: [
                         {
-                            from: { type: "components" },
+                            from: [{ type: "components" }],
                             disallow: {
-                                to: { type: "pages" },
+                                to: [{ type: "pages" }],
                             },
                             message: "Components must not import pages.",
                         },
@@ -268,7 +268,7 @@ export default tseslint.config(
                                 { type: "utils" },
                             ],
                             disallow: {
-                                to: { origin: "external" },
+                                to: [{ origin: "external" }],
                                 dependency: { module: "axios" },
                             },
                             message:

@@ -27,6 +27,24 @@ npm start        # tsx, no auto-reload
 npm run typecheck
 ```
 
+## Production (Docker)
+
+In production the backend is compiled by `tsup` into `dist/` and run with plain `node` (no tsx, no
+TypeScript toolchain). The [Dockerfile](Dockerfile) handles this in two stages:
+
+1. **builder** - installs all deps (including devDeps for tsup), runs `npm run build`, produces `dist/index.js`,
+   `dist/scripts/migrate.js`, `dist/scripts/seed.js`.
+2. **runner** - installs prod-only deps (`npm ci --omit=dev`), copies `dist/` and `migrations/`, runs
+   `node dist/index.js`.
+
+Migrations and seed run before the new image goes live, via an Azure Container Apps Job:
+```bash
+node dist/scripts/migrate.js up && node dist/scripts/seed.js
+```
+
+All secrets (`JWT_SECRET_KEY`, `DB_*`, `CORS_ORIGIN`, etc.) are set as Container App environment variables -
+never baked into the image. See [Required configuration](#configuration) for the full list.
+
 ## Configuration
 
 ### 1. backend/.env
