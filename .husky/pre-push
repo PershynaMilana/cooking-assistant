@@ -1,7 +1,15 @@
+# direct-push-to-main block is a policy guard, enforced even with SKIP_HOOKS
 while read local_ref local_sha remote_ref remote_sha; do
   if [ "$remote_ref" = "refs/heads/main" ]; then
     echo "Error: direct push to main is not allowed. Use a release/X.Y branch and open a PR."
     exit 1
   fi
 done
+
+# escape hatch: SKIP_HOOKS=1 git push ... to skip the frontend build check
+if [ "$SKIP_HOOKS" = "1" ]; then
+  echo "SKIP_HOOKS=1 set - skipping frontend build"
+  exit 0
+fi
+
 npm --prefix frontend run build

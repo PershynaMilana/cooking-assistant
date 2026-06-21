@@ -35,7 +35,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 
 # SQL migration files are read from disk at runtime by node-pg-migrate.
-# The Container Apps Job runs: node dist/scripts/migrate.js up
+# The Container Apps Job runs: node dist/scripts/deploy-db.js (migrate + seed)
 COPY migrations/ ./migrations/
 
 EXPOSE 3000
