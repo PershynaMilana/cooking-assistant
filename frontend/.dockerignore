@@ -1,0 +1,46 @@
+# dependencies and build output
+node_modules
+dist
+dist-ssr
+coverage
+
+# environment secrets
+.env
+.env.*
+*.local
+
+# tests
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+src/test
+jest.config.cjs
+
+# typescript
+*.tsbuildinfo
+
+# lint / editor configs
+eslint.config.js
+eslint.sonarjs.config.js
+stylelint.config.cjs
+.vscode
+.idea
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# os / misc
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.git
+.gitignore
+*.md
+
+# claude code internals
+.claude
