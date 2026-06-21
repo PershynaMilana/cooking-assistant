@@ -29,7 +29,7 @@ changelogs and the tags and now track everything here against one shared version
 
 ### Project
 - Fixed: Migration job now reliably runs migrations and seeding on each deploy via a dedicated entry point, instead of mis-parsed shell arguments.
-- Changed: Git hooks accept a `SKIP_HOOKS=1` escape hatch to bypass local linters/tests/build (the direct-push-to-main block still applies).
+- Changed: Local git hooks accept a `SKIP_HOOKS=1` escape hatch to bypass linters/tests/build (the direct-push-to-main block still applies), and CI skips its check jobs when the commit message or PR title contains `[skip-checks]` while still reporting the required success status.
 
 ## 2.5 - 2026-06-21
 
