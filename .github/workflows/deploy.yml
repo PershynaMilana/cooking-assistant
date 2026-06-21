@@ -12,8 +12,8 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/cooking-backend
-  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/cooking-frontend
+  BACKEND_IMAGE: ghcr.io/pershynamilana/cooking-backend
+  FRONTEND_IMAGE: ghcr.io/pershynamilana/cooking-frontend
 
 jobs:
   build-backend:

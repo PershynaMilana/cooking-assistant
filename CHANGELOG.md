@@ -22,6 +22,11 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.4 - 2026-06-21
+
+### Project
+- Fixed: GHCR image references now use lowercase owner name so Azure Container Apps can pull images correctly.
+
 ## 2.3 - 2026-06-21
 
 ### Project
