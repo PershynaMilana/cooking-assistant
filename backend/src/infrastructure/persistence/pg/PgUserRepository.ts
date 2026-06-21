@@ -1,11 +1,19 @@
 import type { Pool } from "pg";
 
-import { AppError } from "@domain/errors/AppError";
+import { AppError } from "domain/errors/AppError";
 import type {
     NewUser,
     UserRecord,
     UserRepository,
-} from "@domain/repositories/UserRepository";
+} from "domain/repositories/UserRepository";
+
+interface PersonRow {
+    id: number;
+    name: string;
+    surname: string;
+    login: string;
+    password: string;
+}
 
 function isUniqueViolation(error: unknown): boolean {
     return (
@@ -20,11 +28,12 @@ export default class PgUserRepository implements UserRepository {
     constructor(private pool: Pool) {}
 
     async findByLogin(login: string): Promise<UserRecord | null> {
-        const user = await this.pool.query(
+        const result = await this.pool.query<UserRecord>(
             `SELECT * FROM person WHERE login = $1`,
             [login],
         );
-        return user.rows[0] || null;
+
+        return result.rows.length > 0 ? result.rows[0] : null;
     }
 
     async create({
@@ -34,11 +43,12 @@ export default class PgUserRepository implements UserRepository {
         password,
     }: NewUser): Promise<unknown> {
         try {
-            const newUser = await this.pool.query(
+            const result = await this.pool.query<PersonRow>(
                 `INSERT INTO person (name, surname, login, password) VALUES ($1, $2, $3, $4) RETURNING id, name, surname, login`,
                 [name, surname, login, password],
             );
-            return newUser.rows[0];
+
+            return result.rows[0];
         } catch (error) {
             if (isUniqueViolation(error)) {
                 throw new AppError("Login already taken", 409);
@@ -48,9 +58,10 @@ export default class PgUserRepository implements UserRepository {
     }
 
     async findAll(): Promise<unknown[]> {
-        const users = await this.pool.query(
+        const result = await this.pool.query<UserRecord>(
             `SELECT id, name, surname, login FROM person`,
         );
-        return users.rows;
+
+        return result.rows;
     }
 }

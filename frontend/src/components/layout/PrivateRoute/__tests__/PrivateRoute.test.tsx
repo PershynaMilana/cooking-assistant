@@ -45,6 +45,30 @@ describe("PrivateRoute", () => {
         expect(screen.getByText(PROTECTED)).toBeInTheDocument();
     });
 
+    it("should render the nested outlet when no children are given", async () => {
+        jest.mocked(getMe).mockResolvedValue(undefined);
+
+        render(
+            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
+                <Routes>
+                    <Route element={<PrivateRoute />}>
+                        <Route
+                            path={PROTECTED_PATH}
+                            element={<div>{PROTECTED}</div>}
+                        />
+                    </Route>
+                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
+                </Routes>
+            </MemoryRouter>,
+        );
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(screen.getByText(PROTECTED)).toBeInTheDocument();
+    });
+
     it("should redirect to login when getMe rejects with 401", async () => {
         jest.mocked(getMe).mockRejectedValue(makeAuthError(401));
 

@@ -7,6 +7,7 @@ import { getRecipeTypes } from "api/recipeTypesApi";
 
 import { useCreateRecipeForm } from "hooks/useCreateRecipeForm";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -16,12 +17,6 @@ jest.mock("react-router-dom", () => ({
 jest.mock("api/recipesApi");
 jest.mock("api/ingredientsApi");
 jest.mock("api/recipeTypesApi");
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
-};
 
 const fillValid = (form: ReturnType<typeof useCreateRecipeForm>["form"]) => {
     form.setInitialValues({
@@ -92,5 +87,24 @@ describe("useCreateRecipeForm", () => {
             }),
         );
         expect(mockNavigate).toHaveBeenCalledWith("/main");
+    });
+
+    it("should set the form error when creation fails", async () => {
+        jest.mocked(createRecipe).mockRejectedValue(new Error("Network error"));
+
+        const { result } = renderHook(() => useCreateRecipeForm());
+
+        await flush();
+
+        act(() => {
+            fillValid(result.current.form);
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.form.error).toBe("Network error");
+        expect(mockNavigate).not.toHaveBeenCalled();
     });
 });

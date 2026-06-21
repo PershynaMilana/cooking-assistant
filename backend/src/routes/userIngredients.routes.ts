@@ -1,7 +1,7 @@
 import express, { type Router } from "express";
 
-import type UserIngredientsController from "@controller/userIngredients.controller";
-import authenticateToken from "@middleware/jwtMiddleware";
+import type UserIngredientsController from "controller/userIngredients.controller";
+import authenticateToken from "middleware/jwtMiddleware";
 
 export default function createUserIngredientsRouter(
     userIngredientsController: UserIngredientsController,

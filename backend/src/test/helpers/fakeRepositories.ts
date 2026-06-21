@@ -1,12 +1,14 @@
-import type { PasswordHasher } from "@application/ports/PasswordHasher";
-import type { TokenService } from "@application/ports/TokenService";
-import type { RepositoryDeps } from "../../composition-root";
-import type { MenuCategoryRepository } from "@domain/repositories/MenuCategoryRepository";
-import type { MenuRepository } from "@domain/repositories/MenuRepository";
-import type { PantryRepository } from "@domain/repositories/PantryRepository";
-import type { RecipeRepository } from "@domain/repositories/RecipeRepository";
-import type { RecipeTypeRepository } from "@domain/repositories/RecipeTypeRepository";
-import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { RepositoryDeps } from "composition-root";
+
+import type { MenuCategoryRepository } from "domain/repositories/MenuCategoryRepository";
+import type { MenuRepository } from "domain/repositories/MenuRepository";
+import type { PantryRepository } from "domain/repositories/PantryRepository";
+import type { RecipeRepository } from "domain/repositories/RecipeRepository";
+import type { RecipeTypeRepository } from "domain/repositories/RecipeTypeRepository";
+import type { UserRepository } from "domain/repositories/UserRepository";
+
+import type { PasswordHasher } from "application/ports/PasswordHasher";
+import type { TokenService } from "application/ports/TokenService";
 
 export interface FakeRepositoryDeps extends RepositoryDeps {
     recipeRepository: jest.Mocked<RecipeRepository>;
@@ -31,13 +33,7 @@ function createRecipeRepository(): jest.Mocked<RecipeRepository> {
         getStats: jest.fn(),
         findAllIngredients: jest.fn(),
         findExistingIds: jest.fn(),
-    } as unknown as jest.Mocked<RecipeRepository>;
-}
-
-function createRecipeTypeRepository(): jest.Mocked<RecipeTypeRepository> {
-    return {
-        findAll: jest.fn(),
-    } as unknown as jest.Mocked<RecipeTypeRepository>;
+    };
 }
 
 function createMenuRepository(): jest.Mocked<MenuRepository> {
@@ -48,13 +44,7 @@ function createMenuRepository(): jest.Mocked<MenuRepository> {
         update: jest.fn(),
         deleteById: jest.fn(),
         searchByPerson: jest.fn(),
-    } as unknown as jest.Mocked<MenuRepository>;
-}
-
-function createMenuCategoryRepository(): jest.Mocked<MenuCategoryRepository> {
-    return {
-        findAll: jest.fn(),
-    } as unknown as jest.Mocked<MenuCategoryRepository>;
+    };
 }
 
 function createPantryRepository(): jest.Mocked<PantryRepository> {
@@ -65,7 +55,7 @@ function createPantryRepository(): jest.Mocked<PantryRepository> {
         updateQuantities: jest.fn(),
         updatePurchaseQuantity: jest.fn(),
         findPurchaseHistory: jest.fn(),
-    } as unknown as jest.Mocked<PantryRepository>;
+    };
 }
 
 function createUserRepository(): jest.Mocked<UserRepository> {
@@ -73,28 +63,28 @@ function createUserRepository(): jest.Mocked<UserRepository> {
         findByLogin: jest.fn(),
         create: jest.fn(),
         findAll: jest.fn(),
-    } as unknown as jest.Mocked<UserRepository>;
+    };
 }
 
 function createPasswordHasher(): jest.Mocked<PasswordHasher> {
     return {
         hash: jest.fn(),
         compare: jest.fn(),
-    } as unknown as jest.Mocked<PasswordHasher>;
+    };
 }
 
 function createTokenService(): jest.Mocked<TokenService> {
     return {
         generate: jest.fn(),
-    } as unknown as jest.Mocked<TokenService>;
+    };
 }
 
 export function buildFakeDeps(): FakeRepositoryDeps {
     return {
         recipeRepository: createRecipeRepository(),
-        recipeTypeRepository: createRecipeTypeRepository(),
+        recipeTypeRepository: { findAll: jest.fn() },
         menuRepository: createMenuRepository(),
-        menuCategoryRepository: createMenuCategoryRepository(),
+        menuCategoryRepository: { findAll: jest.fn() },
         pantryRepository: createPantryRepository(),
         userRepository: createUserRepository(),
         passwordHasher: createPasswordHasher(),

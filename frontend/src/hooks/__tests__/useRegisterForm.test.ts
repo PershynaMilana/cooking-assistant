@@ -80,6 +80,58 @@ describe("useRegisterForm", () => {
         expect(mockNavigate).not.toHaveBeenCalled();
     });
 
+    it("should not submit and should set a field error when the surname is invalid", async () => {
+        const { result } = renderHook(() => useRegisterForm());
+
+        act(() => {
+            result.current.setField("name", "Test");
+        });
+        act(() => {
+            result.current.setField("surname", "user");
+        });
+        act(() => {
+            result.current.setField("login", "tester");
+        });
+        act(() => {
+            result.current.setField("password", "secret1");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(result.current.errors.surname).toBe(
+            "Surname must start with a capital letter and contain only letters, at least 2 characters.",
+        );
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("should not submit and should set a field error when the login is invalid", async () => {
+        const { result } = renderHook(() => useRegisterForm());
+
+        act(() => {
+            result.current.setField("name", "Test");
+        });
+        act(() => {
+            result.current.setField("surname", "User");
+        });
+        act(() => {
+            result.current.setField("login", "a");
+        });
+        act(() => {
+            result.current.setField("password", "secret1");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(result.current.errors.login).toBeDefined();
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
     it("should reject a short password without submitting", async () => {
         const { result } = renderHook(() => useRegisterForm());
 

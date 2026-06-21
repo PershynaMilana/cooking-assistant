@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export function toNumber(value: unknown): unknown {
-    const isEmptyInput = value === undefined || value === null || value === "";
+    const isEmptyInput = value == null || value === "";
 
     if (isEmptyInput) {
         return undefined;

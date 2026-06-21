@@ -1,4 +1,4 @@
-import { ValidationError } from "@domain/errors/AppError";
+import { ValidationError } from "domain/errors/AppError";
 
 // raw request shape; validation unifies both quantity field names into quantity_recipe_ingredients
 export interface RecipeIngredientInput {

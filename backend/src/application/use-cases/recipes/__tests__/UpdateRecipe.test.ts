@@ -1,7 +1,9 @@
-import UpdateRecipe from "@application/use-cases/recipes/UpdateRecipe";
-import Recipe from "@domain/entities/Recipe";
-import { NotFoundError, ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import Recipe from "domain/entities/Recipe";
+import { NotFoundError, ValidationError } from "domain/errors/AppError";
+
+import UpdateRecipe from "application/use-cases/recipes/UpdateRecipe";
+
+import { catchError } from "test/helpers/assertions";
 
 function makeInput(overrides = {}) {
     return {
@@ -27,10 +29,12 @@ describe("UpdateRecipe", () => {
         const { useCase, recipeRepository } = setup();
         const input = makeInput();
         const updatedRecipe = { id: 12, ...input };
+
         recipeRepository.update.mockResolvedValue(updatedRecipe);
 
         const result = await useCase.execute(12, 7, input);
-        const [id, personId, recipe] = recipeRepository.update.mock.calls[0];
+        const [id, personId, recipe] = recipeRepository.update.mock
+            .calls[0] as [number, number, Recipe];
 
         expect(id).toBe(12);
         expect(personId).toBe(7);
@@ -48,16 +52,22 @@ describe("UpdateRecipe", () => {
 
     it("should accept servings sent as a numeric string", async () => {
         const { useCase, recipeRepository } = setup();
+
         recipeRepository.update.mockResolvedValue({ id: 12 });
 
         await useCase.execute(12, 7, makeInput({ servings: "4" }));
-        const [, , recipe] = recipeRepository.update.mock.calls[0];
+        const [, , recipe] = recipeRepository.update.mock.calls[0] as [
+            number,
+            number,
+            Recipe,
+        ];
 
         expect(recipe).toMatchObject({ servings: 4 });
     });
 
     it("should throw a 404 NotFoundError when the recipe does not belong to the user", async () => {
         const { useCase, recipeRepository } = setup();
+
         recipeRepository.update.mockResolvedValue(null);
 
         const error = await catchError(useCase.execute(12, 7, makeInput()));

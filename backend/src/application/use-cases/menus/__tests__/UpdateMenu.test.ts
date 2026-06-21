@@ -1,7 +1,9 @@
-import UpdateMenu from "@application/use-cases/menus/UpdateMenu";
-import Menu from "@domain/entities/Menu";
-import { NotFoundError, ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import Menu from "domain/entities/Menu";
+import { NotFoundError, ValidationError } from "domain/errors/AppError";
+
+import UpdateMenu from "application/use-cases/menus/UpdateMenu";
+
+import { catchError } from "test/helpers/assertions";
 
 function makeInput() {
     return {
@@ -24,12 +26,13 @@ describe("UpdateMenu", () => {
     it("should update a menu entity with recipe ids", async () => {
         const { useCase, menuRepository, recipeRepository } = setup();
         const input = makeInput();
+
         recipeRepository.findExistingIds.mockResolvedValue(input.recipeIds);
         menuRepository.update.mockResolvedValue(true);
 
-        const result = await useCase.execute(9, 7, input);
-        const [id, personId, menu, recipeIds] =
-            menuRepository.update.mock.calls[0];
+        await useCase.execute(9, 7, input);
+        const [id, personId, menu, recipeIds] = menuRepository.update.mock
+            .calls[0] as [number, number, Menu, number[]];
 
         expect(id).toBe(9);
         expect(personId).toBe(7);
@@ -46,11 +49,11 @@ describe("UpdateMenu", () => {
             menu,
             input.recipeIds,
         );
-        expect(result).toBeUndefined();
     });
 
     it("should throw a 404 NotFoundError when the menu does not belong to the user", async () => {
         const { useCase, menuRepository, recipeRepository } = setup();
+
         recipeRepository.findExistingIds.mockResolvedValue(
             makeInput().recipeIds,
         );
@@ -63,6 +66,7 @@ describe("UpdateMenu", () => {
 
     it("should throw a 400 ValidationError when a recipe does not exist", async () => {
         const { useCase, menuRepository, recipeRepository } = setup();
+
         recipeRepository.findExistingIds.mockResolvedValue([3]);
 
         const error = await catchError(useCase.execute(9, 7, makeInput()));

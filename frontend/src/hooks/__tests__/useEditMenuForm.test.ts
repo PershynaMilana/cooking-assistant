@@ -9,6 +9,7 @@ import { getRecipes } from "api/recipesApi";
 
 import { useEditMenuForm } from "hooks/useEditMenuForm";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -42,12 +43,6 @@ const MENU: MenuDetails = {
     ],
 };
 
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
-};
-
 describe("useEditMenuForm", () => {
     beforeEach(() => {
         jest.mocked(getMenuCategories).mockResolvedValue([]);
@@ -64,6 +59,20 @@ describe("useEditMenuForm", () => {
         expect(result.current.form.selectedCategory).toBe(2);
         expect(result.current.form.selectedRecipes).toEqual([5]);
         expect(result.current.loading).toBe(false);
+    });
+
+    it("should default empty title and description to empty strings", async () => {
+        jest.mocked(getMenuById).mockResolvedValue({
+            ...MENU,
+            menu: { ...MENU.menu, title: "", menucontent: "" },
+        });
+
+        const { result } = renderHook(() => useEditMenuForm("1"));
+
+        await flush();
+
+        expect(result.current.form.menuTitle).toBe("");
+        expect(result.current.form.menuDescription).toBe("");
     });
 
     it("should update the menu and navigate to the menu list on submit", async () => {
@@ -86,6 +95,19 @@ describe("useEditMenuForm", () => {
         expect(mockNavigate).toHaveBeenCalledWith("/menu");
     });
 
+    it("should not update the menu when submitting without an id", async () => {
+        const { result } = renderHook(() => useEditMenuForm(undefined));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(jest.mocked(updateMenu)).not.toHaveBeenCalled();
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
     it("should set loading to false immediately when there is no id", async () => {
         const { result } = renderHook(() => useEditMenuForm(undefined));
 
@@ -102,7 +124,9 @@ describe("useEditMenuForm", () => {
 
         await flush();
 
-        expect(result.current.error).not.toBeNull();
+        expect(result.current.error).toBe(
+            "Failed to load categories or recipes.",
+        );
         expect(result.current.loading).toBe(false);
     });
 
@@ -117,7 +141,9 @@ describe("useEditMenuForm", () => {
             await result.current.handleSubmit();
         });
 
-        expect(result.current.error).not.toBeNull();
+        expect(result.current.error).toBe(
+            "Failed to update menu. Please try again later.",
+        );
     });
 
     it("should clear load error before a second fetch", async () => {

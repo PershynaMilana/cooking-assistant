@@ -76,6 +76,50 @@ describe("useQuantityUpdates", () => {
         ).toBe(1);
     });
 
+    it("should leave non-matching ingredients unchanged on handleQuantityChange", () => {
+        const { result } = renderHook(() =>
+            useQuantityUpdates([INGREDIENT], jest.fn()),
+        );
+
+        act(() => {
+            result.current.startEditing();
+        });
+
+        act(() => {
+            result.current.handleQuantityChange(999, 50);
+        });
+
+        expect(
+            result.current.updatedIngredients.find(
+                (i) => i.id === INGREDIENT.id,
+            )?.quantity_person_ingradient,
+        ).toBe(INGREDIENT.quantity_person_ingradient);
+    });
+
+    it("should exit edit mode when updateQuantities rejects", async () => {
+        jest.mocked(updateQuantities).mockRejectedValue(new Error("boom"));
+
+        const onSaved = jest.fn().mockResolvedValue(undefined);
+        const { result } = renderHook(() =>
+            useQuantityUpdates([INGREDIENT], onSaved),
+        );
+
+        act(() => {
+            result.current.startEditing();
+        });
+
+        act(() => {
+            result.current.handleQuantityChange(INGREDIENT.id, 42);
+        });
+
+        await act(async () => {
+            await result.current.saveUpdatedQuantities();
+        });
+
+        expect(result.current.isEditingQuantity).toBe(false);
+        expect(onSaved).not.toHaveBeenCalled();
+    });
+
     it("should not call API when quantities are unchanged on saveUpdatedQuantities", async () => {
         const onSaved = jest.fn().mockResolvedValue(undefined);
         const { result } = renderHook(() =>

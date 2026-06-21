@@ -1,5 +1,5 @@
-import { ValidationError } from "@domain/errors/AppError";
-import type { RecipeRepository } from "@domain/repositories/RecipeRepository";
+import { ValidationError } from "domain/errors/AppError";
+import type { RecipeRepository } from "domain/repositories/RecipeRepository";
 
 export async function assertRecipesExist(
     recipeRepository: Pick<RecipeRepository, "findExistingIds">,

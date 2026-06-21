@@ -19,10 +19,6 @@ export const ReportDownloadButtons: React.FC<ReportDownloadButtonsProps> = ({
     const [isGenerating, setIsGenerating] = React.useState(false);
 
     const handleDownload = async (download: () => Promise<void>) => {
-        if (isGenerating) {
-            return;
-        }
-
         setIsGenerating(true);
         try {
             await download();

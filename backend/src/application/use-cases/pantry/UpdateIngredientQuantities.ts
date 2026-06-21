@@ -1,7 +1,8 @@
-import { idSchema } from "@application/validation/common.schemas";
-import { pantryUpdateIngredientsSchema } from "@application/validation/pantry.schemas";
-import { validate } from "@application/validation/validate";
-import type { PantryRepository } from "@domain/repositories/PantryRepository";
+import type { PantryRepository } from "domain/repositories/PantryRepository";
+
+import { idSchema } from "application/validation/common.schemas";
+import { pantryUpdateIngredientsSchema } from "application/validation/pantry.schemas";
+import { validate } from "application/validation/validate";
 
 export default class UpdateIngredientQuantities {
     constructor(

@@ -7,8 +7,10 @@ const proxyTarget =
     process.env.VITE_DEV_PROXY_TARGET ?? "http://localhost:3000";
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     plugins: [react(), tsconfigPaths()],
+    // strip console/debugger from the production build only; dev keeps them
+    esbuild: command === "build" ? { drop: ["console", "debugger"] } : {},
     server: {
         port: 8080,
         // same-origin in dev: the browser sees /api on :8080 and Vite forwards it
@@ -20,4 +22,4 @@ export default defineConfig({
             },
         },
     },
-});
+}));

@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp } from "../helpers/testApp";
+import { buildTestApp } from "test/helpers/testApp";
 
 describe("not found routes", () => {
     it("should return a JSON 404 for an unknown route", async () => {

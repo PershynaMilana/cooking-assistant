@@ -1,6 +1,6 @@
 {
   "name": "cooking-assistant",
-  "version": "1.41.0",
+  "version": "1.42.0",
   "main": "src/index.ts",
   "engines": {
     "node": ">=20"
@@ -12,6 +12,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "lint:sonarjs": "eslint . --config eslint.sonarjs.config.js",
     "migrate": "tsx src/scripts/migrate.ts",
     "migrate:up": "tsx src/scripts/migrate.ts up",
@@ -42,7 +43,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.4",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
@@ -51,12 +52,17 @@
     "@types/node": "^25.9.2",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.0",
-    "eslint": "^10.4.1",
+    "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-boundaries": "^6.0.2",
+    "eslint-plugin-de-morgan": "^2.1.2",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "^29.15.2",
     "eslint-plugin-promise": "^7.3.0",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
     "eslint-plugin-sonarjs": "^4.0.3",
-    "globals": "^17.6.0",
+    "globals": "^15.15.0",
     "jest": "^30.4.2",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.11",

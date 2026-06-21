@@ -1,8 +1,9 @@
+import { createApp } from "app";
+import { buildControllers } from "composition-root";
 import jwt from "jsonwebtoken";
 
-import { AUTH_COOKIE_NAME } from "@config/cookie";
-import { createApp } from "../../app";
-import { buildControllers } from "../../composition-root";
+import { AUTH_COOKIE_NAME } from "config/cookie";
+
 import { buildFakeDeps } from "./fakeRepositories";
 
 export function buildTestApp() {
@@ -14,10 +15,7 @@ export function buildTestApp() {
 
 // the session is an httpOnly cookie, so tests authenticate via the Cookie header
 export function authCookie(userId = 1): string {
-    const token = jwt.sign(
-        { id: userId },
-        process.env.JWT_SECRET_KEY as string,
-    );
+    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY ?? "");
 
     return `${AUTH_COOKIE_NAME}=${token}`;
 }

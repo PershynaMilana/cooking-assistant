@@ -1,7 +1,7 @@
 import express, { type Router } from "express";
 
-import type RecipeController from "@controller/recipe.controller";
-import authenticateToken from "@middleware/jwtMiddleware";
+import type RecipeController from "controller/recipe.controller";
+import authenticateToken from "middleware/jwtMiddleware";
 
 export default function createRecipeRouter(
     recipeController: RecipeController,

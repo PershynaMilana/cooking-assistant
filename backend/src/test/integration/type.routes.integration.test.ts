@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp, authCookie } from "../helpers/testApp";
+import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 describe("recipe type routes", () => {
     it("should return 401 without a token", async () => {
@@ -14,6 +14,7 @@ describe("recipe type routes", () => {
     it("should return recipe types", async () => {
         const { app, deps } = buildTestApp();
         const types = [{ id: 1, type_name: "Soup" }];
+
         deps.recipeTypeRepository.findAll.mockResolvedValue(types);
 
         const res = await request(app)

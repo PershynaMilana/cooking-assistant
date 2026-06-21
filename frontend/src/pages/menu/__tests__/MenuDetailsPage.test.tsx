@@ -77,4 +77,29 @@ describe("MenuDetailsPage", () => {
 
         expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENU);
     });
+
+    it("should render the error message when loading the menu fails", async () => {
+        jest.mocked(getMenuById).mockRejectedValue(new Error("boom"));
+
+        renderPage();
+
+        expect(await screen.findByText(/Error:/)).toBeInTheDocument();
+    });
+
+    it("should close the modal when Cancel is clicked", async () => {
+        jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
+
+        renderPage();
+
+        await screen.findByText(TITLE);
+
+        await userEvent.click(
+            screen.getByRole("button", { name: BTN_DELETE_MENU }),
+        );
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+        expect(
+            screen.queryByRole("button", { name: "Cancel" }),
+        ).not.toBeInTheDocument();
+    });
 });

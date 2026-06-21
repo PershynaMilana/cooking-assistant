@@ -7,6 +7,7 @@ import { deleteRecipe, getRecipeById } from "api/recipesApi";
 
 import { useRecipeDetails } from "hooks/useRecipeDetails";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -27,12 +28,6 @@ const RECIPE: RecipeDetails = {
     servings: 4,
     person_id: 3,
     isOwner: true,
-};
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
 };
 
 describe("useRecipeDetails", () => {
@@ -85,5 +80,35 @@ describe("useRecipeDetails", () => {
 
         expect(jest.mocked(deleteRecipe)).toHaveBeenCalledWith("1");
         expect(mockNavigate).toHaveBeenCalledWith("/main");
+    });
+
+    it("should set an error when deleting the recipe fails", async () => {
+        jest.mocked(getRecipeById).mockResolvedValue(RECIPE);
+        jest.mocked(deleteRecipe).mockRejectedValue(new Error("boom"));
+
+        const { result } = renderHook(() => useRecipeDetails("1"));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.deleteRecipe();
+        });
+
+        expect(mockNavigate).not.toHaveBeenCalled();
+        expect(result.current.error).toBe("Error deleting recipe");
+    });
+
+    it("should not fetch or delete the recipe when no id is provided", async () => {
+        const { result } = renderHook(() => useRecipeDetails(undefined));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.deleteRecipe();
+        });
+
+        expect(jest.mocked(getRecipeById)).not.toHaveBeenCalled();
+        expect(jest.mocked(deleteRecipe)).not.toHaveBeenCalled();
+        expect(result.current.recipe).toBeNull();
     });
 });

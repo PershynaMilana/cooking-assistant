@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 
-import type { TokenService } from "@application/ports/TokenService";
-import { requireJwtSecret } from "@config/env";
+import { requireJwtSecret } from "config/env";
+
+import type { TokenService } from "application/ports/TokenService";
 
 export default class JwtTokenService implements TokenService {
     generate(id: number): string {

@@ -1,8 +1,9 @@
-import { NotFoundError } from "@domain/errors/AppError";
-import { idSchema } from "@application/validation/common.schemas";
-import { purchaseQuantitySchema } from "@application/validation/pantry.schemas";
-import { validate } from "@application/validation/validate";
-import type { PantryRepository } from "@domain/repositories/PantryRepository";
+import { NotFoundError } from "domain/errors/AppError";
+import type { PantryRepository } from "domain/repositories/PantryRepository";
+
+import { idSchema } from "application/validation/common.schemas";
+import { purchaseQuantitySchema } from "application/validation/pantry.schemas";
+import { validate } from "application/validation/validate";
 
 export default class UpdatePurchaseQuantity {
     constructor(
@@ -15,7 +16,7 @@ export default class UpdatePurchaseQuantity {
     async execute(
         userId: string | number,
         purchaseId: string | number,
-        quantity?: number,
+        quantity: unknown,
     ): Promise<void> {
         const validUserId = validate(idSchema, userId);
         const validPurchaseId = validate(idSchema, purchaseId);
@@ -26,6 +27,7 @@ export default class UpdatePurchaseQuantity {
             validPurchaseId,
             validQuantity,
         );
+
         if (!updated) {
             throw new NotFoundError("Purchase not found.");
         }

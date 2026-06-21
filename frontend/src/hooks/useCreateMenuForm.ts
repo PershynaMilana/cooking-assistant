@@ -47,11 +47,7 @@ export const useCreateMenuForm = () => {
     }, [t]);
 
     const handleSubmit = async () => {
-        if (!form.validateForm()) {
-            return;
-        }
-
-        if (form.selectedCategory === null) {
+        if (!form.validateForm() || form.selectedCategory === null) {
             return;
         }
 

@@ -1,4 +1,5 @@
 ﻿import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { getRecipesByFilters } from "api/recipesApi";
 import { getRecipeTypes } from "api/recipeTypesApi";
@@ -11,6 +12,10 @@ jest.mock("api/recipeTypesApi");
 
 const RECIPE_TITLE_1 = "Borscht";
 const RECIPE_TITLE_2 = "Varenyky";
+
+const TYPE_ID = 1;
+const TYPE_NAME = "Soup";
+const SAMPLE_TYPES = [{ id: TYPE_ID, type_name: TYPE_NAME, description: "" }];
 
 const SAMPLE_RECIPES = [
     {
@@ -38,5 +43,24 @@ describe("MainPage", () => {
 
         expect(await screen.findByText(RECIPE_TITLE_1)).toBeInTheDocument();
         expect(screen.getByText(RECIPE_TITLE_2)).toBeInTheDocument();
+    });
+
+    it("should show the filtered heading and empty message when a type is selected", async () => {
+        jest.mocked(getRecipesByFilters).mockResolvedValue([]);
+        jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE_TYPES);
+
+        renderWithRouter(<MainPage />, ["/main"]);
+
+        await userEvent.click(
+            await screen.findByRole("button", { name: "Filter" }),
+        );
+        await userEvent.click(screen.getByRole("checkbox"));
+
+        expect(
+            await screen.findByText(`Recipes: ${TYPE_NAME}`),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByText("No such recipes created."),
+        ).toBeInTheDocument();
     });
 });

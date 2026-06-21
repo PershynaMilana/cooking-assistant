@@ -7,6 +7,7 @@ import { deleteMenu, getMenuById } from "api/menusApi";
 
 import { useMenuDetails } from "hooks/useMenuDetails";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -26,12 +27,6 @@ const MENU: MenuDetails = {
         isOwner: true,
     },
     recipes: [],
-};
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
 };
 
 describe("useMenuDetails", () => {
@@ -55,6 +50,44 @@ describe("useMenuDetails", () => {
 
         expect(result.current.menu).toBeNull();
         expect(result.current.isOwner).toBe(false);
+    });
+
+    it("should not fetch the menu when no id is provided", async () => {
+        const { result } = renderHook(() => useMenuDetails(undefined));
+
+        await flush();
+
+        expect(jest.mocked(getMenuById)).not.toHaveBeenCalled();
+        expect(result.current.menu).toBeNull();
+    });
+
+    it("should do nothing when deleting without a loaded menu", async () => {
+        const { result } = renderHook(() => useMenuDetails(undefined));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.deleteMenu();
+        });
+
+        expect(jest.mocked(deleteMenu)).not.toHaveBeenCalled();
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("should surface an error when deleting the menu fails", async () => {
+        jest.mocked(getMenuById).mockResolvedValue(MENU);
+        jest.mocked(deleteMenu).mockRejectedValue(new Error("boom"));
+
+        const { result } = renderHook(() => useMenuDetails("1"));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.deleteMenu();
+        });
+
+        expect(result.current.error).toBe("boom");
+        expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it("should delete the menu and navigate to the menu list", async () => {

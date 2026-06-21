@@ -1,9 +1,7 @@
-import Menu from "@domain/entities/Menu";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchSyncError } from "@test/helpers/assertions";
+import Menu from "domain/entities/Menu";
+import { ValidationError } from "domain/errors/AppError";
 
-type MenuCreationInput = Parameters<typeof Menu.forCreation>[0];
-type MenuUpdateInput = Parameters<typeof Menu.forUpdate>[1];
+import { catchSyncError } from "test/helpers/assertions";
 
 function makeInput(overrides: Record<string, unknown> = {}) {
     return {
@@ -18,7 +16,7 @@ function makeInput(overrides: Record<string, unknown> = {}) {
 
 function catchCreationError(overrides: Record<string, unknown>) {
     return catchSyncError(() => {
-        Menu.forCreation(makeInput(overrides) as MenuCreationInput);
+        Menu.forCreation(makeInput(overrides));
     });
 }
 
@@ -27,7 +25,7 @@ function catchUpdateError(
     overrides: Record<string, unknown> = {},
 ) {
     return catchSyncError(() => {
-        Menu.forUpdate(id, makeInput(overrides) as MenuUpdateInput);
+        Menu.forUpdate(id, makeInput(overrides));
     });
 }
 

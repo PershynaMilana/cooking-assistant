@@ -4,22 +4,32 @@ import express, { type Express } from "express";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
 
+import { config } from "config/env";
+import { logger } from "config/logger";
+import {
+    CORS_METHODS,
+    HSTS_OPTIONS,
+    JSON_BODY_LIMIT,
+    TRUST_PROXY_HOPS,
+} from "config/security";
+
+import errorHandler from "middleware/errorHandler";
+import { createGlobalLimiter } from "middleware/rateLimit";
+import createHealthRouter from "routes/health.routes";
+import createMenuRouter from "routes/menu.routes";
+import createMenuCategoryRouter from "routes/menuCategory.routes";
+import createRecipeRouter from "routes/recipe.routes";
+import createTypeRouter from "routes/type.routes";
+import createUserRouter from "routes/user.routes";
+import createUserIngredientsRouter from "routes/userIngredients.routes";
+
 import type { Controllers } from "./composition-root";
-import { config } from "@config/env";
-import { logger } from "@config/logger";
-import errorHandler from "@middleware/errorHandler";
-import createHealthRouter from "@routes/health.routes";
-import createMenuCategoryRouter from "@routes/menuCategory.routes";
-import createMenuRouter from "@routes/menu.routes";
-import createRecipeRouter from "@routes/recipe.routes";
-import createTypeRouter from "@routes/type.routes";
-import createUserIngredientsRouter from "@routes/userIngredients.routes";
-import createUserRouter from "@routes/user.routes";
 
 export function createApp(controllers: Controllers): Express {
     const app = express();
 
-    app.use(helmet());
+    app.set("trust proxy", TRUST_PROXY_HOPS);
+    app.use(helmet({ hsts: HSTS_OPTIONS }));
     app.use(
         pinoHttp({
             logger,
@@ -30,14 +40,15 @@ export function createApp(controllers: Controllers): Express {
     app.use(
         cors({
             origin: config.corsOrigin,
-            methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+            methods: CORS_METHODS,
             credentials: true,
         }),
     );
-    app.use(express.json({ limit: "100kb" }));
+    app.use(express.json({ limit: JSON_BODY_LIMIT }));
     app.use(cookieParser());
 
     app.use("/api", createHealthRouter());
+    app.use(createGlobalLimiter());
     app.use("/api", createUserRouter(controllers.userController));
     app.use("/api", createRecipeRouter(controllers.recipeController));
     app.use("/api", createTypeRouter(controllers.recipeTypeController));

@@ -1,6 +1,7 @@
+import type { IncomingHttpHeaders } from "http";
 import request from "supertest";
 
-import { buildTestApp, authCookie } from "../helpers/testApp";
+import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 describe("user routes", () => {
     it("should return 401 without a token", async () => {
@@ -19,6 +20,7 @@ describe("user routes", () => {
             surname: "Cook",
             login: "bob",
         };
+
         deps.passwordHasher.hash.mockResolvedValue("hashed-secret");
         deps.userRepository.create.mockResolvedValue(createdUser);
 
@@ -41,6 +43,7 @@ describe("user routes", () => {
 
     it("should log in and set an httpOnly session cookie", async () => {
         const { app, deps } = buildTestApp();
+
         deps.userRepository.findByLogin.mockResolvedValue({
             id: 7,
             login: "bob",
@@ -58,7 +61,8 @@ describe("user routes", () => {
         // token lives only in the cookie, never in the response body
         expect(res.body).toEqual({ message: "Logged in" });
 
-        const setCookie = String(res.headers["set-cookie"]);
+        const headers = res.headers as IncomingHttpHeaders;
+        const setCookie = headers["set-cookie"]?.join(";") ?? "";
 
         expect(setCookie).toContain("authToken=token-value");
         expect(setCookie).toContain("HttpOnly");
@@ -72,7 +76,11 @@ describe("user routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ message: "Logged out" });
-        expect(String(res.headers["set-cookie"])).toContain("authToken=;");
+        const logoutHeaders = res.headers as IncomingHttpHeaders;
+
+        expect(logoutHeaders["set-cookie"]?.join(";") ?? "").toContain(
+            "authToken=;",
+        );
     });
 
     it("should return the current user id for an authenticated request", async () => {
@@ -97,6 +105,7 @@ describe("user routes", () => {
     it("should return users for an authenticated request", async () => {
         const { app, deps } = buildTestApp();
         const users = [{ id: 7, name: "Bob", surname: "Cook", login: "bob" }];
+
         deps.userRepository.findAll.mockResolvedValue(users);
 
         const res = await request(app)
@@ -109,6 +118,7 @@ describe("user routes", () => {
 
     it("should map a login domain error to the response status", async () => {
         const { app, deps } = buildTestApp();
+
         deps.userRepository.findByLogin.mockResolvedValue(null);
 
         const res = await request(app).post("/api/login").send({
@@ -129,6 +139,8 @@ describe("user routes", () => {
             .send('{"login": "bob",');
 
         expect(res.status).toBe(400);
-        expect(res.body).toEqual({ error: expect.any(String) });
+        const body = res.body as { error: string };
+
+        expect(typeof body.error).toBe("string");
     });
 });

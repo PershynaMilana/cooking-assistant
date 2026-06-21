@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 
-import { config } from "@config/env";
-import { logger } from "@config/logger";
+import { config } from "config/env";
+import { logger } from "config/logger";
 
 // idempotent reference + sample data; safe to re-run (guards against existing rows)
 const seedUnitMeasurements = `
@@ -88,7 +88,7 @@ async function main(): Promise<void> {
     const pool = new Pool(config.db);
 
     try {
-        const steps: Array<{ label: string; sql: string }> = [
+        const steps: { label: string; sql: string }[] = [
             { label: "unit_measurement", sql: seedUnitMeasurements },
             { label: "recipe_types", sql: seedRecipeTypes },
             { label: "menu_category", sql: seedMenuCategories },
@@ -97,6 +97,7 @@ async function main(): Promise<void> {
 
         for (const step of steps) {
             const result = await pool.query(step.sql);
+
             logger.info({ inserted: result.rowCount }, `Seeded ${step.label}`);
         }
     } finally {
@@ -104,7 +105,7 @@ async function main(): Promise<void> {
     }
 }
 
-main().catch((error) => {
-    logger.error(error);
+main().catch((error: unknown) => {
+    logger.error({ err: error }, "Seed failed");
     process.exitCode = 1;
 });

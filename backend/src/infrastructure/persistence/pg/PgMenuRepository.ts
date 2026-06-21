@@ -1,52 +1,32 @@
 import type { Pool } from "pg";
 
-import type { Menu } from "@domain/entities/Menu";
-import type { MenuRepository } from "@domain/repositories/MenuRepository";
-import type { MenuFilters } from "@application/use-cases/menus/menu.types";
+import type { Menu } from "domain/entities/Menu";
+import type { MenuRepository } from "domain/repositories/MenuRepository";
 
-type QueryParam = string | number | number[];
+import { findMenuByIdWithRecipes } from "./PgMenuRepository.detail";
+import { findAllMenus, searchPersonMenus } from "./PgMenuRepository.queries";
 
-function toMenuFilters(filters: unknown): MenuFilters {
-    return (filters ?? {}) as MenuFilters;
+interface MenuIdRow {
+    menu_id: number;
 }
 
 export default class PgMenuRepository implements MenuRepository {
     constructor(private pool: Pool) {}
 
+    private buildMenuRecipeInsert(
+        menuId: number | string,
+        recipeIds: number[],
+    ): { placeholders: string; params: (number | string)[] } {
+        const placeholders = recipeIds
+            .map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+            .join(", ");
+        const params = recipeIds.flatMap((recipeId) => [menuId, recipeId]);
+
+        return { placeholders, params };
+    }
+
     async findAll(filters: unknown): Promise<unknown[]> {
-        const { menu_name, category_ids } = toMenuFilters(filters);
-
-        let query = `
-      SELECT
-        m.menu_id AS id,
-        m.menu_title AS title,
-        mc.category_name AS categoryName,
-        m.menu_content AS menuContent
-      FROM menu m
-             LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
-    `;
-
-        const queryParams: QueryParam[] = [];
-
-        if (menu_name) {
-            query += ` WHERE m.menu_title ILIKE $${queryParams.length + 1}`;
-            queryParams.push(`%${menu_name}%`);
-        }
-
-        if (category_ids) {
-            const categoryArray = category_ids.split(",").map(Number);
-            if (menu_name) {
-                query += ` AND m.category_id = ANY($${queryParams.length + 1})`;
-            } else {
-                query += ` WHERE m.category_id = ANY($${
-                    queryParams.length + 1
-                })`;
-            }
-            queryParams.push(categoryArray);
-        }
-
-        const result = await this.pool.query(query, queryParams);
-        return result.rows;
+        return findAllMenus(this.pool, filters);
     }
 
     async create(
@@ -54,10 +34,11 @@ export default class PgMenuRepository implements MenuRepository {
         recipeIds: number[],
     ): Promise<unknown> {
         const client = await this.pool.connect();
+
         try {
             await client.query("BEGIN");
 
-            const menuResult = await client.query(
+            const menuResult = await client.query<MenuIdRow>(
                 `INSERT INTO menu (menu_title, menu_content, category_id, person_id)
              VALUES ($1, $2, $3, $4)
              RETURNING menu_id`,
@@ -78,6 +59,7 @@ export default class PgMenuRepository implements MenuRepository {
             }
 
             await client.query("COMMIT");
+
             return menuId;
         } catch (error) {
             await client.query("ROLLBACK");
@@ -98,27 +80,22 @@ export default class PgMenuRepository implements MenuRepository {
         try {
             await client.query("BEGIN");
 
-            const updateMenuQuery = `
-      UPDATE menu
+            const result = await client.query(
+                `UPDATE menu
       SET menu_title = $1, menu_content = $2, category_id = $3
-      WHERE menu_id = $4 AND person_id = $5
-    `;
-            const result = await client.query(updateMenuQuery, [
-                menuTitle,
-                menuContent,
-                categoryId,
-                id,
-                personId,
-            ]);
+      WHERE menu_id = $4 AND person_id = $5`,
+                [menuTitle, menuContent, categoryId, id, personId],
+            );
 
             if (result.rowCount === 0) {
                 await client.query("ROLLBACK");
+
                 return false;
             }
 
-            const deleteRecipesQuery =
-                "DELETE FROM menu_recipe WHERE menu_id = $1";
-            await client.query(deleteRecipesQuery, [id]);
+            await client.query("DELETE FROM menu_recipe WHERE menu_id = $1", [
+                id,
+            ]);
 
             if (recipeIds.length > 0) {
                 const { placeholders, params } = this.buildMenuRecipeInsert(
@@ -133,6 +110,7 @@ export default class PgMenuRepository implements MenuRepository {
             }
 
             await client.query("COMMIT");
+
             return true;
         } catch (error) {
             await client.query("ROLLBACK");
@@ -145,100 +123,11 @@ export default class PgMenuRepository implements MenuRepository {
     async findByIdWithRecipes(
         id: string | number,
         personId: number,
-    ): Promise<unknown | null> {
-        const menuQuery = `
-      SELECT
-        m.menu_id AS id,
-        m.menu_title AS title,
-        m.menu_content AS menuContent,
-        mc.category_name AS categoryName,
-        m.category_id,
-        m.person_id AS personId,
-        (m.person_id = $2) AS "isOwner"
-      FROM menu m
-      LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
-      WHERE m.menu_id = $1
-    `;
-        const menuResult = await this.pool.query(menuQuery, [id, personId]);
-
-        if (menuResult.rows.length === 0) {
-            return null;
-        }
-
-        const menu = menuResult.rows[0];
-
-        const recipeQuery = `
-      SELECT
-        r.id AS recipe_id,
-        r.title,
-        r.content,
-        r.person_id,
-        r.type_id,
-        r.creation_date,
-        r.cooking_time,
-        r.servings,
-        rt.type_name AS type_name,
-        ARRAY_AGG(i.name) AS ingredients
-      FROM recipes r
-      JOIN menu_recipe mr ON r.id = mr.recipe_id
-      LEFT JOIN recipe_ingredients ri ON ri.recipe_id = r.id
-      LEFT JOIN ingredients i ON i.id = ri.ingredient_id
-      LEFT JOIN recipe_types rt ON rt.id = r.type_id
-      WHERE mr.menu_id = $1
-      GROUP BY r.id, rt.type_name
-    `;
-        const recipeResult = await this.pool.query(recipeQuery, [id]);
-
-        const recipeIds = recipeResult.rows.map((recipe) => recipe.recipe_id);
-
-        // fetch missing ingredients for every recipe of the menu in one query
-        // (previously an N+1 loop with a query per recipe), then group in memory
-        const missingByRecipe = new Map<number, unknown[]>();
-        if (recipeIds.length > 0) {
-            const missingIngredientsQuery = `
-        SELECT
-          ri.recipe_id,
-          i.name AS ingredient_name,
-          GREATEST(ri.quantity_recipe_ingredients - COALESCE(pi.quantity_person_ingradient, 0), 0) AS missing_quantity,
-          u.unit_name,
-          u.coefficient
-        FROM recipe_ingredients ri
-        LEFT JOIN person_ingredients pi
-          ON ri.ingredient_id = pi.ingredient_id AND pi.person_id = $1
-        LEFT JOIN ingredients i
-          ON ri.ingredient_id = i.id
-        LEFT JOIN unit_measurement u
-          ON i.id_unit_measurement = u.id
-        WHERE ri.recipe_id = ANY($2)
-        GROUP BY ri.recipe_id, i.name, ri.quantity_recipe_ingredients, pi.quantity_person_ingradient, u.unit_name, u.coefficient
-        HAVING GREATEST(ri.quantity_recipe_ingredients - COALESCE(pi.quantity_person_ingradient, 0), 0) > 0
-      `;
-            const missingIngredientsResult = await this.pool.query(
-                missingIngredientsQuery,
-                [personId, recipeIds],
-            );
-
-            for (const row of missingIngredientsResult.rows) {
-                const group = missingByRecipe.get(row.recipe_id) ?? [];
-                group.push({
-                    ingredient_name: row.ingredient_name,
-                    missing_quantity: row.missing_quantity,
-                    unit_name: row.unit_name,
-                    coefficient: row.coefficient,
-                });
-                missingByRecipe.set(row.recipe_id, group);
-            }
-        }
-
-        const recipesWithDetails = recipeResult.rows.map((recipe) => ({
-            ...recipe,
-            missingIngredients: missingByRecipe.get(recipe.recipe_id) ?? [],
-        }));
-
-        return { menu, recipes: recipesWithDetails };
+    ): Promise<unknown> {
+        return findMenuByIdWithRecipes(this.pool, id, personId);
     }
 
-    async deleteById(id: string | number, personId: number): Promise<boolean> {
+    async deleteById(id: string | number, personId: number): Promise<unknown> {
         // menu_recipe is deleted explicitly: databases adopted from the legacy
         // database.sql carry a second menu_id FK without ON DELETE CASCADE,
         // so relying on the cascade would fail there
@@ -254,6 +143,7 @@ export default class PgMenuRepository implements MenuRepository {
 
             if (owned.rowCount === 0) {
                 await client.query("ROLLBACK");
+
                 return false;
             }
 
@@ -263,6 +153,7 @@ export default class PgMenuRepository implements MenuRepository {
             await client.query("DELETE FROM menu WHERE menu_id = $1", [id]);
 
             await client.query("COMMIT");
+
             return true;
         } catch (error) {
             await client.query("ROLLBACK");
@@ -272,46 +163,10 @@ export default class PgMenuRepository implements MenuRepository {
         }
     }
 
-    private buildMenuRecipeInsert(
-        menuId: number | string,
-        recipeIds: number[],
-    ): { placeholders: string; params: Array<number | string> } {
-        const placeholders = recipeIds
-            .map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
-            .join(", ");
-        const params = recipeIds.flatMap((recipeId) => [menuId, recipeId]);
-
-        return { placeholders, params };
-    }
-
-    async searchByPerson(id: number, filters: unknown): Promise<unknown[]> {
-        const { menu_name, category_ids } = toMenuFilters(filters);
-
-        let query = `
-      SELECT
-        m.menu_id AS id,
-        m.menu_title AS title,
-        mc.category_name AS categoryName,
-        m.menu_content AS menuContent
-      FROM menu m
-      LEFT JOIN menu_category mc ON m.category_id = mc.menu_category_id
-      WHERE m.person_id = $1
-    `;
-
-        const queryParams: QueryParam[] = [id];
-
-        if (menu_name) {
-            query += ` AND m.menu_title ILIKE $${queryParams.length + 1}`;
-            queryParams.push(`%${menu_name}%`);
-        }
-
-        if (category_ids) {
-            const categoryArray = category_ids.split(",").map(Number);
-            query += ` AND m.category_id = ANY($${queryParams.length + 1})`;
-            queryParams.push(categoryArray);
-        }
-
-        const result = await this.pool.query(query, queryParams);
-        return result.rows;
+    async searchByPerson(
+        personId: number,
+        filters: unknown,
+    ): Promise<unknown[]> {
+        return searchPersonMenus(this.pool, personId, filters);
     }
 }

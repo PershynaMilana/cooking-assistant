@@ -1,6 +1,6 @@
 import pino from "pino";
 
-import { config } from "@config/env";
+import { config } from "config/env";
 
 const isTest = process.env.NODE_ENV === "test";
 

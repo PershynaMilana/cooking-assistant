@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp, authCookie } from "../helpers/testApp";
+import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 function makeRecipeBody() {
     return {
@@ -25,6 +25,7 @@ describe("recipe routes", () => {
     it("should create a recipe for an authenticated request", async () => {
         const { app, deps } = buildTestApp();
         const createdRecipe = { id: 12, title: "Tomato soup" };
+
         deps.recipeRepository.create.mockResolvedValue(createdRecipe);
 
         const res = await request(app)
@@ -43,6 +44,7 @@ describe("recipe routes", () => {
     it("should return recipes for an authenticated request", async () => {
         const { app, deps } = buildTestApp();
         const recipes = [{ id: 12, title: "Tomato soup" }];
+
         deps.recipeRepository.findAllWithIngredients.mockResolvedValue(recipes);
 
         const res = await request(app)
@@ -56,6 +58,7 @@ describe("recipe routes", () => {
     it("should return one recipe with ingredients", async () => {
         const { app, deps } = buildTestApp();
         const recipe = { id: 12, title: "Tomato soup", ingredients: [] };
+
         deps.recipeRepository.findByIdWithIngredients.mockResolvedValue(recipe);
 
         const res = await request(app)
@@ -69,6 +72,7 @@ describe("recipe routes", () => {
     it("should return all known ingredients", async () => {
         const { app, deps } = buildTestApp();
         const ingredients = [{ id: 3, name: "tomato" }];
+
         deps.recipeRepository.findAllIngredients.mockResolvedValue(ingredients);
 
         const res = await request(app)
@@ -82,6 +86,7 @@ describe("recipe routes", () => {
     it("should update a recipe owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         const updatedRecipe = { id: 12, title: "Tomato soup" };
+
         deps.recipeRepository.update.mockResolvedValue(updatedRecipe);
 
         const res = await request(app)
@@ -97,6 +102,7 @@ describe("recipe routes", () => {
 
     it("should return 404 when updating a recipe of another user", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.update.mockResolvedValue(null);
 
         const res = await request(app)
@@ -110,6 +116,7 @@ describe("recipe routes", () => {
 
     it("should delete a recipe owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.deleteById.mockResolvedValue(true);
 
         const res = await request(app)
@@ -124,6 +131,7 @@ describe("recipe routes", () => {
     it("should search recipes by filters", async () => {
         const { app, deps } = buildTestApp();
         const recipes = [{ id: 12, title: "Tomato soup" }];
+
         deps.recipeRepository.search.mockResolvedValue(recipes);
 
         const res = await request(app)
@@ -151,6 +159,7 @@ describe("recipe routes", () => {
     it("should search person recipes by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         const recipes = [{ id: 12, title: "Tomato soup" }];
+
         deps.recipeRepository.searchByPerson.mockResolvedValue(recipes);
 
         const res = await request(app)
@@ -167,6 +176,7 @@ describe("recipe routes", () => {
     it("should return recipe stats", async () => {
         const { app, deps } = buildTestApp();
         const stats = { fastestRecipe: [{ id: 12 }] };
+
         deps.recipeRepository.getStats.mockResolvedValue(stats);
 
         const res = await request(app)
@@ -179,6 +189,7 @@ describe("recipe routes", () => {
 
     it("should map a not found recipe to an error response", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.findByIdWithIngredients.mockResolvedValue(null);
 
         const res = await request(app)

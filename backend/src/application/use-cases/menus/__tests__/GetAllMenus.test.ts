@@ -1,6 +1,8 @@
-import GetAllMenus from "@application/use-cases/menus/GetAllMenus";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import GetAllMenus from "application/use-cases/menus/GetAllMenus";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const menuRepository = { findAll: jest.fn() };
@@ -14,6 +16,7 @@ describe("GetAllMenus", () => {
         const { useCase, menuRepository } = setup();
         const filters = { menu_name: "weekly", category_ids: "1,2" };
         const menus = [{ id: 9, menuTitle: "Weekly menu" }];
+
         menuRepository.findAll.mockResolvedValue(menus);
 
         const result = await useCase.execute(filters);

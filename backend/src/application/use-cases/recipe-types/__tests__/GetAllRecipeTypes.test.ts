@@ -1,4 +1,4 @@
-import GetAllRecipeTypes from "@application/use-cases/recipe-types/GetAllRecipeTypes";
+import GetAllRecipeTypes from "application/use-cases/recipe-types/GetAllRecipeTypes";
 
 describe("GetAllRecipeTypes", () => {
     it("should return all recipe types from the repository", async () => {

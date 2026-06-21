@@ -1,6 +1,6 @@
 import type { Request } from "express";
 
-import { getUserId } from "@controller/requestUser";
+import { getUserId } from "controller/requestUser";
 
 describe("getUserId", () => {
     it("should return the user id from the request", () => {

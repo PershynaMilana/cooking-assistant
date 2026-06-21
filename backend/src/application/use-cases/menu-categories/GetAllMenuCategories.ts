@@ -1,4 +1,4 @@
-import type { MenuCategoryRepository } from "@domain/repositories/MenuCategoryRepository";
+import type { MenuCategoryRepository } from "domain/repositories/MenuCategoryRepository";
 
 export default class GetAllMenuCategories {
     constructor(

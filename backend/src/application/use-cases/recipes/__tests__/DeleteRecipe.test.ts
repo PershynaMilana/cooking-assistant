@@ -1,6 +1,8 @@
-import DeleteRecipe from "@application/use-cases/recipes/DeleteRecipe";
-import { NotFoundError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { NotFoundError } from "domain/errors/AppError";
+
+import DeleteRecipe from "application/use-cases/recipes/DeleteRecipe";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const recipeRepository = { deleteById: jest.fn() };
@@ -12,6 +14,7 @@ function setup() {
 describe("DeleteRecipe", () => {
     it("should throw a 404 NotFoundError when the recipe does not belong to the user", async () => {
         const { useCase, recipeRepository } = setup();
+
         recipeRepository.deleteById.mockResolvedValue(false);
 
         const error = await catchError(useCase.execute(12, 7));
@@ -21,11 +24,11 @@ describe("DeleteRecipe", () => {
 
     it("should delete the recipe when it belongs to the user", async () => {
         const { useCase, recipeRepository } = setup();
+
         recipeRepository.deleteById.mockResolvedValue(true);
 
-        const result = await useCase.execute(12, 7);
+        await useCase.execute(12, 7);
 
         expect(recipeRepository.deleteById).toHaveBeenCalledWith(12, 7);
-        expect(result).toBeUndefined();
     });
 });

@@ -1,7 +1,7 @@
-import { login, logout, register } from "api/authApi";
+import { getMe, login, logout, register } from "api/authApi";
 import { API_ROUTES } from "api/endpoints";
 
-import { mockedPost } from "test/apiClientMock";
+import { mockedGet, mockedPost } from "test/apiClientMock";
 
 jest.mock("../client");
 
@@ -34,6 +34,14 @@ describe("authApi", () => {
             API_ROUTES.auth.register,
             REGISTRATION,
         );
+    });
+
+    it("should get the current user from the me endpoint", async () => {
+        mockedGet.mockResolvedValue({ data: { id: 1 } });
+
+        await getMe();
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.auth.me);
     });
 
     it("should post to the logout endpoint", async () => {

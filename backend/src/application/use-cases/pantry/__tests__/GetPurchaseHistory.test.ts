@@ -1,4 +1,4 @@
-import GetPurchaseHistory from "@application/use-cases/pantry/GetPurchaseHistory";
+import GetPurchaseHistory from "application/use-cases/pantry/GetPurchaseHistory";
 
 describe("GetPurchaseHistory", () => {
     it("should return purchase history from the repository", async () => {

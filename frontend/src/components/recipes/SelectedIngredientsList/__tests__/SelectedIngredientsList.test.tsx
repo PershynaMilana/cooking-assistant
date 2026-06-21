@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { SelectedIngredientsList } from "components/recipes/SelectedIngredientsList";
 
@@ -18,5 +19,37 @@ describe("SelectedIngredientsList", () => {
         expect(screen.getByText("Potato")).toBeInTheDocument();
         expect(screen.getByRole("spinbutton")).toHaveValue(3);
         expect(screen.getByText("g")).toBeInTheDocument();
+    });
+
+    it("should call onQuantityChange with the parsed number when the quantity changes", async () => {
+        const onQuantityChange = jest.fn();
+
+        render(
+            <SelectedIngredientsList
+                ingredients={INGREDIENTS}
+                heading="Selected Ingredients"
+                onQuantityChange={onQuantityChange}
+            />,
+        );
+
+        await userEvent.type(screen.getByRole("spinbutton"), "5");
+
+        expect(onQuantityChange).toHaveBeenCalledWith(1, 35);
+    });
+
+    it("should not call onQuantityChange when the quantity is cleared", async () => {
+        const onQuantityChange = jest.fn();
+
+        render(
+            <SelectedIngredientsList
+                ingredients={INGREDIENTS}
+                heading="Selected Ingredients"
+                onQuantityChange={onQuantityChange}
+            />,
+        );
+
+        await userEvent.clear(screen.getByRole("spinbutton"));
+
+        expect(onQuantityChange).not.toHaveBeenCalled();
     });
 });

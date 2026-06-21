@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp, authCookie } from "../helpers/testApp";
+import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 describe("user ingredient routes", () => {
     it("should return 401 without a token", async () => {
@@ -14,6 +14,7 @@ describe("user ingredient routes", () => {
     it("should return user ingredients for the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         const ingredients = [{ ingredient_id: 3, ingredient_name: "tomato" }];
+
         deps.pantryRepository.findByUser.mockResolvedValue(ingredients);
 
         const res = await request(app)
@@ -27,6 +28,7 @@ describe("user ingredient routes", () => {
 
     it("should update user ingredients", async () => {
         const { app, deps } = buildTestApp();
+
         deps.pantryRepository.addIngredients.mockResolvedValue(undefined);
 
         const res = await request(app)
@@ -45,6 +47,7 @@ describe("user ingredient routes", () => {
 
     it("should delete a user ingredient", async () => {
         const { app, deps } = buildTestApp();
+
         deps.pantryRepository.deleteIngredient.mockResolvedValue(true);
 
         const res = await request(app)
@@ -63,6 +66,7 @@ describe("user ingredient routes", () => {
 
     it("should update ingredient quantities", async () => {
         const { app, deps } = buildTestApp();
+
         deps.pantryRepository.updateQuantities.mockResolvedValue(undefined);
 
         const res = await request(app)
@@ -80,6 +84,7 @@ describe("user ingredient routes", () => {
 
     it("should update a purchase quantity", async () => {
         const { app, deps } = buildTestApp();
+
         deps.pantryRepository.updatePurchaseQuantity.mockResolvedValue(true);
 
         const res = await request(app)
@@ -99,6 +104,7 @@ describe("user ingredient routes", () => {
     it("should return purchase history", async () => {
         const { app, deps } = buildTestApp();
         const history = [{ id: 11, quantity: 2 }];
+
         deps.pantryRepository.findPurchaseHistory.mockResolvedValue(history);
 
         const res = await request(app)
@@ -115,6 +121,7 @@ describe("user ingredient routes", () => {
 
     it("should map a missing purchase to an error response", async () => {
         const { app, deps } = buildTestApp();
+
         deps.pantryRepository.updatePurchaseQuantity.mockResolvedValue(null);
 
         const res = await request(app)
