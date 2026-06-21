@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.2 - 2026-06-21
+
+### Project
+- Fixed: Deploy pipeline now authenticates to Azure correctly on any `v*` tag push.
+
+
 ## 2.1 - 2026-06-21
 
 ### Project
