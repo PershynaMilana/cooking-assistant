@@ -22,6 +22,19 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.43 - 2026-06-21
+
+### Backend
+- Added: Backend is now packaged as a Docker image (multi-stage build via tsup) and published to GitHub Container Registry on each release tag.
+- Added: Database migrations and seed run automatically as a Container Apps Job on every deploy, before the new backend image goes live.
+
+### Frontend
+- Added: Frontend is built into a Docker image served by nginx, with a SPA fallback so deep links load correctly in production.
+
+### Project
+- Added: A `deploy.yml` GitHub Actions workflow that builds both images on a `v*` git tag, pushes them to GHCR, runs migrations, and updates both Azure Container Apps.
+
+
 ## 1.42 - 2026-06-21
 
 ### Backend
