@@ -22,6 +22,12 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.3 - 2026-06-21
+
+### Project
+- Fixed: Azure OIDC login now uses a GitHub environment subject, which is the only format Azure federated credentials support for tag-triggered deploys.
+
+
 ## 2.2 - 2026-06-21
 
 ### Project
