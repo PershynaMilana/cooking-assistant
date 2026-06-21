@@ -1,6 +1,8 @@
-import SearchPersonRecipes from "@application/use-cases/recipes/SearchPersonRecipes";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import SearchPersonRecipes from "application/use-cases/recipes/SearchPersonRecipes";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const recipeRepository = { searchByPerson: jest.fn() };
@@ -14,6 +16,7 @@ describe("SearchPersonRecipes", () => {
         const { useCase, recipeRepository } = setup();
         const filters = { ingredient_name: "tomato", type_ids: "2" };
         const recipes = [{ id: 1, title: "Tomato soup" }];
+
         recipeRepository.searchByPerson.mockResolvedValue(recipes);
 
         const result = await useCase.execute(7, filters);

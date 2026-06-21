@@ -1,6 +1,8 @@
-import UpdateIngredientQuantities from "@application/use-cases/pantry/UpdateIngredientQuantities";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import UpdateIngredientQuantities from "application/use-cases/pantry/UpdateIngredientQuantities";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const pantryRepository = { updateQuantities: jest.fn() };
@@ -62,17 +64,17 @@ describe("UpdateIngredientQuantities", () => {
         const { useCase, pantryRepository } = setup();
         const items = [{ id: 3, quantity_person_ingradient: 2 }];
 
-        const result = await useCase.execute(7, items);
+        await useCase.execute(7, items);
 
         expect(pantryRepository.updateQuantities).toHaveBeenCalledWith(
             7,
             items,
         );
-        expect(result).toBeUndefined();
     });
 
     it("should accept quantity of 0 and pass it to the repository", async () => {
         const { useCase, pantryRepository } = setup();
+
         pantryRepository.updateQuantities.mockResolvedValue(undefined);
 
         await useCase.execute(7, [{ id: 3, quantity_person_ingradient: 0 }]);

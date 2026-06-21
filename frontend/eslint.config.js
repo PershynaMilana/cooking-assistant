@@ -203,7 +203,7 @@ export default tseslint.config(
                     "no-complex-condition": {
                         meta: {
                             type: "suggestion",
-                            messages: { complex: "Условие из 3+ операндов: вынеси в именованную константу." },
+                            messages: { complex: "Condition has 3+ operands: extract it into a named constant." },
                         },
                         create(context) {
                             const count = (n) =>

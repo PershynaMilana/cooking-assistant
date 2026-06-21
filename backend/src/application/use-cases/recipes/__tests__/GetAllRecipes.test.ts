@@ -1,4 +1,4 @@
-import GetAllRecipes from "@application/use-cases/recipes/GetAllRecipes";
+import GetAllRecipes from "application/use-cases/recipes/GetAllRecipes";
 
 describe("GetAllRecipes", () => {
     it("should return all recipes with ingredients from the repository", async () => {

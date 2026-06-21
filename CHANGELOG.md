@@ -22,6 +22,20 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 1.42 - 2026-06-21
+
+### Backend
+- Security: Added a global per-client request rate limit (both the window and the per-IP ceiling are configurable via env) on top of the stricter login/registration limit; throttled responses keep the standard JSON error shape.
+- Security: Responses now send an HTTP Strict-Transport-Security (HSTS) header, and database connections use TLS in production - configurable, including a relaxed-CA option for managed Postgres providers.
+- Security: The app refuses to start in production with default database credentials, now enforced for the migrate and seed scripts too, not just the web server.
+- Changed: Backend code quality was brought up to the frontend's level - stricter type-aware linting, enforced import-layering boundaries, and large data-access files split into smaller focused modules. No change to API behavior.
+
+### Frontend
+- Security: Updated axios to a patched release and removed an unused build dependency, clearing known dependency advisories.
+- Changed: Production builds now strip `console` and `debugger` statements.
+- Changed: The custom ESLint complex-condition rule now reports in English instead of Russian.
+
+
 ## 1.41 - 2026-06-20
 
 ### Backend

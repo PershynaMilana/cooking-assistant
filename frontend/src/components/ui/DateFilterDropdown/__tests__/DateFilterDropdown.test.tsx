@@ -1,4 +1,4 @@
-﻿import { render, screen } from "@testing-library/react";
+﻿import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { DateFilterDropdown } from "components/ui/DateFilterDropdown";
@@ -23,6 +23,65 @@ describe("DateFilterDropdown", () => {
 
         expect(screen.getByLabelText(START_LABEL)).toBeInTheDocument();
         expect(screen.getByLabelText("End date:")).toBeInTheDocument();
+    });
+
+    it("should propagate the chosen start date when it changes", async () => {
+        const setStartDate = jest.fn();
+
+        render(
+            <DateFilterDropdown
+                startDate=""
+                endDate=""
+                setStartDate={setStartDate}
+                setEndDate={jest.fn()}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole("button", { name: TOGGLE }));
+        fireEvent.change(screen.getByLabelText(START_LABEL), {
+            target: { value: "2024-01-01" },
+        });
+
+        expect(setStartDate).toHaveBeenCalledWith("2024-01-01");
+    });
+
+    it("should propagate the chosen end date when it changes", async () => {
+        const setEndDate = jest.fn();
+
+        render(
+            <DateFilterDropdown
+                startDate=""
+                endDate=""
+                setStartDate={jest.fn()}
+                setEndDate={setEndDate}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole("button", { name: TOGGLE }));
+        fireEvent.change(screen.getByLabelText("End date:"), {
+            target: { value: "2024-02-01" },
+        });
+
+        expect(setEndDate).toHaveBeenCalledWith("2024-02-01");
+    });
+
+    it("should show an error when the start date is after the end date", async () => {
+        render(
+            <DateFilterDropdown
+                startDate="2024-02-01"
+                endDate="2024-01-01"
+                setStartDate={jest.fn()}
+                setEndDate={jest.fn()}
+            />,
+        );
+
+        await userEvent.click(screen.getByRole("button", { name: TOGGLE }));
+
+        expect(
+            await screen.findByText(
+                "Start date cannot be later than end date.",
+            ),
+        ).toBeInTheDocument();
     });
 
     it("should clear both dates when the filters are reset", async () => {

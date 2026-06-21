@@ -34,8 +34,24 @@ module.exports = {
         "src/**/*.{ts,tsx}",
         "!src/**/__tests__/**",
         "!src/test/**",
+        // entry + routing composition wiring (analogous to backend main/composition-root)
         "!src/main.tsx",
+        "!src/App.tsx",
         "!src/vite-env.d.ts",
+        // pure type declarations - no runtime code
+        "!src/types/**",
+        // globally replaced by mocks in tests (see moduleNameMapper), never executed
+        "!src/config/env.ts",
+        "!src/config/logger.ts",
+        // one-line window.location.assign glue; jsdom locks window.location so it is not
+        // unit-testable, and the redirect-on-401/403 behavior is covered in client.test.ts
+        "!src/api/redirect.ts",
+        // barrel re-export files - no logic
+        "!src/**/index.ts",
+        // @react-pdf/renderer documents/styles - render PDF primitives, not DOM (not jsdom-testable)
+        "!src/pages/statistics/Pdf*.tsx",
+        "!src/pages/statistics/StatsReport*.tsx",
+        "!src/pages/statistics/reportStyles.ts",
     ],
     coverageProvider: "v8",
     coverageThreshold: {

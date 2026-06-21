@@ -1,10 +1,12 @@
 import type { RequestHandler } from "express";
 
-import type GetUsers from "@application/use-cases/users/GetUsers";
-import type LoginUser from "@application/use-cases/users/LoginUser";
-import type RegisterUser from "@application/use-cases/users/RegisterUser";
-import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from "@config/cookie";
-import { getUserId } from "@controller/requestUser";
+import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from "config/cookie";
+
+import type GetUsers from "application/use-cases/users/GetUsers";
+import type LoginUser from "application/use-cases/users/LoginUser";
+import type RegisterUser from "application/use-cases/users/RegisterUser";
+
+import { getUserId } from "controller/requestUser";
 
 interface UserControllerDependencies {
     registerUser: RegisterUser;
@@ -28,23 +30,17 @@ export default class UserController {
     }
 
     registerUser: RequestHandler = async (req, res) => {
-        const { name, surname, login, password } = req.body;
-        const user = await this.registerUserUseCase.execute({
-            name,
-            surname,
-            login,
-            password,
-        });
+        const user = await this.registerUserUseCase.execute(
+            req.body as Record<string, unknown>,
+        );
 
         res.status(201).json(user);
     };
 
     loginUser: RequestHandler = async (req, res) => {
-        const { login, password } = req.body;
-        const { token } = await this.loginUserUseCase.execute({
-            login,
-            password,
-        });
+        const { token } = await this.loginUserUseCase.execute(
+            req.body as Record<string, unknown>,
+        );
 
         res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
         res.json({ message: "Logged in" });
@@ -61,6 +57,7 @@ export default class UserController {
 
     getUsers: RequestHandler = async (_req, res) => {
         const users = await this.getUsersUseCase.execute();
+
         res.json(users);
     };
 }

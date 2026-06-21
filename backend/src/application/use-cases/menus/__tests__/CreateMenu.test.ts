@@ -1,7 +1,9 @@
-import CreateMenu from "@application/use-cases/menus/CreateMenu";
-import Menu from "@domain/entities/Menu";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import Menu from "domain/entities/Menu";
+import { ValidationError } from "domain/errors/AppError";
+
+import CreateMenu from "application/use-cases/menus/CreateMenu";
+
+import { catchError } from "test/helpers/assertions";
 
 function makeInput(overrides = {}) {
     return {
@@ -27,11 +29,15 @@ describe("CreateMenu", () => {
         const { useCase, menuRepository, recipeRepository } = setup();
         const input = makeInput();
         const createdMenu = { id: 9, menuTitle: input.menuTitle };
+
         recipeRepository.findExistingIds.mockResolvedValue(input.recipeIds);
         menuRepository.create.mockResolvedValue(createdMenu);
 
         const result = await useCase.execute(input);
-        const [menu, recipeIds] = menuRepository.create.mock.calls[0];
+        const [menu, recipeIds] = menuRepository.create.mock.calls[0] as [
+            Menu,
+            number[],
+        ];
 
         expect(menu).toBeInstanceOf(Menu);
         expect(menu).toMatchObject({
@@ -51,6 +57,7 @@ describe("CreateMenu", () => {
     it("should create a menu from a public recipe owned by another user", async () => {
         const { useCase, menuRepository, recipeRepository } = setup();
         const input = makeInput();
+
         recipeRepository.findExistingIds.mockResolvedValue(input.recipeIds);
         menuRepository.create.mockResolvedValue({ id: 9 });
 
@@ -61,6 +68,7 @@ describe("CreateMenu", () => {
 
     it("should throw a 400 ValidationError when a recipe does not exist", async () => {
         const { useCase, menuRepository, recipeRepository } = setup();
+
         recipeRepository.findExistingIds.mockResolvedValue([3]);
 
         const error = await catchError(useCase.execute(makeInput()));

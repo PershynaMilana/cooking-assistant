@@ -1,7 +1,8 @@
 import request from "supertest";
 
-import { ValidationError } from "@domain/errors/AppError";
-import { buildTestApp, authCookie } from "../helpers/testApp";
+import { ValidationError } from "domain/errors/AppError";
+
+import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 describe("menu category routes", () => {
     it("should return 401 without a token", async () => {
@@ -15,6 +16,7 @@ describe("menu category routes", () => {
     it("should return menu categories", async () => {
         const { app, deps } = buildTestApp();
         const categories = [{ menu_category_id: 2, category_name: "Dinner" }];
+
         deps.menuCategoryRepository.findAll.mockResolvedValue(categories);
 
         const res = await request(app)
@@ -27,9 +29,10 @@ describe("menu category routes", () => {
 
     it("should map a domain error to an error response", async () => {
         const { app, deps } = buildTestApp();
-        deps.menuCategoryRepository.findAll.mockImplementation(async () => {
-            throw new ValidationError("Category query is invalid");
-        });
+
+        deps.menuCategoryRepository.findAll.mockRejectedValue(
+            new ValidationError("Category query is invalid"),
+        );
 
         const res = await request(app)
             .get("/api/menu-categories")

@@ -1,14 +1,15 @@
 import type { RequestHandler } from "express";
 
-import type CreateRecipe from "@application/use-cases/recipes/CreateRecipe";
-import type DeleteRecipe from "@application/use-cases/recipes/DeleteRecipe";
-import type GetAllIngredients from "@application/use-cases/recipes/GetAllIngredients";
-import type GetAllRecipes from "@application/use-cases/recipes/GetAllRecipes";
-import type GetRecipeById from "@application/use-cases/recipes/GetRecipeById";
-import type GetRecipeStats from "@application/use-cases/recipes/GetRecipeStats";
-import type SearchPersonRecipes from "@application/use-cases/recipes/SearchPersonRecipes";
-import type SearchRecipes from "@application/use-cases/recipes/SearchRecipes";
-import type UpdateRecipe from "@application/use-cases/recipes/UpdateRecipe";
+import type CreateRecipe from "application/use-cases/recipes/CreateRecipe";
+import type DeleteRecipe from "application/use-cases/recipes/DeleteRecipe";
+import type GetAllIngredients from "application/use-cases/recipes/GetAllIngredients";
+import type GetAllRecipes from "application/use-cases/recipes/GetAllRecipes";
+import type GetRecipeById from "application/use-cases/recipes/GetRecipeById";
+import type GetRecipeStats from "application/use-cases/recipes/GetRecipeStats";
+import type SearchPersonRecipes from "application/use-cases/recipes/SearchPersonRecipes";
+import type SearchRecipes from "application/use-cases/recipes/SearchRecipes";
+import type UpdateRecipe from "application/use-cases/recipes/UpdateRecipe";
+
 import { getUserId } from "./requestUser";
 
 interface RecipeControllerDependencies {
@@ -57,18 +58,11 @@ export default class RecipeController {
     }
 
     createRecipe: RequestHandler = async (req, res) => {
-        const { title, content, ingredients, type_id, cooking_time, servings } =
-            req.body;
+        const body = req.body as Record<string, unknown>;
         const person_id = getUserId(req);
-
         const created = await this.createRecipeUseCase.execute({
-            title,
-            content,
+            ...body,
             person_id,
-            ingredients,
-            type_id,
-            cooking_time,
-            servings,
         });
 
         res.json(created);
@@ -76,40 +70,29 @@ export default class RecipeController {
 
     getAllRecipes: RequestHandler = async (_req, res) => {
         const recipes = await this.getAllRecipesUseCase.execute();
+
         res.json(recipes);
     };
 
-    getRecipeWithIngredients: RequestHandler = async (req, res) => {
+    getRecipeWithIngredients: RequestHandler<{ id: string }> = async (
+        req,
+        res,
+    ) => {
         const recipe = await this.getRecipeByIdUseCase.execute(
-            req.params.id as string,
+            req.params.id,
             getUserId(req),
         );
+
         res.json(recipe);
     };
 
-    updateRecipe: RequestHandler = async (req, res) => {
-        const recipeId = req.params.id as string;
+    updateRecipe: RequestHandler<{ id: string }> = async (req, res) => {
         const person_id = getUserId(req);
-        const {
-            title,
-            content,
-            ingredients: newIngredients,
-            type_id,
-            cooking_time,
-            servings,
-        } = req.body;
-
+        const body = req.body as Record<string, unknown>;
         const updated = await this.updateRecipeUseCase.execute(
-            recipeId,
+            req.params.id,
             person_id,
-            {
-                title,
-                content,
-                ingredients: newIngredients,
-                type_id,
-                cooking_time,
-                servings,
-            },
+            body,
         );
 
         res.json(updated);
@@ -117,6 +100,7 @@ export default class RecipeController {
 
     searchRecipes: RequestHandler = async (req, res) => {
         const recipes = await this.searchRecipesUseCase.execute(req.query);
+
         res.json(recipes);
     };
 
@@ -130,21 +114,21 @@ export default class RecipeController {
         res.json(recipes);
     };
 
-    deleteRecipe: RequestHandler = async (req, res) => {
-        await this.deleteRecipeUseCase.execute(
-            req.params.id as string,
-            getUserId(req),
-        );
+    deleteRecipe: RequestHandler<{ id: string }> = async (req, res) => {
+        await this.deleteRecipeUseCase.execute(req.params.id, getUserId(req));
+
         res.json({ message: "Recipe successfully deleted" });
     };
 
     getAllIngredients: RequestHandler = async (_req, res) => {
         const ingredients = await this.getAllIngredientsUseCase.execute();
+
         res.json(ingredients);
     };
 
     getRecipesStats: RequestHandler = async (_req, res) => {
         const stats = await this.getRecipeStatsUseCase.execute();
+
         res.json(stats);
     };
 }

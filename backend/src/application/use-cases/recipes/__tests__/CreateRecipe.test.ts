@@ -1,7 +1,9 @@
-import CreateRecipe from "@application/use-cases/recipes/CreateRecipe";
-import Recipe from "@domain/entities/Recipe";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import Recipe from "domain/entities/Recipe";
+import { ValidationError } from "domain/errors/AppError";
+
+import CreateRecipe from "application/use-cases/recipes/CreateRecipe";
+
+import { catchError } from "test/helpers/assertions";
 
 function makeInput(overrides = {}) {
     return {
@@ -28,10 +30,11 @@ describe("CreateRecipe", () => {
         const { useCase, recipeRepository } = setup();
         const input = makeInput();
         const createdRecipe = { id: 12, ...input };
+
         recipeRepository.create.mockResolvedValue(createdRecipe);
 
         const result = await useCase.execute(input);
-        const recipe = recipeRepository.create.mock.calls[0][0];
+        const [recipe] = recipeRepository.create.mock.calls[0] as [Recipe];
 
         expect(recipe).toBeInstanceOf(Recipe);
         expect(recipe).toMatchObject({
@@ -51,7 +54,7 @@ describe("CreateRecipe", () => {
         const { useCase, recipeRepository } = setup();
 
         await useCase.execute(makeInput({ servings: "4" }));
-        const recipe = recipeRepository.create.mock.calls[0][0];
+        const [recipe] = recipeRepository.create.mock.calls[0] as [Recipe];
 
         expect(recipe).toMatchObject({ servings: 4 });
     });

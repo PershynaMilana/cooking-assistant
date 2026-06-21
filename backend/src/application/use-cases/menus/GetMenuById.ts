@@ -1,7 +1,8 @@
-import { NotFoundError } from "@domain/errors/AppError";
-import { idSchema } from "@application/validation/common.schemas";
-import { validate } from "@application/validation/validate";
-import type { MenuRepository } from "@domain/repositories/MenuRepository";
+import { NotFoundError } from "domain/errors/AppError";
+import type { MenuRepository } from "domain/repositories/MenuRepository";
+
+import { idSchema } from "application/validation/common.schemas";
+import { validate } from "application/validation/validate";
 
 export default class GetMenuById {
     constructor(
@@ -17,9 +18,11 @@ export default class GetMenuById {
             menuId,
             personId,
         );
+
         if (!menu) {
             throw new NotFoundError("Menu not found");
         }
+
         return menu;
     }
 }

@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp } from "../helpers/testApp";
+import { buildTestApp } from "test/helpers/testApp";
 
 describe("health routes", () => {
     it("should return ok without a token", async () => {

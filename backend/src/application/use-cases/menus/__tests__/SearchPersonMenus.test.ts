@@ -1,6 +1,8 @@
-import SearchPersonMenus from "@application/use-cases/menus/SearchPersonMenus";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import SearchPersonMenus from "application/use-cases/menus/SearchPersonMenus";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const menuRepository = { searchByPerson: jest.fn() };
@@ -14,6 +16,7 @@ describe("SearchPersonMenus", () => {
         const { useCase, menuRepository } = setup();
         const filters = { menu_name: "weekly" };
         const menus = [{ id: 9, menuTitle: "Weekly menu" }];
+
         menuRepository.searchByPerson.mockResolvedValue(menus);
 
         const result = await useCase.execute(7, filters);

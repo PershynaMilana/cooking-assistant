@@ -1,14 +1,10 @@
-import { UnauthorizedError } from "@domain/errors/AppError";
-import type { PasswordHasher } from "@application/ports/PasswordHasher";
-import type { TokenService } from "@application/ports/TokenService";
-import { validate } from "@application/validation/validate";
-import { loginUserSchema } from "@application/validation/user.schemas";
-import type { UserRepository } from "@domain/repositories/UserRepository";
+import { UnauthorizedError } from "domain/errors/AppError";
+import type { UserRepository } from "domain/repositories/UserRepository";
 
-interface LoginInput {
-    login: string;
-    password: string;
-}
+import type { PasswordHasher } from "application/ports/PasswordHasher";
+import type { TokenService } from "application/ports/TokenService";
+import { loginUserSchema } from "application/validation/user.schemas";
+import { validate } from "application/validation/validate";
 
 export default class LoginUser {
     constructor(
@@ -17,10 +13,11 @@ export default class LoginUser {
         private tokenService: Pick<TokenService, "generate">,
     ) {}
 
-    async execute(input: LoginInput): Promise<{ token: string }> {
+    async execute(input: unknown): Promise<{ token: string }> {
         const data = validate(loginUserSchema, input);
         // same error for unknown login and wrong password to prevent login enumeration
         const user = await this.userRepository.findByLogin(data.login);
+
         if (!user) {
             throw new UnauthorizedError("Invalid login or password");
         }
@@ -35,6 +32,7 @@ export default class LoginUser {
         }
 
         const token = this.tokenService.generate(user.id);
+
         return { token };
     }
 }

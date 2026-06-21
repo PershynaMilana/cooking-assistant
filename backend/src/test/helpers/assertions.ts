@@ -1,5 +1,5 @@
 export async function catchError(promise: Promise<unknown>): Promise<unknown> {
-    return promise.catch((e) => e);
+    return promise.catch((e: unknown) => e);
 }
 
 export function catchSyncError(callback: () => void): unknown {

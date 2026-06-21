@@ -1,4 +1,4 @@
-import GetRecipeStats from "@application/use-cases/recipes/GetRecipeStats";
+import GetRecipeStats from "application/use-cases/recipes/GetRecipeStats";
 
 describe("GetRecipeStats", () => {
     it("should return recipe stats from the repository", async () => {

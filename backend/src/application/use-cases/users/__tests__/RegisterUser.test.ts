@@ -1,6 +1,8 @@
-import RegisterUser from "@application/use-cases/users/RegisterUser";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import RegisterUser from "application/use-cases/users/RegisterUser";
+
+import { catchError } from "test/helpers/assertions";
 
 describe("RegisterUser", () => {
     const makeDeps = () => ({
@@ -16,6 +18,7 @@ describe("RegisterUser", () => {
             surname: "Cook",
             login: "bob",
         };
+
         deps.passwordHasher.hash.mockResolvedValue("hashed-secret");
         deps.userRepository.create.mockResolvedValue(createdUser);
         const useCase = new RegisterUser(

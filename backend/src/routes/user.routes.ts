@@ -1,8 +1,8 @@
 import express, { type Router } from "express";
 
-import type UserController from "@controller/user.controller";
-import authenticateToken from "@middleware/jwtMiddleware";
-import { authLimiter } from "@middleware/rateLimit";
+import type UserController from "controller/user.controller";
+import authenticateToken from "middleware/jwtMiddleware";
+import { authLimiter } from "middleware/rateLimit";
 
 export default function createUserRouter(
     userController: UserController,

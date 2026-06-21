@@ -1,6 +1,3 @@
-const { pathsToModuleNameMapper } = require("ts-jest");
-const { compilerOptions } = require("./tsconfig.json");
-
 module.exports = {
     preset: "ts-jest",
     rootDir: ".",
@@ -10,9 +7,19 @@ module.exports = {
     clearMocks: true,
     restoreMocks: true,
     setupFilesAfterEnv: ["<rootDir>/src/test/jest.setup.ts"],
-    moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
-        prefix: "<rootDir>/",
-    }),
+    moduleNameMapper: {
+        "^domain/(.*)$": "<rootDir>/src/domain/$1",
+        "^application/(.*)$": "<rootDir>/src/application/$1",
+        "^infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
+        "^controller/(.*)$": "<rootDir>/src/controller/$1",
+        "^routes/(.*)$": "<rootDir>/src/routes/$1",
+        "^middleware/(.*)$": "<rootDir>/src/middleware/$1",
+        "^config/(.*)$": "<rootDir>/src/config/$1",
+        "^test/(.*)$": "<rootDir>/src/test/$1",
+        "^app$": "<rootDir>/src/app",
+        "^composition-root$": "<rootDir>/src/composition-root",
+        "^db$": "<rootDir>/src/db",
+    },
     collectCoverageFrom: [
         "src/application/use-cases/**/*.ts",
         "src/domain/entities/**/*.ts",

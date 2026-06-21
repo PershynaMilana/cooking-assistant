@@ -125,4 +125,17 @@ describe("useRecipeStatistics", () => {
         expect(result.current.fastestRecipes.map((r) => r.id)).toContain(10);
         expect(result.current.fastestRecipes.map((r) => r.id)).toContain(11);
     });
+
+    it("should keep empty results when fetching recipes fails", async () => {
+        jest.mocked(getRecipes).mockRejectedValue(new Error("network"));
+
+        const { result } = renderHook(() => useRecipeStatistics());
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(result.current.recipesCount).toBe(0);
+        expect(result.current.stats).toHaveLength(0);
+    });
 });

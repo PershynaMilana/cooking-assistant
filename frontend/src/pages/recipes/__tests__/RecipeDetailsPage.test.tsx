@@ -81,4 +81,47 @@ describe("RecipeDetailsPage", () => {
 
         expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
     });
+
+    it("should show an error message when the recipe fails to load", async () => {
+        jest.mocked(getRecipeById).mockRejectedValue(new Error("boom"));
+
+        renderPage();
+
+        expect(
+            await screen.findByText("Error: Error fetching recipe details"),
+        ).toBeInTheDocument();
+    });
+
+    it("should render cooking time in minutes only when under an hour", async () => {
+        jest.mocked(getRecipeById).mockResolvedValue({
+            ...SAMPLE,
+            cooking_time: 45,
+        });
+
+        renderPage();
+
+        await screen.findByText(TITLE);
+
+        expect(screen.getByText("45 minutes")).toBeInTheDocument();
+    });
+
+    it("should close the delete confirmation modal when cancelled", async () => {
+        jest.mocked(getRecipeById).mockResolvedValue(SAMPLE);
+
+        renderPage();
+
+        await screen.findByText(TITLE);
+
+        await userEvent.click(
+            screen.getByRole("button", { name: BTN_DELETE_RECIPE }),
+        );
+
+        const cancelButton = screen.getByRole("button", { name: "Cancel" });
+
+        await userEvent.click(cancelButton);
+
+        expect(
+            screen.queryByRole("button", { name: "Cancel" }),
+        ).not.toBeInTheDocument();
+    });
 });

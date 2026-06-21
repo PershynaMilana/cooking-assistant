@@ -1,9 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { AppError } from "@domain/errors/AppError";
-import { catchSyncError } from "@test/helpers/assertions";
-import authenticateToken from "../jwtMiddleware";
+import { AppError } from "domain/errors/AppError";
+
+import authenticateToken from "middleware/jwtMiddleware";
+
+import { catchSyncError } from "test/helpers/assertions";
 
 function makeResponse() {
     return {
@@ -12,16 +14,18 @@ function makeResponse() {
     } as unknown as Response;
 }
 
-function makeRequest(cookies: Record<string, string>): Request {
+function makeRequest(cookies?: Record<string, string>): Request {
     return { cookies } as unknown as Request;
 }
 
 describe("jwtMiddleware", () => {
+    const testSecret = process.env.JWT_SECRET_KEY ?? "";
     const originalSecret = process.env.JWT_SECRET_KEY;
 
     afterEach(() => {
-        if (originalSecret === undefined) {
+        if (originalSecret == null) {
             delete process.env.JWT_SECRET_KEY;
+
             return;
         }
 
@@ -30,6 +34,20 @@ describe("jwtMiddleware", () => {
 
     it("should return 401 when the auth cookie is missing", () => {
         const req = makeRequest({});
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        authenticateToken(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({
+            error: "No token, access denied",
+        });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should return 401 when the request has no cookies", () => {
+        const req = makeRequest();
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
 
@@ -71,11 +89,7 @@ describe("jwtMiddleware", () => {
     });
 
     it("should return 403 when token is expired", () => {
-        const token = jwt.sign(
-            { id: 7 },
-            process.env.JWT_SECRET_KEY as string,
-            { expiresIn: -1 },
-        );
+        const token = jwt.sign({ id: 7 }, testSecret, { expiresIn: -1 });
         const req = makeRequest({ authToken: token });
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
@@ -90,7 +104,8 @@ describe("jwtMiddleware", () => {
     });
 
     it("should throw a 500 AppError when JWT secret is missing", () => {
-        const token = jwt.sign({ id: 7 }, process.env.JWT_SECRET_KEY as string);
+        const token = jwt.sign({ id: 7 }, testSecret);
+
         delete process.env.JWT_SECRET_KEY;
         const req = makeRequest({ authToken: token });
         const res = makeResponse();
@@ -108,7 +123,7 @@ describe("jwtMiddleware", () => {
     });
 
     it("should attach the user and call next when token has a numeric id", () => {
-        const token = jwt.sign({ id: 7 }, process.env.JWT_SECRET_KEY as string);
+        const token = jwt.sign({ id: 7 }, testSecret);
         const req = makeRequest({ authToken: token });
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
@@ -121,10 +136,7 @@ describe("jwtMiddleware", () => {
     });
 
     it("should return 403 when token id is not numeric", () => {
-        const token = jwt.sign(
-            { id: "7" },
-            process.env.JWT_SECRET_KEY as string,
-        );
+        const token = jwt.sign({ id: "7" }, testSecret);
         const req = makeRequest({ authToken: token });
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
@@ -139,7 +151,7 @@ describe("jwtMiddleware", () => {
     });
 
     it("should return 403 when token id is zero", () => {
-        const token = jwt.sign({ id: 0 }, process.env.JWT_SECRET_KEY as string);
+        const token = jwt.sign({ id: 0 }, testSecret);
         const req = makeRequest({ authToken: token });
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
@@ -154,10 +166,22 @@ describe("jwtMiddleware", () => {
     });
 
     it("should return 403 when token id is negative", () => {
-        const token = jwt.sign(
-            { id: -1 },
-            process.env.JWT_SECRET_KEY as string,
-        );
+        const token = jwt.sign({ id: -1 }, testSecret);
+        const req = makeRequest({ authToken: token });
+        const res = makeResponse();
+        const next = jest.fn() as NextFunction;
+
+        authenticateToken(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({
+            error: "Token is invalid or expired",
+        });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should return 403 when token payload is a string", () => {
+        const token = jwt.sign("string-payload", testSecret);
         const req = makeRequest({ authToken: token });
         const res = makeResponse();
         const next = jest.fn() as NextFunction;

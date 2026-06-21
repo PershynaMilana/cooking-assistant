@@ -1,8 +1,8 @@
-import Recipe from "@domain/entities/Recipe";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchSyncError } from "@test/helpers/assertions";
+import Recipe from "domain/entities/Recipe";
+import { ValidationError } from "domain/errors/AppError";
 
-type RecipeCreationInput = Parameters<typeof Recipe.forCreation>[0];
+import { catchSyncError } from "test/helpers/assertions";
+
 type RecipeUpdateInput = Parameters<typeof Recipe.forUpdate>[0];
 
 function makeCreationInput(overrides: Record<string, unknown> = {}) {
@@ -20,7 +20,7 @@ function makeCreationInput(overrides: Record<string, unknown> = {}) {
 
 function catchCreationError(overrides: Record<string, unknown>) {
     return catchSyncError(() => {
-        Recipe.forCreation(makeCreationInput(overrides) as RecipeCreationInput);
+        Recipe.forCreation(makeCreationInput(overrides));
     });
 }
 

@@ -1,4 +1,4 @@
-import GetUsers from "@application/use-cases/users/GetUsers";
+import GetUsers from "application/use-cases/users/GetUsers";
 
 describe("GetUsers", () => {
     it("should return all users from the repository", async () => {

@@ -1,6 +1,8 @@
-import LoginUser from "@application/use-cases/users/LoginUser";
-import { UnauthorizedError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { UnauthorizedError } from "domain/errors/AppError";
+
+import LoginUser from "application/use-cases/users/LoginUser";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const userRepository = { findByLogin: jest.fn() };
@@ -27,6 +29,7 @@ function makeCredentials(overrides = {}) {
 describe("LoginUser", () => {
     it("should throw a 401 UnauthorizedError when the user does not exist", async () => {
         const { useCase, userRepository } = setup();
+
         userRepository.findByLogin.mockResolvedValue(null);
 
         const error = await catchError(useCase.execute(makeCredentials()));
@@ -40,6 +43,7 @@ describe("LoginUser", () => {
 
     it("should throw a 401 UnauthorizedError when the password is wrong", async () => {
         const { useCase, userRepository, passwordHasher } = setup();
+
         userRepository.findByLogin.mockResolvedValue({
             id: 1,
             password: "hash",
@@ -58,6 +62,7 @@ describe("LoginUser", () => {
     it("should return a token for valid credentials", async () => {
         const { useCase, userRepository, passwordHasher, tokenService } =
             setup();
+
         userRepository.findByLogin.mockResolvedValue({
             id: 7,
             password: "hash",

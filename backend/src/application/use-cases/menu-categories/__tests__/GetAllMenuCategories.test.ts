@@ -1,4 +1,4 @@
-import GetAllMenuCategories from "@application/use-cases/menu-categories/GetAllMenuCategories";
+import GetAllMenuCategories from "application/use-cases/menu-categories/GetAllMenuCategories";
 
 describe("GetAllMenuCategories", () => {
     it("should return all menu categories from the repository", async () => {

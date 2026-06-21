@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
@@ -6,6 +6,7 @@ import { logout } from "api/authApi";
 
 import { Header } from "components/layout/Header";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -13,12 +14,6 @@ jest.mock("react-router-dom", () => ({
     useNavigate: () => mockNavigate,
 }));
 jest.mock("api/authApi");
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
-};
 
 describe("Header", () => {
     it("should show login and register links on the login page", () => {
@@ -40,5 +35,19 @@ describe("Header", () => {
 
         expect(jest.mocked(logout)).toHaveBeenCalled();
         expect(mockNavigate).toHaveBeenCalledWith("/login");
+    });
+
+    it("should show an error message when logout fails", async () => {
+        jest.mocked(logout).mockRejectedValue(new Error("network"));
+
+        renderWithRouter(<Header />, ["/main"]);
+
+        await userEvent.click(screen.getByRole("button", { name: "Logout" }));
+        await flush();
+
+        expect(
+            screen.getByText("Logout failed. Please try again."),
+        ).toBeInTheDocument();
+        expect(mockNavigate).not.toHaveBeenCalled();
     });
 });

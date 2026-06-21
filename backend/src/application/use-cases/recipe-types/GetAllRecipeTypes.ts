@@ -1,4 +1,4 @@
-import type { RecipeTypeRepository } from "@domain/repositories/RecipeTypeRepository";
+import type { RecipeTypeRepository } from "domain/repositories/RecipeTypeRepository";
 
 export default class GetAllRecipeTypes {
     constructor(

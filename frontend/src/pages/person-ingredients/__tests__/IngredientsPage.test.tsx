@@ -9,6 +9,7 @@ import {
     deleteUserIngredient,
     getUserIngredients,
     saveUserIngredient,
+    updateQuantities,
 } from "api/userIngredientsApi";
 
 import IngredientsPage from "pages/person-ingredients/IngredientsPage";
@@ -19,6 +20,7 @@ jest.mock("api/ingredientsApi");
 jest.mock("api/userIngredientsApi");
 
 const INGREDIENT_NAME = "Potato";
+const SAVE_QUANTITIES = "Save quantities";
 const USER_INGREDIENTS: UserIngredient[] = [
     {
         ingredient_id: 5,
@@ -88,6 +90,53 @@ describe("IngredientsPage", () => {
                 `Are you sure you want to delete the ingredient "${INGREDIENT_NAME}"?`,
             ),
         ).toBeInTheDocument();
+    });
+
+    it("should show the quantity editor after clicking Edit quantities", async () => {
+        setup();
+
+        await screen.findByText(INGREDIENT_NAME);
+
+        await userEvent.click(
+            screen.getByRole("button", { name: "Edit quantities" }),
+        );
+
+        expect(
+            screen.getByRole("button", { name: SAVE_QUANTITIES }),
+        ).toBeInTheDocument();
+    });
+
+    it("should hide the quantity editor after clicking Save quantities", async () => {
+        jest.mocked(updateQuantities).mockResolvedValue(undefined);
+        setup();
+
+        await screen.findByText(INGREDIENT_NAME);
+
+        await userEvent.click(
+            screen.getByRole("button", { name: "Edit quantities" }),
+        );
+        await userEvent.click(
+            screen.getByRole("button", { name: SAVE_QUANTITIES }),
+        );
+
+        expect(
+            screen.queryByRole("button", { name: SAVE_QUANTITIES }),
+        ).not.toBeInTheDocument();
+    });
+
+    it("should close the delete confirmation modal when Cancel is clicked", async () => {
+        setup();
+
+        await screen.findByText(INGREDIENT_NAME);
+
+        await userEvent.click(screen.getByRole("button", { name: "Delete" }));
+        await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+        expect(
+            screen.queryByText(
+                `Are you sure you want to delete the ingredient "${INGREDIENT_NAME}"?`,
+            ),
+        ).not.toBeInTheDocument();
     });
 
     it("should remove ingredient from list after confirming delete", async () => {

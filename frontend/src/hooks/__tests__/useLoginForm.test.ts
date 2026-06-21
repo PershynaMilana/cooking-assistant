@@ -142,6 +142,35 @@ describe("useLoginForm", () => {
             jest.useRealTimers();
         });
 
+        it("should clear the lock immediately when the deadline is already in the past", async () => {
+            const start = 1_000_000;
+            // the deadline is computed from the first now() in the catch block;
+            // every later read (re-render guard, effect) sees a clock already
+            // past it, so the effect takes the remaining <= 0 reset branch
+            const nowSpy = jest
+                .spyOn(Date, "now")
+                .mockReturnValueOnce(start)
+                .mockReturnValue(start + 60_000);
+
+            jest.mocked(login).mockRejectedValue(makeLimitError(30));
+
+            const { result } = renderHook(() => useLoginForm());
+
+            act(() => {
+                result.current.setField("login", "tester");
+            });
+            act(() => {
+                result.current.setField("password", "secret1");
+            });
+
+            await act(async () => {
+                await result.current.handleSubmit();
+            });
+
+            expect(result.current.isLocked).toBe(false);
+            nowSpy.mockRestore();
+        });
+
         it("should default to 60 s when retry-after header is absent", async () => {
             jest.mocked(login).mockRejectedValue(makeLimitError());
 

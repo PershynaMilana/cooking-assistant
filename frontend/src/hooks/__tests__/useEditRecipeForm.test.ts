@@ -9,6 +9,7 @@ import { getRecipeTypes } from "api/recipeTypesApi";
 
 import { useEditRecipeForm } from "hooks/useEditRecipeForm";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -38,12 +39,6 @@ const RECIPE: RecipeDetails = {
     servings: 4,
     person_id: 3,
     isOwner: true,
-};
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
 };
 
 describe("useEditRecipeForm", () => {
@@ -81,6 +76,37 @@ describe("useEditRecipeForm", () => {
         expect(mockNavigate).toHaveBeenCalledWith("/main");
     });
 
+    it("should not update when validation fails", async () => {
+        const { result } = renderHook(() => useEditRecipeForm("1"));
+
+        await flush();
+
+        act(() => {
+            result.current.form.setCookingTime("not a time");
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(jest.mocked(updateRecipe)).not.toHaveBeenCalled();
+    });
+
+    it("should set error when updating the recipe fails", async () => {
+        jest.mocked(updateRecipe).mockRejectedValue(new Error("Update error"));
+
+        const { result } = renderHook(() => useEditRecipeForm("1"));
+
+        await flush();
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.form.error).toBe("Update error");
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
     it("should not update when there is no id", async () => {
         const { result } = renderHook(() => useEditRecipeForm(undefined));
 
@@ -91,6 +117,19 @@ describe("useEditRecipeForm", () => {
         });
 
         expect(jest.mocked(updateRecipe)).not.toHaveBeenCalled();
+    });
+
+    it("should load an empty servings field when the recipe has no servings", async () => {
+        jest.mocked(getRecipeById).mockResolvedValue({
+            ...RECIPE,
+            servings: null,
+        });
+
+        const { result } = renderHook(() => useEditRecipeForm("1"));
+
+        await flush();
+
+        expect(result.current.form.servings).toBe("");
     });
 
     it("should set error when fetching the recipe fails", async () => {

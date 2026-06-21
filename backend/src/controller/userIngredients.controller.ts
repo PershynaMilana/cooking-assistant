@@ -1,11 +1,12 @@
 import type { RequestHandler } from "express";
 
-import type AddUserIngredients from "@application/use-cases/pantry/AddUserIngredients";
-import type DeleteUserIngredient from "@application/use-cases/pantry/DeleteUserIngredient";
-import type GetPurchaseHistory from "@application/use-cases/pantry/GetPurchaseHistory";
-import type GetUserIngredients from "@application/use-cases/pantry/GetUserIngredients";
-import type UpdateIngredientQuantities from "@application/use-cases/pantry/UpdateIngredientQuantities";
-import type UpdatePurchaseQuantity from "@application/use-cases/pantry/UpdatePurchaseQuantity";
+import type AddUserIngredients from "application/use-cases/pantry/AddUserIngredients";
+import type DeleteUserIngredient from "application/use-cases/pantry/DeleteUserIngredient";
+import type GetPurchaseHistory from "application/use-cases/pantry/GetPurchaseHistory";
+import type GetUserIngredients from "application/use-cases/pantry/GetUserIngredients";
+import type UpdateIngredientQuantities from "application/use-cases/pantry/UpdateIngredientQuantities";
+import type UpdatePurchaseQuantity from "application/use-cases/pantry/UpdatePurchaseQuantity";
+
 import { getUserId } from "./requestUser";
 
 interface UserIngredientsControllerDependencies {
@@ -45,12 +46,13 @@ export default class UserIngredientsController {
         const userId = getUserId(req);
         const ingredients =
             await this.getUserIngredientsUseCase.execute(userId);
+
         res.json(ingredients);
     };
 
     updateUserIngredients: RequestHandler = async (req, res) => {
         const userId = getUserId(req);
-        const { ingredients } = req.body;
+        const { ingredients } = req.body as Record<string, unknown>;
 
         await this.addUserIngredientsUseCase.execute(userId, ingredients);
 
@@ -59,11 +61,16 @@ export default class UserIngredientsController {
         });
     };
 
-    deleteUserIngredient: RequestHandler = async (req, res) => {
+    deleteUserIngredient: RequestHandler<{ ingredientId: string }> = async (
+        req,
+        res,
+    ) => {
         const userId = getUserId(req);
-        const ingredientId = req.params.ingredientId as string;
 
-        await this.deleteUserIngredientUseCase.execute(userId, ingredientId);
+        await this.deleteUserIngredientUseCase.execute(
+            userId,
+            req.params.ingredientId,
+        );
 
         res.json({
             message: "Ingredient and its history successfully deleted",
@@ -72,7 +79,7 @@ export default class UserIngredientsController {
 
     updateIngredientQuantities: RequestHandler = async (req, res) => {
         const userId = getUserId(req);
-        const { updatedIngredients } = req.body;
+        const { updatedIngredients } = req.body as Record<string, unknown>;
 
         await this.updateIngredientQuantitiesUseCase.execute(
             userId,
@@ -84,14 +91,16 @@ export default class UserIngredientsController {
         });
     };
 
-    updatePurchaseQuantity: RequestHandler = async (req, res) => {
-        const purchaseId = req.params.purchaseId as string;
+    updatePurchaseQuantity: RequestHandler<{ purchaseId: string }> = async (
+        req,
+        res,
+    ) => {
         const userId = getUserId(req);
-        const { quantity } = req.body;
+        const { quantity } = req.body as Record<string, unknown>;
 
         await this.updatePurchaseQuantityUseCase.execute(
             userId,
-            purchaseId,
+            req.params.purchaseId,
             quantity,
         );
 
@@ -100,12 +109,14 @@ export default class UserIngredientsController {
         });
     };
 
-    getPurchaseHistory: RequestHandler = async (req, res) => {
+    getPurchaseHistory: RequestHandler<{ ingredientId: string }> = async (
+        req,
+        res,
+    ) => {
         const userId = getUserId(req);
-        const ingredientId = req.params.ingredientId as string;
         const history = await this.getPurchaseHistoryUseCase.execute(
             userId,
-            ingredientId,
+            req.params.ingredientId,
         );
 
         res.json(history);

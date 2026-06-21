@@ -1,12 +1,13 @@
-import { z } from "zod";
+import type { z } from "zod";
 
-import { ValidationError } from "@domain/errors/AppError";
+import { ValidationError } from "domain/errors/AppError";
 
-export function validate<TSchema extends z.ZodTypeAny>(
-    schema: TSchema,
+export function validate<Output, Input>(
+    schema: z.ZodType<Output, z.ZodTypeDef, Input>,
     data: unknown,
-): z.infer<TSchema> {
+): Output {
     const result = schema.safeParse(data);
+
     if (!result.success) {
         const message = result.error.issues
             .map((issue) =>

@@ -79,6 +79,19 @@ describe("useRecipeTypeDescriptions", () => {
         expect(result.current.typesHeader).toBe("Soup, Dessert");
     });
 
+    it("should keep descriptions empty when fetching fails", async () => {
+        jest.mocked(getRecipeTypes).mockRejectedValue(new Error("boom"));
+
+        const { result } = renderHook(() => useRecipeTypeDescriptions([1]));
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(result.current.descriptions).toHaveLength(0);
+        expect(result.current.typesHeader).toBe("");
+    });
+
     it("should clear descriptions when selectedTypes becomes empty", async () => {
         jest.mocked(getRecipeTypes).mockResolvedValue([ALL_TYPES[0]]);
 

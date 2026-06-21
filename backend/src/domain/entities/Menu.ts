@@ -1,4 +1,4 @@
-import { ValidationError } from "@domain/errors/AppError";
+import { ValidationError } from "domain/errors/AppError";
 
 export interface MenuInput {
     menuTitle?: string;

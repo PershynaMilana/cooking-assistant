@@ -1,6 +1,8 @@
-import SearchRecipes from "@application/use-cases/recipes/SearchRecipes";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import SearchRecipes from "application/use-cases/recipes/SearchRecipes";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const recipeRepository = { search: jest.fn() };
@@ -19,6 +21,7 @@ describe("SearchRecipes", () => {
             sort_order: "asc",
         };
         const recipes = [{ id: 1, title: "Tomato soup" }];
+
         recipeRepository.search.mockResolvedValue(recipes);
 
         const result = await useCase.execute(filters);

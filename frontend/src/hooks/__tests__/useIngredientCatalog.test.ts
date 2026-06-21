@@ -13,6 +13,7 @@ import {
 import { useIngredientCatalog } from "hooks/useIngredientCatalog";
 
 import { MOCK_ERROR_NETWORK } from "test/constants";
+import { flushMicrotasks as flushEffects } from "test/flush";
 
 jest.mock("api/ingredientsApi");
 jest.mock("api/userIngredientsApi");
@@ -21,12 +22,6 @@ const setup = () => {
     jest.mocked(getIngredients).mockResolvedValue([]);
     jest.mocked(getUserIngredients).mockResolvedValue([]);
     jest.mocked(updateQuantities).mockResolvedValue(undefined);
-};
-
-const flushEffects = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
 };
 
 describe("useIngredientCatalog", () => {
@@ -135,6 +130,77 @@ describe("useIngredientCatalog", () => {
             });
 
             expect(result.current.selectedIngredientToDelete).toBe(ingredient);
+        });
+
+        it("should do nothing when no ingredient is selected to delete", async () => {
+            setup();
+            jest.mocked(deleteUserIngredient).mockResolvedValue(undefined);
+
+            const { result } = renderHook(() => useIngredientCatalog());
+
+            await flushEffects();
+
+            await act(async () => {
+                await result.current.handleConfirmDelete();
+            });
+
+            expect(deleteUserIngredient).not.toHaveBeenCalled();
+            expect(result.current.selectedIngredientToDelete).toBeNull();
+        });
+    });
+
+    describe("handleToggleQuantityEdit", () => {
+        it("should set isEditing to false when starting quantity edit", async () => {
+            setup();
+
+            const { result } = renderHook(() => useIngredientCatalog());
+
+            await flushEffects();
+
+            await act(async () => {
+                await result.current.handleSaveOrToggleEdit();
+            });
+
+            expect(result.current.isEditing).toBe(true);
+
+            act(() => {
+                result.current.handleToggleQuantityEdit();
+            });
+
+            expect(result.current.isEditing).toBe(false);
+            expect(result.current.isEditingQuantity).toBe(true);
+        });
+    });
+
+    describe("closeHistoryModal", () => {
+        const ingredient: PantryIngredient = {
+            id: 1,
+            unit_name: "kg",
+            quantity_person_ingradient: 2,
+        };
+
+        it("should clear the selected history ingredient and refetch", async () => {
+            setup();
+
+            const { result } = renderHook(() => useIngredientCatalog());
+
+            await flushEffects();
+
+            act(() => {
+                result.current.setSelectedHistoryIngredient(ingredient);
+            });
+
+            expect(result.current.selectedHistoryIngredient).toBe(ingredient);
+
+            jest.mocked(getUserIngredients).mockClear();
+
+            await act(async () => {
+                result.current.closeHistoryModal();
+                await Promise.resolve();
+            });
+
+            expect(result.current.selectedHistoryIngredient).toBeNull();
+            expect(getUserIngredients).toHaveBeenCalled();
         });
     });
 });

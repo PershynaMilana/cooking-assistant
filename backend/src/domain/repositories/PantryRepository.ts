@@ -12,7 +12,7 @@ export interface PantryRepository {
     deleteIngredient(
         userId: string | number,
         ingredientId: string | number,
-    ): Promise<unknown | null>;
+    ): Promise<unknown>;
     updateQuantities(
         userId: string | number,
         items: PantryIngredientInput[],
@@ -21,7 +21,7 @@ export interface PantryRepository {
         userId: string | number,
         purchaseId: string | number,
         quantity: number,
-    ): Promise<unknown | null>;
+    ): Promise<unknown>;
     findPurchaseHistory(
         userId: string | number,
         ingredientId: string | number,

@@ -84,6 +84,39 @@ describe("usePurchaseHistory", () => {
         });
     });
 
+    it("should set error when fetching history fails", async () => {
+        jest.mocked(getPurchaseHistory).mockRejectedValue(
+            new Error(MOCK_ERROR_SERVER),
+        );
+
+        const { result } = renderHook(() => usePurchaseHistory(INGREDIENT_ID));
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        expect(result.current.error).toBe(MOCK_ERROR_SERVER);
+    });
+
+    it("should update the quantity locally on handleQuantityChange", async () => {
+        jest.mocked(getPurchaseHistory).mockResolvedValue(HISTORY);
+
+        const { result } = renderHook(() => usePurchaseHistory(INGREDIENT_ID));
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        act(() => {
+            result.current.handleQuantityChange(1, 99);
+        });
+
+        expect(result.current.purchaseHistory).toEqual([
+            { ...HISTORY[0], quantity: 99 },
+            HISTORY[1],
+        ]);
+    });
+
     it("should set error when saveChange API fails", async () => {
         jest.mocked(getPurchaseHistory).mockResolvedValue(HISTORY);
         jest.mocked(updatePurchase).mockRejectedValue(

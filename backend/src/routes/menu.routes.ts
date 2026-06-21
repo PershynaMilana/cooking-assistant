@@ -1,7 +1,7 @@
 import express, { type Router } from "express";
 
-import type MenuController from "@controller/menu.controller";
-import authenticateToken from "@middleware/jwtMiddleware";
+import type MenuController from "controller/menu.controller";
+import authenticateToken from "middleware/jwtMiddleware";
 
 export default function createMenuRouter(
     menuController: MenuController,

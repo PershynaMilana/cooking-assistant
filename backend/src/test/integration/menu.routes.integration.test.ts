@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { buildTestApp, authCookie } from "../helpers/testApp";
+import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 function makeMenuBody() {
     return {
@@ -23,6 +23,7 @@ describe("menu routes", () => {
     it("should return menus", async () => {
         const { app, deps } = buildTestApp();
         const menus = [{ id: 9, title: "Weekly menu" }];
+
         deps.menuRepository.findAll.mockResolvedValue(menus);
 
         const res = await request(app)
@@ -35,6 +36,7 @@ describe("menu routes", () => {
 
     it("should create a menu, including public recipes of other users", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.findExistingIds.mockResolvedValue([3, 5]);
         deps.menuRepository.create.mockResolvedValue(9);
 
@@ -59,6 +61,7 @@ describe("menu routes", () => {
 
     it("should return 400 when creating a menu with a recipe that does not exist", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.findExistingIds.mockResolvedValue([3]);
 
         const res = await request(app)
@@ -76,6 +79,7 @@ describe("menu routes", () => {
     it("should return menu details scoped to the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         const menu = { menu: { id: 9, isOwner: true }, recipes: [] };
+
         deps.menuRepository.findByIdWithRecipes.mockResolvedValue(menu);
 
         const res = await request(app)
@@ -84,7 +88,9 @@ describe("menu routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual(menu);
-        expect(res.body.menu.isOwner).toBe(true);
+        expect((res.body as { menu: { isOwner: boolean } }).menu.isOwner).toBe(
+            true,
+        );
         expect(deps.menuRepository.findByIdWithRecipes).toHaveBeenCalledWith(
             9,
             7,
@@ -94,6 +100,7 @@ describe("menu routes", () => {
     it("should return menu details with isOwner:false when reading a menu of another user", async () => {
         const { app, deps } = buildTestApp();
         const menu = { menu: { id: 9, isOwner: false }, recipes: [] };
+
         deps.menuRepository.findByIdWithRecipes.mockResolvedValue(menu);
 
         const res = await request(app)
@@ -101,7 +108,9 @@ describe("menu routes", () => {
             .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
-        expect(res.body.menu.isOwner).toBe(false);
+        expect((res.body as { menu: { isOwner: boolean } }).menu.isOwner).toBe(
+            false,
+        );
         expect(deps.menuRepository.findByIdWithRecipes).toHaveBeenCalledWith(
             9,
             7,
@@ -110,6 +119,7 @@ describe("menu routes", () => {
 
     it("should update a menu owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.findExistingIds.mockResolvedValue([3, 5]);
         deps.menuRepository.update.mockResolvedValue(true);
 
@@ -126,6 +136,7 @@ describe("menu routes", () => {
 
     it("should return 404 when updating a menu of another user", async () => {
         const { app, deps } = buildTestApp();
+
         deps.recipeRepository.findExistingIds.mockResolvedValue([3, 5]);
         deps.menuRepository.update.mockResolvedValue(false);
 
@@ -140,6 +151,7 @@ describe("menu routes", () => {
 
     it("should delete a menu owned by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
+
         deps.menuRepository.deleteById.mockResolvedValue(true);
 
         const res = await request(app)
@@ -154,6 +166,7 @@ describe("menu routes", () => {
     it("should search person menus by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
         const menus = [{ id: 9, title: "Weekly menu" }];
+
         deps.menuRepository.searchByPerson.mockResolvedValue(menus);
 
         const res = await request(app)
@@ -169,6 +182,7 @@ describe("menu routes", () => {
 
     it("should map a missing menu to an error response", async () => {
         const { app, deps } = buildTestApp();
+
         deps.menuRepository.findByIdWithRecipes.mockResolvedValue(null);
 
         const res = await request(app)

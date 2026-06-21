@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 
@@ -7,6 +7,8 @@ import type { Menu } from "types/menu";
 import { getMenuCategories } from "api/menuCategoriesApi";
 
 import { useMenuList } from "hooks/useMenuList";
+
+import { flushMicrotasks as flush } from "test/flush";
 
 jest.mock("api/menuCategoriesApi");
 
@@ -17,12 +19,6 @@ const MENUS: Menu[] = [
 const wrapper = ({ children }: { children: ReactNode }) => (
     <MemoryRouter>{children}</MemoryRouter>
 );
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
-};
 
 describe("useMenuList", () => {
     it("should load menus from the fetcher", async () => {

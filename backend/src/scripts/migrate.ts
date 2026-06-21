@@ -1,9 +1,8 @@
+import { runner } from "node-pg-migrate";
 import path from "path";
 
-import { runner } from "node-pg-migrate";
-
-import { config } from "@config/env";
-import { logger } from "@config/logger";
+import { config } from "config/env";
+import { logger } from "config/logger";
 
 type MigrationDirection = "up" | "down";
 
@@ -24,6 +23,7 @@ async function main(): Promise<void> {
     });
 
     const names = migrations.map((migration) => migration.name);
+
     logger.info(
         { direction, fake, migrations: names },
         names.length
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     );
 }
 
-main().catch((error) => {
-    logger.error(error);
+main().catch((error: unknown) => {
+    logger.error({ err: error }, "Migration failed");
     process.exitCode = 1;
 });

@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { AppError, NotFoundError } from "@domain/errors/AppError";
-import errorHandler from "../errorHandler";
+import { AppError, NotFoundError } from "domain/errors/AppError";
+
+import errorHandler from "middleware/errorHandler";
 
 function makeResponse(headersSent = false) {
     return {

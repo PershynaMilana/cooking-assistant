@@ -7,6 +7,7 @@ import { getRecipes } from "api/recipesApi";
 
 import { useCreateMenuForm } from "hooks/useCreateMenuForm";
 
+import { flushMicrotasks as flush } from "test/flush";
 import { mockNavigate } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -16,12 +17,6 @@ jest.mock("react-router-dom", () => ({
 jest.mock("api/menuCategoriesApi");
 jest.mock("api/menusApi");
 jest.mock("api/recipesApi");
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
-};
 
 const fillValid = (form: ReturnType<typeof useCreateMenuForm>["form"]) => {
     form.setInitialValues({
@@ -71,6 +66,39 @@ describe("useCreateMenuForm", () => {
         });
 
         expect(jest.mocked(createMenu)).not.toHaveBeenCalled();
+    });
+
+    it("should set a fetch error when loading data fails", async () => {
+        jest.mocked(getMenuCategories).mockRejectedValue(new Error("boom"));
+
+        const { result } = renderHook(() => useCreateMenuForm());
+
+        await flush();
+
+        expect(result.current.fetchError).toBe(
+            "Failed to load categories or recipes.",
+        );
+    });
+
+    it("should set a fetch error when creating the menu fails", async () => {
+        jest.mocked(createMenu).mockRejectedValue(new Error("boom"));
+
+        const { result } = renderHook(() => useCreateMenuForm());
+
+        await flush();
+
+        act(() => {
+            fillValid(result.current.form);
+        });
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.fetchError).toBe(
+            "Failed to create menu. Please try again.",
+        );
+        expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it("should create the menu and navigate to the menu list when valid", async () => {

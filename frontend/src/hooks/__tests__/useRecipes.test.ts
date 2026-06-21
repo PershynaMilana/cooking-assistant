@@ -53,6 +53,50 @@ describe("useRecipes", () => {
         expect(result.current.recipes[1].id).toBe(2);
     });
 
+    it("should break ascending ties by title", async () => {
+        const sameTimeFirst: RecipeListItem = {
+            ...RECIPE_B,
+            title: "Zucchini",
+        };
+        const sameTimeSecond: RecipeListItem = {
+            ...RECIPE_A,
+            cooking_time: 30,
+        };
+        const fetcher = jest
+            .fn()
+            .mockResolvedValue([sameTimeFirst, sameTimeSecond]);
+        const { result } = renderHook(() => useRecipes(fetcher));
+
+        await act(async () => {
+            await result.current.fetchRecipes(BASE_PARAMS, "asc");
+        });
+
+        expect(result.current.recipes[0].title).toBe("Borscht");
+        expect(result.current.recipes[1].title).toBe("Zucchini");
+    });
+
+    it("should break descending ties by title", async () => {
+        const sameTimeFirst: RecipeListItem = {
+            ...RECIPE_B,
+            title: "Zucchini",
+        };
+        const sameTimeSecond: RecipeListItem = {
+            ...RECIPE_A,
+            cooking_time: 30,
+        };
+        const fetcher = jest
+            .fn()
+            .mockResolvedValue([sameTimeFirst, sameTimeSecond]);
+        const { result } = renderHook(() => useRecipes(fetcher));
+
+        await act(async () => {
+            await result.current.fetchRecipes(BASE_PARAMS, "desc");
+        });
+
+        expect(result.current.recipes[0].title).toBe("Borscht");
+        expect(result.current.recipes[1].title).toBe("Zucchini");
+    });
+
     it("should set noRecipes when api returns empty array", async () => {
         const fetcher = jest.fn().mockResolvedValue([]);
         const { result } = renderHook(() => useRecipes(fetcher));

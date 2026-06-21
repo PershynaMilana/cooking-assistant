@@ -1,6 +1,8 @@
-import GetMenuById from "@application/use-cases/menus/GetMenuById";
-import { NotFoundError, ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { NotFoundError, ValidationError } from "domain/errors/AppError";
+
+import GetMenuById from "application/use-cases/menus/GetMenuById";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const menuRepository = { findByIdWithRecipes: jest.fn() };
@@ -21,6 +23,7 @@ describe("GetMenuById", () => {
 
     it("should throw a 404 NotFoundError when the menu does not belong to the user", async () => {
         const { useCase, menuRepository } = setup();
+
         menuRepository.findByIdWithRecipes.mockResolvedValue(null);
 
         const error = await catchError(useCase.execute(9, 7));
@@ -31,6 +34,7 @@ describe("GetMenuById", () => {
     it("should return the menu scoped to the requesting user", async () => {
         const { useCase, menuRepository } = setup();
         const menu = { id: 9, menuTitle: "Weekly menu" };
+
         menuRepository.findByIdWithRecipes.mockResolvedValue(menu);
 
         const result = await useCase.execute(9, 7);

@@ -1,6 +1,8 @@
-import AddUserIngredients from "@application/use-cases/pantry/AddUserIngredients";
-import { ValidationError } from "@domain/errors/AppError";
-import { catchError } from "@test/helpers/assertions";
+import { ValidationError } from "domain/errors/AppError";
+
+import AddUserIngredients from "application/use-cases/pantry/AddUserIngredients";
+
+import { catchError } from "test/helpers/assertions";
 
 function setup() {
     const pantryRepository = { addIngredients: jest.fn() };
@@ -77,12 +79,11 @@ describe("AddUserIngredients", () => {
         const { useCase, pantryRepository } = setup();
         const ingredients = [{ id: 3, quantity_person_ingradient: 2 }];
 
-        const result = await useCase.execute(7, ingredients);
+        await useCase.execute(7, ingredients);
 
         expect(pantryRepository.addIngredients).toHaveBeenCalledWith(
             7,
             ingredients,
         );
-        expect(result).toBeUndefined();
     });
 });

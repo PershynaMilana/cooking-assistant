@@ -1,7 +1,8 @@
-import { NotFoundError } from "@domain/errors/AppError";
-import { idSchema } from "@application/validation/common.schemas";
-import { validate } from "@application/validation/validate";
-import type { RecipeRepository } from "@domain/repositories/RecipeRepository";
+import { NotFoundError } from "domain/errors/AppError";
+import type { RecipeRepository } from "domain/repositories/RecipeRepository";
+
+import { idSchema } from "application/validation/common.schemas";
+import { validate } from "application/validation/validate";
 
 export default class GetRecipeById {
     constructor(
@@ -20,9 +21,11 @@ export default class GetRecipeById {
             recipeId,
             currentUserId,
         );
+
         if (!recipe) {
             throw new NotFoundError("Recipe not found");
         }
+
         return recipe;
     }
 }

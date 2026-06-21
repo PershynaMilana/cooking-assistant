@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 
@@ -7,6 +7,8 @@ import type { RecipeListItem } from "types/recipe";
 import { getRecipeTypes } from "api/recipeTypesApi";
 
 import { useRecipeList } from "hooks/useRecipeList";
+
+import { flushMicrotasks as flush } from "test/flush";
 
 jest.mock("api/recipeTypesApi");
 
@@ -23,12 +25,6 @@ const RECIPES: RecipeListItem[] = [
 const wrapper = ({ children }: { children: ReactNode }) => (
     <MemoryRouter>{children}</MemoryRouter>
 );
-
-const flush = async () => {
-    await act(async () => {
-        await Promise.resolve();
-    });
-};
 
 describe("useRecipeList", () => {
     it("should load recipes from the fetcher", async () => {

@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { createLimiter } from "../rateLimit";
+import { createLimiter } from "middleware/rateLimit";
 
 describe("createLimiter", () => {
     it("should call next in test mode", () => {

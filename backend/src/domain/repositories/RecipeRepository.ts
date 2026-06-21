@@ -1,4 +1,4 @@
-import type { Recipe } from "@domain/entities/Recipe";
+import type { Recipe } from "domain/entities/Recipe";
 
 export interface RecipeRepository {
     create(recipe: Recipe): Promise<unknown>;
@@ -6,13 +6,13 @@ export interface RecipeRepository {
     findByIdWithIngredients(
         id: string | number,
         currentUserId: number,
-    ): Promise<unknown | null>;
+    ): Promise<unknown>;
     update(
         id: string | number,
         personId: number,
         data: Recipe,
-    ): Promise<unknown | null>;
-    deleteById(id: string | number, personId: number): Promise<unknown | null>;
+    ): Promise<unknown>;
+    deleteById(id: string | number, personId: number): Promise<unknown>;
     search(filters: unknown): Promise<unknown[]>;
     searchByPerson(personId: number, filters: unknown): Promise<unknown[]>;
     findExistingIds(ids: number[]): Promise<number[]>;
