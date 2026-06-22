@@ -115,7 +115,7 @@ jobs:
             [ "$STATUS" = "Failed"    ] && { echo "Migration job failed"; exit 1; }
             sleep 5
           done
-          [ "$STATUS" != "Succeeded" ] && { echo "Migration job timed out after 5 min"; exit 1; }
+          [ "$STATUS" = "Succeeded" ] || { echo "Migration job timed out after 5 min"; exit 1; }
 
       - name: Update backend container app
         run: |

@@ -140,6 +140,11 @@ PR title = the commit title (`<version>: <description>`). One bullet per change,
 
 CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR and on push to `main`: a root `format` (Prettier check), then per side `lint` (ESLint), `typecheck`, `sonarjs` (SonarJS lint), and `test:coverage` (Jest, 80% gate); the frontend additionally runs `build` (`tsc -b && vite build`) and `stylelint`. A `ci-success` job aggregates them all and is the single required check - all must be green to merge. The same suite runs locally before a commit via the Husky `pre-commit` hook (lint-staged + both sides' typecheck/lint/sonarjs/tests, plus frontend stylelint), and `pre-push` both blocks pushing straight to `main` and runs the frontend build. `npm run verify` reproduces the CI gates locally in one command. Hosted SonarCloud is not wired up (no `SONAR_TOKEN`); the local `sonarjs` lint covers the static-analysis role for now.
 
+**Escape hatches (ops-only commits - never use when touching `backend/src` or `frontend/src`):**
+
+- `[skip-checks]` in the commit message or PR title - skips all pre-commit checks locally and all 11 CI jobs; `ci-success` still passes (`skipped != failed`), so the PR can merge. Use only for pure ops-only changes: `.github/workflows/`, `.husky/`, docs, changelog.
+- `SKIP_HOOKS=1 git push origin <branch>` - skips the pre-push frontend build check. The direct-push-to-main block in `.husky/pre-push` is a policy guard and is NOT bypassed by `SKIP_HOOKS`.
+
 ## Required configuration
 
 1. PostgreSQL connection in [backend/src/config/env.ts](backend/src/config/env.ts) reads the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME` environment variables, falling back to the historical hardcoded defaults (`postgres` / `12345678` / `localhost` / `5432` / `cooking_helper`) when unset. Env values are parsed with zod on startup, so invalid ports or logger levels fail fast with a clear configuration error. `JWT_SECRET_KEY` stays optional at startup (but must be at least 32 characters when set) and is still checked lazily by JWT code. [backend/src/db.ts](backend/src/db.ts) consumes that typed config.

@@ -22,6 +22,13 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 2.7 - 2026-06-22
+
+### Project
+- Fixed: Deploy pipeline no longer reports a failed step when the migration job actually succeeded (bash set -e false-positive on the timeout guard).
+- Added: `[skip-checks]` in a commit message or PR title now skips all CI jobs and local pre-commit hooks (for pure ops-only commits such as workflow files and docs).
+- Fixed: Backend SonarJS lint no longer reports errors on compiled files in `dist/`.
+
 ## 2.6 - 2026-06-21
 
 ### Backend

@@ -33,14 +33,15 @@ In production the backend is compiled by `tsup` into `dist/` and run with plain 
 TypeScript toolchain). The [Dockerfile](Dockerfile) handles this in two stages:
 
 1. **builder** - installs all deps (including devDeps for tsup), runs `npm run build`, produces `dist/index.js`,
-   `dist/scripts/migrate.js`, `dist/scripts/seed.js`.
+   `dist/scripts/migrate.js`, `dist/scripts/seed.js`, `dist/scripts/deploy-db.js`.
 2. **runner** - installs prod-only deps (`npm ci --omit=dev`), copies `dist/` and `migrations/`, runs
    `node dist/index.js`.
 
-Migrations and seed run before the new image goes live, via an Azure Container Apps Job:
+Migrations and seed run before the new image goes live, via an Azure Container Apps Job that runs:
 ```bash
-node dist/scripts/migrate.js up && node dist/scripts/seed.js
+node dist/scripts/deploy-db.js
 ```
+`deploy-db.js` is a single entry point that runs migrations then seed in one Node process (no shell needed).
 
 All secrets (`JWT_SECRET_KEY`, `DB_*`, `CORS_ORIGIN`, etc.) are set as Container App environment variables -
 never baked into the image. See [Required configuration](#configuration) for the full list.
@@ -196,7 +197,7 @@ backend/
 ├── .env                  JWT_SECRET_KEY + DB_* + PORT (you create - gitignored)
 │
 └── src/
-    ├── scripts/             migrate.ts (node-pg-migrate runner) and seed.ts (idempotent seed)
+    ├── scripts/             migrate.ts, seed.ts (thin CLI entry points); runMigrations.ts, runSeed.ts (shared logic); deploy-db.ts (migrate + seed in one process, used by the Container Apps Job)
     ├── app.ts                createApp(controllers); mounts middleware, health, and routers without listening
     ├── index.ts              runtime entry; listens on 3000 and shuts down server + pg pool cleanly
     ├── composition-root.ts   dependency injection: buildControllers(deps), plus real pg wiring
@@ -380,9 +381,9 @@ The "ingredients you are missing for a menu" query joins `menu_recipe` -> `recip
 - Controllers, use cases, and repositories are classes wired via the composition root (constructor DI).
   Repositories implement an interface from `src/domain/repositories/` and hold all SQL - match the
   pattern.
-- Cross-folder backend imports use path aliases from [tsconfig.json](tsconfig.json): `@domain/*`,
-  `@application/*`, `@infrastructure/*`, `@controller/*`, `@routes/*`, `@middleware/*`, `@config/*`,
-  and `@test/*`. Keep true same-folder imports relative with `./`.
+- Cross-folder backend imports use bare path aliases from [tsconfig.json](tsconfig.json) (`baseUrl: "./src"`): `domain/*`,
+  `application/*`, `infrastructure/*`, `controller/*`, `routes/*`, `middleware/*`, `config/*`,
+  and `test/*`. Keep same-folder imports relative with `./`; never use `../` across folders.
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed.
 - Raw SQL with `$1`, `$2`, ... parameters via `db.query(text, values)` - never string-concatenate
   user input.
