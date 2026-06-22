@@ -1,6 +1,6 @@
-# escape hatch: SKIP_HOOKS=1 git commit ... to skip linters/typecheck/tests
-if [ "$SKIP_HOOKS" = "1" ]; then
-  echo "SKIP_HOOKS=1 set - skipping pre-commit checks"
+# escape hatch: [skip-checks] in commit message skips pre-commit checks
+if grep -q '\[skip-checks\]' "$(git rev-parse --git-dir)/COMMIT_EDITMSG" 2>/dev/null; then
+  echo "[skip-checks] in commit message - skipping pre-commit checks"
   exit 0
 fi
 
