@@ -21,6 +21,9 @@ changelogs and the tags and now track everything here against one shared version
 
 ## Unreleased
 
+### Frontend
+- Added: Groundwork for centralized app state - a Redux Toolkit store now backs the app, starting with shared sign-in session state.
+
 
 ## 2.7 - 2026-06-22
 

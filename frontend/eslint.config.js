@@ -104,12 +104,14 @@ export default tseslint.config(
                         ["^\\u0000"],
                         // external packages - starts with letter/@, but not our bare aliases
                         [
-                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|test|types|utils)/)@?\\w",
+                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|store|test|types|utils)/)@?\\w",
                         ],
                         // config / constants / types layers
                         ["^(?:config|constants|types)/"],
                         // api layer
                         ["^api/"],
+                        // store (state) layer
+                        ["^store/"],
                         // hooks layer
                         ["^hooks/"],
                         // components / assets / i18n layers
@@ -241,6 +243,7 @@ export default tseslint.config(
                 { type: "i18n", pattern: "src/i18n/**" },
                 { type: "utils", pattern: "src/utils/*" },
                 { type: "api", pattern: "src/api/**" },
+                { type: "store", pattern: "src/store/**" },
                 { type: "hooks", pattern: "src/hooks/*" },
                 { type: "components", pattern: "src/components/**" },
                 { type: "pages", pattern: "src/pages/**" },
@@ -266,6 +269,7 @@ export default tseslint.config(
                                 { type: "pages" },
                                 { type: "hooks" },
                                 { type: "utils" },
+                                { type: "store" },
                             ],
                             disallow: {
                                 to: [{ origin: "external" }],

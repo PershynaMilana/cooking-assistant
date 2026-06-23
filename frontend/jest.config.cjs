@@ -22,6 +22,7 @@ module.exports = {
         "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
         "^i18n/(.*)$": "<rootDir>/src/i18n/$1",
         "^pages/(.*)$": "<rootDir>/src/pages/$1",
+        "^store/(.*)$": "<rootDir>/src/store/$1",
         "^test/(.*)$": "<rootDir>/src/test/$1",
         "^types/(.*)$": "<rootDir>/src/types/$1",
         "^utils/(.*)$": "<rootDir>/src/utils/$1",
