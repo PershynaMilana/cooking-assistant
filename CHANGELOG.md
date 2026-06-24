@@ -22,7 +22,8 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 ### Frontend
-- Added: Groundwork for centralized app state - a Redux Toolkit store now backs the app, starting with shared sign-in session state.
+- Added: Groundwork for centralized app state - a Redux Toolkit store now backs the app, starting with shared sign-in session state (checking / authed / unauthed / error - error is reserved for network failures, unauthed only for explicit logout).
+- Added: Session selectors (`selectSessionStatus`, `selectIsAuthed`, `selectIsChecking`, `selectHasSessionError`) as a separate co-located file - the established pattern for all future slices.
 
 ### Project
 - Added: A `git skip-checks <command>` helper (repo-local alias, auto-installed on `npm install`) runs a single git command with checks skipped, in any shell.

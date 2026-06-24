@@ -30,7 +30,7 @@ const sessionSlice = createSlice({
                 state.status = "authed";
             })
             .addCase(checkSession.rejected, (state) => {
-                state.status = "unauthed";
+                state.status = "error";
             });
     },
 });
