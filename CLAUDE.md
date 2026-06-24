@@ -142,8 +142,9 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR and o
 
 **Escape hatches (ops-only commits - never use when touching `backend/src` or `frontend/src`):**
 
-- `[skip-checks]` in the commit message or PR title - skips all pre-commit checks locally and all 11 CI jobs; `ci-success` still passes (`skipped != failed`), so the PR can merge. Use only for pure ops-only changes: `.github/workflows/`, `.husky/`, docs, changelog.
-- `SKIP_HOOKS=1 git push origin <branch>` - skips the pre-push frontend build check. The direct-push-to-main block in `.husky/pre-push` is a policy guard and is NOT bypassed by `SKIP_HOOKS`.
+- `SKIP_CHECKS=1 git commit -m "<msg>"` - skips all local pre-commit checks AND, via the `prepare-commit-msg` hook, auto-stamps `[skip-checks]` onto the commit subject so all 11 CI jobs skip too; `ci-success` still passes (`skipped != failed`), so the PR can merge. Use only for pure ops-only changes: `.github/workflows/`, `.husky/`, docs, changelog. (Git Bash: `SKIP_CHECKS=1 git commit ...`; PowerShell: `$env:SKIP_CHECKS='1'; git commit ...; $env:SKIP_CHECKS=$null`.)
+- `SKIP_CHECKS=1 git push origin <branch>` - also skips the pre-push frontend build check (`SKIP_HOOKS=1` stays as a backward-compat alias). The direct-push-to-main block in `.husky/pre-push` is a policy guard and is NOT bypassed by either flag.
+- CI reads the marker from the commit message on `push` and from the PR title on `pull_request` (PR events carry no `head_commit`). Since the project convention is PR title = commit subject, the stamped subject carries `[skip-checks]` into the title; editing a PR title after open does not re-trigger CI, so set it at PR creation.
 
 ## Required configuration
 

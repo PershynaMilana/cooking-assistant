@@ -13,8 +13,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# put [skip-checks] in the commit message (push) or PR title to skip the heavy
-# jobs; ci-success still runs and passes (skipped != failed), so a PR can merge
+# skip the heavy jobs with [skip-checks]: on push it is read from the commit
+# message, on a PR from the PR title (pull_request events carry no head_commit).
+# ci-success still runs and passes (skipped != failed), so a PR can merge.
+# locally, SKIP_CHECKS=1 stamps the marker onto the commit subject (see .husky).
 jobs:
   format:
     runs-on: ubuntu-latest
