@@ -28,6 +28,7 @@ changelogs and the tags and now track everything here against one shared version
 - Added: A `git skip-checks <command>` helper (repo-local alias, auto-installed on `npm install`) runs a single git command with checks skipped, in any shell.
 - Changed: A single `SKIP_CHECKS=1` flag now skips both the local git hooks and CI for one commit or push - on commit it auto-stamps `[skip-checks]` into the message so CI skips its jobs too (`SKIP_HOOKS=1` kept as a backward-compatible alias; the direct-push-to-main block still applies).
 - Fixed: The pre-commit hook no longer reads the previous commit's message, so a `[skip-checks]` from an earlier commit can no longer wrongly skip checks on the next, unrelated commit.
+- Fixed: `[skip-checks]` now skips CI on pull requests too (a gate job reads the commit message directly), so it no longer has to be repeated in the PR title.
 
 
 ## 2.7 - 2026-06-22
