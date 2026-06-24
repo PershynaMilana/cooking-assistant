@@ -1,4 +1,4 @@
-# direct-push-to-main block is a policy guard, enforced even with SKIP_HOOKS
+# direct-push-to-main block is a policy guard, enforced even with skip flags
 while read local_ref local_sha remote_ref remote_sha; do
   if [ "$remote_ref" = "refs/heads/main" ]; then
     echo "Error: direct push to main is not allowed. Use a release/X.Y branch and open a PR."
@@ -6,9 +6,9 @@ while read local_ref local_sha remote_ref remote_sha; do
   fi
 done
 
-# escape hatch: SKIP_HOOKS=1 git push ... to skip the frontend build check
-if [ "$SKIP_HOOKS" = "1" ]; then
-  echo "SKIP_HOOKS=1 set - skipping frontend build"
+# escape hatch: SKIP_CHECKS=1 (or legacy SKIP_HOOKS=1) skips the frontend build
+if [ "$SKIP_CHECKS" = "1" ] || [ "$SKIP_HOOKS" = "1" ]; then
+  echo "skip flag set - skipping frontend build"
   exit 0
 fi
 

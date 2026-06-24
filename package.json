@@ -1,9 +1,9 @@
 {
   "name": "cooking-assistant",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "private": true,
   "scripts": {
-    "prepare": "husky",
+    "prepare": "husky && node scripts/setup-skip-alias.mjs",
     "postinstall": "npm --prefix backend install && npm --prefix frontend install",
     "start": "concurrently -n backend,frontend -c blue,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "dev": "concurrently -n backend,frontend -c blue,magenta \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",

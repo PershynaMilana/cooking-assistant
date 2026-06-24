@@ -13,12 +13,38 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# put [skip-checks] in the commit message (push) or PR title to skip the heavy
-# jobs; ci-success still runs and passes (skipped != failed), so a PR can merge
+# the gate job reads the head commit message (with the PR title as a fallback)
+# and decides whether to skip the heavy jobs - working the same on push and PR.
+# pull_request events carry no head_commit, so the gate checks out the PR head
+# sha and reads its message directly, making [skip-checks] in the commit message
+# authoritative everywhere (no need to put it in the PR title). ci-success still
+# runs and passes (skipped != failed), so a PR can merge. locally, SKIP_CHECKS=1
+# stamps the marker onto the commit subject (see .husky/prepare-commit-msg).
 jobs:
-  format:
+  gate:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
+    outputs:
+      skip: ${{ steps.decide.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - id: decide
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          MESSAGE="$(git log -1 --pretty=%B)"
+          if printf '%s %s' "$MESSAGE" "$PR_TITLE" | grep -qF '[skip-checks]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  format:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -29,8 +55,9 @@ jobs:
         run: npm run format:check
 
   lint-backend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -41,8 +68,9 @@ jobs:
         run: npm --prefix backend run lint
 
   typecheck-backend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -53,8 +81,9 @@ jobs:
         run: npm --prefix backend run typecheck
 
   sonarjs-backend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -65,8 +94,9 @@ jobs:
         run: npm --prefix backend run lint:sonarjs
 
   test-backend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -77,8 +107,9 @@ jobs:
         run: npm --prefix backend run test:coverage
 
   lint-frontend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -89,8 +120,9 @@ jobs:
         run: npm --prefix frontend run lint
 
   typecheck-frontend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -101,8 +133,9 @@ jobs:
         run: npm --prefix frontend run typecheck
 
   sonarjs-frontend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -113,8 +146,9 @@ jobs:
         run: npm --prefix frontend run lint:sonarjs
 
   build-frontend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -125,8 +159,9 @@ jobs:
         run: npm --prefix frontend run build
 
   stylelint-frontend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -137,8 +172,9 @@ jobs:
         run: npm --prefix frontend run stylelint
 
   test-frontend:
+    needs: gate
+    if: ${{ needs.gate.outputs.skip != 'true' }}
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') && !contains(github.event.pull_request.title, '[skip-checks]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
@@ -151,7 +187,7 @@ jobs:
   ci-success:
     name: ci-success
     if: always()
-    needs: [format, lint-backend, lint-frontend, typecheck-backend, typecheck-frontend, sonarjs-backend, sonarjs-frontend, test-backend, build-frontend, stylelint-frontend, test-frontend]
+    needs: [gate, format, lint-backend, lint-frontend, typecheck-backend, typecheck-frontend, sonarjs-backend, sonarjs-frontend, test-backend, build-frontend, stylelint-frontend, test-frontend]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any needed job failed

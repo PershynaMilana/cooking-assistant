@@ -16,6 +16,7 @@
       "types/*": ["./src/types/*"],
       "constants/*": ["./src/constants/*"],
       "config/*": ["./src/config/*"],
+      "redux/*": ["./src/redux/*"],
       "i18n/*": ["./src/i18n/*"],
       "pages/*": ["./src/pages/*"],
       "assets/*": ["./src/assets/*"],

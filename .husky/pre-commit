@@ -1,6 +1,8 @@
-# escape hatch: [skip-checks] in commit message skips pre-commit checks
-if grep -q '\[skip-checks\]' "$(git rev-parse --git-dir)/COMMIT_EDITMSG" 2>/dev/null; then
-  echo "[skip-checks] in commit message - skipping pre-commit checks"
+# escape hatch: SKIP_CHECKS=1 git commit ... skips all local pre-commit checks.
+# read the env var, NOT .git/COMMIT_EDITMSG - at pre-commit time that file still
+# holds the PREVIOUS commit's message, which caused false skips.
+if [ "$SKIP_CHECKS" = "1" ]; then
+  echo "SKIP_CHECKS=1 set - skipping pre-commit checks"
   exit 0
 fi
 
