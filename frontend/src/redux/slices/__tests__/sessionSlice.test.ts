@@ -1,8 +1,10 @@
-import {
-    checkSession,
-    loggedOut,
-    sessionReducer,
-} from "redux/slices/sessionSlice";
+import { authApi } from "redux/services/authApi";
+import { loggedOut, sessionReducer } from "redux/slices/sessionSlice";
+
+import { mockedGet, mockedPost } from "test/apiClientMock";
+import { makeTestStore } from "test/store";
+
+jest.mock("api/client");
 
 describe("sessionSlice", () => {
     it("should start in the checking status", () => {
@@ -11,66 +13,40 @@ describe("sessionSlice", () => {
         expect(state.status).toBe("checking");
     });
 
-    it("should set the status to unauthed on loggedOut from authed", () => {
+    it("should set the status to unauthed on the loggedOut action", () => {
         const state = sessionReducer({ status: "authed" }, loggedOut());
 
         expect(state.status).toBe("unauthed");
     });
 
-    it("should set the status to unauthed on loggedOut from checking", () => {
-        const state = sessionReducer({ status: "checking" }, loggedOut());
+    it("should go checking while the session check is pending then authed on success", async () => {
+        mockedGet.mockResolvedValue({ data: null });
+        const store = makeTestStore({ session: { status: "authed" } });
 
-        expect(state.status).toBe("unauthed");
+        const pending = store.dispatch(authApi.endpoints.getMe.initiate(null));
+
+        expect(store.getState().session.status).toBe("checking");
+
+        await pending;
+
+        expect(store.getState().session.status).toBe("authed");
     });
 
-    it("should set the status to unauthed on loggedOut from error", () => {
-        const state = sessionReducer({ status: "error" }, loggedOut());
+    it("should set the status to error when the session check fails", async () => {
+        mockedGet.mockRejectedValue(new Error("offline"));
+        const store = makeTestStore();
 
-        expect(state.status).toBe("unauthed");
+        await store.dispatch(authApi.endpoints.getMe.initiate(null));
+
+        expect(store.getState().session.status).toBe("error");
     });
 
-    it("should set the status to checking while the session check is pending", () => {
-        const state = sessionReducer(
-            { status: "unauthed" },
-            checkSession.pending("", undefined),
-        );
+    it("should set the status to unauthed when logout succeeds", async () => {
+        mockedPost.mockResolvedValue({ data: null });
+        const store = makeTestStore();
 
-        expect(state.status).toBe("checking");
-    });
+        await store.dispatch(authApi.endpoints.logout.initiate(null));
 
-    it("should set the status to checking when a new session check starts from authed", () => {
-        const state = sessionReducer(
-            { status: "authed" },
-            checkSession.pending("", undefined),
-        );
-
-        expect(state.status).toBe("checking");
-    });
-
-    it("should set the status to authed when the session check is fulfilled", () => {
-        const state = sessionReducer(
-            { status: "checking" },
-            checkSession.fulfilled(undefined, "", undefined),
-        );
-
-        expect(state.status).toBe("authed");
-    });
-
-    it("should set the status to error when the session check is rejected", () => {
-        const state = sessionReducer(
-            { status: "checking" },
-            checkSession.rejected(new Error("network error"), "", undefined),
-        );
-
-        expect(state.status).toBe("error");
-    });
-
-    it("should set the status to error when the session check is rejected from unauthed", () => {
-        const state = sessionReducer(
-            { status: "unauthed" },
-            checkSession.rejected(new Error("network error"), "", undefined),
-        );
-
-        expect(state.status).toBe("error");
+        expect(store.getState().session.status).toBe("unauthed");
     });
 });

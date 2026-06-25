@@ -21,3 +21,12 @@ export function getApiErrorMessage(error: unknown): string {
 
     return "Unknown error";
 }
+
+// HTTP status for the axios baseQuery; non-axios errors have no status
+export function getApiErrorStatus(error: unknown): number | undefined {
+    if (axios.isAxiosError(error)) {
+        return error.response?.status;
+    }
+
+    return undefined;
+}

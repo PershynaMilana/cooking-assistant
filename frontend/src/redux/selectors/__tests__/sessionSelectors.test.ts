@@ -7,9 +7,11 @@ import {
 import type { SessionStatus } from "redux/slices/sessionSlice";
 import type { RootState } from "redux/store";
 
-const makeState = (status: SessionStatus): RootState => ({
-    session: { status },
-});
+import { makeTestStore } from "test/store";
+
+// build a real RootState (incl. the RTK Query slice) and seed just the session
+const makeState = (status: SessionStatus): RootState =>
+    makeTestStore({ session: { status } }).getState();
 
 const authed: SessionStatus = "authed";
 const unauthed: SessionStatus = "unauthed";
