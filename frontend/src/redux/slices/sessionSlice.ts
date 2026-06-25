@@ -1,6 +1,6 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-import { getMe } from "api/authApi";
+import { authApi } from "redux/services/authApi";
 
 export type SessionStatus = "checking" | "authed" | "unauthed" | "error";
 
@@ -10,9 +10,9 @@ interface SessionState {
 
 const initialState: SessionState = { status: "checking" };
 
-// one server round-trip to confirm the auth cookie is still valid
-export const checkSession = createAsyncThunk("session/check", () => getMe());
-
+// session status is derived from the authApi endpoints: a getMe check drives
+// checking/authed/error, logout (and the explicit loggedOut action) -> unauthed.
+// "error" is reserved for failed checks (network/401); unauthed is explicit only
 const sessionSlice = createSlice({
     name: "session",
     initialState,
@@ -23,14 +23,17 @@ const sessionSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(checkSession.pending, (state) => {
+            .addMatcher(authApi.endpoints.getMe.matchPending, (state) => {
                 state.status = "checking";
             })
-            .addCase(checkSession.fulfilled, (state) => {
+            .addMatcher(authApi.endpoints.getMe.matchFulfilled, (state) => {
                 state.status = "authed";
             })
-            .addCase(checkSession.rejected, (state) => {
+            .addMatcher(authApi.endpoints.getMe.matchRejected, (state) => {
                 state.status = "error";
+            })
+            .addMatcher(authApi.endpoints.logout.matchFulfilled, (state) => {
+                state.status = "unauthed";
             });
     },
 });

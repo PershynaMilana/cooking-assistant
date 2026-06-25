@@ -11,6 +11,8 @@ import { ROUTES } from "constants/routes";
 
 import { PageSpinner } from "components/layout/PageSpinner";
 import { PrivateRoute } from "components/layout/PrivateRoute";
+import { ModalRoot } from "components/ui/ModalRoot";
+import { Toaster } from "components/ui/Toaster";
 
 const LoginPage = React.lazy(() => import("pages/auth/LoginPage"));
 const RegisterPage = React.lazy(() => import("pages/auth/RegisterPage"));
@@ -82,6 +84,8 @@ const AppWrapper: React.FC = () => (
         <Suspense fallback={<PageSpinner />}>
             <App />
         </Suspense>
+        <ModalRoot />
+        <Toaster />
     </Router>
 );
 

@@ -1,0 +1,160 @@
+import type {
+    CreateRecipeRequest,
+    RecipeDetails,
+    RecipeFilterParams,
+    RecipeListItem,
+    UpdateRecipeRequest,
+} from "types/recipe";
+
+import { API_ROUTES } from "api/endpoints";
+
+import { recipesApi } from "redux/services/recipesApi";
+
+import {
+    mockedDelete,
+    mockedGet,
+    mockedPost,
+    mockedPut,
+} from "test/apiClientMock";
+import { makeTestStore } from "test/store";
+
+jest.mock("api/client");
+
+const LIST: RecipeListItem[] = [
+    {
+        id: 1,
+        title: "Soup",
+        type_name: "Hot",
+        creation_date: "2024-01-01",
+        cooking_time: 30,
+    },
+];
+const FILTERS: RecipeFilterParams = { ingredient_name: "", sort_order: "asc" };
+const CREATE: CreateRecipeRequest = {
+    title: "Soup",
+    content: "boil",
+    ingredients: [{ id: 1, quantity: 2 }],
+    type_id: 1,
+    cooking_time: 30,
+    servings: 2,
+};
+const UPDATE: UpdateRecipeRequest = {
+    title: "Soup",
+    content: "boil",
+    type_id: 1,
+    cooking_time: 30,
+    servings: 2,
+    ingredients: [{ id: 1, quantity_recipe_ingredients: 2 }],
+};
+const DETAIL: RecipeDetails = {
+    id: 1,
+    title: "Soup",
+    content: "boil",
+    ingredients: [],
+    type_id: 1,
+    type_name: "Hot",
+    cooking_time: 30,
+    creation_date: "2024-01-01",
+    servings: 2,
+    person_id: 1,
+    isOwner: true,
+};
+
+describe("recipesApi", () => {
+    it("should fetch recipes by filters", async () => {
+        mockedGet.mockResolvedValue({ data: LIST });
+        const store = makeTestStore();
+
+        const result = await store.dispatch(
+            recipesApi.endpoints.getRecipesByFilters.initiate(FILTERS),
+        );
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.byFilters, {
+            params: FILTERS,
+        });
+        expect(result.data).toEqual(LIST);
+    });
+
+    it("should fetch the current user's recipes by filters", async () => {
+        mockedGet.mockResolvedValue({ data: LIST });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            recipesApi.endpoints.getRecipesByPerson.initiate(FILTERS),
+        );
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.byPerson, {
+            params: FILTERS,
+        });
+    });
+
+    it("should fetch all recipes for statistics", async () => {
+        mockedGet.mockResolvedValue({ data: [] });
+        const store = makeTestStore();
+
+        await store.dispatch(recipesApi.endpoints.getAllRecipes.initiate(null));
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.list, {
+            params: undefined,
+        });
+    });
+
+    it("should fetch a recipe by id", async () => {
+        mockedGet.mockResolvedValue({ data: DETAIL });
+        const store = makeTestStore();
+
+        const result = await store.dispatch(
+            recipesApi.endpoints.getRecipeById.initiate("1"),
+        );
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.byId("1"), {
+            params: undefined,
+        });
+        expect(result.data).toEqual(DETAIL);
+    });
+
+    it("should create a recipe", async () => {
+        mockedPost.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            recipesApi.endpoints.createRecipe.initiate(CREATE),
+        );
+
+        expect(mockedPost).toHaveBeenCalledWith(
+            API_ROUTES.recipes.create,
+            CREATE,
+        );
+    });
+
+    it("should update a recipe", async () => {
+        mockedPut.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            recipesApi.endpoints.updateRecipe.initiate({
+                id: "1",
+                data: UPDATE,
+            }),
+        );
+
+        expect(mockedPut).toHaveBeenCalledWith(
+            API_ROUTES.recipes.byId("1"),
+            UPDATE,
+        );
+    });
+
+    it("should delete a recipe", async () => {
+        mockedDelete.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(recipesApi.endpoints.deleteRecipe.initiate("1"));
+
+        expect(mockedDelete).toHaveBeenCalledWith(
+            API_ROUTES.recipes.byId("1"),
+            {
+                params: undefined,
+            },
+        );
+    });
+});

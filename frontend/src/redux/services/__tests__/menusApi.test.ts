@@ -1,0 +1,123 @@
+import type {
+    CreateMenuRequest,
+    Menu,
+    MenuDetails,
+    MenuListParams,
+    UpdateMenuRequest,
+} from "types/menu";
+
+import { API_ROUTES } from "api/endpoints";
+
+import { menusApi } from "redux/services/menusApi";
+
+import {
+    mockedDelete,
+    mockedGet,
+    mockedPost,
+    mockedPut,
+} from "test/apiClientMock";
+import { makeTestStore } from "test/store";
+
+jest.mock("api/client");
+
+const LIST: Menu[] = [
+    { id: 1, title: "Week", categoryname: "Weekly", menucontent: "x" },
+];
+const PARAMS: MenuListParams = { menu_name: "Week" };
+const DETAIL: MenuDetails = {
+    menu: {
+        id: 1,
+        title: "Week",
+        categoryname: "Weekly",
+        menucontent: "x",
+        category_id: 2,
+        isOwner: true,
+    },
+    recipes: [],
+};
+const CREATE: CreateMenuRequest = {
+    menuTitle: "Week",
+    menuContent: "x",
+    categoryId: 2,
+    recipeIds: [1, 2],
+};
+const UPDATE: UpdateMenuRequest = {
+    menuTitle: "Week",
+    menuContent: "x",
+    categoryId: 2,
+    recipeIds: [1, 2],
+};
+
+describe("menusApi", () => {
+    it("should fetch menus by filters", async () => {
+        mockedGet.mockResolvedValue({ data: LIST });
+        const store = makeTestStore();
+
+        const result = await store.dispatch(
+            menusApi.endpoints.getMenus.initiate(PARAMS),
+        );
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.menu.list, {
+            params: PARAMS,
+        });
+        expect(result.data).toEqual(LIST);
+    });
+
+    it("should fetch the current user's menus", async () => {
+        mockedGet.mockResolvedValue({ data: LIST });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            menusApi.endpoints.getMenusByPerson.initiate(PARAMS),
+        );
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.menu.byPerson, {
+            params: PARAMS,
+        });
+    });
+
+    it("should fetch a menu by id", async () => {
+        mockedGet.mockResolvedValue({ data: DETAIL });
+        const store = makeTestStore();
+
+        const result = await store.dispatch(
+            menusApi.endpoints.getMenuById.initiate(1),
+        );
+
+        expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.menu.byId(1), {
+            params: undefined,
+        });
+        expect(result.data).toEqual(DETAIL);
+    });
+
+    it("should create a menu", async () => {
+        mockedPost.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(menusApi.endpoints.createMenu.initiate(CREATE));
+
+        expect(mockedPost).toHaveBeenCalledWith(API_ROUTES.menu.create, CREATE);
+    });
+
+    it("should update a menu", async () => {
+        mockedPut.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            menusApi.endpoints.updateMenu.initiate({ id: 1, data: UPDATE }),
+        );
+
+        expect(mockedPut).toHaveBeenCalledWith(API_ROUTES.menu.byId(1), UPDATE);
+    });
+
+    it("should delete a menu", async () => {
+        mockedDelete.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(menusApi.endpoints.deleteMenu.initiate(1));
+
+        expect(mockedDelete).toHaveBeenCalledWith(API_ROUTES.menu.byId(1), {
+            params: undefined,
+        });
+    });
+});

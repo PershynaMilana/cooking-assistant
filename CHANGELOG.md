@@ -22,7 +22,8 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 ### Frontend
-- Added: Groundwork for centralized app state - a Redux Toolkit store now backs the app, starting with shared sign-in session state (checking / authed / unauthed / error - error is reserved for network failures, unauthed only for explicit logout).
+- Added: Groundwork for centralized app state - a Redux Toolkit store now backs the app: shared sign-in session state (checking / authed / unauthed / error - error is reserved for failed checks, unauthed only for explicit logout), plus a centralized server-data cache (RTK Query) for recipes, menus, ingredients, recipe types, menu categories, the pantry and the session, so data is fetched once and shared across pages and lists refresh automatically after you add, edit, or delete.
+- Added: Groundwork for app-wide toast notifications that surface failed requests, and a single global manager for pop-up dialogs.
 - Added: Session selectors (`selectSessionStatus`, `selectIsAuthed`, `selectIsChecking`, `selectHasSessionError`) as a separate co-located file - the established pattern for all future slices.
 
 ### Project

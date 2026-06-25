@@ -1,7 +1,7 @@
 import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { AxiosError, AxiosHeaders } from "axios";
 
-import { getApiErrorMessage } from "api/httpError";
+import { getApiErrorMessage, getApiErrorStatus } from "api/httpError";
 
 const SERVER_MESSAGE = "Too many requests";
 const AXIOS_MESSAGE = "Request failed with status code 429";
@@ -41,5 +41,36 @@ describe("getApiErrorMessage", () => {
 
     it("should return a default message for a non-Error non-axios throw", () => {
         expect(getApiErrorMessage("raw string")).toBe(UNKNOWN);
+    });
+});
+
+describe("getApiErrorStatus", () => {
+    it("should return the status from an axios error response", () => {
+        const response: AxiosResponse = {
+            data: {},
+            status: 429,
+            statusText: "Too Many Requests",
+            headers: new AxiosHeaders(),
+            config,
+        };
+        const error = new AxiosError(
+            AXIOS_MESSAGE,
+            "ERR_BAD_REQUEST",
+            config,
+            undefined,
+            response,
+        );
+
+        expect(getApiErrorStatus(error)).toBe(429);
+    });
+
+    it("should return undefined for an axios error without a response", () => {
+        expect(
+            getApiErrorStatus(new AxiosError(AXIOS_MESSAGE)),
+        ).toBeUndefined();
+    });
+
+    it("should return undefined for a non-axios error", () => {
+        expect(getApiErrorStatus(new Error("boom"))).toBeUndefined();
     });
 });
