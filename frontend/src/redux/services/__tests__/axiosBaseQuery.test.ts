@@ -55,7 +55,11 @@ describe("axiosBaseQuery", () => {
     it("should map an axios error to its status and a user-facing message", async () => {
         mockedGet.mockRejectedValue({
             isAxiosError: true,
-            response: { status: 404, data: { error: "Not found" } },
+            response: {
+                status: 404,
+                data: { error: "Not found" },
+                headers: {},
+            },
             message: "Request failed",
         });
         const store = makeProbeStore();
@@ -64,7 +68,11 @@ describe("axiosBaseQuery", () => {
             probeApi.endpoints.read.initiate({ url: PROBE_URL }),
         );
 
-        expect(result.error).toEqual({ status: 404, data: "Not found" });
+        expect(result.error).toEqual({
+            status: 404,
+            data: "Not found",
+            retryAfter: null,
+        });
     });
 
     it("should map a non-axios error to an undefined status", async () => {
@@ -78,6 +86,30 @@ describe("axiosBaseQuery", () => {
         expect(result.error).toEqual({
             status: undefined,
             data: "network down",
+            retryAfter: null,
+        });
+    });
+
+    it("should surface the Retry-After header as retryAfter on a 429", async () => {
+        mockedGet.mockRejectedValue({
+            isAxiosError: true,
+            response: {
+                status: 429,
+                data: { error: "Too many" },
+                headers: { "retry-after": "30" },
+            },
+            message: "Request failed",
+        });
+        const store = makeProbeStore();
+
+        const result = await store.dispatch(
+            probeApi.endpoints.read.initiate({ url: PROBE_URL }),
+        );
+
+        expect(result.error).toEqual({
+            status: 429,
+            data: "Too many",
+            retryAfter: 30,
         });
     });
 

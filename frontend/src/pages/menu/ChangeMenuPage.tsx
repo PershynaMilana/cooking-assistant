@@ -1,8 +1,18 @@
-import React from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { useEditMenuForm } from "hooks/useEditMenuForm";
+import { ROUTES } from "constants/routes";
+
+import { useGetMenuCategoriesQuery } from "redux/services/menuCategoriesApi";
+import {
+    useGetMenuByIdQuery,
+    useUpdateMenuMutation,
+} from "redux/services/menusApi";
+import { useGetAllRecipesQuery } from "redux/services/recipesApi";
+
+import { useMenuForm } from "hooks/useMenuForm";
 
 import { MenuFormFields } from "components/forms/MenuFormFields";
 import { Header } from "components/layout/Header";
@@ -10,10 +20,56 @@ import { Header } from "components/layout/Header";
 const UpdateMenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
     const { id } = useParams<{ id: string }>();
-    const ctrl = useEditMenuForm(id);
-    const { handleSubmit } = ctrl;
+    const navigate = useNavigate();
+    const form = useMenuForm({
+        errorMessages: {
+            emptyTitle: t("changeMenuPage.errorTitle"),
+            emptyDescription: t("changeMenuPage.errorDescription"),
+            noCategory: t("changeMenuPage.errorCategory"),
+            noRecipes: t("changeMenuPage.errorRecipes"),
+        },
+    });
+    const { setInitialValues } = form;
+    const { data: categories = [] } = useGetMenuCategoriesQuery(null);
+    const { data: allRecipes = [] } = useGetAllRecipesQuery(null);
+    const { data: menu, isLoading } = useGetMenuByIdQuery(id ?? skipToken);
+    const [updateMenu] = useUpdateMenuMutation();
 
-    if (ctrl.loading) {
+    useEffect(() => {
+        if (!menu) {
+            return;
+        }
+
+        setInitialValues({
+            menuTitle: menu.menu.title || "",
+            menuDescription: menu.menu.menucontent || "",
+            selectedCategory: menu.menu.category_id,
+            selectedRecipes: menu.recipes.map((recipe) => recipe.recipe_id),
+        });
+    }, [menu, setInitialValues]);
+
+    const handleSubmit = async () => {
+        if (!form.validateForm() || !id) {
+            return;
+        }
+
+        // a failed mutation is already toasted by the global listener
+        const result = await updateMenu({
+            id,
+            data: {
+                menuTitle: form.menuTitle,
+                menuContent: form.menuDescription,
+                categoryId: form.selectedCategory,
+                recipeIds: form.selectedRecipes,
+            },
+        });
+
+        if ("data" in result) {
+            navigate(ROUTES.menu);
+        }
+    };
+
+    if (isLoading) {
         return <div>{t("changeMenuPage.loading")}</div>;
     }
 
@@ -26,9 +82,9 @@ const UpdateMenuPage: React.FC = () => {
                 </h1>
                 <form className="space-y-4">
                     <MenuFormFields
-                        form={ctrl.form}
-                        categories={ctrl.categories}
-                        allRecipes={ctrl.allRecipes}
+                        form={form}
+                        categories={categories}
+                        allRecipes={allRecipes}
                         idPrefix="edit-menu"
                         keyPrefix="changeMenuPage"
                     />
@@ -44,12 +100,6 @@ const UpdateMenuPage: React.FC = () => {
                         </button>
                     </div>
                 </form>
-
-                {ctrl.error && (
-                    <div className="text-red-500 text-sm mt-4">
-                        {ctrl.error}
-                    </div>
-                )}
             </div>
         </div>
     );

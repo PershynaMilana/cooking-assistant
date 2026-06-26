@@ -1,50 +1,65 @@
 import { act, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
+import React from "react";
+import { Provider } from "react-redux";
 import type * as ReactRouterDom from "react-router-dom";
 
-import { register } from "api/authApi";
+import { API_ROUTES } from "api/endpoints";
 
 import { useRegisterForm } from "hooks/useRegisterForm";
 
+import { mockedPost } from "test/apiClientMock";
 import { mockNavigate } from "test/router";
+import { makeTestStore } from "test/store";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/authApi");
+jest.mock("api/client");
 
 interface FormResult {
     current: ReturnType<typeof useRegisterForm>;
 }
 
-const fillValid = (result: FormResult) => {
+const wrapper = ({ children }: { children: ReactNode }) =>
+    React.createElement(Provider, { store: makeTestStore(), children });
+
+const renderRegisterForm = () =>
+    renderHook(() => useRegisterForm(), { wrapper });
+
+const setField = (
+    result: FormResult,
+    field: "name" | "surname" | "login" | "password",
+    value: string,
+) => {
     act(() => {
-        result.current.setField("name", "Test");
-    });
-    act(() => {
-        result.current.setField("surname", "User");
-    });
-    act(() => {
-        result.current.setField("login", "tester");
-    });
-    act(() => {
-        result.current.setField("password", "secret1");
+        result.current.setField(field, value);
     });
 };
 
+const fillValid = (result: FormResult) => {
+    setField(result, "name", "Test");
+    setField(result, "surname", "User");
+    setField(result, "login", "tester");
+    setField(result, "password", "secret1");
+};
+
+const submit = (result: FormResult) =>
+    act(async () => {
+        await result.current.handleSubmit();
+    });
+
 describe("useRegisterForm", () => {
     it("should register the user and navigate to login when all fields are valid", async () => {
-        jest.mocked(register).mockResolvedValue(undefined);
+        mockedPost.mockResolvedValue({ data: null });
 
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
         fillValid(result);
+        await submit(result);
 
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(register)).toHaveBeenCalledWith({
+        expect(mockedPost).toHaveBeenCalledWith(API_ROUTES.auth.register, {
             name: "Test",
             surname: "User",
             login: "tester",
@@ -54,26 +69,15 @@ describe("useRegisterForm", () => {
     });
 
     it("should not submit and should set a field error when the name is invalid", async () => {
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
-        act(() => {
-            result.current.setField("name", "test");
-        });
-        act(() => {
-            result.current.setField("surname", "User");
-        });
-        act(() => {
-            result.current.setField("login", "tester");
-        });
-        act(() => {
-            result.current.setField("password", "secret1");
-        });
+        setField(result, "name", "test");
+        setField(result, "surname", "User");
+        setField(result, "login", "tester");
+        setField(result, "password", "secret1");
+        await submit(result);
 
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(mockedPost).not.toHaveBeenCalled();
         expect(result.current.errors.name).toBe(
             "Name must start with a capital letter and contain only letters, at least 2 characters.",
         );
@@ -81,26 +85,15 @@ describe("useRegisterForm", () => {
     });
 
     it("should not submit and should set a field error when the surname is invalid", async () => {
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
-        act(() => {
-            result.current.setField("name", "Test");
-        });
-        act(() => {
-            result.current.setField("surname", "user");
-        });
-        act(() => {
-            result.current.setField("login", "tester");
-        });
-        act(() => {
-            result.current.setField("password", "secret1");
-        });
+        setField(result, "name", "Test");
+        setField(result, "surname", "user");
+        setField(result, "login", "tester");
+        setField(result, "password", "secret1");
+        await submit(result);
 
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(mockedPost).not.toHaveBeenCalled();
         expect(result.current.errors.surname).toBe(
             "Surname must start with a capital letter and contain only letters, at least 2 characters.",
         );
@@ -108,77 +101,55 @@ describe("useRegisterForm", () => {
     });
 
     it("should not submit and should set a field error when the login is invalid", async () => {
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
-        act(() => {
-            result.current.setField("name", "Test");
-        });
-        act(() => {
-            result.current.setField("surname", "User");
-        });
-        act(() => {
-            result.current.setField("login", "a");
-        });
-        act(() => {
-            result.current.setField("password", "secret1");
-        });
+        setField(result, "name", "Test");
+        setField(result, "surname", "User");
+        setField(result, "login", "a");
+        setField(result, "password", "secret1");
+        await submit(result);
 
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(mockedPost).not.toHaveBeenCalled();
         expect(result.current.errors.login).toBeDefined();
         expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it("should reject a short password without submitting", async () => {
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
-        act(() => {
-            result.current.setField("name", "Test");
-        });
-        act(() => {
-            result.current.setField("surname", "User");
-        });
-        act(() => {
-            result.current.setField("login", "tester");
-        });
-        act(() => {
-            result.current.setField("password", "short");
-        });
+        setField(result, "name", "Test");
+        setField(result, "surname", "User");
+        setField(result, "login", "tester");
+        setField(result, "password", "short");
+        await submit(result);
 
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
-
-        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(mockedPost).not.toHaveBeenCalled();
         expect(result.current.errors.password).toBe(
             "Password must be at least 6 characters.",
         );
     });
 
     it("should set a required-fields error when a field is empty", async () => {
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
+        await submit(result);
 
-        expect(jest.mocked(register)).not.toHaveBeenCalled();
+        expect(mockedPost).not.toHaveBeenCalled();
         expect(result.current.error).toBe("Please fill in all fields.");
     });
 
     it("should set a generic error when registration fails", async () => {
-        jest.mocked(register).mockRejectedValue(new Error("409"));
+        mockedPost.mockRejectedValue(
+            Object.assign(new Error(), {
+                isAxiosError: true,
+                response: { status: 409, data: { error: "exists" } },
+            }),
+        );
 
-        const { result } = renderHook(() => useRegisterForm());
+        const { result } = renderRegisterForm();
 
         fillValid(result);
-
-        await act(async () => {
-            await result.current.handleSubmit();
-        });
+        await submit(result);
 
         expect(result.current.error).toBe("This user already exists.");
         expect(mockNavigate).not.toHaveBeenCalled();

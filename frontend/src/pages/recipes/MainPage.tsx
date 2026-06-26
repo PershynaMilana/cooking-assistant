@@ -1,15 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { getRecipesByFilters } from "api/recipesApi";
-
-import { useRecipeList } from "hooks/useRecipeList";
+import { RECIPE_SOURCE, useRecipeListView } from "hooks/useRecipeListView";
 
 import { RecipeListView } from "components/recipes/RecipeListView";
 
 const MainPage: React.FC = () => {
     const { t } = useTranslation("recipes");
-    const list = useRecipeList(getRecipesByFilters);
+    const list = useRecipeListView(RECIPE_SOURCE.all);
 
     const heading =
         list.filters.selectedTypes.length > 0

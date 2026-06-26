@@ -18,7 +18,8 @@
         "saveQuantitiesButton": "Save quantities",
         "deleteConfirmMessage": "Are you sure you want to delete the ingredient \"{{name}}\"?",
         "confirmButton": "Confirm",
-        "cancelButton": "Cancel"
+        "cancelButton": "Cancel",
+        "deleted": "Ingredient deleted"
     },
     "purchaseModal": {
         "title": "Purchase History: {{name}}",

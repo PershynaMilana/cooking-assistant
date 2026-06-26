@@ -1,15 +1,50 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
-import { useCreateMenuForm } from "hooks/useCreateMenuForm";
+import { ROUTES } from "constants/routes";
+
+import { useGetMenuCategoriesQuery } from "redux/services/menuCategoriesApi";
+import { useCreateMenuMutation } from "redux/services/menusApi";
+import { useGetAllRecipesQuery } from "redux/services/recipesApi";
+
+import { useMenuForm } from "hooks/useMenuForm";
 
 import { MenuFormFields } from "components/forms/MenuFormFields";
 import { Header } from "components/layout/Header";
 
 const CreateMenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
-    const ctrl = useCreateMenuForm();
-    const { handleSubmit } = ctrl;
+    const navigate = useNavigate();
+    const form = useMenuForm({
+        errorMessages: {
+            emptyTitle: t("createMenuPage.errorTitle"),
+            emptyDescription: t("createMenuPage.errorDescription"),
+            noCategory: t("createMenuPage.errorCategory"),
+            noRecipes: t("createMenuPage.errorRecipes"),
+        },
+    });
+    const { data: categories = [] } = useGetMenuCategoriesQuery(null);
+    const { data: allRecipes = [] } = useGetAllRecipesQuery(null);
+    const [createMenu] = useCreateMenuMutation();
+
+    const handleSubmit = async () => {
+        if (!form.validateForm() || form.selectedCategory === null) {
+            return;
+        }
+
+        // a failed mutation is already toasted by the global listener
+        const result = await createMenu({
+            menuTitle: form.menuTitle,
+            menuContent: form.menuDescription,
+            categoryId: form.selectedCategory,
+            recipeIds: form.selectedRecipes,
+        });
+
+        if ("data" in result) {
+            navigate(ROUTES.menu);
+        }
+    };
 
     return (
         <div>
@@ -20,9 +55,9 @@ const CreateMenuPage: React.FC = () => {
                 </h1>
                 <form className="space-y-4">
                     <MenuFormFields
-                        form={ctrl.form}
-                        categories={ctrl.categories}
-                        allRecipes={ctrl.allRecipes}
+                        form={form}
+                        categories={categories}
+                        allRecipes={allRecipes}
                         idPrefix="create-menu"
                         keyPrefix="createMenuPage"
                     />
@@ -38,12 +73,6 @@ const CreateMenuPage: React.FC = () => {
                         </button>
                     </div>
                 </form>
-
-                {ctrl.fetchError && (
-                    <div className="text-red-500 text-sm mt-4">
-                        {ctrl.fetchError}
-                    </div>
-                )}
             </div>
         </div>
     );

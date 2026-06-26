@@ -1,26 +1,25 @@
-﻿import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
 import type * as ReactRouterDom from "react-router-dom";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import type { MenuDetails } from "types/menu";
 import type { RecipeWithIngredientNames } from "types/recipe";
 
-import { getMenuCategories } from "api/menuCategoriesApi";
-import { getMenuById, updateMenu } from "api/menusApi";
-import { getRecipes } from "api/recipesApi";
+import { API_ROUTES } from "api/endpoints";
 
 import ChangeMenuPage from "pages/menu/ChangeMenuPage";
+import { mockedPut, mockGetByUrl } from "test/apiClientMock";
 import { ERROR_RECIPES_REQUIRED, ROUTE_MENU } from "test/constants";
 import { mockNavigate } from "test/router";
+import { makeTestStore } from "test/store";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/menusApi");
-jest.mock("api/menuCategoriesApi");
-jest.mock("api/recipesApi");
+jest.mock("api/client");
 
 const TITLE = "Weekday menu";
 const UPDATE_MENU = "Update Menu";
@@ -61,16 +60,23 @@ const SAMPLE_WITH_RECIPE: MenuDetails = {
 };
 
 const setup = (sample: MenuDetails = SAMPLE) => {
-    jest.mocked(getMenuById).mockResolvedValue(sample);
-    jest.mocked(getMenuCategories).mockResolvedValue(CATEGORIES);
-    jest.mocked(getRecipes).mockResolvedValue([RECIPE]);
+    mockGetByUrl({
+        [API_ROUTES.menu.byId("1")]: sample,
+        [API_ROUTES.menuCategories.list]: CATEGORIES,
+        [API_ROUTES.recipes.list]: [RECIPE],
+    });
 
     render(
-        <MemoryRouter initialEntries={["/change-menu/1"]}>
-            <Routes>
-                <Route path="/change-menu/:id" element={<ChangeMenuPage />} />
-            </Routes>
-        </MemoryRouter>,
+        <Provider store={makeTestStore()}>
+            <MemoryRouter initialEntries={["/change-menu/1"]}>
+                <Routes>
+                    <Route
+                        path="/change-menu/:id"
+                        element={<ChangeMenuPage />}
+                    />
+                </Routes>
+            </MemoryRouter>
+        </Provider>,
     );
 };
 
@@ -81,8 +87,8 @@ describe("ChangeMenuPage", () => {
         expect(await screen.findByDisplayValue(TITLE)).toBeInTheDocument();
     });
 
-    it("should call updateMenu with the changed values on valid submit", async () => {
-        jest.mocked(updateMenu).mockResolvedValue(undefined);
+    it("should update the menu with the changed values on valid submit", async () => {
+        mockedPut.mockResolvedValue({ data: null });
         setup(SAMPLE_WITH_RECIPE);
 
         await screen.findByDisplayValue(TITLE);
@@ -91,8 +97,8 @@ describe("ChangeMenuPage", () => {
             screen.getByRole("button", { name: UPDATE_MENU }),
         );
 
-        expect(jest.mocked(updateMenu)).toHaveBeenCalledWith(
-            "1",
+        expect(mockedPut).toHaveBeenCalledWith(
+            API_ROUTES.menu.byId("1"),
             expect.objectContaining({
                 menuTitle: TITLE,
                 categoryId: CATEGORY_ID,
@@ -102,7 +108,7 @@ describe("ChangeMenuPage", () => {
     });
 
     it("should navigate to /menu after successful update", async () => {
-        jest.mocked(updateMenu).mockResolvedValue(undefined);
+        mockedPut.mockResolvedValue({ data: null });
         setup(SAMPLE_WITH_RECIPE);
 
         await screen.findByDisplayValue(TITLE);

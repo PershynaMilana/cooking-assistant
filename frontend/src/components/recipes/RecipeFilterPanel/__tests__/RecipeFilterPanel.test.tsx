@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import type { RecipeFilterState } from "hooks/useRecipeFilters";
+import type { RecipeFilterState } from "hooks/useRecipeListView";
 
 import { RecipeFilterPanel } from "components/recipes/RecipeFilterPanel";
 

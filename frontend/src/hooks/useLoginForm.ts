@@ -5,15 +5,20 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "constants/routes";
 import type { LoginRequest } from "types/auth";
 
-import { login as loginRequest } from "api/authApi";
-import { isAxiosError } from "api/client";
+import { useLoginMutation } from "redux/services/authApi";
+
+import { getQueryErrorRetryAfter, getQueryErrorStatus } from "utils/queryError";
 
 const EMPTY_FORM: LoginRequest = { login: "", password: "" };
+const TOO_MANY_ATTEMPTS_STATUS = 429;
+// used only when the server did not send a Retry-After header
+const FALLBACK_LOCKOUT_SECONDS = 60;
 
 // a failed login shows one generic message, never revealing whether the username or the password was wrong
 export const useLoginForm = () => {
     const { t } = useTranslation("auth");
     const navigate = useNavigate();
+    const [login] = useLoginMutation();
 
     const [values, setValues] = useState<LoginRequest>(EMPTY_FORM);
     const [error, setError] = useState<string | null>(null);
@@ -57,21 +62,25 @@ export const useLoginForm = () => {
             return;
         }
 
-        try {
-            await loginRequest(values);
-            navigate(ROUTES.main);
-        } catch (err) {
-            if (isAxiosError(err) && err.response?.status === 429) {
-                const raw = Number(err.response.headers["retry-after"]);
-                const seconds = Number.isFinite(raw) && raw > 0 ? raw : 60;
+        const result = await login(values);
 
-                setLockedUntil(Date.now() + seconds * 1000);
-                setError(t("errors.tooManyAttempts", { seconds }));
-            } else {
-                setError(t("errors.invalidCredentials"));
-            }
+        if ("data" in result) {
+            navigate(ROUTES.main);
+
+            return;
         }
-    }, [isLocked, navigate, t, values]);
+
+        if (getQueryErrorStatus(result.error) === TOO_MANY_ATTEMPTS_STATUS) {
+            const seconds =
+                getQueryErrorRetryAfter(result.error) ??
+                FALLBACK_LOCKOUT_SECONDS;
+
+            setLockedUntil(Date.now() + seconds * 1000);
+            setError(t("errors.tooManyAttempts", { seconds }));
+        } else {
+            setError(t("errors.invalidCredentials"));
+        }
+    }, [isLocked, login, navigate, t, values]);
 
     return {
         values,

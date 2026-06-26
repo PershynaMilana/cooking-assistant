@@ -1,25 +1,17 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
-import { getRecipesByPerson } from "api/recipesApi";
-
-import { useRecipeList } from "hooks/useRecipeList";
+import { RECIPE_SOURCE, useRecipeListView } from "hooks/useRecipeListView";
 
 import { RecipeListView } from "components/recipes/RecipeListView";
 
 const UserRecipesPage: React.FC = () => {
     const { t } = useTranslation("recipes");
 
-    const fetcher = useCallback(
-        (params: Parameters<typeof getRecipesByPerson>[0]) =>
-            getRecipesByPerson(params),
-        [],
-    );
-
-    const list = useRecipeList(fetcher);
+    const list = useRecipeListView(RECIPE_SOURCE.person);
 
     const heading =
         list.filters.selectedTypes.length > 0

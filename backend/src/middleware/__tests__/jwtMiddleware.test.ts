@@ -41,7 +41,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            error: "No token, access denied",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -55,7 +55,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            error: "No token, access denied",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -69,7 +69,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            error: "No token, access denied",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -83,7 +83,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -98,7 +98,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -145,7 +145,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -160,7 +160,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -175,7 +175,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -190,7 +190,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Token is invalid or expired",
+            error: "Session expired, please log in again",
         });
         expect(next).not.toHaveBeenCalled();
     });

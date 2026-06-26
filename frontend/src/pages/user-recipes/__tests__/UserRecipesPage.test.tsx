@@ -1,17 +1,16 @@
-﻿import { screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { RecipeListItem } from "types/recipe";
 import type { RecipeTypeSummary } from "types/recipeType";
 
-import { getRecipesByPerson } from "api/recipesApi";
-import { getRecipeTypes } from "api/recipeTypesApi";
+import { API_ROUTES } from "api/endpoints";
 
 import UserRecipesPage from "pages/user-recipes/UserRecipesPage";
-import { renderWithRouter } from "test/router";
+import { mockGetByUrl } from "test/apiClientMock";
+import { renderWithProviders } from "test/router";
 
-jest.mock("api/recipesApi");
-jest.mock("api/recipeTypesApi");
+jest.mock("api/client");
 
 const TITLE = "Borscht";
 const SAMPLE: RecipeListItem[] = [
@@ -32,19 +31,27 @@ const SOUP_TYPE: RecipeTypeSummary = {
 
 describe("UserRecipesPage", () => {
     it("should render the user's recipes loaded from the api", async () => {
-        jest.mocked(getRecipesByPerson).mockResolvedValue(SAMPLE);
-        jest.mocked(getRecipeTypes).mockResolvedValue([]);
+        mockGetByUrl({
+            [API_ROUTES.recipes.byPerson]: SAMPLE,
+            [API_ROUTES.recipeTypes.list]: [],
+        });
 
-        renderWithRouter(<UserRecipesPage />, ["/my-recipes"]);
+        renderWithProviders(<UserRecipesPage />, {
+            initialEntries: ["/my-recipes"],
+        });
 
         expect(await screen.findByText(TITLE)).toBeInTheDocument();
     });
 
-    it("should show the by-type heading and empty message when a type is selected", async () => {
-        jest.mocked(getRecipesByPerson).mockResolvedValue([]);
-        jest.mocked(getRecipeTypes).mockResolvedValue([SOUP_TYPE]);
+    it("should record the selected type in the store and show the by-type heading", async () => {
+        mockGetByUrl({
+            [API_ROUTES.recipes.byPerson]: [],
+            [API_ROUTES.recipeTypes.list]: [SOUP_TYPE],
+        });
 
-        renderWithRouter(<UserRecipesPage />, ["/my-recipes"]);
+        const { store } = renderWithProviders(<UserRecipesPage />, {
+            initialEntries: ["/my-recipes"],
+        });
 
         await userEvent.click(screen.getByRole("button", { name: "Filter" }));
         await userEvent.click(screen.getByRole("checkbox"));
@@ -53,5 +60,6 @@ describe("UserRecipesPage", () => {
         expect(
             screen.getByText("No recipes of this type found."),
         ).toBeInTheDocument();
+        expect(store.getState().filters.recipe.selectedTypes).toEqual([1]);
     });
 });

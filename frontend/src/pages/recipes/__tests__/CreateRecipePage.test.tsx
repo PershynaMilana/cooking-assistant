@@ -1,12 +1,11 @@
-﻿import { screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
-import { getIngredients } from "api/ingredientsApi";
-import { createRecipe } from "api/recipesApi";
-import { getRecipeTypes } from "api/recipeTypesApi";
+import { API_ROUTES } from "api/endpoints";
 
 import CreateRecipePage from "pages/recipes/CreateRecipePage";
+import { mockedPost, mockGetByUrl } from "test/apiClientMock";
 import { LABEL_COOKING_TIME, ROUTE_MAIN } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
@@ -14,9 +13,7 @@ jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/recipesApi");
-jest.mock("api/recipeTypesApi");
-jest.mock("api/ingredientsApi");
+jest.mock("api/client");
 
 const TYPE_ID = 3;
 const TYPE_NAME = "Soup";
@@ -33,11 +30,11 @@ const SAMPLE_INGREDIENTS = [
 
 describe("CreateRecipePage", () => {
     it("should create the recipe and navigate home on submit", async () => {
-        jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE_TYPES);
-        jest.mocked(getIngredients).mockResolvedValue(SAMPLE_INGREDIENTS);
-        const mockedCreateRecipe = jest.mocked(createRecipe);
-
-        mockedCreateRecipe.mockResolvedValue(undefined);
+        mockGetByUrl({
+            [API_ROUTES.ingredients.list]: SAMPLE_INGREDIENTS,
+            [API_ROUTES.recipeTypes.list]: SAMPLE_TYPES,
+        });
+        mockedPost.mockResolvedValue({ data: null });
 
         renderWithRouter(<CreateRecipePage />);
 
@@ -65,7 +62,8 @@ describe("CreateRecipePage", () => {
             screen.getByRole("button", { name: "Create Recipe" }),
         );
 
-        expect(mockedCreateRecipe).toHaveBeenCalledWith(
+        expect(mockedPost).toHaveBeenCalledWith(
+            API_ROUTES.recipes.create,
             expect.objectContaining({
                 title: TITLE,
                 content: DESCRIPTION,

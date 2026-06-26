@@ -2,9 +2,10 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
-import { login } from "api/authApi";
+import { API_ROUTES } from "api/endpoints";
 
 import LoginPage from "pages/auth/LoginPage";
+import { mockedPost } from "test/apiClientMock";
 import { ROUTE_MAIN } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
@@ -12,16 +13,14 @@ jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/authApi");
+jest.mock("api/client");
 
 const USERNAME = "test-user";
 const PASSWORD = "test-pass";
 
 describe("LoginPage", () => {
     it("should navigate to main on successful login", async () => {
-        const mockedLogin = jest.mocked(login);
-
-        mockedLogin.mockResolvedValue(undefined);
+        mockedPost.mockResolvedValue({ data: null });
 
         renderWithRouter(<LoginPage />);
 
@@ -29,7 +28,7 @@ describe("LoginPage", () => {
         await userEvent.type(screen.getByLabelText("Password:"), PASSWORD);
         await userEvent.click(screen.getByRole("button", { name: "Log In" }));
 
-        expect(mockedLogin).toHaveBeenCalledWith({
+        expect(mockedPost).toHaveBeenCalledWith(API_ROUTES.auth.login, {
             login: USERNAME,
             password: PASSWORD,
         });

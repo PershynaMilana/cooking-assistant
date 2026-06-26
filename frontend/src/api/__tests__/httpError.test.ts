@@ -1,10 +1,16 @@
 import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { AxiosError, AxiosHeaders } from "axios";
 
-import { getApiErrorMessage, getApiErrorStatus } from "api/httpError";
+import {
+    getApiErrorMessage,
+    getApiErrorRetryAfter,
+    getApiErrorStatus,
+} from "api/httpError";
 
 const SERVER_MESSAGE = "Too many requests";
 const AXIOS_MESSAGE = "Request failed with status code 429";
+const AXIOS_CODE = "ERR_BAD_REQUEST";
+const STATUS_TEXT = "Too Many Requests";
 const UNKNOWN = "Unknown error";
 
 const config: InternalAxiosRequestConfig = { headers: new AxiosHeaders() };
@@ -14,13 +20,13 @@ describe("getApiErrorMessage", () => {
         const response: AxiosResponse = {
             data: { error: SERVER_MESSAGE },
             status: 429,
-            statusText: "Too Many Requests",
+            statusText: STATUS_TEXT,
             headers: new AxiosHeaders(),
             config,
         };
         const error = new AxiosError(
             AXIOS_MESSAGE,
-            "ERR_BAD_REQUEST",
+            AXIOS_CODE,
             config,
             undefined,
             response,
@@ -49,13 +55,13 @@ describe("getApiErrorStatus", () => {
         const response: AxiosResponse = {
             data: {},
             status: 429,
-            statusText: "Too Many Requests",
+            statusText: STATUS_TEXT,
             headers: new AxiosHeaders(),
             config,
         };
         const error = new AxiosError(
             AXIOS_MESSAGE,
-            "ERR_BAD_REQUEST",
+            AXIOS_CODE,
             config,
             undefined,
             response,
@@ -72,5 +78,34 @@ describe("getApiErrorStatus", () => {
 
     it("should return undefined for a non-axios error", () => {
         expect(getApiErrorStatus(new Error("boom"))).toBeUndefined();
+    });
+});
+
+describe("getApiErrorRetryAfter", () => {
+    it("should return the Retry-After seconds from an axios error response", () => {
+        const response: AxiosResponse = {
+            data: {},
+            status: 429,
+            statusText: STATUS_TEXT,
+            headers: new AxiosHeaders({ "retry-after": "45" }),
+            config,
+        };
+        const error = new AxiosError(
+            AXIOS_MESSAGE,
+            AXIOS_CODE,
+            config,
+            undefined,
+            response,
+        );
+
+        expect(getApiErrorRetryAfter(error)).toBe(45);
+    });
+
+    it("should return null for an axios error without a Retry-After header", () => {
+        expect(getApiErrorRetryAfter(new AxiosError(AXIOS_MESSAGE))).toBeNull();
+    });
+
+    it("should return null for a non-axios error", () => {
+        expect(getApiErrorRetryAfter(new Error("boom"))).toBeNull();
     });
 });

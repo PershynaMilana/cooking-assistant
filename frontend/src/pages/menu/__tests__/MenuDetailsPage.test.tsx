@@ -1,21 +1,28 @@
-﻿import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
 import type * as ReactRouterDom from "react-router-dom";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import type { MenuDetails } from "types/menu";
 
-import { deleteMenu, getMenuById } from "api/menusApi";
+import { API_ROUTES } from "api/endpoints";
+
+import { MODAL_TYPE } from "redux/slices/uiSlice";
+
+import { ModalRoot } from "components/ui/ModalRoot";
 
 import MenuDetailsPage from "pages/menu/MenuDetailsPage";
+import { mockedDelete, mockedGet } from "test/apiClientMock";
 import { BTN_DELETE_MENU, ROUTE_MENU } from "test/constants";
 import { mockNavigate } from "test/router";
+import { makeTestStore } from "test/store";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/menusApi");
+jest.mock("api/client");
 
 const TITLE = "Weekday menu";
 const OWNER_ID = 5;
@@ -32,18 +39,31 @@ const SAMPLE: MenuDetails = {
     recipes: [],
 };
 
-const renderPage = () =>
-    render(
-        <MemoryRouter initialEntries={["/menu/1"]}>
-            <Routes>
-                <Route path="/menu/:id" element={<MenuDetailsPage />} />
-            </Routes>
-        </MemoryRouter>,
+const renderPage = (store = makeTestStore()) => {
+    const view = render(
+        <Provider store={store}>
+            <MemoryRouter initialEntries={["/menu/1"]}>
+                <Routes>
+                    <Route
+                        path="/menu/:id"
+                        element={
+                            <>
+                                <MenuDetailsPage />
+                                <ModalRoot />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        </Provider>,
     );
+
+    return { store, ...view };
+};
 
 describe("MenuDetailsPage", () => {
     it("should render the menu title loaded from the api", async () => {
-        jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
+        mockedGet.mockResolvedValue({ data: SAMPLE });
 
         renderPage();
 
@@ -51,10 +71,9 @@ describe("MenuDetailsPage", () => {
     });
 
     it("should show Delete button when current user is the menu owner", async () => {
-        jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
+        mockedGet.mockResolvedValue({ data: SAMPLE });
 
         renderPage();
-
         await screen.findByText(TITLE);
 
         expect(
@@ -62,24 +81,30 @@ describe("MenuDetailsPage", () => {
         ).toBeInTheDocument();
     });
 
-    it("should navigate to /menu after successful delete", async () => {
-        jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
-        jest.mocked(deleteMenu).mockResolvedValue(undefined);
+    it("should open the global delete modal and navigate to /menu after delete", async () => {
+        mockedGet.mockResolvedValue({ data: SAMPLE });
+        mockedDelete.mockResolvedValue({ data: null });
 
-        renderPage();
+        const { store } = renderPage();
 
         await screen.findByText(TITLE);
 
         await userEvent.click(
             screen.getByRole("button", { name: BTN_DELETE_MENU }),
         );
+
+        expect(store.getState().ui.modal?.type).toBe(MODAL_TYPE.deleteMenu);
+
         await userEvent.click(screen.getByRole("button", { name: "Delete" }));
 
+        expect(mockedDelete).toHaveBeenCalledWith(API_ROUTES.menu.byId(1), {
+            params: undefined,
+        });
         expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENU);
     });
 
     it("should render the error message when loading the menu fails", async () => {
-        jest.mocked(getMenuById).mockRejectedValue(new Error("boom"));
+        mockedGet.mockRejectedValue(new Error("boom"));
 
         renderPage();
 
@@ -87,9 +112,9 @@ describe("MenuDetailsPage", () => {
     });
 
     it("should close the modal when Cancel is clicked", async () => {
-        jest.mocked(getMenuById).mockResolvedValue(SAMPLE);
+        mockedGet.mockResolvedValue({ data: SAMPLE });
 
-        renderPage();
+        const { store } = renderPage();
 
         await screen.findByText(TITLE);
 
@@ -98,8 +123,6 @@ describe("MenuDetailsPage", () => {
         );
         await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
-        expect(
-            screen.queryByRole("button", { name: "Cancel" }),
-        ).not.toBeInTheDocument();
+        expect(store.getState().ui.modal).toBeNull();
     });
 });
