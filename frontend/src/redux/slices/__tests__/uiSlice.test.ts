@@ -1,3 +1,5 @@
+import type { PantryIngredient } from "types/userIngredient";
+
 import type { ActiveModal, ModalInput } from "redux/slices/uiSlice";
 import {
     closeModal,
@@ -12,6 +14,13 @@ const MODAL_INPUT: ModalInput = {
     ingredientName: "Salt",
 };
 const MODAL: ActiveModal = { id: "modal-1", ...MODAL_INPUT };
+
+const PANTRY_INGREDIENT: PantryIngredient = {
+    id: 9,
+    ingredient_name: "Salt",
+    unit_name: "g",
+    quantity_person_ingradient: 100,
+};
 
 describe("uiSlice", () => {
     it("should start with no modal", () => {
@@ -35,5 +44,47 @@ describe("uiSlice", () => {
         expect(
             uiReducer({ modal: MODAL }, closeModal("modal-2")).modal,
         ).toEqual(MODAL);
+    });
+
+    it("should open a delete-recipe modal carrying the recipe id", () => {
+        const state = uiReducer(
+            undefined,
+            openModal({ type: MODAL_TYPE.deleteRecipe, recipeId: "42" }),
+        );
+
+        expect(state.modal).toMatchObject({
+            type: "deleteRecipe",
+            recipeId: "42",
+        });
+        expect(state.modal?.id.length).toBeGreaterThan(0);
+    });
+
+    it("should open a delete-menu modal carrying the menu id", () => {
+        const state = uiReducer(
+            undefined,
+            openModal({ type: MODAL_TYPE.deleteMenu, menuId: 7 }),
+        );
+
+        expect(state.modal).toMatchObject({
+            type: "deleteMenu",
+            menuId: 7,
+        });
+        expect(state.modal?.id.length).toBeGreaterThan(0);
+    });
+
+    it("should open a delete-ingredient modal carrying the ingredient", () => {
+        const state = uiReducer(
+            undefined,
+            openModal({
+                type: MODAL_TYPE.deleteIngredient,
+                ingredient: PANTRY_INGREDIENT,
+            }),
+        );
+
+        expect(state.modal).toMatchObject({
+            type: "deleteIngredient",
+            ingredient: PANTRY_INGREDIENT,
+        });
+        expect(state.modal?.id.length).toBeGreaterThan(0);
     });
 });

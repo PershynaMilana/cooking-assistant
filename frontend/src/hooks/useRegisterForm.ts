@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "constants/routes";
 import type { RegisterErrors, RegisterRequest } from "types/auth";
 
-import { register as registerRequest } from "api/authApi";
+import { useRegisterMutation } from "redux/services/authApi";
 
 import {
     isValidLogin,
@@ -26,6 +26,7 @@ const EMPTY_FORM: RegisterRequest = {
 export const useRegisterForm = () => {
     const { t } = useTranslation("auth");
     const navigate = useNavigate();
+    const [registerUser] = useRegisterMutation();
 
     const [values, setValues] = useState<RegisterRequest>(EMPTY_FORM);
     const [errors, setErrors] = useState<RegisterErrors>({});
@@ -82,14 +83,14 @@ export const useRegisterForm = () => {
             return;
         }
 
-        try {
-            await registerRequest(values);
+        const result = await registerUser(values);
 
+        if ("data" in result) {
             navigate(ROUTES.login);
-        } catch {
+        } else {
             setError(t("errors.userExists"));
         }
-    }, [navigate, t, validate, values]);
+    }, [navigate, registerUser, t, validate, values]);
 
     return { values, errors, error, setField, handleSubmit };
 };

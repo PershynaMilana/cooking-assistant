@@ -3,17 +3,14 @@ import userEvent from "@testing-library/user-event";
 
 import type { RecipeWithIngredientNames } from "types/recipe";
 
-import { getMenus } from "api/menusApi";
-import { getRecipes } from "api/recipesApi";
-import { getRecipesStats } from "api/statsApi";
+import { API_ROUTES } from "api/endpoints";
 
 import StatsPage from "pages/statistics/StatsPage";
+import { mockGetByUrl } from "test/apiClientMock";
 import { flushMacrotasks as flushAsync } from "test/flush";
 import { renderWithRouter } from "test/router";
 
-jest.mock("api/recipesApi");
-jest.mock("api/menusApi");
-jest.mock("api/statsApi");
+jest.mock("api/client");
 
 // react-apexcharts cannot render under jsdom (canvas), so it is stubbed out
 jest.mock("react-apexcharts", () => ({
@@ -50,9 +47,18 @@ const SAMPLE: RecipeWithIngredientNames[] = [
     },
 ];
 
+const REPORT_FAILED = "Failed to generate report. Please try again.";
+
+const stubData = () => {
+    mockGetByUrl({
+        [API_ROUTES.recipes.list]: SAMPLE,
+        [API_ROUTES.menu.list]: [],
+    });
+};
+
 describe("StatsPage", () => {
     it("should render statistics computed from the loaded recipes", async () => {
-        jest.mocked(getRecipes).mockResolvedValue(SAMPLE);
+        stubData();
 
         renderWithRouter(<StatsPage />);
 
@@ -61,11 +67,7 @@ describe("StatsPage", () => {
     });
 
     it("should download the recipe statistics report as a pdf", async () => {
-        jest.mocked(getRecipes).mockResolvedValue(SAMPLE);
-        jest.mocked(getMenus).mockResolvedValue([]);
-        jest.mocked(getRecipesStats).mockResolvedValue({
-            averageCookingTimes: [],
-        });
+        stubData();
         mockToBlob.mockResolvedValue(new Blob(["report"]));
 
         const createObjectURL = jest.fn(() => "blob:url");
@@ -89,11 +91,7 @@ describe("StatsPage", () => {
     });
 
     it("should download the second statistics report as a pdf", async () => {
-        jest.mocked(getRecipes).mockResolvedValue(SAMPLE);
-        jest.mocked(getMenus).mockResolvedValue([]);
-        jest.mocked(getRecipesStats).mockResolvedValue({
-            averageCookingTimes: [],
-        });
+        stubData();
         mockToBlob.mockResolvedValue(new Blob(["report"]));
 
         const createObjectURL = jest.fn(() => "blob:url");
@@ -114,11 +112,7 @@ describe("StatsPage", () => {
     });
 
     it("should show an error message when report generation fails", async () => {
-        jest.mocked(getRecipes).mockResolvedValue(SAMPLE);
-        jest.mocked(getMenus).mockResolvedValue([]);
-        jest.mocked(getRecipesStats).mockResolvedValue({
-            averageCookingTimes: [],
-        });
+        stubData();
         mockToBlob.mockRejectedValue(new Error("boom"));
 
         renderWithRouter(<StatsPage />);
@@ -127,19 +121,11 @@ describe("StatsPage", () => {
             screen.getByRole("button", { name: "Statistics Report PDF" }),
         );
 
-        expect(
-            await screen.findByText(
-                "Failed to generate report. Please try again.",
-            ),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(REPORT_FAILED)).toBeInTheDocument();
     });
 
     it("should show an error message when the second report generation fails", async () => {
-        jest.mocked(getRecipes).mockResolvedValue(SAMPLE);
-        jest.mocked(getMenus).mockResolvedValue([]);
-        jest.mocked(getRecipesStats).mockResolvedValue({
-            averageCookingTimes: [],
-        });
+        stubData();
         mockToBlob.mockRejectedValue(new Error("boom"));
 
         renderWithRouter(<StatsPage />);
@@ -150,10 +136,6 @@ describe("StatsPage", () => {
             }),
         );
 
-        expect(
-            await screen.findByText(
-                "Failed to generate report. Please try again.",
-            ),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(REPORT_FAILED)).toBeInTheDocument();
     });
 });

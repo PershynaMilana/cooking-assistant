@@ -14,8 +14,7 @@
         "myMenus": "My Menus",
         "login": "Login",
         "register": "Register",
-        "logout": "Logout",
-        "logoutError": "Logout failed. Please try again."
+        "logout": "Logout"
     },
     "search": {
         "placeholderPrefix": "Search by",

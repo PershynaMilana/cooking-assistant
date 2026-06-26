@@ -1,24 +1,22 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAppDispatch } from "redux/hooks";
+import { MODAL_TYPE, openModal } from "redux/slices/uiSlice";
+
 import { useIngredientCatalog } from "hooks/useIngredientCatalog";
 
-import { DeleteConfirmModal } from "components/ingredients/DeleteConfirmModal";
 import { IngredientList } from "components/ingredients/IngredientList";
 import { IngredientsActionBar } from "components/ingredients/IngredientsActionBar";
 import { IngredientSelector } from "components/ingredients/IngredientSelector";
-import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
 import { QuantityEditor } from "components/ingredients/QuantityEditor";
 import { Header } from "components/layout/Header";
 
 const IngredientsPage: React.FC = () => {
     const { t } = useTranslation("ingredients");
+    const dispatch = useAppDispatch();
     const catalog = useIngredientCatalog();
-    const {
-        handleConfirmDelete,
-        handleSaveOrToggleEdit,
-        saveUpdatedQuantities,
-    } = catalog;
+    const { handleSaveOrToggleEdit, saveUpdatedQuantities } = catalog;
 
     return (
         <div>
@@ -41,10 +39,25 @@ const IngredientsPage: React.FC = () => {
                         {!catalog.isEditing ? (
                             <IngredientList
                                 ingredients={catalog.personIngredients}
-                                onOpenHistory={
-                                    catalog.setSelectedHistoryIngredient
-                                }
-                                onDelete={catalog.setSelectedIngredientToDelete}
+                                onOpenHistory={(ingredient) => {
+                                    dispatch(
+                                        openModal({
+                                            type: MODAL_TYPE.ingredientHistory,
+                                            ingredientId: ingredient.id,
+                                            ingredientName:
+                                                ingredient.ingredient_name ??
+                                                "",
+                                        }),
+                                    );
+                                }}
+                                onDelete={(ingredient) => {
+                                    dispatch(
+                                        openModal({
+                                            type: MODAL_TYPE.deleteIngredient,
+                                            ingredient,
+                                        }),
+                                    );
+                                }}
                             />
                         ) : (
                             <IngredientSelector
@@ -66,29 +79,7 @@ const IngredientsPage: React.FC = () => {
                         />
                     </>
                 )}
-
-                {catalog.selectedIngredientToDelete && (
-                    <DeleteConfirmModal
-                        ingredient={catalog.selectedIngredientToDelete}
-                        onConfirm={() => {
-                            void handleConfirmDelete();
-                        }}
-                        onCancel={() => {
-                            catalog.setSelectedIngredientToDelete(null);
-                        }}
-                    />
-                )}
             </div>
-
-            {catalog.selectedHistoryIngredient && (
-                <PurchaseHistoryModal
-                    ingredientId={catalog.selectedHistoryIngredient.id}
-                    ingredientName={
-                        catalog.selectedHistoryIngredient.ingredient_name ?? ""
-                    }
-                    onClose={catalog.closeHistoryModal}
-                />
-            )}
         </div>
     );
 };

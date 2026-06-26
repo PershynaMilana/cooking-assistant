@@ -1,25 +1,17 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
-import { getMenusByPerson } from "api/menusApi";
-
-import { useMenuList } from "hooks/useMenuList";
+import { MENU_SOURCE, useMenuListView } from "hooks/useMenuListView";
 
 import { MenuListView } from "components/menu/MenuListView";
 
 const UserMenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
 
-    const fetcher = useCallback(
-        (params: Parameters<typeof getMenusByPerson>[0]) =>
-            getMenusByPerson(params),
-        [],
-    );
-
-    const list = useMenuList(fetcher);
+    const list = useMenuListView(MENU_SOURCE.person);
 
     const heading =
         list.selectedCategories.length > 0

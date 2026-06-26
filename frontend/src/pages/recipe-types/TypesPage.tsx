@@ -1,14 +1,14 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { useRecipeTypes } from "hooks/useRecipeTypes";
+import { useGetRecipeTypesQuery } from "redux/services/recipeTypesApi";
 
 import { Header } from "components/layout/Header";
 import { TypeListItem } from "components/recipe-types/TypeListItem";
 
 const TypesPage: React.FC = () => {
     const { t } = useTranslation("recipeTypes");
-    const { types } = useRecipeTypes();
+    const { data: types = [] } = useGetRecipeTypesQuery(null);
 
     return (
         <>

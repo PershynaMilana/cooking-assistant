@@ -27,7 +27,7 @@ const authenticateToken: RequestHandler = (req, res, next) => {
     const token = cookies?.[AUTH_COOKIE_NAME]?.trim() ?? "";
 
     if (!token) {
-        res.status(401).json({ error: "No token, access denied" });
+        res.status(401).json({ error: "Session expired, please log in again" });
 
         return;
     }
@@ -36,7 +36,9 @@ const authenticateToken: RequestHandler = (req, res, next) => {
 
     jwt.verify(token, secret, { algorithms: ["HS256"] }, (err, decoded) => {
         if (err !== null || !isUserPayload(decoded)) {
-            res.status(403).json({ error: "Token is invalid or expired" });
+            res.status(403).json({
+                error: "Session expired, please log in again",
+            });
 
             return;
         }

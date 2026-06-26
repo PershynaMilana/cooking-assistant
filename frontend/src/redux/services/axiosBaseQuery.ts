@@ -1,7 +1,11 @@
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 
 import { apiClient } from "api/client";
-import { getApiErrorMessage, getApiErrorStatus } from "api/httpError";
+import {
+    getApiErrorMessage,
+    getApiErrorRetryAfter,
+    getApiErrorStatus,
+} from "api/httpError";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -15,6 +19,7 @@ export interface AxiosBaseQueryArgs {
 export interface AxiosBaseQueryError {
     status?: number;
     data: string;
+    retryAfter: number | null;
 }
 
 export type AxiosBaseQueryFn = BaseQueryFn<
@@ -60,6 +65,7 @@ export const axiosBaseQuery =
                 error: {
                     status: getApiErrorStatus(error),
                     data: getApiErrorMessage(error),
+                    retryAfter: getApiErrorRetryAfter(error),
                 },
             };
         }

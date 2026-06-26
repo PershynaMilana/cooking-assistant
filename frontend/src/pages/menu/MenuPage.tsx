@@ -1,15 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { getMenus } from "api/menusApi";
-
-import { useMenuList } from "hooks/useMenuList";
+import { MENU_SOURCE, useMenuListView } from "hooks/useMenuListView";
 
 import { MenuListView } from "components/menu/MenuListView";
 
 const MenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
-    const list = useMenuList(getMenus);
+    const list = useMenuListView(MENU_SOURCE.all);
 
     const heading =
         list.selectedCategories.length > 0

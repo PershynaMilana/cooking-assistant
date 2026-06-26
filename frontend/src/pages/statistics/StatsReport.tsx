@@ -2,8 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import type { RecipeWithIngredientNames } from "types/recipe";
-
-import type { RecipeTypeStat } from "hooks/useRecipeStatistics";
+import type { RecipeTypeStat } from "types/stats";
 
 import { PdfRecipeList } from "./PdfRecipeList";
 import { PdfReportLayout } from "./PdfReportLayout";

@@ -1,24 +1,23 @@
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { screen } from "@testing-library/react";
 
 import { ListPageLayout } from "components/layout/ListPageLayout";
+
+import { renderWithProviders } from "test/router";
 
 const FILTERS = "filters";
 const CARD = "card";
 
 const renderLayout = (props: { isEmpty: boolean; error: string | null }) =>
-    render(
-        <MemoryRouter>
-            <ListPageLayout
-                filterSlot={<div>{FILTERS}</div>}
-                heading="All Recipes"
-                isEmpty={props.isEmpty}
-                emptyMessage="Nothing here"
-                error={props.error}
-            >
-                <div>{CARD}</div>
-            </ListPageLayout>
-        </MemoryRouter>,
+    renderWithProviders(
+        <ListPageLayout
+            filterSlot={<div>{FILTERS}</div>}
+            heading="All Recipes"
+            isEmpty={props.isEmpty}
+            emptyMessage="Nothing here"
+            error={props.error}
+        >
+            <div>{CARD}</div>
+        </ListPageLayout>,
     );
 
 describe("ListPageLayout", () => {

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import type { RecipeTypeSummary } from "types/recipeType";
 
-import type { RecipeFilterState } from "hooks/useRecipeFilters";
+import type { RecipeFilterState } from "hooks/useRecipeListView";
 
 import { CookingTimeInput } from "components/recipes/CookingTimeInput";
 import { RecipeTypeFilter } from "components/recipes/RecipeTypeFilter";

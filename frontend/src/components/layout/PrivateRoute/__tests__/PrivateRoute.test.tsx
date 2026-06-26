@@ -1,156 +1,100 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { Provider } from "react-redux";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-
-import { getMe } from "api/authApi";
 
 import { PrivateRoute } from "components/layout/PrivateRoute";
 
-jest.mock("api/authApi");
+import { mockedGet } from "test/apiClientMock";
+import { makeTestStore } from "test/store";
+
+jest.mock("api/client");
 
 const PROTECTED = "Protected content";
 const LOGIN = "Login page";
 const PROTECTED_PATH = "/protected";
 const LOGIN_PATH = "/login";
+const SESSION_ERROR = "Could not verify session. Please refresh the page.";
 
 const makeAuthError = (status: number) =>
     Object.assign(new Error(), {
         isAxiosError: true,
-        response: { status },
+        response: { status, data: { error: "Unauthorized" } },
     });
+
+const renderWithChildren = () =>
+    render(
+        <Provider store={makeTestStore()}>
+            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
+                <Routes>
+                    <Route
+                        path={PROTECTED_PATH}
+                        element={
+                            <PrivateRoute>
+                                <div>{PROTECTED}</div>
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
+                </Routes>
+            </MemoryRouter>
+        </Provider>,
+    );
 
 describe("PrivateRoute", () => {
     it("should render children when getMe resolves", async () => {
-        jest.mocked(getMe).mockResolvedValue(undefined);
+        mockedGet.mockResolvedValue({ data: null });
 
-        render(
-            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                <Routes>
-                    <Route
-                        path={PROTECTED_PATH}
-                        element={
-                            <PrivateRoute>
-                                <div>{PROTECTED}</div>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                </Routes>
-            </MemoryRouter>,
-        );
+        renderWithChildren();
 
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(screen.getByText(PROTECTED)).toBeInTheDocument();
+        expect(await screen.findByText(PROTECTED)).toBeInTheDocument();
     });
 
     it("should render the nested outlet when no children are given", async () => {
-        jest.mocked(getMe).mockResolvedValue(undefined);
+        mockedGet.mockResolvedValue({ data: null });
 
         render(
-            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                <Routes>
-                    <Route element={<PrivateRoute />}>
-                        <Route
-                            path={PROTECTED_PATH}
-                            element={<div>{PROTECTED}</div>}
-                        />
-                    </Route>
-                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                </Routes>
-            </MemoryRouter>,
+            <Provider store={makeTestStore()}>
+                <MemoryRouter initialEntries={[PROTECTED_PATH]}>
+                    <Routes>
+                        <Route element={<PrivateRoute />}>
+                            <Route
+                                path={PROTECTED_PATH}
+                                element={<div>{PROTECTED}</div>}
+                            />
+                        </Route>
+                        <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
+                    </Routes>
+                </MemoryRouter>
+            </Provider>,
         );
 
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(screen.getByText(PROTECTED)).toBeInTheDocument();
+        expect(await screen.findByText(PROTECTED)).toBeInTheDocument();
     });
 
     it("should redirect to login when getMe rejects with 401", async () => {
-        jest.mocked(getMe).mockRejectedValue(makeAuthError(401));
+        mockedGet.mockRejectedValue(makeAuthError(401));
 
-        render(
-            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                <Routes>
-                    <Route
-                        path={PROTECTED_PATH}
-                        element={
-                            <PrivateRoute>
-                                <div>{PROTECTED}</div>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                </Routes>
-            </MemoryRouter>,
-        );
+        renderWithChildren();
 
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(screen.getByText(LOGIN)).toBeInTheDocument();
+        expect(await screen.findByText(LOGIN)).toBeInTheDocument();
         expect(screen.queryByText(PROTECTED)).not.toBeInTheDocument();
     });
 
     it("should redirect to login when getMe rejects with 403", async () => {
-        jest.mocked(getMe).mockRejectedValue(makeAuthError(403));
+        mockedGet.mockRejectedValue(makeAuthError(403));
 
-        render(
-            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                <Routes>
-                    <Route
-                        path={PROTECTED_PATH}
-                        element={
-                            <PrivateRoute>
-                                <div>{PROTECTED}</div>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                </Routes>
-            </MemoryRouter>,
-        );
+        renderWithChildren();
 
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(screen.getByText(LOGIN)).toBeInTheDocument();
+        expect(await screen.findByText(LOGIN)).toBeInTheDocument();
         expect(screen.queryByText(PROTECTED)).not.toBeInTheDocument();
     });
 
     it("should show a session error when getMe rejects with a non-auth error", async () => {
-        jest.mocked(getMe).mockRejectedValue(new Error("Network error"));
+        mockedGet.mockRejectedValue(new Error("Network error"));
 
-        render(
-            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                <Routes>
-                    <Route
-                        path={PROTECTED_PATH}
-                        element={
-                            <PrivateRoute>
-                                <div>{PROTECTED}</div>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                </Routes>
-            </MemoryRouter>,
-        );
+        renderWithChildren();
 
-        await act(async () => {
-            await Promise.resolve();
-        });
-
-        expect(
-            await screen.findByText(
-                "Could not verify session. Please refresh the page.",
-            ),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(SESSION_ERROR)).toBeInTheDocument();
         expect(screen.queryByText(PROTECTED)).not.toBeInTheDocument();
         expect(screen.queryByText(LOGIN)).not.toBeInTheDocument();
     });

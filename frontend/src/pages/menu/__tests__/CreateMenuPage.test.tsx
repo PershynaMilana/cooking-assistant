@@ -1,12 +1,11 @@
-﻿import { screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as ReactRouterDom from "react-router-dom";
 
-import { getMenuCategories } from "api/menuCategoriesApi";
-import { createMenu } from "api/menusApi";
-import { getRecipes } from "api/recipesApi";
+import { API_ROUTES } from "api/endpoints";
 
 import CreateMenuPage from "pages/menu/CreateMenuPage";
+import { mockedPost, mockGetByUrl } from "test/apiClientMock";
 import { ROUTE_MENU } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
@@ -14,9 +13,7 @@ jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/menuCategoriesApi");
-jest.mock("api/recipesApi");
-jest.mock("api/menusApi");
+jest.mock("api/client");
 
 const CATEGORY_ID = 2;
 const CATEGORY_NAME = "Lunch";
@@ -41,11 +38,11 @@ const SAMPLE_RECIPES = [
 
 describe("CreateMenuPage", () => {
     it("should create the menu and navigate to the menu list on submit", async () => {
-        jest.mocked(getMenuCategories).mockResolvedValue(SAMPLE_CATEGORIES);
-        jest.mocked(getRecipes).mockResolvedValue(SAMPLE_RECIPES);
-        const mockedCreateMenu = jest.mocked(createMenu);
-
-        mockedCreateMenu.mockResolvedValue(undefined);
+        mockGetByUrl({
+            [API_ROUTES.menuCategories.list]: SAMPLE_CATEGORIES,
+            [API_ROUTES.recipes.list]: SAMPLE_RECIPES,
+        });
+        mockedPost.mockResolvedValue({ data: null });
 
         renderWithRouter(<CreateMenuPage />);
 
@@ -67,7 +64,7 @@ describe("CreateMenuPage", () => {
             screen.getByRole("button", { name: "Create Menu" }),
         );
 
-        expect(mockedCreateMenu).toHaveBeenCalledWith({
+        expect(mockedPost).toHaveBeenCalledWith(API_ROUTES.menu.create, {
             menuTitle: MENU_TITLE,
             menuContent: MENU_DESC,
             categoryId: CATEGORY_ID,

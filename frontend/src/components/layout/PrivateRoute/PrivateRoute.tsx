@@ -1,14 +1,20 @@
 import type { ReactNode } from "react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Outlet } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
-import { getMe } from "api/authApi";
-import { isAxiosError } from "api/client";
+import { useAppSelector } from "redux/hooks";
+import {
+    selectIsAuthed,
+    selectIsChecking,
+} from "redux/selectors/sessionSelectors";
+import { useGetMeQuery } from "redux/services/authApi";
 
-type SessionState = "checking" | "authed" | "unauthed" | "error";
+import { getQueryErrorStatus } from "utils/queryError";
+
+const UNAUTHORIZED_STATUSES = [401, 403];
 
 interface PrivateRouteProps {
     children?: ReactNode;
@@ -16,29 +22,19 @@ interface PrivateRouteProps {
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     const { t } = useTranslation();
-    const [session, setSession] = useState<SessionState>("checking");
+    // drives the session matchers; the slice tracks checking/authed/error
+    const { error } = useGetMeQuery(null);
+    const isChecking = useAppSelector(selectIsChecking);
+    const isAuthed = useAppSelector(selectIsAuthed);
 
-    useEffect(() => {
-        getMe()
-            .then(() => {
-                setSession("authed");
-            })
-            .catch((err: unknown) => {
-                const status = isAxiosError(err)
-                    ? err.response?.status
-                    : undefined;
+    if (isChecking) return <div className="min-h-screen" />;
+    if (isAuthed) return <>{children ?? <Outlet />}</>;
 
-                if (status === 401 || status === 403) {
-                    setSession("unauthed");
-                } else {
-                    setSession("error");
-                }
-            });
-    }, []);
+    const status = getQueryErrorStatus(error);
+    const isUnauthorized =
+        status !== null && UNAUTHORIZED_STATUSES.includes(status);
 
-    if (session === "checking") return <div className="min-h-screen" />;
-    if (session === "unauthed") return <Navigate to={ROUTES.login} replace />;
-    if (session === "error") return <div>{t("sessionError")}</div>;
+    if (isUnauthorized) return <Navigate to={ROUTES.login} replace />;
 
-    return <>{children ?? <Outlet />}</>;
+    return <div>{t("sessionError")}</div>;
 };

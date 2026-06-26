@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 
 const Chart = React.lazy(() => import("./LazyChart"));
 
-import type { RecipeTypeStat } from "hooks/useRecipeStatistics";
+import type { RecipeTypeStat } from "types/stats";
 
 interface RecipeTypeChartProps {
     stats: RecipeTypeStat[];

@@ -1,31 +1,36 @@
-import React, { useState } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
-import { useMenuDetails } from "hooks/useMenuDetails";
+import { useAppDispatch } from "redux/hooks";
+import { useGetMenuByIdQuery } from "redux/services/menusApi";
+import { MODAL_TYPE, openModal } from "redux/slices/uiSlice";
 
 import { Header } from "components/layout/Header";
 import { GroupedRecipesList } from "components/menu/GroupedRecipesList";
 import { MenuMetaInfo } from "components/menu/MenuMetaInfo";
 import { MenuOwnerActions } from "components/menu/MenuOwnerActions";
 import { MissingIngredientsList } from "components/menu/MissingIngredientsList";
-import { Modal } from "components/ui/Modal";
 
 import {
     aggregateMissingIngredients,
     groupRecipesByType,
 } from "utils/menuUtils";
+import { getQueryErrorMessage } from "utils/queryError";
 
 const MenuDetailsPage: React.FC = () => {
     const { t } = useTranslation("menu");
     const { id } = useParams<{ id: string }>();
-    const { menu, error, isOwner, deleteMenu } = useMenuDetails(id);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const { data: menu, isError, error } = useGetMenuByIdQuery(id ?? skipToken);
 
-    if (error) {
+    if (isError) {
         return (
             <div className="text-red-500">
-                {t("menuDetailsPage.error", { message: error })}
+                {t("menuDetailsPage.error", {
+                    message: getQueryErrorMessage(error),
+                })}
             </div>
         );
     }
@@ -34,6 +39,7 @@ const MenuDetailsPage: React.FC = () => {
         return <div>{t("menuDetailsPage.loading")}</div>;
     }
 
+    const isOwner = menu.menu.isOwner;
     const groupedRecipes = groupRecipesByType(menu.recipes);
     const missingIngredients = aggregateMissingIngredients(menu.recipes);
 
@@ -62,24 +68,16 @@ const MenuDetailsPage: React.FC = () => {
                     <MenuOwnerActions
                         menuId={menu.menu.id}
                         onDelete={() => {
-                            setIsModalOpen(true);
+                            dispatch(
+                                openModal({
+                                    type: MODAL_TYPE.deleteMenu,
+                                    menuId: menu.menu.id,
+                                }),
+                            );
                         }}
                     />
                 )}
             </div>
-
-            <Modal
-                isOpen={isModalOpen}
-                title={t("menuDetailsPage.deleteTitle")}
-                message={t("menuDetailsPage.deleteMessage")}
-                onClose={() => {
-                    setIsModalOpen(false);
-                }}
-                onConfirm={() => {
-                    void deleteMenu();
-                    setIsModalOpen(false);
-                }}
-            />
         </div>
     );
 };

@@ -1,15 +1,15 @@
-﻿import { render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
 import type * as ReactRouterDom from "react-router-dom";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import type { RecipeDetails } from "types/recipe";
 
-import { getIngredients } from "api/ingredientsApi";
-import { getRecipeById, updateRecipe } from "api/recipesApi";
-import { getRecipeTypes } from "api/recipeTypesApi";
+import { API_ROUTES } from "api/endpoints";
 
 import ChangeRecipePage from "pages/recipes/ChangeRecipePage";
+import { mockedPut, mockGetByUrl } from "test/apiClientMock";
 import {
     ERROR_COOKING_TIME_FORMAT,
     LABEL_COOKING_TIME,
@@ -17,14 +17,13 @@ import {
     ROUTE_MAIN,
 } from "test/constants";
 import { mockNavigate } from "test/router";
+import { makeTestStore } from "test/store";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
     useNavigate: () => mockNavigate,
 }));
-jest.mock("api/recipesApi");
-jest.mock("api/ingredientsApi");
-jest.mock("api/recipeTypesApi");
+jest.mock("api/client");
 
 const TITLE = "Borscht";
 const UPDATE_RECIPE = "Update Recipe";
@@ -43,21 +42,31 @@ const SAMPLE: RecipeDetails = {
 };
 
 const setup = () => {
-    jest.mocked(getRecipeById).mockResolvedValue(SAMPLE);
-    jest.mocked(getIngredients).mockResolvedValue([]);
-    jest.mocked(getRecipeTypes).mockResolvedValue([]);
+    mockGetByUrl({
+        [API_ROUTES.recipes.byId("1")]: SAMPLE,
+        [API_ROUTES.ingredients.list]: [],
+        [API_ROUTES.recipeTypes.list]: [],
+    });
+    const store = makeTestStore();
 
     render(
-        <MemoryRouter initialEntries={["/change-recipe/1"]}>
-            <Routes>
-                <Route
-                    path="/change-recipe/:id"
-                    element={<ChangeRecipePage />}
-                />
-            </Routes>
-        </MemoryRouter>,
+        <Provider store={store}>
+            <MemoryRouter initialEntries={["/change-recipe/1"]}>
+                <Routes>
+                    <Route
+                        path="/change-recipe/:id"
+                        element={<ChangeRecipePage />}
+                    />
+                </Routes>
+            </MemoryRouter>
+        </Provider>,
     );
+
+    return { store };
 };
+
+const submit = () =>
+    userEvent.click(screen.getByRole("button", { name: UPDATE_RECIPE }));
 
 describe("ChangeRecipePage", () => {
     it("should load the recipe into the edit form", async () => {
@@ -75,55 +84,51 @@ describe("ChangeRecipePage", () => {
 
         await userEvent.clear(cookingTimeInput);
         await userEvent.type(cookingTimeInput, "invalid");
-        await userEvent.click(
-            screen.getByRole("button", { name: UPDATE_RECIPE }),
-        );
+        await submit();
 
         expect(screen.getByText(ERROR_COOKING_TIME_FORMAT)).toBeInTheDocument();
     });
 
-    it("should call updateRecipe with the changed values on valid submit", async () => {
-        jest.mocked(updateRecipe).mockResolvedValue(undefined);
+    it("should update the recipe with the changed values on valid submit", async () => {
+        mockedPut.mockResolvedValue({ data: null });
         setup();
 
         await screen.findByDisplayValue(TITLE);
+        await submit();
 
-        await userEvent.click(
-            screen.getByRole("button", { name: UPDATE_RECIPE }),
-        );
-
-        expect(jest.mocked(updateRecipe)).toHaveBeenCalledWith(
-            "1",
-            expect.objectContaining({
-                title: TITLE,
-                cooking_time: 60,
-            }),
+        expect(mockedPut).toHaveBeenCalledWith(
+            API_ROUTES.recipes.byId("1"),
+            expect.objectContaining({ title: TITLE, cooking_time: 60 }),
         );
     });
 
     it("should navigate home after successful update", async () => {
-        jest.mocked(updateRecipe).mockResolvedValue(undefined);
+        mockedPut.mockResolvedValue({ data: null });
         setup();
 
         await screen.findByDisplayValue(TITLE);
-
-        await userEvent.click(
-            screen.getByRole("button", { name: UPDATE_RECIPE }),
-        );
+        await submit();
 
         expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
     });
 
-    it("should display an error message when updateRecipe fails", async () => {
-        jest.mocked(updateRecipe).mockRejectedValue(new Error("Server error"));
-        setup();
+    it("should notify with an error when the update fails", async () => {
+        mockedPut.mockRejectedValue({
+            isAxiosError: true,
+            response: { status: 500, data: { error: MOCK_ERROR_SERVER } },
+            message: "Request failed",
+        });
+        const { store } = setup();
 
         await screen.findByDisplayValue(TITLE);
+        await submit();
 
-        await userEvent.click(
-            screen.getByRole("button", { name: UPDATE_RECIPE }),
-        );
-
-        expect(await screen.findByText(MOCK_ERROR_SERVER)).toBeInTheDocument();
+        expect(store.getState().notifications.items).toEqual([
+            expect.objectContaining({
+                type: "error",
+                message: MOCK_ERROR_SERVER,
+            }),
+        ]);
+        expect(mockNavigate).not.toHaveBeenCalled();
     });
 });

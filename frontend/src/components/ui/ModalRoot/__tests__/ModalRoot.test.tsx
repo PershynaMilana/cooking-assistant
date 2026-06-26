@@ -1,10 +1,15 @@
 import { act } from "@testing-library/react";
 
+import type { PantryIngredient } from "types/userIngredient";
+
 import type { ActiveModal } from "redux/slices/uiSlice";
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
 import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
 import { ModalRoot } from "components/ui/ModalRoot";
+import { DeleteIngredientModal } from "components/ui/ModalRoot/DeleteIngredientModal";
+import { DeleteMenuModal } from "components/ui/ModalRoot/DeleteMenuModal";
+import { DeleteRecipeModal } from "components/ui/ModalRoot/DeleteRecipeModal";
 
 import { renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
@@ -12,8 +17,27 @@ import { makeTestStore } from "test/store";
 jest.mock("components/ingredients/PurchaseHistoryModal", () => ({
     PurchaseHistoryModal: jest.fn(() => null),
 }));
+jest.mock("components/ui/ModalRoot/DeleteRecipeModal", () => ({
+    DeleteRecipeModal: jest.fn(() => null),
+}));
+jest.mock("components/ui/ModalRoot/DeleteMenuModal", () => ({
+    DeleteMenuModal: jest.fn(() => null),
+}));
+jest.mock("components/ui/ModalRoot/DeleteIngredientModal", () => ({
+    DeleteIngredientModal: jest.fn(() => null),
+}));
 
 const mockedModal = jest.mocked(PurchaseHistoryModal);
+const mockedDeleteRecipe = jest.mocked(DeleteRecipeModal);
+const mockedDeleteMenu = jest.mocked(DeleteMenuModal);
+const mockedDeleteIngredient = jest.mocked(DeleteIngredientModal);
+
+const INGREDIENT: PantryIngredient = {
+    id: 9,
+    ingredient_name: "Salt",
+    unit_name: "g",
+    quantity_person_ingradient: 100,
+};
 
 const MODAL: ActiveModal = {
     id: "modal-1",
@@ -57,5 +81,62 @@ describe("ModalRoot", () => {
 
         expect(container).toBeEmptyDOMElement();
         expect(mockedModal).not.toHaveBeenCalled();
+    });
+
+    it("should render the delete-recipe modal with its id and recipe id", () => {
+        renderWithProviders(<ModalRoot />, {
+            store: makeTestStore({
+                ui: {
+                    modal: {
+                        id: "modal-2",
+                        type: MODAL_TYPE.deleteRecipe,
+                        recipeId: "42",
+                    },
+                },
+            }),
+        });
+
+        const props = mockedDeleteRecipe.mock.calls[0][0];
+
+        expect(props.modalId).toBe("modal-2");
+        expect(props.recipeId).toBe("42");
+    });
+
+    it("should render the delete-menu modal with its id and menu id", () => {
+        renderWithProviders(<ModalRoot />, {
+            store: makeTestStore({
+                ui: {
+                    modal: {
+                        id: "modal-3",
+                        type: MODAL_TYPE.deleteMenu,
+                        menuId: 7,
+                    },
+                },
+            }),
+        });
+
+        const props = mockedDeleteMenu.mock.calls[0][0];
+
+        expect(props.modalId).toBe("modal-3");
+        expect(props.menuId).toBe(7);
+    });
+
+    it("should render the delete-ingredient modal with its id and ingredient", () => {
+        renderWithProviders(<ModalRoot />, {
+            store: makeTestStore({
+                ui: {
+                    modal: {
+                        id: "modal-4",
+                        type: MODAL_TYPE.deleteIngredient,
+                        ingredient: INGREDIENT,
+                    },
+                },
+            }),
+        });
+
+        const props = mockedDeleteIngredient.mock.calls[0][0];
+
+        expect(props.modalId).toBe("modal-4");
+        expect(props.ingredient).toEqual(INGREDIENT);
     });
 });

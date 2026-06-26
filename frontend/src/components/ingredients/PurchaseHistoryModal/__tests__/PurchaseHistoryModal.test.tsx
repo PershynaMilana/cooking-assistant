@@ -1,14 +1,13 @@
-﻿import { screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 
 import type { Purchase } from "types/userIngredient";
 
-import { getPurchaseHistory } from "api/userIngredientsApi";
-
 import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
 
+import { mockedGet } from "test/apiClientMock";
 import { renderWithRouter } from "test/router";
 
-jest.mock("api/userIngredientsApi");
+jest.mock("api/client");
 
 const SAMPLE_HISTORY: Purchase[] = [
     {
@@ -22,7 +21,7 @@ const SAMPLE_HISTORY: Purchase[] = [
 
 describe("PurchaseHistoryModal", () => {
     it("should render purchase history loaded from the api", async () => {
-        jest.mocked(getPurchaseHistory).mockResolvedValue(SAMPLE_HISTORY);
+        mockedGet.mockResolvedValue({ data: SAMPLE_HISTORY });
 
         renderWithRouter(
             <PurchaseHistoryModal
@@ -38,5 +37,26 @@ describe("PurchaseHistoryModal", () => {
         expect(
             screen.getByRole("button", { name: "Close" }),
         ).toBeInTheDocument();
+    });
+
+    it("should show an error message when the history fails to load", async () => {
+        mockedGet.mockRejectedValue({
+            isAxiosError: true,
+            response: { status: 500, data: { error: "Server error" } },
+            message: "Request failed",
+        });
+
+        renderWithRouter(
+            <PurchaseHistoryModal
+                ingredientId={5}
+                ingredientName="Potato"
+                onClose={jest.fn()}
+            />,
+        );
+
+        expect(await screen.findByText("Server error")).toBeInTheDocument();
+        expect(
+            screen.queryByText("No purchase history"),
+        ).not.toBeInTheDocument();
     });
 });

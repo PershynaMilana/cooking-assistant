@@ -1,11 +1,16 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice, nanoid } from "@reduxjs/toolkit";
 
+import type { PantryIngredient } from "types/userIngredient";
+
 // global modal manager: the active modal is a discriminated union keyed by
 // `type`, so ModalRoot renders the matching modal and reads a typed payload.
 // Modal types live here as a single source of truth, with no magic strings.
 export const MODAL_TYPE = {
     ingredientHistory: "ingredientHistory",
+    deleteRecipe: "deleteRecipe",
+    deleteMenu: "deleteMenu",
+    deleteIngredient: "deleteIngredient",
 } as const;
 
 export interface IngredientHistoryModalInput {
@@ -18,8 +23,43 @@ export interface IngredientHistoryModal extends IngredientHistoryModalInput {
     id: string;
 }
 
-export type ModalInput = IngredientHistoryModalInput;
-export type ActiveModal = IngredientHistoryModal;
+export interface DeleteRecipeModalInput {
+    type: typeof MODAL_TYPE.deleteRecipe;
+    recipeId: string;
+}
+
+export interface DeleteRecipeModal extends DeleteRecipeModalInput {
+    id: string;
+}
+
+export interface DeleteMenuModalInput {
+    type: typeof MODAL_TYPE.deleteMenu;
+    menuId: string | number;
+}
+
+export interface DeleteMenuModal extends DeleteMenuModalInput {
+    id: string;
+}
+
+export interface DeleteIngredientModalInput {
+    type: typeof MODAL_TYPE.deleteIngredient;
+    ingredient: PantryIngredient;
+}
+
+export interface DeleteIngredientModal extends DeleteIngredientModalInput {
+    id: string;
+}
+
+export type ModalInput =
+    | IngredientHistoryModalInput
+    | DeleteRecipeModalInput
+    | DeleteMenuModalInput
+    | DeleteIngredientModalInput;
+export type ActiveModal =
+    | IngredientHistoryModal
+    | DeleteRecipeModal
+    | DeleteMenuModal
+    | DeleteIngredientModal;
 
 interface UiState {
     modal: ActiveModal | null;

@@ -21,10 +21,14 @@ changelogs and the tags and now track everything here against one shared version
 
 ## Unreleased
 
+
+## 3.0 - 2026-06-26
+
 ### Frontend
-- Added: Groundwork for centralized app state - a Redux Toolkit store now backs the app: shared sign-in session state (checking / authed / unauthed / error - error is reserved for failed checks, unauthed only for explicit logout), plus a centralized server-data cache (RTK Query) for recipes, menus, ingredients, recipe types, menu categories, the pantry and the session, so data is fetched once and shared across pages and lists refresh automatically after you add, edit, or delete.
-- Added: Groundwork for app-wide toast notifications that surface failed requests, and a single global manager for pop-up dialogs.
+- Added: Centralized app state - a Redux Toolkit store now backs the whole app: shared sign-in session state (checking / authed / unauthed / error - error is reserved for failed checks, unauthed only for explicit logout), plus a centralized server-data cache (RTK Query) for recipes, menus, ingredients, recipe types, menu categories, the pantry and the session, so data is fetched once and shared across pages and every list refreshes automatically after you add, edit, or delete.
+- Added: App-wide toast notifications that confirm successful actions and surface failed requests, plus a single global manager for all pop-up dialogs, including the delete confirmations for recipes, menus and pantry items.
 - Added: Session selectors (`selectSessionStatus`, `selectIsAuthed`, `selectIsChecking`, `selectHasSessionError`) as a separate co-located file - the established pattern for all future slices.
+- Changed: Every page, list, detail view, the statistics page and the recipe and menu filters now read and write through the shared store and cache instead of per-page data fetching, with no change to how the app behaves.
 
 ### Project
 - Added: A `git skip-checks <command>` helper (repo-local alias, auto-installed on `npm install`) runs a single git command with checks skipped, in any shell.

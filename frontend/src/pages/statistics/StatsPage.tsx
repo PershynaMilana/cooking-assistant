@@ -1,50 +1,64 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useMenuStatistics } from "hooks/useMenuStatistics";
-import { useRecipeStatistics } from "hooks/useRecipeStatistics";
+import { useAppSelector } from "redux/hooks";
+import {
+    selectMenuStatistics,
+    selectRecipeStatistics,
+} from "redux/selectors/statisticsSelectors";
+import { useGetMenusQuery } from "redux/services/menusApi";
+import { useGetAllRecipesQuery } from "redux/services/recipesApi";
 
 import { Header } from "components/layout/Header";
 import { RecipeTypeChart } from "components/stats/RecipeTypeChart";
 import { RecipeTypesSummary } from "components/stats/RecipeTypesSummary";
 import { ReportDownloadButtons } from "components/stats/ReportDownloadButtons";
 
+import { getQueryErrorMessage } from "utils/queryError";
+import { triggerDownload } from "utils/triggerDownload";
+
+// stable arg so the menu cache key matches the statistics selector's
+const ALL_MENUS_PARAMS = {};
+
 const StatsPage: React.FC = () => {
     const { t } = useTranslation("stats");
+    const recipesQuery = useGetAllRecipesQuery(null);
+    const menusQuery = useGetMenusQuery(ALL_MENUS_PARAMS);
     const {
         stats,
-        recipesCount,
         fastestRecipes,
         slowestRecipes,
         mostIngredientsRecipes,
         leastIngredientsRecipes,
-    } = useRecipeStatistics();
-    const menuStats = useMenuStatistics(recipesCount);
+    } = useAppSelector(selectRecipeStatistics);
+    const menuStats = useAppSelector(selectMenuStatistics);
     const [downloadError, setDownloadError] = useState<string | null>(null);
 
-    const triggerDownload = (blob: Blob, filename: string) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+    const queryError = menusQuery.error ?? recipesQuery.error;
+    const statsError = queryError ? getQueryErrorMessage(queryError) : null;
 
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    const handleDownload1 = async () => {
+    const runDownload = async (
+        build: () => Promise<Blob>,
+        filename: string,
+    ) => {
         setDownloadError(null);
         try {
+            triggerDownload(await build(), filename);
+        } catch {
+            setDownloadError("Failed to generate report. Please try again.");
+        }
+    };
+
+    const handleDownload1 = () =>
+        runDownload(async () => {
             const [{ pdf }, { StatsReport }] = await Promise.all([
                 import("@react-pdf/renderer"),
                 import("./StatsReport"),
             ]);
-            const reportTime = new Date();
-            const blob = await pdf(
+
+            return pdf(
                 <StatsReport
-                    reportTime={reportTime}
+                    reportTime={new Date()}
                     stats={stats}
                     fastestRecipes={fastestRecipes}
                     slowestRecipes={slowestRecipes}
@@ -52,37 +66,26 @@ const StatsPage: React.FC = () => {
                     leastIngredientsRecipes={leastIngredientsRecipes}
                 />,
             ).toBlob();
+        }, "Statistics_Report.pdf");
 
-            triggerDownload(blob, "Statistics_Report.pdf");
-        } catch {
-            setDownloadError("Failed to generate report. Please try again.");
-        }
-    };
-
-    const handleDownload2 = async () => {
-        setDownloadError(null);
-        try {
+    const handleDownload2 = () =>
+        runDownload(async () => {
             const [{ pdf }, { StatsReportSecond }] = await Promise.all([
                 import("@react-pdf/renderer"),
                 import("./StatsReportSecond"),
             ]);
-            const reportTime = new Date();
-            const blob = await pdf(
+
+            return pdf(
                 <StatsReportSecond
-                    reportTime={reportTime}
+                    reportTime={new Date()}
                     menusCount={menuStats.menusCount}
                     recipesCount={menuStats.recipesCount}
                     averageCookingTimes={menuStats.averageCookingTimes}
                     menuCountByCategory={menuStats.menuCountByCategory}
-                    error={menuStats.error}
+                    error={statsError}
                 />,
             ).toBlob();
-
-            triggerDownload(blob, "Statistics_Second_Report.pdf");
-        } catch {
-            setDownloadError("Failed to generate report. Please try again.");
-        }
-    };
+        }, "Statistics_Second_Report.pdf");
 
     return (
         <div>

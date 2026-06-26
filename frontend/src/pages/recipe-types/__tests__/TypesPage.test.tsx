@@ -2,12 +2,11 @@ import { screen } from "@testing-library/react";
 
 import type { RecipeTypeSummary } from "types/recipeType";
 
-import { getRecipeTypes } from "api/recipeTypesApi";
-
 import TypesPage from "pages/recipe-types/TypesPage";
+import { mockedGet } from "test/apiClientMock";
 import { renderWithRouter } from "test/router";
 
-jest.mock("api/recipeTypesApi");
+jest.mock("api/client");
 
 const TYPE_NAME = "Soup";
 const SAMPLE: RecipeTypeSummary[] = [
@@ -16,7 +15,7 @@ const SAMPLE: RecipeTypeSummary[] = [
 
 describe("TypesPage", () => {
     it("should render the recipe types loaded from the api", async () => {
-        jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE);
+        mockedGet.mockResolvedValue({ data: SAMPLE });
 
         renderWithRouter(<TypesPage />);
 
@@ -24,10 +23,9 @@ describe("TypesPage", () => {
     });
 
     it("should not offer add, edit or delete controls", async () => {
-        jest.mocked(getRecipeTypes).mockResolvedValue(SAMPLE);
+        mockedGet.mockResolvedValue({ data: SAMPLE });
 
         renderWithRouter(<TypesPage />);
-
         await screen.findByText(TYPE_NAME);
 
         expect(

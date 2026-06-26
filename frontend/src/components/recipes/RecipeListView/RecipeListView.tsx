@@ -3,7 +3,7 @@ import React from "react";
 import type { RecipeListItem } from "types/recipe";
 import type { RecipeTypeSummary } from "types/recipeType";
 
-import type { RecipeFilterState } from "hooks/useRecipeFilters";
+import type { RecipeFilterState } from "hooks/useRecipeListView";
 
 import { ListPageLayout } from "components/layout/ListPageLayout";
 import { RecipeCard } from "components/recipes/RecipeCard";

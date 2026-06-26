@@ -3,6 +3,7 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 
 import { notificationsListener } from "redux/middleware/notificationsListener";
 import { baseApi } from "redux/services/baseApi";
+import { filtersReducer } from "redux/slices/filtersSlice";
 import { notificationsReducer } from "redux/slices/notificationsSlice";
 import { sessionReducer } from "redux/slices/sessionSlice";
 import { uiReducer } from "redux/slices/uiSlice";
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
     session: sessionReducer,
     ui: uiReducer,
     notifications: notificationsReducer,
+    filters: filtersReducer,
     [baseApi.reducerPath]: baseApi.reducer,
 });
 
