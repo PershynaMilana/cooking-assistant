@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { selectNotifications } from "redux/selectors/notificationsSelectors";
+import { useAppDispatch } from "redux/hooks";
 import type { Notification } from "redux/slices/notificationsSlice";
 import { removeNotification } from "redux/slices/notificationsSlice";
 
@@ -13,7 +12,7 @@ const TYPE_CLASSNAMES: Record<Notification["type"], string> = {
     info: "bg-gray-800",
 };
 
-const ToastItem = ({ notification }: { notification: Notification }) => {
+export const Toast = ({ notification }: { notification: Notification }) => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -34,21 +33,5 @@ const ToastItem = ({ notification }: { notification: Notification }) => {
         >
             {notification.message}
         </button>
-    );
-};
-
-export const Toaster = () => {
-    const notifications = useAppSelector(selectNotifications);
-
-    if (notifications.length === 0) {
-        return null;
-    }
-
-    return (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-            {notifications.map((notification) => (
-                <ToastItem key={notification.id} notification={notification} />
-            ))}
-        </div>
     );
 };

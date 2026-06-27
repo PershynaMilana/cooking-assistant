@@ -224,18 +224,32 @@ module.exports = tseslint.config(
                     default: "allow",
                     rules: [
                         {
-                            from: ["domain"],
-                            disallow: ["application", "infrastructure", "controller", "routes", "middleware"],
+                            from: [{ type: "domain" }],
+                            disallow: {
+                                to: [
+                                    { type: "application" },
+                                    { type: "infrastructure" },
+                                    { type: "controller" },
+                                    { type: "routes" },
+                                    { type: "middleware" },
+                                ],
+                            },
                             message: "Domain must not import outer layers.",
                         },
                         {
-                            from: ["application"],
-                            disallow: ["infrastructure", "controller", "routes"],
+                            from: [{ type: "application" }],
+                            disallow: {
+                                to: [
+                                    { type: "infrastructure" },
+                                    { type: "controller" },
+                                    { type: "routes" },
+                                ],
+                            },
                             message: "Application must not import infrastructure or HTTP layers.",
                         },
                         {
-                            from: ["controller"],
-                            disallow: ["infrastructure"],
+                            from: [{ type: "controller" }],
+                            disallow: { to: [{ type: "infrastructure" }] },
                             message: "Controllers must not import infrastructure directly; use use-cases.",
                         },
                     ],

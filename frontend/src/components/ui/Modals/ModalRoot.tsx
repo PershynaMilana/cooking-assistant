@@ -2,10 +2,11 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectActiveModal } from "redux/selectors/uiSelectors";
 import { closeModal, MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
-import { DeleteIngredientModal } from "components/ui/ModalRoot/DeleteIngredientModal";
-import { DeleteMenuModal } from "components/ui/ModalRoot/DeleteMenuModal";
-import { DeleteRecipeModal } from "components/ui/ModalRoot/DeleteRecipeModal";
+import { DeleteIngredientModal } from "components/ui/Modals/DeleteIngredientModal";
+import { DeleteMenuModal } from "components/ui/Modals/DeleteMenuModal";
+import { DeleteRecipeModal } from "components/ui/Modals/DeleteRecipeModal";
+import { LogoutConfirmModal } from "components/ui/Modals/LogoutConfirmModal";
+import { PurchaseHistoryModal } from "components/ui/Modals/PurchaseHistoryModal";
 
 // renders the active modal from the ui slice; each modal type maps to one
 // container that owns its own data/mutations
@@ -46,6 +47,10 @@ export const ModalRoot = () => {
                 ingredient={modal.ingredient}
             />
         );
+    }
+
+    if (modal?.type === MODAL_TYPE.logout) {
+        return <LogoutConfirmModal modalId={modal.id} />;
     }
 
     return null;

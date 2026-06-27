@@ -194,4 +194,83 @@ describe("useLoginForm", () => {
             expect(result.current.error).toContain("30");
         });
     });
+
+    describe("client-side escalating lockout", () => {
+        const failOnce = async (result: {
+            current: ReturnType<typeof useLoginForm>;
+        }) => {
+            fillCredentials(result);
+            await act(async () => {
+                await result.current.handleSubmit();
+            });
+        };
+
+        it("should lock after 5 failed attempts even without a server 429", async () => {
+            mockedPost.mockRejectedValue(makeError(401));
+
+            const { result } = renderLoginForm();
+
+            for (let i = 0; i < 5; i += 1) {
+                await failOnce(result);
+            }
+
+            expect(result.current.isLocked).toBe(true);
+            expect(mockedPost).toHaveBeenCalledTimes(5);
+        });
+
+        it("should expose a live remaining-time countdown that ticks down while locked", async () => {
+            jest.useFakeTimers();
+            mockedPost.mockRejectedValue(makeError(401));
+
+            const { result } = renderLoginForm();
+
+            for (let i = 0; i < 5; i += 1) {
+                await failOnce(result);
+            }
+
+            const initialRemaining = result.current.lockoutRemainingMs;
+
+            expect(initialRemaining).not.toBeNull();
+
+            act(() => {
+                jest.advanceTimersByTime(1000);
+            });
+
+            expect(result.current.lockoutRemainingMs).toBeLessThan(
+                initialRemaining ?? 0,
+            );
+            jest.useRealTimers();
+        });
+
+        it("should persist the lockout across a remount", async () => {
+            mockedPost.mockRejectedValue(makeError(401));
+
+            const { result, unmount } = renderLoginForm();
+
+            for (let i = 0; i < 5; i += 1) {
+                await failOnce(result);
+            }
+
+            unmount();
+
+            const view = renderLoginForm();
+
+            expect(view.result.current.isLocked).toBe(true);
+        });
+
+        it("should clear the lockout state on a successful login", async () => {
+            mockedPost
+                .mockRejectedValueOnce(makeError(401))
+                .mockRejectedValueOnce(makeError(401))
+                .mockResolvedValue({ data: null });
+
+            const { result } = renderLoginForm();
+
+            await failOnce(result);
+            await failOnce(result);
+            await failOnce(result);
+
+            expect(localStorage.getItem("cooking.loginLockout")).toBeNull();
+        });
+    });
 });

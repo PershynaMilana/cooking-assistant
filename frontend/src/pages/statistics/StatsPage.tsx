@@ -45,7 +45,7 @@ const StatsPage: React.FC = () => {
         try {
             triggerDownload(await build(), filename);
         } catch {
-            setDownloadError("Failed to generate report. Please try again.");
+            setDownloadError(t("statsPage.reportError"));
         }
     };
 

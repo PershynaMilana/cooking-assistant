@@ -11,8 +11,8 @@ import { ROUTES } from "constants/routes";
 
 import { PageSpinner } from "components/layout/PageSpinner";
 import { PrivateRoute } from "components/layout/PrivateRoute";
-import { ModalRoot } from "components/ui/ModalRoot";
-import { Toaster } from "components/ui/Toaster";
+import { ModalRoot } from "components/ui/Modals";
+import { Toaster } from "components/ui/Toasts";
 
 const LoginPage = React.lazy(() => import("pages/auth/LoginPage"));
 const RegisterPage = React.lazy(() => import("pages/auth/RegisterPage"));

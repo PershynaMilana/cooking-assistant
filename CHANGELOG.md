@@ -22,6 +22,20 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 3.2 - 2026-06-27
+
+### Frontend
+- Added: Repeated failed login attempts now trigger an escalating lockout (1, then 5, 10, 30, and 60 minutes) with a live countdown shown on the form; the lockout survives a page refresh and is lifted immediately on a successful login.
+- Added: Signing out now asks for confirmation first, and shows a "You have been logged out" confirmation toast.
+- Changed: All modal dialogs (delete confirmations, purchase history, sign-out) and all toast notifications now share one consistent look and keyboard/click-outside behavior (Escape and click-outside close a dialog the same way everywhere).
+- Fixed: Checking your session or signing out no longer shows a false "something went wrong" error pop-up.
+- Added: The remaining untranslated text in the app (including the PDF report error message) now goes through the same translation system as the rest of the UI, and any new untranslated text is now caught automatically going forward.
+- Security: Removed an unused PDF dependency (`jspdf`) that carried a critical vulnerability; PDF report export uses `@react-pdf/renderer` only and is unaffected.
+
+### Backend
+- Changed: Internal lint configuration cleanup (no behavior change).
+
+
 ## 3.1 - 2026-06-27
 
 ### Frontend

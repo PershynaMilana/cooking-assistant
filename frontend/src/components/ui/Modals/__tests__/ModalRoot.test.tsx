@@ -5,25 +5,25 @@ import type { PantryIngredient } from "types/userIngredient";
 import type { ActiveModal } from "redux/slices/uiSlice";
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
-import { ModalRoot } from "components/ui/ModalRoot";
-import { DeleteIngredientModal } from "components/ui/ModalRoot/DeleteIngredientModal";
-import { DeleteMenuModal } from "components/ui/ModalRoot/DeleteMenuModal";
-import { DeleteRecipeModal } from "components/ui/ModalRoot/DeleteRecipeModal";
+import { ModalRoot } from "components/ui/Modals";
+import { DeleteIngredientModal } from "components/ui/Modals/DeleteIngredientModal";
+import { DeleteMenuModal } from "components/ui/Modals/DeleteMenuModal";
+import { DeleteRecipeModal } from "components/ui/Modals/DeleteRecipeModal";
+import { PurchaseHistoryModal } from "components/ui/Modals/PurchaseHistoryModal";
 
 import { renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
 
-jest.mock("components/ingredients/PurchaseHistoryModal", () => ({
+jest.mock("components/ui/Modals/PurchaseHistoryModal", () => ({
     PurchaseHistoryModal: jest.fn(() => null),
 }));
-jest.mock("components/ui/ModalRoot/DeleteRecipeModal", () => ({
+jest.mock("components/ui/Modals/DeleteRecipeModal", () => ({
     DeleteRecipeModal: jest.fn(() => null),
 }));
-jest.mock("components/ui/ModalRoot/DeleteMenuModal", () => ({
+jest.mock("components/ui/Modals/DeleteMenuModal", () => ({
     DeleteMenuModal: jest.fn(() => null),
 }));
-jest.mock("components/ui/ModalRoot/DeleteIngredientModal", () => ({
+jest.mock("components/ui/Modals/DeleteIngredientModal", () => ({
     DeleteIngredientModal: jest.fn(() => null),
 }));
 

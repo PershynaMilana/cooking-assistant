@@ -5,6 +5,8 @@ import type { LoginRequest } from "types/auth";
 
 import { FormField, PasswordField } from "components/forms/fields";
 
+import { formatCountdown } from "utils/loginLockout";
+
 interface LoginFormProps {
     values: LoginRequest;
     onFieldChange: (field: keyof LoginRequest, value: string) => void;
@@ -12,6 +14,7 @@ interface LoginFormProps {
     submitLabel: string;
     submitError?: string | null;
     isLocked?: boolean;
+    lockoutRemainingMs?: number | null;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -21,8 +24,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     submitLabel,
     submitError,
     isLocked,
+    lockoutRemainingMs = null,
 }) => {
     const { t } = useTranslation("auth");
+
+    const displayedError =
+        isLocked && lockoutRemainingMs !== null
+            ? t("errors.lockoutCountdown", {
+                  time: formatCountdown(lockoutRemainingMs),
+              })
+            : submitError;
 
     return (
         <form
@@ -50,8 +61,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 showLabel={t("fields.showPassword")}
                 hideLabel={t("fields.hidePassword")}
             />
-            {submitError && (
-                <p className="text-red-500 text-sm">{submitError}</p>
+            {displayedError && (
+                <p className="text-red-500 text-sm">{displayedError}</p>
             )}
             <button
                 type="submit"

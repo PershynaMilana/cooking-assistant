@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 
 import type { Purchase } from "types/userIngredient";
 
-import { PurchaseHistoryModal } from "components/ingredients/PurchaseHistoryModal";
+import { PurchaseHistoryModal } from "components/ui/Modals/PurchaseHistoryModal";
 
 import { mockedGet } from "test/apiClientMock";
 import { renderWithRouter } from "test/router";

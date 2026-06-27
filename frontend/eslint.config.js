@@ -284,16 +284,42 @@ export default tseslint.config(
         },
     },
     {
-        // require translated strings only in the fully-i18n'd shared layers (0 warnings here);
-        // domain pages keep literal text until their slices, so they are NOT scoped
+        // the whole app is i18n-disciplined now (3.2): catch new user-visible
+        // literal JSX text and the few attributes users actually read
+        // (placeholder/alt/aria-label/title) before they ship un-translated
         files: [
-            "src/components/ui/**/*.{ts,tsx}",
-            "src/components/layout/**/*.{ts,tsx}",
+            "src/components/**/*.{ts,tsx}",
+            "src/pages/**/*.{ts,tsx}",
+            "src/hooks/**/*.{ts,tsx}",
             "src/i18n/**/*.{ts,tsx}",
         ],
+        ignores: ["**/__tests__/**"],
         plugins: { i18next },
         rules: {
-            "i18next/no-literal-string": ["warn", { mode: "jsx-text-only" }],
+            "i18next/no-literal-string": [
+                "error",
+                {
+                    mode: "jsx-only",
+                    "jsx-attributes": {
+                        // the plugin's own defaults, plus two narrowly-scoped
+                        // technical (non-user-visible) props this codebase uses:
+                        // a native <option value="asc"> sort key, and the
+                        // idPrefix building internal id/htmlFor pairs
+                        exclude: [
+                            "className",
+                            "styleName",
+                            "style",
+                            "type",
+                            "key",
+                            "id",
+                            "width",
+                            "height",
+                            "value",
+                            "idPrefix",
+                        ],
+                    },
+                },
+            ],
         },
     },
     {

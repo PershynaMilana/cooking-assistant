@@ -16,6 +16,7 @@
         "saveButton": "Save",
         "editQuantitiesButton": "Edit quantities",
         "saveQuantitiesButton": "Save quantities",
+        "deleteTitle": "Delete confirmation",
         "deleteConfirmMessage": "Are you sure you want to delete the ingredient \"{{name}}\"?",
         "confirmButton": "Confirm",
         "cancelButton": "Cancel"

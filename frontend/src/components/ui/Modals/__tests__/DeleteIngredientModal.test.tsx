@@ -1,38 +1,38 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type * as ReactRouterDom from "react-router-dom";
 
-import { ROUTES } from "constants/routes";
+import type { PantryIngredient } from "types/userIngredient";
 
 import { API_ROUTES } from "api/endpoints";
 
 import type { ActiveModal } from "redux/slices/uiSlice";
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { DeleteMenuModal } from "components/ui/ModalRoot/DeleteMenuModal";
+import { DeleteIngredientModal } from "components/ui/Modals/DeleteIngredientModal";
 
 import { mockedDelete } from "test/apiClientMock";
-import { mockNavigate, renderWithProviders } from "test/router";
+import { renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
 
 jest.mock("api/client");
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 
-const MENU_ID = 7;
+const INGREDIENT: PantryIngredient = {
+    id: 9,
+    ingredient_name: "Salt",
+    unit_name: "g",
+    quantity_person_ingradient: 100,
+};
 const MODAL_ID = "m1";
 const MODAL: ActiveModal = {
     id: MODAL_ID,
-    type: MODAL_TYPE.deleteMenu,
-    menuId: MENU_ID,
+    type: MODAL_TYPE.deleteIngredient,
+    ingredient: INGREDIENT,
 };
 
 const renderOpen = () => {
     const store = makeTestStore({ ui: { modal: MODAL } });
     const view = renderWithProviders(
-        <DeleteMenuModal modalId={MODAL_ID} menuId={MENU_ID} />,
+        <DeleteIngredientModal modalId={MODAL_ID} ingredient={INGREDIENT} />,
         { store },
     );
 
@@ -40,35 +40,45 @@ const renderOpen = () => {
 };
 
 const clickConfirm = () =>
-    userEvent.click(screen.getByRole("button", { name: "Delete" }));
+    userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
-describe("DeleteMenuModal", () => {
-    it("should render the delete confirmation", () => {
+describe("DeleteIngredientModal", () => {
+    it("should render the delete confirmation with the ingredient name", () => {
         renderOpen();
 
+        expect(screen.getByText("Delete confirmation")).toBeInTheDocument();
         expect(
-            screen.getByText("Are you sure you want to delete this menu?"),
+            screen.getByText(
+                'Are you sure you want to delete the ingredient "Salt"?',
+            ),
         ).toBeInTheDocument();
     });
 
-    it("should delete the menu, notify, close and navigate on confirm", async () => {
+    it("should use the normalized gray Cancel button (same as other delete dialogs)", () => {
+        renderOpen();
+
+        expect(screen.getByRole("button", { name: "Cancel" })).toHaveClass(
+            "bg-gray-400",
+        );
+    });
+
+    it("should delete the ingredient, notify and close on confirm", async () => {
         mockedDelete.mockResolvedValue({ data: null });
         const { store } = renderOpen();
 
         await clickConfirm();
 
         expect(mockedDelete).toHaveBeenCalledWith(
-            API_ROUTES.menu.byId(MENU_ID),
+            API_ROUTES.userIngredients.item(INGREDIENT.id),
             { params: undefined },
         );
         expect(store.getState().notifications.items).toEqual([
             expect.objectContaining({
                 type: "success",
-                message: "Menu deleted",
+                message: "Ingredient deleted",
             }),
         ]);
         expect(store.getState().ui.modal).toBeNull();
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTES.menu);
     });
 
     it("should close the modal without deleting on cancel", async () => {
@@ -80,7 +90,7 @@ describe("DeleteMenuModal", () => {
         expect(store.getState().ui.modal).toBeNull();
     });
 
-    it("should keep the modal open and not navigate when deletion fails", async () => {
+    it("should keep the modal open when deletion fails", async () => {
         mockedDelete.mockRejectedValue({
             isAxiosError: true,
             response: { status: 500, data: { error: "Boom" } },
@@ -94,6 +104,5 @@ describe("DeleteMenuModal", () => {
         expect(store.getState().notifications.items).toEqual([
             expect.objectContaining({ type: "error", message: "Boom" }),
         ]);
-        expect(mockNavigate).not.toHaveBeenCalled();
     });
 });

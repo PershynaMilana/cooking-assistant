@@ -1,10 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 import type { PantryIngredient } from "types/userIngredient";
 
 import { useAppDispatch } from "redux/hooks";
 import { useDeleteUserIngredientMutation } from "redux/services/userIngredientsApi";
 import { closeModal } from "redux/slices/uiSlice";
 
-import { DeleteConfirmModal } from "components/ingredients/DeleteConfirmModal";
+import { ConfirmModal } from "components/ui/Modals/ConfirmModal";
 
 interface DeleteIngredientModalProps {
     modalId: string;
@@ -15,8 +17,9 @@ export const DeleteIngredientModal = ({
     modalId,
     ingredient,
 }: DeleteIngredientModalProps) => {
+    const { t } = useTranslation("ingredients");
     const dispatch = useAppDispatch();
-    const [deleteIngredient] = useDeleteUserIngredientMutation();
+    const [deleteIngredient, { isLoading }] = useDeleteUserIngredientMutation();
 
     const handleConfirm = async () => {
         // success and failure toasts are handled by the global listener
@@ -28,10 +31,16 @@ export const DeleteIngredientModal = ({
     };
 
     return (
-        <DeleteConfirmModal
-            ingredient={ingredient}
+        <ConfirmModal
+            title={t("page.deleteTitle")}
+            message={t("page.deleteConfirmMessage", {
+                name: ingredient.ingredient_name,
+            })}
+            confirmLabel={t("page.confirmButton")}
+            cancelLabel={t("page.cancelButton")}
+            isConfirmDisabled={isLoading}
+            onClose={() => dispatch(closeModal(modalId))}
             onConfirm={() => void handleConfirm()}
-            onCancel={() => dispatch(closeModal(modalId))}
         />
     );
 };
