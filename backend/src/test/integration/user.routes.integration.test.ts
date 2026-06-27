@@ -1,6 +1,8 @@
 import type { IncomingHttpHeaders } from "http";
 import request from "supertest";
 
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "constants/errorMessages";
+
 import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 describe("user routes", () => {
@@ -59,7 +61,7 @@ describe("user routes", () => {
 
         expect(res.status).toBe(200);
         // token lives only in the cookie, never in the response body
-        expect(res.body).toEqual({ message: "Logged in" });
+        expect(res.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_IN });
 
         const headers = res.headers as IncomingHttpHeaders;
         const setCookie = headers["set-cookie"]?.join(";") ?? "";
@@ -75,7 +77,7 @@ describe("user routes", () => {
         const res = await request(app).post("/api/logout");
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ message: "Logged out" });
+        expect(res.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
         const logoutHeaders = res.headers as IncomingHttpHeaders;
 
         expect(logoutHeaders["set-cookie"]?.join(";") ?? "").toContain(
@@ -127,7 +129,9 @@ describe("user routes", () => {
         });
 
         expect(res.status).toBe(401);
-        expect(res.body).toEqual({ error: "Invalid login or password" });
+        expect(res.body).toEqual({
+            error: ERROR_MESSAGES.INVALID_LOGIN_OR_PASSWORD,
+        });
     });
 
     it("should return a 400 error body for malformed JSON", async () => {

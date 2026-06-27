@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import Menu from "domain/entities/Menu";
 import { NotFoundError, ValidationError } from "domain/errors/AppError";
 
@@ -61,7 +62,11 @@ describe("UpdateMenu", () => {
 
         const error = await catchError(useCase.execute(9, 7, makeInput()));
 
-        expect(error).toBeAppError(NotFoundError, "Menu not found", 404);
+        expect(error).toBeAppError(
+            NotFoundError,
+            ERROR_MESSAGES.MENU_NOT_FOUND,
+            404,
+        );
     });
 
     it("should throw a 400 ValidationError when a recipe does not exist", async () => {
@@ -73,7 +78,7 @@ describe("UpdateMenu", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "One or more recipes do not exist",
+            ERROR_MESSAGES.MENU_RECIPES_NOT_EXIST,
             400,
         );
         expect(menuRepository.update).not.toHaveBeenCalled();

@@ -8,6 +8,7 @@ module.exports = {
     restoreMocks: true,
     setupFilesAfterEnv: ["<rootDir>/src/test/jest.setup.ts"],
     moduleNameMapper: {
+        "^constants/(.*)$": "<rootDir>/src/constants/$1",
         "^domain/(.*)$": "<rootDir>/src/domain/$1",
         "^application/(.*)$": "<rootDir>/src/application/$1",
         "^infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",

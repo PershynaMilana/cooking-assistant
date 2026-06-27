@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import Menu from "domain/entities/Menu";
 import { ValidationError } from "domain/errors/AppError";
 
@@ -75,7 +76,7 @@ describe("CreateMenu", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "One or more recipes do not exist",
+            ERROR_MESSAGES.MENU_RECIPES_NOT_EXIST,
             400,
         );
         expect(menuRepository.create).not.toHaveBeenCalled();
@@ -105,7 +106,7 @@ describe("CreateMenu", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Insufficient data to create menu",
+            ERROR_MESSAGES.MENU_INSUFFICIENT_DATA_CREATE,
             400,
         );
         expect(menuRepository.create).not.toHaveBeenCalled();

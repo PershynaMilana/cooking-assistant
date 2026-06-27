@@ -3,13 +3,17 @@ import {
     getErrorMessage,
 } from "redux/middleware/notificationsListener";
 import { authApi } from "redux/services/authApi";
+import { menusApi } from "redux/services/menusApi";
+import { recipesApi } from "redux/services/recipesApi";
+import { userIngredientsApi } from "redux/services/userIngredientsApi";
 
-import { mockedPost } from "test/apiClientMock";
+import { mockedDelete, mockedPost, mockedPut } from "test/apiClientMock";
 import { makeTestStore } from "test/store";
 
 jest.mock("api/client");
 
-const CREDENTIALS = { login: "a", password: "b" };
+const REQUEST_FAILED_MESSAGE = "Request failed";
+const BAD_CREDENTIALS_ERROR = "Bad credentials";
 
 describe("getErrorMessage", () => {
     it("should return the data message from a query error payload", () => {
@@ -35,19 +39,175 @@ describe("notificationsListener", () => {
     it("should add an error notification when a request fails", async () => {
         mockedPost.mockRejectedValue({
             isAxiosError: true,
-            response: { status: 401, data: { error: "Bad credentials" } },
-            message: "Request failed",
+            response: {
+                status: 401,
+                data: { error: BAD_CREDENTIALS_ERROR },
+            },
+            message: REQUEST_FAILED_MESSAGE,
         });
         const store = makeTestStore();
 
-        await store.dispatch(authApi.endpoints.login.initiate(CREDENTIALS));
+        await store.dispatch(authApi.endpoints.logout.initiate(null));
 
         const { items } = store.getState().notifications;
 
         expect(items).toHaveLength(1);
         expect(items[0]).toMatchObject({
             type: "error",
-            message: "Bad credentials",
+            message: BAD_CREDENTIALS_ERROR,
+        });
+    });
+
+    it("should not add a notification when a login request fails", async () => {
+        mockedPost.mockRejectedValue({
+            isAxiosError: true,
+            response: {
+                status: 401,
+                data: { error: BAD_CREDENTIALS_ERROR },
+            },
+            message: REQUEST_FAILED_MESSAGE,
+        });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            authApi.endpoints.login.initiate({ login: "a", password: "b" }),
+        );
+
+        expect(store.getState().notifications.items).toEqual([]);
+    });
+
+    it("should not add a notification when a register request fails", async () => {
+        mockedPost.mockRejectedValue({
+            isAxiosError: true,
+            response: { status: 409, data: { error: "exists" } },
+            message: REQUEST_FAILED_MESSAGE,
+        });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            authApi.endpoints.register.initiate({
+                name: "Test",
+                surname: "User",
+                login: "tester",
+                password: "secret1",
+            }),
+        );
+
+        expect(store.getState().notifications.items).toEqual([]);
+    });
+});
+
+describe("notificationsListener success toasts", () => {
+    it("should add a success notification when a recipe is deleted", async () => {
+        mockedDelete.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(recipesApi.endpoints.deleteRecipe.initiate("5"));
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "Recipe deleted",
+        });
+    });
+
+    it("should add a success notification when a menu is deleted", async () => {
+        mockedDelete.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(menusApi.endpoints.deleteMenu.initiate(3));
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "Menu deleted",
+        });
+    });
+
+    it("should add a success notification when a user ingredient is deleted", async () => {
+        mockedDelete.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            userIngredientsApi.endpoints.deleteUserIngredient.initiate(7),
+        );
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "Ingredient deleted",
+        });
+    });
+
+    it("should add a success notification when user ingredients are saved", async () => {
+        mockedPut.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            userIngredientsApi.endpoints.saveUserIngredient.initiate({
+                ingredients: [
+                    {
+                        id: 1,
+                        ingredient_name: "Salt",
+                        quantity_person_ingradient: 2,
+                    },
+                ],
+            }),
+        );
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "Ingredients saved",
+        });
+    });
+
+    it("should add a success notification when ingredient quantities are updated", async () => {
+        mockedPut.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            userIngredientsApi.endpoints.updateQuantities.initiate({
+                updatedIngredients: [
+                    { id: 1, unit_name: "g", quantity_person_ingradient: 3 },
+                ],
+            }),
+        );
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "Quantities updated",
+        });
+    });
+
+    it("should add a success notification when a purchase is saved", async () => {
+        mockedPut.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(
+            userIngredientsApi.endpoints.updatePurchase.initiate({
+                purchaseId: 11,
+                body: { quantity: 5 },
+            }),
+        );
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "Purchase saved",
         });
     });
 });

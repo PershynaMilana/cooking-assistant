@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { AppError } from "domain/errors/AppError";
 
 import authenticateToken from "middleware/jwtMiddleware";
@@ -41,7 +42,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -55,7 +56,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -69,7 +70,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -83,7 +84,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -98,7 +99,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -115,7 +116,7 @@ describe("jwtMiddleware", () => {
 
         expect(error).toBeInstanceOf(AppError);
         expect(error).toMatchObject({
-            message: "JWT secret is not configured",
+            message: ERROR_MESSAGES.JWT_NOT_CONFIGURED,
             status: 500,
         });
         expect(res.status).not.toHaveBeenCalled();
@@ -145,7 +146,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -160,7 +161,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -175,7 +176,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });
@@ -190,7 +191,7 @@ describe("jwtMiddleware", () => {
 
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Session expired, please log in again",
+            error: ERROR_MESSAGES.SESSION_EXPIRED,
         });
         expect(next).not.toHaveBeenCalled();
     });

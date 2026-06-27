@@ -64,7 +64,6 @@
         "loading": "Loading...",
         "deleteTitle": "Confirm Deletion",
         "deleteMessage": "Are you sure you want to delete this menu?",
-        "deleted": "Menu deleted",
         "error": "Error: {{message}}"
     }
 }

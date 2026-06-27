@@ -94,9 +94,9 @@ module.exports = tseslint.config(
                     groups: [
                         ["^\\u0000"],
                         [
-                            "^(?!(?:domain|application|infrastructure|controller|routes|middleware|config|test)/)@?\\w",
+                            "^(?!(?:domain|application|infrastructure|controller|routes|middleware|config|constants|test)/)@?\\w",
                         ],
-                        ["^(?:config|domain)/"],
+                        ["^(?:config|constants|domain)/"],
                         ["^application/"],
                         ["^infrastructure/"],
                         ["^(?:controller|routes|middleware)/"],
@@ -207,6 +207,7 @@ module.exports = tseslint.config(
         settings: {
             "boundaries/elements": [
                 { type: "config", pattern: "src/config/**" },
+                { type: "constants", pattern: "src/constants/**" },
                 { type: "domain", pattern: "src/domain/**" },
                 { type: "application", pattern: "src/application/**" },
                 { type: "infrastructure", pattern: "src/infrastructure/**" },

@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { ValidationError } from "domain/errors/AppError";
 
 // raw request shape; validation unifies both quantity field names into quantity_recipe_ingredients
@@ -32,12 +33,12 @@ export type RecipeUpdateData = Omit<RecipeCreationData, "person_id">;
 
 function validateIngredients(ingredients: RecipeIngredient[]): void {
     if (!Array.isArray(ingredients) || ingredients.length === 0) {
-        throw new ValidationError("Ingredients cannot be empty");
+        throw new ValidationError(ERROR_MESSAGES.RECIPE_INGREDIENTS_EMPTY);
     }
 
     for (const ingredient of ingredients) {
         if (!ingredient.id) {
-            throw new ValidationError("All ingredients must have id");
+            throw new ValidationError(ERROR_MESSAGES.RECIPE_INGREDIENTS_NO_ID);
         }
     }
 }
@@ -82,7 +83,9 @@ export class Recipe {
         servings,
     }: RecipeUpdateData): Recipe {
         if (!title || !content) {
-            throw new ValidationError("Title and content cannot be empty");
+            throw new ValidationError(
+                ERROR_MESSAGES.RECIPE_TITLE_CONTENT_EMPTY,
+            );
         }
 
         validateIngredients(ingredients);

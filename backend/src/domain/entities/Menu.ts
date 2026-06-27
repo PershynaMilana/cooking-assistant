@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { ValidationError } from "domain/errors/AppError";
 
 export interface MenuInput {
@@ -27,7 +28,9 @@ export class Menu {
             !menuTitle || !categoryId || !recipeIds || recipeIds.length === 0;
 
         if (hasInsufficientData) {
-            throw new ValidationError("Insufficient data to create menu");
+            throw new ValidationError(
+                ERROR_MESSAGES.MENU_INSUFFICIENT_DATA_CREATE,
+            );
         }
 
         return new Menu({ menuTitle, menuContent, categoryId, personId });
@@ -45,7 +48,9 @@ export class Menu {
             recipeIds.length === 0;
 
         if (hasInsufficientData) {
-            throw new ValidationError("Insufficient data to update menu");
+            throw new ValidationError(
+                ERROR_MESSAGES.MENU_INSUFFICIENT_DATA_UPDATE,
+            );
         }
 
         return new Menu({ menuTitle, menuContent, categoryId });

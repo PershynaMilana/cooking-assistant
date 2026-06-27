@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import { SUCCESS_MESSAGES } from "constants/errorMessages";
+
 import type CreateRecipe from "application/use-cases/recipes/CreateRecipe";
 import type DeleteRecipe from "application/use-cases/recipes/DeleteRecipe";
 import type GetAllIngredients from "application/use-cases/recipes/GetAllIngredients";
@@ -117,7 +119,7 @@ export default class RecipeController {
     deleteRecipe: RequestHandler<{ id: string }> = async (req, res) => {
         await this.deleteRecipeUseCase.execute(req.params.id, getUserId(req));
 
-        res.json({ message: "Recipe successfully deleted" });
+        res.json({ message: SUCCESS_MESSAGES.RECIPE_DELETED });
     };
 
     getAllIngredients: RequestHandler = async (_req, res) => {

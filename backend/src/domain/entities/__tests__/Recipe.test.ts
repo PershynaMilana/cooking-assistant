@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import Recipe from "domain/entities/Recipe";
 import { ValidationError } from "domain/errors/AppError";
 
@@ -36,7 +37,7 @@ describe("Recipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Ingredients cannot be empty",
+            ERROR_MESSAGES.RECIPE_INGREDIENTS_EMPTY,
             400,
         );
     });
@@ -46,7 +47,7 @@ describe("Recipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Ingredients cannot be empty",
+            ERROR_MESSAGES.RECIPE_INGREDIENTS_EMPTY,
             400,
         );
     });
@@ -58,7 +59,7 @@ describe("Recipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "All ingredients must have id",
+            ERROR_MESSAGES.RECIPE_INGREDIENTS_NO_ID,
             400,
         );
     });
@@ -102,7 +103,7 @@ describe("Recipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Title and content cannot be empty",
+            ERROR_MESSAGES.RECIPE_TITLE_CONTENT_EMPTY,
             400,
         );
     });
@@ -112,7 +113,7 @@ describe("Recipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Ingredients cannot be empty",
+            ERROR_MESSAGES.RECIPE_INGREDIENTS_EMPTY,
             400,
         );
     });
@@ -126,7 +127,7 @@ describe("Recipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "All ingredients must have id",
+            ERROR_MESSAGES.RECIPE_INGREDIENTS_NO_ID,
             400,
         );
     });

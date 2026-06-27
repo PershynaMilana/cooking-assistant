@@ -11,6 +11,7 @@ import { getQueryErrorRetryAfter, getQueryErrorStatus } from "utils/queryError";
 
 const EMPTY_FORM: LoginRequest = { login: "", password: "" };
 const TOO_MANY_ATTEMPTS_STATUS = 429;
+const SERVER_ERROR_STATUS_THRESHOLD = 500;
 // used only when the server did not send a Retry-After header
 const FALLBACK_LOCKOUT_SECONDS = 60;
 
@@ -70,13 +71,17 @@ export const useLoginForm = () => {
             return;
         }
 
-        if (getQueryErrorStatus(result.error) === TOO_MANY_ATTEMPTS_STATUS) {
+        const status = getQueryErrorStatus(result.error);
+
+        if (status === TOO_MANY_ATTEMPTS_STATUS) {
             const seconds =
                 getQueryErrorRetryAfter(result.error) ??
                 FALLBACK_LOCKOUT_SECONDS;
 
             setLockedUntil(Date.now() + seconds * 1000);
             setError(t("errors.tooManyAttempts", { seconds }));
+        } else if (status !== null && status >= SERVER_ERROR_STATUS_THRESHOLD) {
+            setError(t("errors.serverError"));
         } else {
             setError(t("errors.invalidCredentials"));
         }

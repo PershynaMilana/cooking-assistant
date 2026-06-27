@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import { SUCCESS_MESSAGES } from "constants/errorMessages";
+
 import type CreateMenu from "application/use-cases/menus/CreateMenu";
 import type DeleteMenu from "application/use-cases/menus/DeleteMenu";
 import type GetAllMenus from "application/use-cases/menus/GetAllMenus";
@@ -56,7 +58,10 @@ export default class MenuController {
             personId,
         });
 
-        res.status(201).json({ message: "Menu created successfully", menuId });
+        res.status(201).json({
+            message: SUCCESS_MESSAGES.MENU_CREATED,
+            menuId,
+        });
     };
 
     getById: RequestHandler<{ id: string }> = async (req, res) => {
@@ -74,13 +79,13 @@ export default class MenuController {
 
         await this.updateMenuUseCase.execute(req.params.id, personId, body);
 
-        res.status(200).json({ message: "Menu updated successfully" });
+        res.status(200).json({ message: SUCCESS_MESSAGES.MENU_UPDATED });
     };
 
     remove: RequestHandler<{ id: string }> = async (req, res) => {
         await this.deleteMenuUseCase.execute(req.params.id, getUserId(req));
 
-        res.status(200).json({ message: "Menu deleted successfully" });
+        res.status(200).json({ message: SUCCESS_MESSAGES.MENU_DELETED });
     };
 
     searchByPerson: RequestHandler = async (req, res) => {

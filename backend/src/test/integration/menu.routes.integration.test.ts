@@ -1,5 +1,7 @@
 import request from "supertest";
 
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "constants/errorMessages";
+
 import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 function makeMenuBody() {
@@ -47,7 +49,7 @@ describe("menu routes", () => {
 
         expect(res.status).toBe(201);
         expect(res.body).toEqual({
-            message: "Menu created successfully",
+            message: SUCCESS_MESSAGES.MENU_CREATED,
             menuId: 9,
         });
         expect(deps.menuRepository.create.mock.calls[0][0]).toMatchObject({
@@ -71,7 +73,7 @@ describe("menu routes", () => {
 
         expect(res.status).toBe(400);
         expect(res.body).toEqual({
-            error: "One or more recipes do not exist",
+            error: ERROR_MESSAGES.MENU_RECIPES_NOT_EXIST,
         });
         expect(deps.menuRepository.create).not.toHaveBeenCalled();
     });
@@ -129,7 +131,7 @@ describe("menu routes", () => {
             .send(makeMenuBody());
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ message: "Menu updated successfully" });
+        expect(res.body).toEqual({ message: SUCCESS_MESSAGES.MENU_UPDATED });
         expect(deps.menuRepository.update.mock.calls[0][0]).toBe(9);
         expect(deps.menuRepository.update.mock.calls[0][1]).toBe(7);
     });
@@ -146,7 +148,7 @@ describe("menu routes", () => {
             .send(makeMenuBody());
 
         expect(res.status).toBe(404);
-        expect(res.body).toEqual({ error: "Menu not found" });
+        expect(res.body).toEqual({ error: ERROR_MESSAGES.MENU_NOT_FOUND });
     });
 
     it("should delete a menu owned by the authenticated user", async () => {
@@ -159,7 +161,7 @@ describe("menu routes", () => {
             .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ message: "Menu deleted successfully" });
+        expect(res.body).toEqual({ message: SUCCESS_MESSAGES.MENU_DELETED });
         expect(deps.menuRepository.deleteById).toHaveBeenCalledWith(9, 7);
     });
 
@@ -190,6 +192,6 @@ describe("menu routes", () => {
             .set("Cookie", authCookie());
 
         expect(res.status).toBe(404);
-        expect(res.body).toEqual({ error: "Menu not found" });
+        expect(res.body).toEqual({ error: ERROR_MESSAGES.MENU_NOT_FOUND });
     });
 });

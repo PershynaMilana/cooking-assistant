@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { NotFoundError } from "domain/errors/AppError";
 
 import GetRecipeById from "application/use-cases/recipes/GetRecipeById";
@@ -19,7 +20,11 @@ describe("GetRecipeById", () => {
 
         const error = await catchError(useCase.execute(12, 7));
 
-        expect(error).toBeAppError(NotFoundError, "Recipe not found", 404);
+        expect(error).toBeAppError(
+            NotFoundError,
+            ERROR_MESSAGES.RECIPE_NOT_FOUND,
+            404,
+        );
     });
 
     it("should return the recipe and pass the requesting user to the repository", async () => {
