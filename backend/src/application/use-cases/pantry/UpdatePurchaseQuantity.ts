@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { NotFoundError } from "domain/errors/AppError";
 import type { PantryRepository } from "domain/repositories/PantryRepository";
 
@@ -29,7 +30,7 @@ export default class UpdatePurchaseQuantity {
         );
 
         if (!updated) {
-            throw new NotFoundError("Purchase not found.");
+            throw new NotFoundError(ERROR_MESSAGES.PURCHASE_NOT_FOUND);
         }
     }
 }

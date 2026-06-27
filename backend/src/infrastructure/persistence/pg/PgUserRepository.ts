@@ -1,5 +1,6 @@
 import type { Pool } from "pg";
 
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { AppError } from "domain/errors/AppError";
 import type {
     NewUser,
@@ -51,7 +52,7 @@ export default class PgUserRepository implements UserRepository {
             return result.rows[0];
         } catch (error) {
             if (isUniqueViolation(error)) {
-                throw new AppError("Login already taken", 409);
+                throw new AppError(ERROR_MESSAGES.LOGIN_ALREADY_TAKEN, 409);
             }
             throw error;
         }

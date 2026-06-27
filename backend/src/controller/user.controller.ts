@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS } from "config/cookie";
+import { SUCCESS_MESSAGES } from "constants/errorMessages";
 
 import type GetUsers from "application/use-cases/users/GetUsers";
 import type LoginUser from "application/use-cases/users/LoginUser";
@@ -43,12 +44,12 @@ export default class UserController {
         );
 
         res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
-        res.json({ message: "Logged in" });
+        res.json({ message: SUCCESS_MESSAGES.LOGGED_IN });
     };
 
     logout: RequestHandler = (_req, res) => {
         res.clearCookie(AUTH_COOKIE_NAME, AUTH_COOKIE_OPTIONS);
-        res.json({ message: "Logged out" });
+        res.json({ message: SUCCESS_MESSAGES.LOGGED_OUT });
     };
 
     me: RequestHandler = (req, res) => {

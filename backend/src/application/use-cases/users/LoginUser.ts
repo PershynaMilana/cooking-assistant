@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { UnauthorizedError } from "domain/errors/AppError";
 import type { UserRepository } from "domain/repositories/UserRepository";
 
@@ -19,7 +20,9 @@ export default class LoginUser {
         const user = await this.userRepository.findByLogin(data.login);
 
         if (!user) {
-            throw new UnauthorizedError("Invalid login or password");
+            throw new UnauthorizedError(
+                ERROR_MESSAGES.INVALID_LOGIN_OR_PASSWORD,
+            );
         }
 
         const isPasswordValid = await this.passwordHasher.compare(
@@ -28,7 +31,9 @@ export default class LoginUser {
         );
 
         if (!isPasswordValid) {
-            throw new UnauthorizedError("Invalid login or password");
+            throw new UnauthorizedError(
+                ERROR_MESSAGES.INVALID_LOGIN_OR_PASSWORD,
+            );
         }
 
         const token = this.tokenService.generate(user.id);

@@ -1,5 +1,7 @@
 import request from "supertest";
 
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "constants/errorMessages";
+
 import { authCookie, buildTestApp } from "test/helpers/testApp";
 
 describe("user ingredient routes", () => {
@@ -38,7 +40,7 @@ describe("user ingredient routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
-            message: "Ingredients updated successfully",
+            message: SUCCESS_MESSAGES.INGREDIENTS_UPDATED,
         });
         expect(deps.pantryRepository.addIngredients).toHaveBeenCalledWith(7, [
             { id: 3, quantity_person_ingradient: 2 },
@@ -56,7 +58,7 @@ describe("user ingredient routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
-            message: "Ingredient and its history successfully deleted",
+            message: SUCCESS_MESSAGES.INGREDIENT_DELETED,
         });
         expect(deps.pantryRepository.deleteIngredient).toHaveBeenCalledWith(
             7,
@@ -78,7 +80,7 @@ describe("user ingredient routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
-            message: "Ingredient quantities and purchase history updated",
+            message: SUCCESS_MESSAGES.QUANTITIES_UPDATED,
         });
     });
 
@@ -94,7 +96,7 @@ describe("user ingredient routes", () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({
-            message: "Purchase quantity updated successfully.",
+            message: SUCCESS_MESSAGES.PURCHASE_UPDATED,
         });
         expect(
             deps.pantryRepository.updatePurchaseQuantity,
@@ -130,6 +132,6 @@ describe("user ingredient routes", () => {
             .send({ quantity: 4 });
 
         expect(res.status).toBe(404);
-        expect(res.body).toEqual({ error: "Purchase not found." });
+        expect(res.body).toEqual({ error: ERROR_MESSAGES.PURCHASE_NOT_FOUND });
     });
 });

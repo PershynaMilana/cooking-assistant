@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { NotFoundError, ValidationError } from "domain/errors/AppError";
 
 import UpdatePurchaseQuantity from "application/use-cases/pantry/UpdatePurchaseQuantity";
@@ -32,7 +33,11 @@ describe("UpdatePurchaseQuantity", () => {
 
         const error = await catchError(useCase.execute(7, 12, 3));
 
-        expect(error).toBeAppError(NotFoundError, "Purchase not found.", 404);
+        expect(error).toBeAppError(
+            NotFoundError,
+            ERROR_MESSAGES.PURCHASE_NOT_FOUND,
+            404,
+        );
     });
 
     it("should throw a 400 ValidationError when quantity is below 1", async () => {

@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { AppError, NotFoundError } from "domain/errors/AppError";
 
 import errorHandler from "middleware/errorHandler";
@@ -14,7 +15,7 @@ function makeResponse(headersSent = false) {
 
 describe("errorHandler", () => {
     it("should respond with the AppError status and message", () => {
-        const err = new NotFoundError("Recipe not found");
+        const err = new NotFoundError(ERROR_MESSAGES.RECIPE_NOT_FOUND);
         const req = {} as Request;
         const res = makeResponse();
         const next = jest.fn() as NextFunction;
@@ -22,12 +23,14 @@ describe("errorHandler", () => {
         errorHandler(err, req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ error: "Recipe not found" });
+        expect(res.json).toHaveBeenCalledWith({
+            error: ERROR_MESSAGES.RECIPE_NOT_FOUND,
+        });
         expect(next).not.toHaveBeenCalled();
     });
 
     it("should hide the message of an AppError with a 5xx status", () => {
-        const err = new AppError("JWT secret is not configured", 500);
+        const err = new AppError(ERROR_MESSAGES.JWT_NOT_CONFIGURED, 500);
         const req = {} as Request;
         const res = makeResponse();
         const next = jest.fn() as NextFunction;

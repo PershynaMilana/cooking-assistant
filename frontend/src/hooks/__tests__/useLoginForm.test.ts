@@ -1,7 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
-import type { ReactNode } from "react";
-import React from "react";
-import { Provider } from "react-redux";
+import { act } from "@testing-library/react";
 import type * as ReactRouterDom from "react-router-dom";
 
 import { API_ROUTES } from "api/endpoints";
@@ -10,7 +7,7 @@ import { useLoginForm } from "hooks/useLoginForm";
 
 import { mockedPost } from "test/apiClientMock";
 import { mockNavigate } from "test/router";
-import { makeTestStore } from "test/store";
+import { renderHookWithStore } from "test/store";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
@@ -31,10 +28,7 @@ const makeError = (status: number, retryAfter: number | null = null) =>
         },
     });
 
-const wrapper = ({ children }: { children: ReactNode }) =>
-    React.createElement(Provider, { store: makeTestStore(), children });
-
-const renderLoginForm = () => renderHook(() => useLoginForm(), { wrapper });
+const renderLoginForm = () => renderHookWithStore(() => useLoginForm());
 
 const fillCredentials = (result: {
     current: ReturnType<typeof useLoginForm>;
@@ -90,6 +84,34 @@ describe("useLoginForm", () => {
 
         expect(result.current.error).toBe("Incorrect username or password.");
         expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("should show a server error message on 500", async () => {
+        mockedPost.mockRejectedValue(makeError(500));
+
+        const { result } = renderLoginForm();
+
+        fillCredentials(result);
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(result.current.error?.toLowerCase()).toContain("server error");
+    });
+
+    it("should not show a toast notification on login error", async () => {
+        mockedPost.mockRejectedValue(makeError(401));
+
+        const { result, store } = renderLoginForm();
+
+        fillCredentials(result);
+
+        await act(async () => {
+            await result.current.handleSubmit();
+        });
+
+        expect(store.getState().notifications.items).toEqual([]);
     });
 
     describe("lockout on 429", () => {

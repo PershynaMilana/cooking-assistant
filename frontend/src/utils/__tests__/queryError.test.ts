@@ -1,3 +1,5 @@
+import i18next from "i18next";
+
 import {
     getQueryErrorMessage,
     getQueryErrorRetryAfter,
@@ -13,12 +15,14 @@ describe("getQueryErrorMessage", () => {
 
     it("should fall back when the error has no string data", () => {
         expect(getQueryErrorMessage({ status: 500 })).toBe(
-            "Something went wrong",
+            i18next.t("notifications.somethingWentWrong"),
         );
     });
 
     it("should fall back for an unknown error shape", () => {
-        expect(getQueryErrorMessage(undefined)).toBe("Something went wrong");
+        expect(getQueryErrorMessage(undefined)).toBe(
+            i18next.t("notifications.somethingWentWrong"),
+        );
     });
 });
 

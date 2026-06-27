@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { NotFoundError } from "domain/errors/AppError";
 import type { MenuRepository } from "domain/repositories/MenuRepository";
 
@@ -12,7 +13,7 @@ export default class DeleteMenu {
         const deleted = await this.menuRepository.deleteById(menuId, personId);
 
         if (!deleted) {
-            throw new NotFoundError("Menu not found");
+            throw new NotFoundError(ERROR_MESSAGES.MENU_NOT_FOUND);
         }
     }
 }

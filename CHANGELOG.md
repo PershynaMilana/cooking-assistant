@@ -22,6 +22,20 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 3.1 - 2026-06-27
+
+### Frontend
+- Fixed: Logging in now shows a clear "A server error occurred" message instead of the misleading "incorrect username or password" message when the server itself fails.
+- Fixed: A failed login attempt no longer shows a duplicate error pop-up on top of the inline message under the form.
+- Added: Create/edit recipe and create/edit menu pages now use RTK Query mutations directly instead of legacy wrapper calls, so the cache invalidates automatically and no manual refetch is needed.
+- Added: Successful delete and save operations (recipe, menu, pantry ingredient, ingredient quantities, purchase) now show a green confirmation toast.
+- Added: All toast messages (success confirmations and the generic fallback error) are now driven by i18n keys, ready for future translation.
+
+### Backend
+- Changed: Error messages returned by the API are now defined in one shared place, so wording stays consistent everywhere a given error can occur.
+- Changed: Success messages returned by the API (login, logout, create/update/delete menu, delete recipe, pantry operations) are now defined in one shared constants file, eliminating hardcoded strings across four controllers.
+
+
 ## 3.0 - 2026-06-26
 
 ### Frontend

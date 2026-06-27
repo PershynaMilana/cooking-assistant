@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import { SUCCESS_MESSAGES } from "constants/errorMessages";
+
 import type AddUserIngredients from "application/use-cases/pantry/AddUserIngredients";
 import type DeleteUserIngredient from "application/use-cases/pantry/DeleteUserIngredient";
 import type GetPurchaseHistory from "application/use-cases/pantry/GetPurchaseHistory";
@@ -57,7 +59,7 @@ export default class UserIngredientsController {
         await this.addUserIngredientsUseCase.execute(userId, ingredients);
 
         res.status(200).json({
-            message: "Ingredients updated successfully",
+            message: SUCCESS_MESSAGES.INGREDIENTS_UPDATED,
         });
     };
 
@@ -73,7 +75,7 @@ export default class UserIngredientsController {
         );
 
         res.json({
-            message: "Ingredient and its history successfully deleted",
+            message: SUCCESS_MESSAGES.INGREDIENT_DELETED,
         });
     };
 
@@ -87,7 +89,7 @@ export default class UserIngredientsController {
         );
 
         res.json({
-            message: "Ingredient quantities and purchase history updated",
+            message: SUCCESS_MESSAGES.QUANTITIES_UPDATED,
         });
     };
 
@@ -105,7 +107,7 @@ export default class UserIngredientsController {
         );
 
         res.status(200).json({
-            message: "Purchase quantity updated successfully.",
+            message: SUCCESS_MESSAGES.PURCHASE_UPDATED,
         });
     };
 

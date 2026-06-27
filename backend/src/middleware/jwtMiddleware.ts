@@ -3,6 +3,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 
 import { AUTH_COOKIE_NAME } from "config/cookie";
 import { requireJwtSecret } from "config/env";
+import { ERROR_MESSAGES } from "constants/errorMessages";
 
 function isUserPayload(
     decoded: string | JwtPayload | undefined,
@@ -27,7 +28,7 @@ const authenticateToken: RequestHandler = (req, res, next) => {
     const token = cookies?.[AUTH_COOKIE_NAME]?.trim() ?? "";
 
     if (!token) {
-        res.status(401).json({ error: "Session expired, please log in again" });
+        res.status(401).json({ error: ERROR_MESSAGES.SESSION_EXPIRED });
 
         return;
     }
@@ -37,7 +38,7 @@ const authenticateToken: RequestHandler = (req, res, next) => {
     jwt.verify(token, secret, { algorithms: ["HS256"] }, (err, decoded) => {
         if (err !== null || !isUserPayload(decoded)) {
             res.status(403).json({
-                error: "Session expired, please log in again",
+                error: ERROR_MESSAGES.SESSION_EXPIRED,
             });
 
             return;

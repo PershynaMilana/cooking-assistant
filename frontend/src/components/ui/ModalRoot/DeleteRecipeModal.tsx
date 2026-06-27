@@ -5,7 +5,6 @@ import { ROUTES } from "constants/routes";
 
 import { useAppDispatch } from "redux/hooks";
 import { useDeleteRecipeMutation } from "redux/services/recipesApi";
-import { addNotification } from "redux/slices/notificationsSlice";
 import { closeModal } from "redux/slices/uiSlice";
 
 import { Modal } from "components/ui/Modal";
@@ -25,16 +24,10 @@ export const DeleteRecipeModal = ({
     const [deleteRecipe, { isLoading }] = useDeleteRecipeMutation();
 
     const handleConfirm = async () => {
-        // a failed mutation is already toasted by the global listener
+        // success and failure toasts are handled by the global listener
         const result = await deleteRecipe(recipeId);
 
         if ("data" in result) {
-            dispatch(
-                addNotification({
-                    type: "success",
-                    message: t("recipeDetailsPage.deleted"),
-                }),
-            );
             dispatch(closeModal(modalId));
             navigate(ROUTES.main);
         }

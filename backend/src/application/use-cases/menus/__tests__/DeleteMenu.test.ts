@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { NotFoundError, ValidationError } from "domain/errors/AppError";
 
 import DeleteMenu from "application/use-cases/menus/DeleteMenu";
@@ -28,7 +29,11 @@ describe("DeleteMenu", () => {
 
         const error = await catchError(useCase.execute(9, 7));
 
-        expect(error).toBeAppError(NotFoundError, "Menu not found", 404);
+        expect(error).toBeAppError(
+            NotFoundError,
+            ERROR_MESSAGES.MENU_NOT_FOUND,
+            404,
+        );
     });
 
     it("should delete the menu when it belongs to the user", async () => {

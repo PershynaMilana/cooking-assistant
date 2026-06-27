@@ -5,7 +5,6 @@ import { ROUTES } from "constants/routes";
 
 import { useAppDispatch } from "redux/hooks";
 import { useDeleteMenuMutation } from "redux/services/menusApi";
-import { addNotification } from "redux/slices/notificationsSlice";
 import { closeModal } from "redux/slices/uiSlice";
 
 import { Modal } from "components/ui/Modal";
@@ -22,16 +21,10 @@ export const DeleteMenuModal = ({ modalId, menuId }: DeleteMenuModalProps) => {
     const [deleteMenu, { isLoading }] = useDeleteMenuMutation();
 
     const handleConfirm = async () => {
-        // a failed mutation is already toasted by the global listener
+        // success and failure toasts are handled by the global listener
         const result = await deleteMenu(menuId);
 
         if ("data" in result) {
-            dispatch(
-                addNotification({
-                    type: "success",
-                    message: t("menuDetailsPage.deleted"),
-                }),
-            );
             dispatch(closeModal(modalId));
             navigate(ROUTES.menu);
         }

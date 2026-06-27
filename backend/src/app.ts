@@ -12,6 +12,7 @@ import {
     JSON_BODY_LIMIT,
     TRUST_PROXY_HOPS,
 } from "config/security";
+import { ERROR_MESSAGES } from "constants/errorMessages";
 
 import errorHandler from "middleware/errorHandler";
 import { createGlobalLimiter } from "middleware/rateLimit";
@@ -63,7 +64,7 @@ export function createApp(controllers: Controllers): Express {
     );
 
     app.use((_req, res) => {
-        res.status(404).json({ error: "Not found" });
+        res.status(404).json({ error: ERROR_MESSAGES.NOT_FOUND });
     });
     app.use(errorHandler);
 

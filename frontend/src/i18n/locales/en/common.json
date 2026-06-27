@@ -34,5 +34,14 @@
         "subtitle": "It looks like you got lost",
         "description": "The page you are looking for does not exist or has been moved. We suggest you return to the homepage.",
         "goHome": "GO TO HOMEPAGE"
+    },
+    "notifications": {
+        "somethingWentWrong": "Something went wrong",
+        "recipeDeleted": "Recipe deleted",
+        "menuDeleted": "Menu deleted",
+        "ingredientDeleted": "Ingredient deleted",
+        "ingredientsSaved": "Ingredients saved",
+        "quantitiesUpdated": "Quantities updated",
+        "purchaseSaved": "Purchase saved"
     }
 }

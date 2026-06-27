@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import Recipe from "domain/entities/Recipe";
 import { ValidationError } from "domain/errors/AppError";
 
@@ -90,7 +91,7 @@ describe("CreateRecipe", () => {
 
         expect(error).toBeAppError(
             ValidationError,
-            "Ingredients cannot be empty",
+            ERROR_MESSAGES.RECIPE_INGREDIENTS_EMPTY,
             400,
         );
         expect(recipeRepository.create).not.toHaveBeenCalled();

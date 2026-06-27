@@ -1,4 +1,4 @@
-const FALLBACK_ERROR_MESSAGE = "Something went wrong";
+import i18next from "i18next";
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null;
@@ -10,7 +10,7 @@ export const getQueryErrorMessage = (error: unknown): string => {
         return error.data;
     }
 
-    return FALLBACK_ERROR_MESSAGE;
+    return i18next.t("notifications.somethingWentWrong");
 };
 
 // the HTTP status the axios base query attached to a failed RTK Query result

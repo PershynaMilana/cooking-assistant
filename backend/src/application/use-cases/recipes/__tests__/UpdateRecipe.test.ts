@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import Recipe from "domain/entities/Recipe";
 import { NotFoundError, ValidationError } from "domain/errors/AppError";
 
@@ -72,7 +73,11 @@ describe("UpdateRecipe", () => {
 
         const error = await catchError(useCase.execute(12, 7, makeInput()));
 
-        expect(error).toBeAppError(NotFoundError, "Recipe not found", 404);
+        expect(error).toBeAppError(
+            NotFoundError,
+            ERROR_MESSAGES.RECIPE_NOT_FOUND,
+            404,
+        );
     });
 
     it("should throw a 400 ValidationError before updating when input is invalid", async () => {

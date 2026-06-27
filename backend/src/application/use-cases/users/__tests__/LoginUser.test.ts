@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "constants/errorMessages";
 import { UnauthorizedError } from "domain/errors/AppError";
 
 import LoginUser from "application/use-cases/users/LoginUser";
@@ -36,7 +37,7 @@ describe("LoginUser", () => {
 
         expect(error).toBeAppError(
             UnauthorizedError,
-            "Invalid login or password",
+            ERROR_MESSAGES.INVALID_LOGIN_OR_PASSWORD,
             401,
         );
     });
@@ -54,7 +55,7 @@ describe("LoginUser", () => {
 
         expect(error).toBeAppError(
             UnauthorizedError,
-            "Invalid login or password",
+            ERROR_MESSAGES.INVALID_LOGIN_OR_PASSWORD,
             401,
         );
     });
