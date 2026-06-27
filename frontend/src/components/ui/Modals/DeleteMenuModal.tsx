@@ -4,40 +4,36 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "constants/routes";
 
 import { useAppDispatch } from "redux/hooks";
-import { useDeleteRecipeMutation } from "redux/services/recipesApi";
+import { useDeleteMenuMutation } from "redux/services/menusApi";
 import { closeModal } from "redux/slices/uiSlice";
 
-import { Modal } from "components/ui/Modal";
+import { ConfirmModal } from "components/ui/Modals/ConfirmModal";
 
-interface DeleteRecipeModalProps {
+interface DeleteMenuModalProps {
     modalId: string;
-    recipeId: string;
+    menuId: string | number;
 }
 
-export const DeleteRecipeModal = ({
-    modalId,
-    recipeId,
-}: DeleteRecipeModalProps) => {
-    const { t } = useTranslation("recipes");
+export const DeleteMenuModal = ({ modalId, menuId }: DeleteMenuModalProps) => {
+    const { t } = useTranslation("menu");
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const [deleteRecipe, { isLoading }] = useDeleteRecipeMutation();
+    const [deleteMenu, { isLoading }] = useDeleteMenuMutation();
 
     const handleConfirm = async () => {
         // success and failure toasts are handled by the global listener
-        const result = await deleteRecipe(recipeId);
+        const result = await deleteMenu(menuId);
 
         if ("data" in result) {
             dispatch(closeModal(modalId));
-            navigate(ROUTES.main);
+            navigate(ROUTES.menu);
         }
     };
 
     return (
-        <Modal
-            isOpen
-            title={t("recipeDetailsPage.deleteTitle")}
-            message={t("recipeDetailsPage.deleteMessage")}
+        <ConfirmModal
+            title={t("menuDetailsPage.deleteTitle")}
+            message={t("menuDetailsPage.deleteMessage")}
             isConfirmDisabled={isLoading}
             onClose={() => dispatch(closeModal(modalId))}
             onConfirm={() => void handleConfirm()}

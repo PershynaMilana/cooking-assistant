@@ -16,7 +16,7 @@ carry the cookie.
 - **axios** - HTTP client, wrapped behind a single shared instance in `src/api/`
 - **i18next + react-i18next** - all user-facing strings (one namespace per domain, `en` locale today)
 - **ApexCharts + react-apexcharts** - charts on the stats page (lazy-loaded)
-- **@react-pdf/renderer + jspdf** - PDF report export (lazy-loaded on click)
+- **@react-pdf/renderer** - PDF report export (lazy-loaded on click)
 - **Jest 30 + @swc/jest + React Testing Library + jsdom** - test suite (~108 files, 80% coverage gate)
 
 > No `jwt-decode`, no Redux/RTK, no global state library. State lives in custom hooks; auth lives in the

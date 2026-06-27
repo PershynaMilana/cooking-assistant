@@ -9,7 +9,7 @@ import { API_ROUTES } from "api/endpoints";
 import type { ActiveModal } from "redux/slices/uiSlice";
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { DeleteRecipeModal } from "components/ui/ModalRoot/DeleteRecipeModal";
+import { DeleteRecipeModal } from "components/ui/Modals/DeleteRecipeModal";
 
 import { mockedDelete } from "test/apiClientMock";
 import { mockNavigate, renderWithProviders } from "test/router";

@@ -69,4 +69,25 @@ describe("LoginForm", () => {
             screen.getByText("Incorrect username or password."),
         ).toBeInTheDocument();
     });
+
+    it("should show the live lockout countdown instead of the submit error while locked", () => {
+        render(
+            <LoginForm
+                values={VALUES}
+                onFieldChange={jest.fn()}
+                onSubmit={jest.fn()}
+                submitLabel="Log In"
+                submitError="Incorrect username or password."
+                isLocked
+                lockoutRemainingMs={65_000}
+            />,
+        );
+
+        expect(
+            screen.getByText("Too many attempts. Try again in 1:05."),
+        ).toBeInTheDocument();
+        expect(
+            screen.queryByText("Incorrect username or password."),
+        ).not.toBeInTheDocument();
+    });
 });

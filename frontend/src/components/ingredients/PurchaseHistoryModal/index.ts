@@ -1,1 +1,0 @@
-export { PurchaseHistoryModal } from "./PurchaseHistoryModal";

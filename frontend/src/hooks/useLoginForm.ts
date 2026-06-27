@@ -7,6 +7,13 @@ import type { LoginRequest } from "types/auth";
 
 import { useLoginMutation } from "redux/services/authApi";
 
+import {
+    clearLockout,
+    mergeServerRetryAfter,
+    readLockout,
+    registerFailure,
+    writeLockout,
+} from "utils/loginLockout";
 import { getQueryErrorRetryAfter, getQueryErrorStatus } from "utils/queryError";
 
 const EMPTY_FORM: LoginRequest = { login: "", password: "" };
@@ -14,6 +21,7 @@ const TOO_MANY_ATTEMPTS_STATUS = 429;
 const SERVER_ERROR_STATUS_THRESHOLD = 500;
 // used only when the server did not send a Retry-After header
 const FALLBACK_LOCKOUT_SECONDS = 60;
+const TICK_INTERVAL_MS = 1000;
 
 // a failed login shows one generic message, never revealing whether the username or the password was wrong
 export const useLoginForm = () => {
@@ -23,26 +31,34 @@ export const useLoginForm = () => {
 
     const [values, setValues] = useState<LoginRequest>(EMPTY_FORM);
     const [error, setError] = useState<string | null>(null);
-    const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+    const [lockout, setLockout] = useState(() => readLockout());
+    const [now, setNow] = useState(() => Date.now());
 
+    const { lockedUntil } = lockout;
+
+    // ticks once a second while locked, both to drive a live countdown and to
+    // auto-unlock the moment the lock expires
     useEffect(() => {
-        if (lockedUntil === null) return undefined;
-
-        const remaining = lockedUntil - Date.now();
-
-        if (remaining <= 0) {
-            setLockedUntil(null);
-
+        if (lockedUntil === null) {
             return undefined;
         }
 
-        const timer = setTimeout(() => {
-            setLockedUntil(null);
-            setError(null);
-        }, remaining);
+        const tick = () => {
+            const currentNow = Date.now();
+
+            setNow(currentNow);
+
+            if (currentNow >= lockedUntil) {
+                setLockout((prev) => ({ ...prev, lockedUntil: null }));
+                setError(null);
+            }
+        };
+
+        tick();
+        const interval = setInterval(tick, TICK_INTERVAL_MS);
 
         return () => {
-            clearTimeout(timer);
+            clearInterval(interval);
         };
     }, [lockedUntil]);
 
@@ -50,7 +66,8 @@ export const useLoginForm = () => {
         setValues((prev) => ({ ...prev, [field]: value }));
     }, []);
 
-    const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
+    const isLocked = lockedUntil !== null && now < lockedUntil;
+    const lockoutRemainingMs = isLocked ? lockedUntil - now : null;
 
     const handleSubmit = useCallback(async () => {
         if (isLocked) return;
@@ -66,6 +83,8 @@ export const useLoginForm = () => {
         const result = await login(values);
 
         if ("data" in result) {
+            clearLockout();
+            setLockout({ failures: 0, lockedUntil: null });
             navigate(ROUTES.main);
 
             return;
@@ -77,15 +96,21 @@ export const useLoginForm = () => {
             const seconds =
                 getQueryErrorRetryAfter(result.error) ??
                 FALLBACK_LOCKOUT_SECONDS;
+            const next = mergeServerRetryAfter(lockout, seconds);
 
-            setLockedUntil(Date.now() + seconds * 1000);
+            writeLockout(next);
+            setLockout(next);
             setError(t("errors.tooManyAttempts", { seconds }));
         } else if (status !== null && status >= SERVER_ERROR_STATUS_THRESHOLD) {
             setError(t("errors.serverError"));
         } else {
+            const next = registerFailure(lockout);
+
+            writeLockout(next);
+            setLockout(next);
             setError(t("errors.invalidCredentials"));
         }
-    }, [isLocked, login, navigate, t, values]);
+    }, [isLocked, lockout, login, navigate, t, values]);
 
     return {
         values,
@@ -93,5 +118,6 @@ export const useLoginForm = () => {
         setField,
         handleSubmit,
         isLocked,
+        lockoutRemainingMs,
     };
 };

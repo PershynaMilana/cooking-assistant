@@ -1,7 +1,4 @@
-import {
-    FALLBACK_ERROR_MESSAGE,
-    getErrorMessage,
-} from "redux/middleware/notificationsListener";
+import { getErrorMessage } from "redux/middleware/notificationsListener";
 import { authApi } from "redux/services/authApi";
 import { menusApi } from "redux/services/menusApi";
 import { recipesApi } from "redux/services/recipesApi";
@@ -14,6 +11,7 @@ jest.mock("api/client");
 
 const REQUEST_FAILED_MESSAGE = "Request failed";
 const BAD_CREDENTIALS_ERROR = "Bad credentials";
+const FALLBACK_ERROR_MESSAGE = "Something went wrong";
 
 describe("getErrorMessage", () => {
     it("should return the data message from a query error payload", () => {
@@ -37,17 +35,17 @@ describe("getErrorMessage", () => {
 
 describe("notificationsListener", () => {
     it("should add an error notification when a request fails", async () => {
-        mockedPost.mockRejectedValue({
+        mockedDelete.mockRejectedValue({
             isAxiosError: true,
             response: {
-                status: 401,
+                status: 500,
                 data: { error: BAD_CREDENTIALS_ERROR },
             },
             message: REQUEST_FAILED_MESSAGE,
         });
         const store = makeTestStore();
 
-        await store.dispatch(authApi.endpoints.logout.initiate(null));
+        await store.dispatch(recipesApi.endpoints.deleteRecipe.initiate("5"));
 
         const { items } = store.getState().notifications;
 
@@ -94,6 +92,50 @@ describe("notificationsListener", () => {
         );
 
         expect(store.getState().notifications.items).toEqual([]);
+    });
+
+    it("should not add a notification when a getMe request fails", async () => {
+        mockedPost.mockRejectedValue({
+            isAxiosError: true,
+            response: { status: 401, data: { error: "Unauthorized" } },
+            message: REQUEST_FAILED_MESSAGE,
+        });
+        const store = makeTestStore();
+
+        await store.dispatch(authApi.endpoints.getMe.initiate(null));
+
+        expect(store.getState().notifications.items).toEqual([]);
+    });
+
+    it("should not add a notification when a logout request fails", async () => {
+        mockedPost.mockRejectedValue({
+            isAxiosError: true,
+            response: {
+                status: 500,
+                data: { error: BAD_CREDENTIALS_ERROR },
+            },
+            message: REQUEST_FAILED_MESSAGE,
+        });
+        const store = makeTestStore();
+
+        await store.dispatch(authApi.endpoints.logout.initiate(null));
+
+        expect(store.getState().notifications.items).toEqual([]);
+    });
+
+    it("should add a success notification when logout succeeds", async () => {
+        mockedPost.mockResolvedValue({ data: null });
+        const store = makeTestStore();
+
+        await store.dispatch(authApi.endpoints.logout.initiate(null));
+
+        const { items } = store.getState().notifications;
+
+        expect(items).toHaveLength(1);
+        expect(items[0]).toMatchObject({
+            type: "success",
+            message: "You have been logged out",
+        });
     });
 });
 

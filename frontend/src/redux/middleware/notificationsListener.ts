@@ -12,10 +12,6 @@ import { recipesApi } from "redux/services/recipesApi";
 import { userIngredientsApi } from "redux/services/userIngredientsApi";
 import { addNotification } from "redux/slices/notificationsSlice";
 
-export const FALLBACK_ERROR_MESSAGE = i18next.t(
-    "notifications.somethingWentWrong",
-);
-
 const isQueryError = (payload: unknown): payload is AxiosBaseQueryError => {
     if (typeof payload !== "object" || payload === null) {
         return false;
@@ -30,11 +26,16 @@ export const getErrorMessage = (payload: unknown): string =>
         ? payload.data
         : i18next.t("notifications.somethingWentWrong");
 
-// auth forms that already render their own inline error - excluded from the
-// global toast so a failed login/register doesn't double-report
+// requests that already render their own feedback - excluded from the global
+// toast so they don't double-report: login/register show an inline form
+// error, getMe's failure is shown by PrivateRoute's session-error message,
+// and a failed logout shouldn't surface as a scary generic error (a 401/403
+// is already a hard-redirect to login via the api client interceptor)
 export const isSelfHandledRejection = isAnyOf(
     authApi.endpoints.login.matchRejected,
     authApi.endpoints.register.matchRejected,
+    authApi.endpoints.getMe.matchRejected,
+    authApi.endpoints.logout.matchRejected,
 );
 
 export const notificationsListener = createListenerMiddleware();
@@ -127,6 +128,20 @@ notificationsListener.startListening({
             addNotification({
                 type: "success",
                 message: i18next.t("notifications.purchaseSaved"),
+            }),
+        );
+    },
+});
+
+// a deliberate logout gets its own confirmation - distinct from the silent
+// hard-redirect that happens when a session merely expires
+notificationsListener.startListening({
+    matcher: authApi.endpoints.logout.matchFulfilled,
+    effect: (_action, listenerApi) => {
+        listenerApi.dispatch(
+            addNotification({
+                type: "success",
+                message: i18next.t("notifications.loggedOut"),
             }),
         );
     },

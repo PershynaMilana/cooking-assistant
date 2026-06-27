@@ -2,7 +2,7 @@ import { act, fireEvent, screen } from "@testing-library/react";
 
 import type { Notification } from "redux/slices/notificationsSlice";
 
-import { Toaster } from "components/ui/Toaster";
+import { Toaster } from "components/ui/Toasts/Toaster";
 
 import { renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";

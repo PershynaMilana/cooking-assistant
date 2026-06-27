@@ -9,6 +9,7 @@ import {
 } from "redux/services/userIngredientsApi";
 
 import { PurchaseItem } from "components/ingredients/PurchaseItem";
+import { BaseModal } from "components/ui/Modals/BaseModal";
 
 import { getQueryErrorMessage } from "utils/queryError";
 
@@ -68,38 +69,35 @@ export const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({
     const hasHistory = !isLoading && !isError && items.length > 0;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                <h2 className="text-2xl font-bold mb-4">
-                    {t("purchaseModal.title", { name: ingredientName })}
-                </h2>
-                {isLoading && <p>{t("purchaseModal.loading")}</p>}
-                {isError && (
-                    <p className="text-red-500">
-                        {getQueryErrorMessage(error)}
-                    </p>
-                )}
-                {isEmpty && <p>{t("purchaseModal.noHistory")}</p>}
-                {hasHistory && (
-                    <ul className="space-y-2">
-                        {items.map((purchase) => (
-                            <PurchaseItem
-                                key={purchase.id}
-                                purchase={purchase}
-                                language={i18n.language}
-                                onQuantityChange={handleQuantityChange}
-                                onSave={handleSave}
-                            />
-                        ))}
-                    </ul>
-                )}
-                <button
-                    onClick={onClose}
-                    className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-full"
-                >
-                    {t("purchaseModal.closeButton")}
-                </button>
-            </div>
-        </div>
+        <BaseModal
+            size="md"
+            title={t("purchaseModal.title", { name: ingredientName })}
+            onClose={onClose}
+        >
+            {isLoading && <p>{t("purchaseModal.loading")}</p>}
+            {isError && (
+                <p className="text-red-500">{getQueryErrorMessage(error)}</p>
+            )}
+            {isEmpty && <p>{t("purchaseModal.noHistory")}</p>}
+            {hasHistory && (
+                <ul className="space-y-2">
+                    {items.map((purchase) => (
+                        <PurchaseItem
+                            key={purchase.id}
+                            purchase={purchase}
+                            language={i18n.language}
+                            onQuantityChange={handleQuantityChange}
+                            onSave={handleSave}
+                        />
+                    ))}
+                </ul>
+            )}
+            <button
+                onClick={onClose}
+                className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-full"
+            >
+                {t("purchaseModal.closeButton")}
+            </button>
+        </BaseModal>
     );
 };

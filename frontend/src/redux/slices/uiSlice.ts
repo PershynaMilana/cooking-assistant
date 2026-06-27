@@ -11,6 +11,7 @@ export const MODAL_TYPE = {
     deleteRecipe: "deleteRecipe",
     deleteMenu: "deleteMenu",
     deleteIngredient: "deleteIngredient",
+    logout: "logout",
 } as const;
 
 export interface IngredientHistoryModalInput {
@@ -50,16 +51,26 @@ export interface DeleteIngredientModal extends DeleteIngredientModalInput {
     id: string;
 }
 
+export interface LogoutModalInput {
+    type: typeof MODAL_TYPE.logout;
+}
+
+export interface LogoutModal extends LogoutModalInput {
+    id: string;
+}
+
 export type ModalInput =
     | IngredientHistoryModalInput
     | DeleteRecipeModalInput
     | DeleteMenuModalInput
-    | DeleteIngredientModalInput;
+    | DeleteIngredientModalInput
+    | LogoutModalInput;
 export type ActiveModal =
     | IngredientHistoryModal
     | DeleteRecipeModal
     | DeleteMenuModal
-    | DeleteIngredientModal;
+    | DeleteIngredientModal
+    | LogoutModal;
 
 interface UiState {
     modal: ActiveModal | null;

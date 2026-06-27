@@ -10,7 +10,7 @@ import { API_ROUTES } from "api/endpoints";
 
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { ModalRoot } from "components/ui/ModalRoot";
+import { ModalRoot } from "components/ui/Modals";
 
 import RecipeDetailsPage from "pages/recipes/RecipeDetailsPage";
 import { mockedDelete, mockedGet } from "test/apiClientMock";

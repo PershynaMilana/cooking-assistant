@@ -4,6 +4,11 @@
         "cancel": "Cancel",
         "confirm": "Delete"
     },
+    "logoutModal": {
+        "title": "Log out",
+        "message": "Are you sure you want to log out of your account?",
+        "confirm": "Log out"
+    },
     "header": {
         "home": "Home",
         "myRecipes": "My Recipes",
@@ -37,6 +42,7 @@
     },
     "notifications": {
         "somethingWentWrong": "Something went wrong",
+        "loggedOut": "You have been logged out",
         "recipeDeleted": "Recipe deleted",
         "menuDeleted": "Menu deleted",
         "ingredientDeleted": "Ingredient deleted",
