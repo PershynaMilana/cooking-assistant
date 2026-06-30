@@ -1,5 +1,5 @@
+import i18next from "i18next";
 import React from "react";
-import { useTranslation } from "react-i18next";
 
 import type { RecipeWithIngredientNames } from "types/recipe";
 import type { RecipeTypeStat } from "types/stats";
@@ -17,6 +17,8 @@ interface StatsReportProps {
     leastIngredientsRecipes: RecipeWithIngredientNames[];
 }
 
+const t = (key: string) => i18next.t(`stats:${key}`);
+
 export const StatsReport: React.FC<StatsReportProps> = ({
     reportTime,
     stats,
@@ -24,38 +26,34 @@ export const StatsReport: React.FC<StatsReportProps> = ({
     slowestRecipes,
     mostIngredientsRecipes,
     leastIngredientsRecipes,
-}) => {
-    const { t, i18n } = useTranslation("stats");
-
-    return (
-        <PdfReportLayout reportTime={reportTime} language={i18n.language}>
-            <PdfStatList
-                title={t("statsReport.recipeTypes")}
-                items={stats.map((s) => ({
-                    label: s.typeName,
-                    value: s.count,
-                }))}
-            />
-            <PdfRecipeList
-                title={t("statsReport.fastestRecipes")}
-                recipes={fastestRecipes}
-                variant="time"
-            />
-            <PdfRecipeList
-                title={t("statsReport.slowestRecipes")}
-                recipes={slowestRecipes}
-                variant="time"
-            />
-            <PdfRecipeList
-                title={t("statsReport.mostIngredients")}
-                recipes={mostIngredientsRecipes}
-                variant="ingredients"
-            />
-            <PdfRecipeList
-                title={t("statsReport.leastIngredients")}
-                recipes={leastIngredientsRecipes}
-                variant="ingredients"
-            />
-        </PdfReportLayout>
-    );
-};
+}) => (
+    <PdfReportLayout reportTime={reportTime} language={i18next.language}>
+        <PdfStatList
+            title={t("statsReport.recipeTypes")}
+            items={stats.map((s) => ({
+                label: s.typeName,
+                value: s.count,
+            }))}
+        />
+        <PdfRecipeList
+            title={t("statsReport.fastestRecipes")}
+            recipes={fastestRecipes}
+            variant="time"
+        />
+        <PdfRecipeList
+            title={t("statsReport.slowestRecipes")}
+            recipes={slowestRecipes}
+            variant="time"
+        />
+        <PdfRecipeList
+            title={t("statsReport.mostIngredients")}
+            recipes={mostIngredientsRecipes}
+            variant="ingredients"
+        />
+        <PdfRecipeList
+            title={t("statsReport.leastIngredients")}
+            recipes={leastIngredientsRecipes}
+            variant="ingredients"
+        />
+    </PdfReportLayout>
+);

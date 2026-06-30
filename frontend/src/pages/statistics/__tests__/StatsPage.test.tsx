@@ -12,8 +12,8 @@ import { renderWithRouter } from "test/router";
 
 jest.mock("api/client");
 
-// react-apexcharts cannot render under jsdom (canvas), so it is stubbed out
-jest.mock("react-apexcharts", () => ({
+// recharts cannot fully render under jsdom (SVG/ResizeObserver), so it is stubbed out
+jest.mock("components/stats/RecipeTypeChart/PieChart", () => ({
     __esModule: true,
     default: () => null,
 }));

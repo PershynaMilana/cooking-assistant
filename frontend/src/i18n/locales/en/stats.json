@@ -7,6 +7,8 @@
         "slowestRecipes": "Slowest Recipes:",
         "mostIngredients": "Recipes with Most Ingredients:",
         "leastIngredients": "Recipes with Least Ingredients:",
+        "recipesLabel": "recipes",
+        "legendEntry": "{{name}}: {{count}}",
         "downloadReport1": "Statistics Report PDF",
         "downloadReport2": "Statistics Report PDF - Option 2",
         "reportError": "Failed to generate report. Please try again.",

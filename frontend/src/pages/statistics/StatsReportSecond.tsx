@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
+import i18next from "i18next";
 import React from "react";
-import { useTranslation } from "react-i18next";
 
 import type { AverageCookingTime, MenuCategoryStat } from "types/stats";
 
@@ -17,6 +17,9 @@ interface StatsReportSecondProps {
     error: string | null;
 }
 
+const t = (key: string, opts?: Record<string, unknown>) =>
+    i18next.t(`stats:${key}`, opts);
+
 export const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
     reportTime,
     menusCount,
@@ -24,52 +27,44 @@ export const StatsReportSecond: React.FC<StatsReportSecondProps> = ({
     averageCookingTimes,
     menuCountByCategory,
     error,
-}) => {
-    const { t, i18n } = useTranslation("stats");
+}) => (
+    <PdfReportLayout
+        reportTime={reportTime}
+        language={i18next.language}
+        error={error ? t("statsReportSecond.error", { message: error }) : null}
+    >
+        <View style={reportStyles.section}>
+            <Text style={reportStyles.title}>
+                {t("statsReportSecond.title")}
+            </Text>
+        </View>
 
-    return (
-        <PdfReportLayout
-            reportTime={reportTime}
-            language={i18n.language}
-            error={
-                error ? t("statsReportSecond.error", { message: error }) : null
-            }
-        >
-            <View style={reportStyles.section}>
-                <Text style={reportStyles.title}>
-                    {t("statsReportSecond.title")}
-                </Text>
-            </View>
+        <View style={reportStyles.section}>
+            <Text style={reportStyles.subtitle}>
+                {t("statsReportSecond.totalMenus", { count: menusCount })}
+            </Text>
+        </View>
 
-            <View style={reportStyles.section}>
-                <Text style={reportStyles.subtitle}>
-                    {t("statsReportSecond.totalMenus", { count: menusCount })}
-                </Text>
-            </View>
+        <View style={reportStyles.section}>
+            <Text style={reportStyles.subtitle}>
+                {t("statsReportSecond.totalRecipes", { count: recipesCount })}
+            </Text>
+        </View>
 
-            <View style={reportStyles.section}>
-                <Text style={reportStyles.subtitle}>
-                    {t("statsReportSecond.totalRecipes", {
-                        count: recipesCount,
-                    })}
-                </Text>
-            </View>
+        <PdfStatList
+            title={t("statsReportSecond.avgCookingTime")}
+            items={averageCookingTimes.map((item) => ({
+                label: item.typeName,
+                value: `${item.averageCookingTime}${t("statsReportSecond.timeUnit")}`,
+            }))}
+        />
 
-            <PdfStatList
-                title={t("statsReportSecond.avgCookingTime")}
-                items={averageCookingTimes.map((item) => ({
-                    label: item.typeName,
-                    value: `${item.averageCookingTime}${t("statsReportSecond.timeUnit")}`,
-                }))}
-            />
-
-            <PdfStatList
-                title={t("statsReportSecond.menusByCategory")}
-                items={menuCountByCategory.map((cat) => ({
-                    label: cat.categoryname,
-                    value: cat.menuCount,
-                }))}
-            />
-        </PdfReportLayout>
-    );
-};
+        <PdfStatList
+            title={t("statsReportSecond.menusByCategory")}
+            items={menuCountByCategory.map((cat) => ({
+                label: cat.categoryname,
+                value: cat.menuCount,
+            }))}
+        />
+    </PdfReportLayout>
+);
