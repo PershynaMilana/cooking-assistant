@@ -6,7 +6,7 @@ import {
     selectMenuStatistics,
     selectRecipeStatistics,
 } from "redux/selectors/statisticsSelectors";
-import { useGetMenusQuery } from "redux/services/menusApi";
+import { useGetAllMenusQuery } from "redux/services/menusApi";
 import { useGetAllRecipesQuery } from "redux/services/recipesApi";
 
 import { Header } from "components/layout/Header";
@@ -17,13 +17,10 @@ import { ReportDownloadButtons } from "components/stats/ReportDownloadButtons";
 import { getQueryErrorMessage } from "utils/queryError";
 import { triggerDownload } from "utils/triggerDownload";
 
-// stable arg so the menu cache key matches the statistics selector's
-const ALL_MENUS_PARAMS = {};
-
 const StatsPage: React.FC = () => {
     const { t } = useTranslation("stats");
     const recipesQuery = useGetAllRecipesQuery(null);
-    const menusQuery = useGetMenusQuery(ALL_MENUS_PARAMS);
+    const menusQuery = useGetAllMenusQuery(null);
     const {
         stats,
         fastestRecipes,

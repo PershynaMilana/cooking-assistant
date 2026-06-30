@@ -1,3 +1,9 @@
+import type { InfiniteData } from "@reduxjs/toolkit/query";
+
+import type { PaginatedResult } from "types/pagination";
+
+import { flattenPages } from "./infiniteQueryHelpers";
+
 interface WithId {
     id: number;
 }
@@ -20,3 +26,10 @@ export const listProvidesTags = <TagType extends string>(
     result
         ? [...result.map(({ id }) => ({ type, id })), listTag(type)]
         : [listTag(type)];
+
+// infiniteQuery providesTags: an infinite query hands back { pages, pageParams }
+// instead of a flat array, so flatten its pages before reusing listProvidesTags
+export const infiniteListProvidesTags = <TagType extends string>(
+    type: TagType,
+    result: InfiniteData<PaginatedResult<WithId>, number> | undefined,
+) => listProvidesTags(type, flattenPages(result));

@@ -52,7 +52,7 @@ const REPORT_FAILED = "Failed to generate report. Please try again.";
 const stubData = () => {
     mockGetByUrl({
         [API_ROUTES.recipes.list]: SAMPLE,
-        [API_ROUTES.menu.list]: [],
+        [API_ROUTES.menu.allUnpaginated]: [],
     });
 };
 

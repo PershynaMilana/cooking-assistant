@@ -3,7 +3,9 @@ import { z } from "zod";
 import {
     idListStringSchema,
     idSchema,
+    limitSchema,
     nonEmptyStringSchema,
+    offsetSchema,
     optionalStringSchema,
     positiveIntegerSchema,
 } from "./common.schemas";
@@ -33,4 +35,6 @@ export const updateMenuSchema = createMenuSchema.omit({
 export const menuFiltersSchema = z.object({
     menu_name: optionalStringSchema("Menu name"),
     category_ids: idListStringSchema("Category IDs").optional(),
+    limit: limitSchema,
+    offset: offsetSchema,
 });

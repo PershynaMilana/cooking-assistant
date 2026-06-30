@@ -49,5 +49,10 @@
         "ingredientsSaved": "Ingredients saved",
         "quantitiesUpdated": "Quantities updated",
         "purchaseSaved": "Purchase saved"
+    },
+    "loadMore": {
+        "showing": "Showing {{loaded}} of {{total}}",
+        "button": "Load more",
+        "loading": "Loading more"
     }
 }

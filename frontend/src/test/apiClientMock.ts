@@ -18,3 +18,16 @@ export const mockGetByUrl = (handlers: Record<string, unknown>) => {
             : Promise.reject(new Error(`unexpected GET ${url}`)),
     );
 };
+
+// the offset an infiniteQuery request asked for, read off the axios config
+// passed to apiClient.get(url, { params })
+export const byOffset = (config: unknown): number =>
+    (config as { params?: { offset?: number } } | null)?.params?.offset ?? 0;
+
+// a fake axios error recognized by axios.isAxiosError, for tests that mock
+// a failed GET/POST/PUT/DELETE through the api client
+export const makeAxiosError = (status: number, message: string): Error =>
+    Object.assign(new Error(message), {
+        isAxiosError: true,
+        response: { status, data: { error: message } },
+    });

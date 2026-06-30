@@ -19,11 +19,12 @@ const SAMPLE: Menu[] = [
 const CATEGORIES: MenuCategory[] = [
     { menu_category_id: 3, category_name: CATEGORY_NAME },
 ];
+const PAGE = { items: SAMPLE, total: SAMPLE.length };
 
 describe("MenuPage", () => {
     it("should render the menus loaded from the api", async () => {
         mockGetByUrl({
-            [API_ROUTES.menu.list]: SAMPLE,
+            [API_ROUTES.menu.list]: PAGE,
             [API_ROUTES.menuCategories.list]: [],
         });
 
@@ -34,7 +35,7 @@ describe("MenuPage", () => {
 
     it("should record the selected category and show the by-categories heading", async () => {
         mockGetByUrl({
-            [API_ROUTES.menu.list]: SAMPLE,
+            [API_ROUTES.menu.list]: PAGE,
             [API_ROUTES.menuCategories.list]: CATEGORIES,
         });
 

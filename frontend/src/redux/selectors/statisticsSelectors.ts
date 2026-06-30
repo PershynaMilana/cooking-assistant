@@ -111,7 +111,7 @@ const computeMenuStatistics = (
 
 // no-arg list caches the stats page also subscribes to via the query hooks
 const selectAllRecipesResult = recipesApi.endpoints.getAllRecipes.select(null);
-const selectMenusResult = menusApi.endpoints.getMenus.select({});
+const selectMenusResult = menusApi.endpoints.getAllMenus.select(null);
 
 const selectAllRecipes = createSelector(
     selectAllRecipesResult,

@@ -2,9 +2,14 @@ import type { Pool } from "pg";
 
 import type { Menu } from "domain/entities/Menu";
 import type { MenuRepository } from "domain/repositories/MenuRepository";
+import type { PaginatedResult } from "domain/repositories/pagination.types";
 
 import { findMenuByIdWithRecipes } from "./PgMenuRepository.detail";
-import { findAllMenus, searchPersonMenus } from "./PgMenuRepository.queries";
+import {
+    findAllMenus,
+    findAllMenusUnpaginated,
+    searchPersonMenus,
+} from "./PgMenuRepository.queries";
 
 interface MenuIdRow {
     menu_id: number;
@@ -25,8 +30,12 @@ export default class PgMenuRepository implements MenuRepository {
         return { placeholders, params };
     }
 
-    async findAll(filters: unknown): Promise<unknown[]> {
+    async findAll(filters: unknown): Promise<PaginatedResult<unknown>> {
         return findAllMenus(this.pool, filters);
+    }
+
+    async findAllUnpaginated(): Promise<unknown[]> {
+        return findAllMenusUnpaginated(this.pool);
     }
 
     async create(
@@ -166,7 +175,7 @@ export default class PgMenuRepository implements MenuRepository {
     async searchByPerson(
         personId: number,
         filters: unknown,
-    ): Promise<unknown[]> {
+    ): Promise<PaginatedResult<unknown>> {
         return searchPersonMenus(this.pool, personId, filters);
     }
 }

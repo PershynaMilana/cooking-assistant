@@ -24,12 +24,62 @@ describe("menu routes", () => {
 
     it("should return menus", async () => {
         const { app, deps } = buildTestApp();
-        const menus = [{ id: 9, title: "Weekly menu" }];
+        const paginated = {
+            items: [{ id: 9, title: "Weekly menu" }],
+            total: 1,
+        };
 
-        deps.menuRepository.findAll.mockResolvedValue(menus);
+        deps.menuRepository.findAll.mockResolvedValue(paginated);
 
         const res = await request(app)
             .get("/api/menu?menu_name=Weekly")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual(paginated);
+    });
+
+    it("should pass limit and offset through to the repository", async () => {
+        const { app, deps } = buildTestApp();
+
+        deps.menuRepository.findAll.mockResolvedValue({ items: [], total: 0 });
+
+        const res = await request(app)
+            .get("/api/menu?limit=10&offset=20")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(200);
+        expect(deps.menuRepository.findAll).toHaveBeenCalledWith({
+            limit: 10,
+            offset: 20,
+        });
+    });
+
+    it("should return a 400 error body for an out-of-range limit", async () => {
+        const { app, deps } = buildTestApp();
+
+        const res = await request(app)
+            .get("/api/menu?limit=101")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({
+            error: "limit: Limit must be at most 100",
+        });
+        expect(deps.menuRepository.findAll).not.toHaveBeenCalled();
+    });
+
+    it("should return every menu unpaginated", async () => {
+        const { app, deps } = buildTestApp();
+        const menus = [
+            { id: 9, title: "Weekly menu" },
+            { id: 10, title: "Holiday menu" },
+        ];
+
+        deps.menuRepository.findAllUnpaginated.mockResolvedValue(menus);
+
+        const res = await request(app)
+            .get("/api/menus")
             .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
@@ -167,16 +217,19 @@ describe("menu routes", () => {
 
     it("should search person menus by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
-        const menus = [{ id: 9, title: "Weekly menu" }];
+        const paginated = {
+            items: [{ id: 9, title: "Weekly menu" }],
+            total: 1,
+        };
 
-        deps.menuRepository.searchByPerson.mockResolvedValue(menus);
+        deps.menuRepository.searchByPerson.mockResolvedValue(paginated);
 
         const res = await request(app)
             .get("/api/menu-filters-person?menu_name=Weekly")
             .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(menus);
+        expect(res.body).toEqual(paginated);
         expect(deps.menuRepository.searchByPerson).toHaveBeenCalledWith(7, {
             menu_name: "Weekly",
         });

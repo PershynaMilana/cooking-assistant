@@ -11,6 +11,7 @@ import GetAllMenuCategories from "application/use-cases/menu-categories/GetAllMe
 import CreateMenu from "application/use-cases/menus/CreateMenu";
 import DeleteMenu from "application/use-cases/menus/DeleteMenu";
 import GetAllMenus from "application/use-cases/menus/GetAllMenus";
+import GetAllMenusUnpaginated from "application/use-cases/menus/GetAllMenusUnpaginated";
 import GetMenuById from "application/use-cases/menus/GetMenuById";
 import SearchPersonMenus from "application/use-cases/menus/SearchPersonMenus";
 import UpdateMenu from "application/use-cases/menus/UpdateMenu";
@@ -100,6 +101,7 @@ export function buildControllers({
 
     const menuController = new MenuController({
         getAllMenus: new GetAllMenus(menuRepository),
+        getAllMenusUnpaginated: new GetAllMenusUnpaginated(menuRepository),
         createMenu: new CreateMenu(menuRepository, recipeRepository),
         getMenuById: new GetMenuById(menuRepository),
         updateMenu: new UpdateMenu(menuRepository, recipeRepository),

@@ -1,5 +1,7 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
+import { PAGE_SIZE } from "constants/pagination";
 import type { RecipeListItem } from "types/recipe";
 import type { RecipeTypeSummary } from "types/recipeType";
 
@@ -9,6 +11,7 @@ import { ListPageLayout } from "components/layout/ListPageLayout";
 import { RecipeCard } from "components/recipes/RecipeCard";
 import { RecipeFilterPanel } from "components/recipes/RecipeFilterPanel";
 import { RecipeTypeDescriptions } from "components/recipes/RecipeTypeDescriptions";
+import { LoadMore } from "components/ui/LoadMore";
 
 interface RecipeListViewProps {
     filters: RecipeFilterState;
@@ -27,6 +30,12 @@ interface RecipeListViewProps {
     emptyMessage: string;
     searchPlaceholder: string;
     actionSlot?: React.ReactNode;
+    total: number;
+    loadedCount: number;
+    hasNextPage: boolean;
+    isFetchingNextPage: boolean;
+    fetchNextPage: () => void;
+    loadMoreError: string | null;
 }
 
 export const RecipeListView: React.FC<RecipeListViewProps> = ({
@@ -46,37 +55,67 @@ export const RecipeListView: React.FC<RecipeListViewProps> = ({
     emptyMessage,
     searchPlaceholder,
     actionSlot,
-}) => (
-    <ListPageLayout
-        filterSlot={
-            <RecipeFilterPanel
-                filters={filters}
-                setSelectedTypes={setSelectedTypes}
-                setStartDate={setStartDate}
-                setEndDate={setEndDate}
-                setMinCookingTime={setMinCookingTime}
-                setMaxCookingTime={setMaxCookingTime}
-                setSortOrder={setSortOrder}
-                types={types}
-                searchPlaceholder={searchPlaceholder}
-            />
-        }
-        actionSlot={actionSlot}
-        heading={heading}
-        afterHeading={<RecipeTypeDescriptions descriptions={descriptions} />}
-        isEmpty={noRecipes}
-        emptyMessage={emptyMessage}
-        error={error}
-    >
-        {recipes.map((recipe) => (
-            <RecipeCard
-                key={recipe.id}
-                id={recipe.id}
-                title={recipe.title}
-                typeName={recipe.type_name}
-                creationDate={recipe.creation_date}
-                cookingTime={recipe.cooking_time}
-            />
-        ))}
-    </ListPageLayout>
-);
+    total,
+    loadedCount,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    loadMoreError,
+}) => {
+    const { t } = useTranslation();
+
+    return (
+        <ListPageLayout
+            filterSlot={
+                <RecipeFilterPanel
+                    filters={filters}
+                    setSelectedTypes={setSelectedTypes}
+                    setStartDate={setStartDate}
+                    setEndDate={setEndDate}
+                    setMinCookingTime={setMinCookingTime}
+                    setMaxCookingTime={setMaxCookingTime}
+                    setSortOrder={setSortOrder}
+                    types={types}
+                    searchPlaceholder={searchPlaceholder}
+                />
+            }
+            actionSlot={actionSlot}
+            heading={heading}
+            afterHeading={
+                <RecipeTypeDescriptions descriptions={descriptions} />
+            }
+            isEmpty={noRecipes}
+            emptyMessage={emptyMessage}
+            error={error}
+            footerSlot={
+                <LoadMore
+                    hasMore={hasNextPage}
+                    isLoading={isFetchingNextPage}
+                    onLoadMore={fetchNextPage}
+                    loadMoreLabel={t("loadMore.button")}
+                    loadingLabel={t("loadMore.loading")}
+                    countLabel={
+                        total > PAGE_SIZE
+                            ? t("loadMore.showing", {
+                                  loaded: loadedCount,
+                                  total,
+                              })
+                            : undefined
+                    }
+                    errorMessage={loadMoreError ?? undefined}
+                />
+            }
+        >
+            {recipes.map((recipe) => (
+                <RecipeCard
+                    key={recipe.id}
+                    id={recipe.id}
+                    title={recipe.title}
+                    typeName={recipe.type_name}
+                    creationDate={recipe.creation_date}
+                    cookingTime={recipe.cooking_time}
+                />
+            ))}
+        </ListPageLayout>
+    );
+};

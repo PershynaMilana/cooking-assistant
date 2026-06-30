@@ -36,7 +36,10 @@ const SAMPLE_RECIPES = [
 describe("MainPage", () => {
     it("should render recipe titles returned by the api", async () => {
         mockGetByUrl({
-            [API_ROUTES.recipes.byFilters]: SAMPLE_RECIPES,
+            [API_ROUTES.recipes.byFilters]: {
+                items: SAMPLE_RECIPES,
+                total: SAMPLE_RECIPES.length,
+            },
             [API_ROUTES.recipeTypes.list]: [],
         });
 
@@ -48,7 +51,7 @@ describe("MainPage", () => {
 
     it("should record the selected type in the store and show the filtered heading", async () => {
         mockGetByUrl({
-            [API_ROUTES.recipes.byFilters]: [],
+            [API_ROUTES.recipes.byFilters]: { items: [], total: 0 },
             [API_ROUTES.recipeTypes.list]: SAMPLE_TYPES,
         });
 

@@ -10,6 +10,7 @@ interface ListPageLayoutProps {
     isEmpty: boolean;
     emptyMessage: string;
     error: string | null;
+    footerSlot?: React.ReactNode;
     children: React.ReactNode;
 }
 
@@ -24,6 +25,7 @@ export const ListPageLayout: React.FC<ListPageLayoutProps> = ({
     isEmpty,
     emptyMessage,
     error,
+    footerSlot,
     children,
 }) => (
     <div>
@@ -48,6 +50,8 @@ export const ListPageLayout: React.FC<ListPageLayoutProps> = ({
                     {children}
                 </div>
             )}
+
+            {footerSlot}
 
             {error && <div className="text-red-500 mb-4">{error}</div>}
         </div>

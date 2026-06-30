@@ -22,6 +22,17 @@ changelogs and the tags and now track everything here against one shared version
 ## Unreleased
 
 
+## 3.3 - 2026-06-29
+
+### Frontend
+- Added: "All recipes", "My recipes", "All menus" and "My menus" now load 30 at a time with a "Load more" button, plus a "Showing X of Y" counter once there are more than 30 to show. Sorting and filters continue to work as before, now applied across the whole list rather than just what's currently loaded.
+
+### Backend
+- Changed: The recipe and menu list endpoints now return results in pages of 30 (with a total count) instead of the entire matching set in one response.
+- Fixed: The statistics page's menu totals now always reflect every menu, not just the most recent 30.
+- Changed: Internal lint configuration cleanup (no behavior change).
+
+
 ## 3.2 - 2026-06-27
 
 ### Frontend

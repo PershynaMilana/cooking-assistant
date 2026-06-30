@@ -5,10 +5,14 @@ import { SEARCH_PARAM_INGREDIENT_NAME } from "constants/queryParams";
 
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { selectMenuFilters } from "redux/selectors/filtersSelectors";
+import {
+    flattenPages,
+    getPaginatedTotal,
+} from "redux/services/infiniteQueryHelpers";
 import { useGetMenuCategoriesQuery } from "redux/services/menuCategoriesApi";
 import {
-    useGetMenusByPersonQuery,
-    useGetMenusQuery,
+    useGetMenusByPersonInfiniteQuery,
+    useGetMenusInfiniteQuery,
 } from "redux/services/menusApi";
 import { setMenuSelectedCategories } from "redux/slices/filtersSlice";
 
@@ -37,12 +41,19 @@ export const useMenuListView = (source: MenuSource) => {
     );
 
     const isPerson = source === MENU_SOURCE.person;
-    const all = useGetMenusQuery(params, { skip: isPerson });
-    const byPerson = useGetMenusByPersonQuery(params, { skip: !isPerson });
+    const all = useGetMenusInfiniteQuery(params, { skip: isPerson });
+    const byPerson = useGetMenusByPersonInfiniteQuery(params, {
+        skip: !isPerson,
+    });
     const active = isPerson ? byPerson : all;
 
     const { data: categories = [] } = useGetMenuCategoriesQuery(null);
-    const menus = active.data ?? [];
+    const menus = useMemo(() => flattenPages(active.data), [active.data]);
+    const total = getPaginatedTotal(active.data);
+    const hasLoadedMenus = menus.length > 0;
+    const errorMessage = active.isError
+        ? getQueryErrorMessage(active.error)
+        : null;
 
     const selectedCategoryNames = categories
         .filter((category) =>
@@ -57,8 +68,14 @@ export const useMenuListView = (source: MenuSource) => {
             dispatch(setMenuSelectedCategories(next)),
         categories,
         menus,
-        noMenus: active.isSuccess && menus.length === 0,
-        error: active.isError ? getQueryErrorMessage(active.error) : null,
+        noMenus: active.isSuccess && !hasLoadedMenus,
+        error: !hasLoadedMenus ? errorMessage : null,
         selectedCategoryNames,
+        total,
+        loadedCount: menus.length,
+        hasNextPage: active.hasNextPage,
+        isFetchingNextPage: active.isFetchingNextPage,
+        fetchNextPage: active.fetchNextPage,
+        loadMoreError: hasLoadedMenus ? errorMessage : null,
     };
 };
