@@ -1,7 +1,7 @@
 import type React from "react";
 
-export const PIE_DATA_KEY = "count" as const;
-export const PIE_NAME_KEY = "typeName" as const;
+export const PIE_DATA_KEY = "value" as const;
+export const PIE_NAME_KEY = "name" as const;
 export const PIE_CURSOR = "default" as const;
 
 export const PIE_WRAPPER_STYLE: React.CSSProperties = {

@@ -1,14 +1,14 @@
 import React, { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { RecipeTypeStat } from "types/stats";
+import type { MenuCategoryStat } from "types/stats";
 
 const LazyPieChartCard = React.lazy(
     () => import("components/stats/PieChartCard/PieChartCard"),
 );
 
-interface RecipeTypeChartProps {
-    stats: RecipeTypeStat[];
+interface MenuCategoryChartProps {
+    categories: MenuCategoryStat[];
 }
 
 const CENTERING_STYLE: React.CSSProperties = {
@@ -16,9 +16,12 @@ const CENTERING_STYLE: React.CSSProperties = {
     justifyContent: "center",
 };
 
-export const RecipeTypeChart = ({ stats }: RecipeTypeChartProps) => {
+export const MenuCategoryChart = ({ categories }: MenuCategoryChartProps) => {
     const { t } = useTranslation("stats");
-    const data = stats.map((s) => ({ name: s.typeName, value: s.count }));
+    const data = categories.map((c) => ({
+        name: c.categoryname,
+        value: c.menuCount,
+    }));
 
     return (
         <Suspense
@@ -29,7 +32,7 @@ export const RecipeTypeChart = ({ stats }: RecipeTypeChartProps) => {
             <div style={CENTERING_STYLE}>
                 <LazyPieChartCard
                     data={data}
-                    centerLabel={t("statsPage.recipesLabel")}
+                    centerLabel={t("statsPage.menusLabel")}
                 />
             </div>
         </Suspense>

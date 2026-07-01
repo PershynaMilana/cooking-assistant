@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react";
 import {
     CHART_COLORS,
     getChartColor,
-} from "components/stats/RecipeTypeChart/chartColors";
-import PieChart from "components/stats/RecipeTypeChart/PieChart";
+} from "components/stats/PieChartCard/chartColors";
+import PieChartCard from "components/stats/PieChartCard/PieChartCard";
 
 jest.mock("recharts", () => ({
     PieChart: ({ children }: { children: React.ReactNode }) => (
@@ -15,11 +15,11 @@ jest.mock("recharts", () => ({
         data,
     }: {
         children: React.ReactNode;
-        data: { typeName: string; count: number }[];
+        data: { name: string; value: number }[];
     }) => (
         <g data-testid="pie">
             {data.map((d) => (
-                <circle key={d.typeName} data-name={d.typeName} />
+                <circle key={d.name} data-name={d.name} />
             ))}
             {children}
         </g>
@@ -30,20 +30,26 @@ jest.mock("recharts", () => ({
     Tooltip: () => null,
 }));
 
-describe("PieChart", () => {
+describe("PieChartCard", () => {
     it("should render the pie chart container", () => {
-        render(<PieChart stats={[{ typeName: "Soup", count: 4 }]} />);
+        render(
+            <PieChartCard
+                data={[{ name: "Soup", value: 4 }]}
+                centerLabel="recipes"
+            />,
+        );
 
         expect(screen.getByTestId("pie-chart")).toBeInTheDocument();
     });
 
-    it("should render one cell per stat with brand colors", () => {
+    it("should render one cell per datum with brand colors", () => {
         render(
-            <PieChart
-                stats={[
-                    { typeName: "Soup", count: 4 },
-                    { typeName: "Dessert", count: 2 },
+            <PieChartCard
+                data={[
+                    { name: "Soup", value: 4 },
+                    { name: "Dessert", value: 2 },
                 ]}
+                centerLabel="recipes"
             />,
         );
 
@@ -54,39 +60,45 @@ describe("PieChart", () => {
         expect(cells[1]).toHaveAttribute("data-fill", CHART_COLORS[1]);
     });
 
-    it("should display the total recipe count in the center", () => {
+    it("should display the total value in the center", () => {
         render(
-            <PieChart
-                stats={[
-                    { typeName: "Soup", count: 6 },
-                    { typeName: "Dessert", count: 9 },
+            <PieChartCard
+                data={[
+                    { name: "Soup", value: 6 },
+                    { name: "Dessert", value: 9 },
                 ]}
+                centerLabel="recipes"
             />,
         );
 
         expect(screen.getByText("15")).toBeInTheDocument();
     });
 
-    it("should display the recipes i18n label in the center", () => {
-        render(<PieChart stats={[{ typeName: "Soup", count: 1 }]} />);
+    it("should display the given center label", () => {
+        render(
+            <PieChartCard
+                data={[{ name: "Soup", value: 1 }]}
+                centerLabel="recipes"
+            />,
+        );
 
         expect(screen.getByText("recipes")).toBeInTheDocument();
     });
 
-    it("should render with empty stats showing zero total", () => {
-        render(<PieChart stats={[]} />);
+    it("should render with empty data showing zero total", () => {
+        render(<PieChartCard data={[]} centerLabel="recipes" />);
 
         expect(screen.getByText("0")).toBeInTheDocument();
         expect(screen.queryAllByTestId("cell")).toHaveLength(0);
     });
 
-    it("should cycle colors when stats exceed palette size", () => {
-        const stats = Array.from({ length: 7 }, (_, i) => ({
-            typeName: `Type${i}`,
-            count: 1,
+    it("should cycle colors when data exceeds palette size", () => {
+        const data = Array.from({ length: 7 }, (_, i) => ({
+            name: `Type${i}`,
+            value: 1,
         }));
 
-        render(<PieChart stats={stats} />);
+        render(<PieChartCard data={data} centerLabel="recipes" />);
 
         const cells = screen.getAllByTestId("cell");
 
@@ -97,13 +109,14 @@ describe("PieChart", () => {
         );
     });
 
-    it("should render legend entries for each stat", () => {
+    it("should render legend entries for each datum", () => {
         render(
-            <PieChart
-                stats={[
-                    { typeName: "Soup", count: 6 },
-                    { typeName: "Dessert", count: 9 },
+            <PieChartCard
+                data={[
+                    { name: "Soup", value: 6 },
+                    { name: "Dessert", value: 9 },
                 ]}
+                centerLabel="recipes"
             />,
         );
 
@@ -111,8 +124,8 @@ describe("PieChart", () => {
         expect(screen.getByText("Dessert: 9")).toBeInTheDocument();
     });
 
-    it("should render no legend entries for empty stats", () => {
-        render(<PieChart stats={[]} />);
+    it("should render no legend entries for empty data", () => {
+        render(<PieChartCard data={[]} centerLabel="recipes" />);
 
         expect(screen.queryByText(/:/)).toBeNull();
     });

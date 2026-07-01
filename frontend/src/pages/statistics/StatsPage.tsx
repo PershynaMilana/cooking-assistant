@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAppSelector } from "redux/hooks";
@@ -10,17 +10,19 @@ import { useGetAllMenusQuery } from "redux/services/menusApi";
 import { useGetAllRecipesQuery } from "redux/services/recipesApi";
 
 import { Header } from "components/layout/Header";
+import { MenuCategoryChart } from "components/stats/MenuCategoryChart";
+import { MenuStatsSummary } from "components/stats/MenuStatsSummary";
 import { RecipeTypeChart } from "components/stats/RecipeTypeChart";
 import { RecipeTypesSummary } from "components/stats/RecipeTypesSummary";
-import { ReportDownloadButtons } from "components/stats/ReportDownloadButtons";
 
-import { getQueryErrorMessage } from "utils/queryError";
-import { triggerDownload } from "utils/triggerDownload";
+const CARD_CLASSNAME =
+    "bg-white p-6 rounded-lg shadow-lg border border-gray-200";
 
 const StatsPage: React.FC = () => {
     const { t } = useTranslation("stats");
-    const recipesQuery = useGetAllRecipesQuery(null);
-    const menusQuery = useGetAllMenusQuery(null);
+
+    useGetAllRecipesQuery(null);
+    useGetAllMenusQuery(null);
     const {
         stats,
         fastestRecipes,
@@ -29,94 +31,60 @@ const StatsPage: React.FC = () => {
         leastIngredientsRecipes,
     } = useAppSelector(selectRecipeStatistics);
     const menuStats = useAppSelector(selectMenuStatistics);
-    const [downloadError, setDownloadError] = useState<string | null>(null);
-
-    const queryError = menusQuery.error ?? recipesQuery.error;
-    const statsError = queryError ? getQueryErrorMessage(queryError) : null;
-
-    const runDownload = async (
-        build: () => Promise<Blob>,
-        filename: string,
-    ) => {
-        setDownloadError(null);
-        try {
-            triggerDownload(await build(), filename);
-        } catch {
-            setDownloadError(t("statsPage.reportError"));
-        }
-    };
-
-    const handleDownload1 = () =>
-        runDownload(async () => {
-            const [{ pdf }, { StatsReport }] = await Promise.all([
-                import("@react-pdf/renderer"),
-                import("./StatsReport"),
-            ]);
-
-            return pdf(
-                <StatsReport
-                    reportTime={new Date()}
-                    stats={stats}
-                    fastestRecipes={fastestRecipes}
-                    slowestRecipes={slowestRecipes}
-                    mostIngredientsRecipes={mostIngredientsRecipes}
-                    leastIngredientsRecipes={leastIngredientsRecipes}
-                />,
-            ).toBlob();
-        }, "Statistics_Report.pdf");
-
-    const handleDownload2 = () =>
-        runDownload(async () => {
-            const [{ pdf }, { StatsReportSecond }] = await Promise.all([
-                import("@react-pdf/renderer"),
-                import("./StatsReportSecond"),
-            ]);
-
-            return pdf(
-                <StatsReportSecond
-                    reportTime={new Date()}
-                    menusCount={menuStats.menusCount}
-                    recipesCount={menuStats.recipesCount}
-                    averageCookingTimes={menuStats.averageCookingTimes}
-                    menuCountByCategory={menuStats.menuCountByCategory}
-                    error={statsError}
-                />,
-            ).toBlob();
-        }, "Statistics_Second_Report.pdf");
 
     return (
         <div>
             <Header />
-            <div className="mx-[15vw] my-8">
-                <div className="flex items-center justify-center mb-6">
-                    <h1 className="text-relative-h3 font-bold text-center bg-gradient-to-r from-dark-purple to-perfect-purple text-white p-4 rounded-md">
-                        {t("statsPage.heading")}
-                    </h1>
-                </div>
 
-                <div className="flex justify-between">
-                    <div className="bg-white p-6 h-full rounded-xl shadow-lg border border-gray-200">
-                        <RecipeTypeChart stats={stats} />
-                        <ReportDownloadButtons
-                            label1={t("statsPage.downloadReport1")}
-                            label2={t("statsPage.downloadReport2")}
-                            onDownload1={handleDownload1}
-                            onDownload2={handleDownload2}
-                        />
-                        {downloadError !== null && (
-                            <p className="text-red-500 text-sm mt-2">
-                                {downloadError}
-                            </p>
-                        )}
+            <div className="mx-[15vw] my-8">
+                <h1 className="text-relative-h3 font-bold text-center bg-gradient-to-r from-dark-purple to-perfect-purple text-white p-4 rounded-md mb-8">
+                    {t("statsPage.heading")}
+                </h1>
+
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+                        <div
+                            className={`${CARD_CLASSNAME} flex items-center justify-center`}
+                        >
+                            <RecipeTypeChart stats={stats} />
+                        </div>
+
+                        <div className={CARD_CLASSNAME}>
+                            <RecipeTypesSummary
+                                stats={stats}
+                                fastestRecipes={fastestRecipes.slice(0, 3)}
+                                slowestRecipes={slowestRecipes.slice(0, 3)}
+                                mostIngredientsRecipes={mostIngredientsRecipes.slice(
+                                    0,
+                                    3,
+                                )}
+                                leastIngredientsRecipes={leastIngredientsRecipes.slice(
+                                    0,
+                                    3,
+                                )}
+                            />
+                        </div>
                     </div>
 
-                    <RecipeTypesSummary
-                        stats={stats}
-                        fastestRecipes={fastestRecipes}
-                        slowestRecipes={slowestRecipes}
-                        mostIngredientsRecipes={mostIngredientsRecipes}
-                        leastIngredientsRecipes={leastIngredientsRecipes}
-                    />
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+                        <div
+                            className={`${CARD_CLASSNAME} flex items-center justify-center`}
+                        >
+                            <MenuCategoryChart
+                                categories={menuStats.menuCountByCategory}
+                            />
+                        </div>
+
+                        <div className={CARD_CLASSNAME}>
+                            <MenuStatsSummary
+                                menusCount={menuStats.menusCount}
+                                recipesCount={menuStats.recipesCount}
+                                averageCookingTimes={
+                                    menuStats.averageCookingTimes
+                                }
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

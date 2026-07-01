@@ -9,7 +9,7 @@ export const flushMicrotasks = async (): Promise<void> => {
 };
 
 // also settle pending macrotasks - needed when the code under test schedules a timer
-// or chains lazy dynamic imports (e.g. the StatsPage lazy @react-pdf/renderer download)
+// or chains lazy dynamic imports
 export const flushMacrotasks = async (): Promise<void> => {
     await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0));

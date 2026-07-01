@@ -21,7 +21,6 @@
     "major": "npm version major --no-git-tag-version"
   },
   "dependencies": {
-    "@react-pdf/renderer": "^4.1.5",
     "@reduxjs/toolkit": "^2.12.0",
     "axios": "^1.18.0",
     "i18next": "26.3.1",

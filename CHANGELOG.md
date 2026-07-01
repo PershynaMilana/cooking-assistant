@@ -21,6 +21,10 @@ changelogs and the tags and now track everything here against one shared version
 
 ## Unreleased
 
+### Frontend
+- Added: Menu statistics are now shown directly on the statistics page — a donut chart for menus per category plus totals and average cooking time by type.
+- Changed: The statistics page has a cleaner card-based layout.
+- Removed: PDF export has been removed from the statistics page; statistics are viewed on screen only.
 
 ## 3.3 - 2026-06-29
 

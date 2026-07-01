@@ -1,8 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Cell, Pie, PieChart as RechartsPieChart, Tooltip } from "recharts";
 
-import type { RecipeTypeStat } from "types/stats";
-
 import { getChartColor } from "./chartColors";
 import {
     CENTER_LABEL_STYLE,
@@ -20,13 +18,19 @@ import {
     TOOLTIP_WRAPPER_STYLE,
 } from "./chartStyles";
 
-interface PieChartProps {
-    stats: RecipeTypeStat[];
+interface PieChartDatum {
+    name: string;
+    value: number;
 }
 
-const PieChart = ({ stats }: PieChartProps) => {
+interface PieChartCardProps {
+    data: PieChartDatum[];
+    centerLabel: string;
+}
+
+const PieChartCard = ({ data, centerLabel }: PieChartCardProps) => {
     const { t } = useTranslation("stats");
-    const total = stats.reduce((sum, s) => sum + s.count, 0);
+    const total = data.reduce((sum, d) => sum + d.value, 0);
 
     return (
         <div>
@@ -43,7 +47,7 @@ const PieChart = ({ stats }: PieChartProps) => {
                     style={RECHARTS_SVG_STYLE}
                 >
                     <Pie
-                        data={stats}
+                        data={data}
                         dataKey={PIE_DATA_KEY}
                         nameKey={PIE_NAME_KEY}
                         cx="50%"
@@ -54,9 +58,9 @@ const PieChart = ({ stats }: PieChartProps) => {
                         strokeWidth={0}
                         cursor={PIE_CURSOR}
                     >
-                        {stats.map((entry, index) => (
+                        {data.map((entry, index) => (
                             <Cell
-                                key={entry.typeName}
+                                key={entry.name}
                                 fill={getChartColor(index)}
                             />
                         ))}
@@ -68,14 +72,12 @@ const PieChart = ({ stats }: PieChartProps) => {
                 </RechartsPieChart>
                 <div aria-hidden="true" style={CENTER_STYLE}>
                     <span style={CENTER_TOTAL_STYLE}>{total}</span>
-                    <span style={CENTER_LABEL_STYLE}>
-                        {t("statsPage.recipesLabel")}
-                    </span>
+                    <span style={CENTER_LABEL_STYLE}>{centerLabel}</span>
                 </div>
             </div>
             <div style={LEGEND_WRAPPER_STYLE}>
-                {stats.map((entry, index) => (
-                    <div key={entry.typeName} style={LEGEND_ITEM_STYLE}>
+                {data.map((entry, index) => (
+                    <div key={entry.name} style={LEGEND_ITEM_STYLE}>
                         <span
                             style={{
                                 ...LEGEND_DOT_BASE_STYLE,
@@ -84,8 +86,8 @@ const PieChart = ({ stats }: PieChartProps) => {
                         />
                         <span>
                             {t("statsPage.legendEntry", {
-                                name: entry.typeName,
-                                count: entry.count,
+                                name: entry.name,
+                                count: entry.value,
                             })}
                         </span>
                     </div>
@@ -95,4 +97,4 @@ const PieChart = ({ stats }: PieChartProps) => {
     );
 };
 
-export default PieChart;
+export default PieChartCard;

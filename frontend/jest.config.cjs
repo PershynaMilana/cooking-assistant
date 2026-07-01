@@ -52,10 +52,6 @@ module.exports = {
         "!src/api/redirect.ts",
         // barrel re-export files - no logic
         "!src/**/index.ts",
-        // @react-pdf/renderer documents/styles - render PDF primitives, not DOM (not jsdom-testable)
-        "!src/pages/statistics/Pdf*.tsx",
-        "!src/pages/statistics/StatsReport*.tsx",
-        "!src/pages/statistics/reportStyles.ts",
     ],
     coverageProvider: "v8",
     coverageThreshold: {
