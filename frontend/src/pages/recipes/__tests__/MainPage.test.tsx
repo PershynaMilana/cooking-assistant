@@ -5,6 +5,7 @@ import { API_ROUTES } from "api/endpoints";
 
 import MainPage from "pages/recipes/MainPage";
 import { mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_ALL_RECIPES } from "test/constants";
 import { renderWithProviders } from "test/router";
 
 jest.mock("api/client");
@@ -43,7 +44,9 @@ describe("MainPage", () => {
             [API_ROUTES.recipeTypes.list]: [],
         });
 
-        renderWithProviders(<MainPage />, { initialEntries: ["/main"] });
+        renderWithProviders(<MainPage />, {
+            initialEntries: [ROUTE_ALL_RECIPES],
+        });
 
         expect(await screen.findByText(RECIPE_TITLE_1)).toBeInTheDocument();
         expect(screen.getByText(RECIPE_TITLE_2)).toBeInTheDocument();
@@ -56,7 +59,7 @@ describe("MainPage", () => {
         });
 
         const { store } = renderWithProviders(<MainPage />, {
-            initialEntries: ["/main"],
+            initialEntries: [ROUTE_ALL_RECIPES],
         });
 
         await userEvent.click(

@@ -10,11 +10,15 @@ import { API_ROUTES } from "api/endpoints";
 
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { ModalRoot } from "components/ui/Modals";
+import { ModalRoot } from "components/modals";
 
 import RecipeDetailsPage from "pages/recipes/RecipeDetailsPage";
 import { mockedDelete, mockedGet } from "test/apiClientMock";
-import { BTN_DELETE_RECIPE, BTN_EDIT_RECIPE, ROUTE_MAIN } from "test/constants";
+import {
+    BTN_DELETE_RECIPE,
+    BTN_EDIT_RECIPE,
+    ROUTE_ALL_RECIPES,
+} from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore } from "test/store";
 
@@ -105,7 +109,7 @@ describe("RecipeDetailsPage", () => {
             API_ROUTES.recipes.byId("1"),
             { params: undefined },
         );
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_ALL_RECIPES);
     });
 
     it("should show an error message when the recipe fails to load", async () => {

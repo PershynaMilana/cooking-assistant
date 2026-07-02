@@ -1,0 +1,11 @@
+.app-shell {
+    min-height: 100vh;
+    min-height: 100svh;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.app-shell__main {
+    max-width: 1280px;
+    margin: 0 auto;
+}

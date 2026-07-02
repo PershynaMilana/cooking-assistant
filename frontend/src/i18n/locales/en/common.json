@@ -1,4 +1,5 @@
 {
+    "appName": "Cooking Assistant",
     "sessionError": "Could not verify session. Please refresh the page.",
     "modal": {
         "cancel": "Cancel",
@@ -9,17 +10,21 @@
         "message": "Are you sure you want to log out of your account?",
         "confirm": "Log out"
     },
-    "header": {
-        "home": "Home",
-        "myRecipes": "My Recipes",
-        "statistics": "Statistics",
-        "types": "Types",
-        "myIngredients": "My Ingredients",
-        "menu": "Menu",
+    "nav": {
+        "recipes": "Recipes",
+        "menus": "Menus",
         "myMenus": "My Menus",
-        "login": "Login",
-        "register": "Register",
-        "logout": "Logout"
+        "ingredients": "Ingredients",
+        "stats": "Stats",
+        "openMenu": "Open menu",
+        "closeMenu": "Close menu",
+        "logout": "Logout",
+        "accountPlaceholder": "My account"
+    },
+    "theme": {
+        "dark": "Dark",
+        "light": "Light",
+        "toggleLabel": "Toggle theme"
     },
     "search": {
         "placeholderPrefix": "Search by",

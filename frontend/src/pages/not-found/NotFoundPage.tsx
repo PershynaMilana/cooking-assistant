@@ -9,7 +9,7 @@ const NotFoundPage: React.FC = () => {
     const navigate = useNavigate();
 
     const handleGoHome = () => {
-        navigate(ROUTES.main);
+        navigate(ROUTES.home);
     };
 
     return (

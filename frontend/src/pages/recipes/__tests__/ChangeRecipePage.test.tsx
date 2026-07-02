@@ -14,7 +14,7 @@ import {
     ERROR_COOKING_TIME_FORMAT,
     LABEL_COOKING_TIME,
     MOCK_ERROR_SERVER,
-    ROUTE_MAIN,
+    ROUTE_ALL_RECIPES,
 } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore } from "test/store";
@@ -109,7 +109,7 @@ describe("ChangeRecipePage", () => {
         await screen.findByDisplayValue(TITLE);
         await submit();
 
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_ALL_RECIPES);
     });
 
     it("should notify with an error when the update fails", async () => {

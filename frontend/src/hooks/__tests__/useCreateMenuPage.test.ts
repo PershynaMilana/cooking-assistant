@@ -9,6 +9,7 @@ import { recipesApi } from "redux/services/recipesApi";
 import { useCreateMenuPage } from "hooks/useCreateMenuPage";
 
 import { mockedPost, mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_MENUS } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
@@ -55,7 +56,7 @@ const setup = async () => {
 };
 
 describe("useCreateMenuPage", () => {
-    it("should create the menu and navigate to /menu on valid submit", async () => {
+    it("should create the menu and navigate to menus on valid submit", async () => {
         mockedPost.mockResolvedValue({ data: null });
         const { result } = await setup();
 
@@ -76,7 +77,7 @@ describe("useCreateMenuPage", () => {
             categoryId: CATEGORY_ID,
             recipeIds: [RECIPE_ID],
         });
-        expect(mockNavigate).toHaveBeenCalledWith("/menu");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENUS);
     });
 
     it("should not call the mutation when the form is empty", async () => {

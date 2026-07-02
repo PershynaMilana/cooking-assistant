@@ -18,28 +18,38 @@ Before, the repo had three separate versions (root, backend, frontend) and three
 tags. For a two-app project that was more bookkeeping than it was worth, so we dropped the per-package
 changelogs and the tags and now track everything here against one shared version.
 
-
 ## Unreleased
 
+## 3.3 - 2026-07-02
+
 ### Frontend
+
+- Added: "All recipes", "My recipes", "All menus" and "My menus" now load 30 at a time with a "Load more" button, plus a "Showing X of Y" counter once there are more than 30 to show. Sorting and filters continue to work as before, now applied across the whole list rather than just what's currently loaded.
 - Added: Menu statistics are now shown directly on the statistics page — a donut chart for menus per category plus totals and average cooking time by type.
 - Changed: The statistics page has a cleaner card-based layout.
 - Removed: PDF export has been removed from the statistics page; statistics are viewed on screen only.
-
-## 3.3 - 2026-06-29
-
-### Frontend
-- Added: "All recipes", "My recipes", "All menus" and "My menus" now load 30 at a time with a "Load more" button, plus a "Showing X of Y" counter once there are more than 30 to show. Sorting and filters continue to work as before, now applied across the whole list rather than just what's currently loaded.
+- Added: A brand-new Home dashboard - now the default page after signing in - showing your recipe, menu and pantry counts, ingredients expiring soon, and your most recent recipes at a glance, plus quick actions for a new recipe or menu and a "What's new" popup.
+- Added: A dark/light theme toggle, available from every page, that remembers your choice and otherwise follows your system preference.
+- Added: A redesigned navigation bar (with a mobile menu on small screens) now appears consistently across every page.
+- Added: The sign-in and sign-up pages now link directly to each other.
+- Added: The Home dashboard now greets you by name, and the avatar in the navigation bar shows your initials instead of a generic icon.
+- Added: "My Menus" is back in the main navigation bar and mobile menu.
+- Changed: The homepage now opens directly at the site's root address; "All recipes" moved to its own page reachable from the navigation bar, alongside "Menus", "Ingredients" and "Stats".
+- Fixed: The "Expiring soon" panel and count on the Home dashboard now only include ingredients that are actually expiring soon or already expired, instead of sometimes showing fresh items or an inaccurate count.
+- Fixed: Ingredient expiry dates on the Home dashboard are now calculated consistently regardless of your timezone.
+- Fixed: A routing-library warning no longer appears in the browser console.
 
 ### Backend
+
 - Changed: The recipe and menu list endpoints now return results in pages of 30 (with a total count) instead of the entire matching set in one response.
 - Fixed: The statistics page's menu totals now always reflect every menu, not just the most recent 30.
 - Changed: Internal lint configuration cleanup (no behavior change).
-
+- Added: The session check now returns your name alongside your account id, so the frontend can greet you by name.
 
 ## 3.2 - 2026-06-27
 
 ### Frontend
+
 - Added: Repeated failed login attempts now trigger an escalating lockout (1, then 5, 10, 30, and 60 minutes) with a live countdown shown on the form; the lockout survives a page refresh and is lifted immediately on a successful login.
 - Added: Signing out now asks for confirmation first, and shows a "You have been logged out" confirmation toast.
 - Changed: All modal dialogs (delete confirmations, purchase history, sign-out) and all toast notifications now share one consistent look and keyboard/click-outside behavior (Escape and click-outside close a dialog the same way everywhere).
@@ -48,12 +58,13 @@ changelogs and the tags and now track everything here against one shared version
 - Security: Removed an unused PDF dependency (`jspdf`) that carried a critical vulnerability; PDF report export uses `@react-pdf/renderer` only and is unaffected.
 
 ### Backend
-- Changed: Internal lint configuration cleanup (no behavior change).
 
+- Changed: Internal lint configuration cleanup (no behavior change).
 
 ## 3.1 - 2026-06-27
 
 ### Frontend
+
 - Fixed: Logging in now shows a clear "A server error occurred" message instead of the misleading "incorrect username or password" message when the server itself fails.
 - Fixed: A failed login attempt no longer shows a duplicate error pop-up on top of the inline message under the form.
 - Added: Create/edit recipe and create/edit menu pages now use RTK Query mutations directly instead of legacy wrapper calls, so the cache invalidates automatically and no manual refetch is needed.
@@ -61,28 +72,30 @@ changelogs and the tags and now track everything here against one shared version
 - Added: All toast messages (success confirmations and the generic fallback error) are now driven by i18n keys, ready for future translation.
 
 ### Backend
+
 - Changed: Error messages returned by the API are now defined in one shared place, so wording stays consistent everywhere a given error can occur.
 - Changed: Success messages returned by the API (login, logout, create/update/delete menu, delete recipe, pantry operations) are now defined in one shared constants file, eliminating hardcoded strings across four controllers.
-
 
 ## 3.0 - 2026-06-26
 
 ### Frontend
+
 - Added: Centralized app state - a Redux Toolkit store now backs the whole app: shared sign-in session state (checking / authed / unauthed / error - error is reserved for failed checks, unauthed only for explicit logout), plus a centralized server-data cache (RTK Query) for recipes, menus, ingredients, recipe types, menu categories, the pantry and the session, so data is fetched once and shared across pages and every list refreshes automatically after you add, edit, or delete.
 - Added: App-wide toast notifications that confirm successful actions and surface failed requests, plus a single global manager for all pop-up dialogs, including the delete confirmations for recipes, menus and pantry items.
 - Added: Session selectors (`selectSessionStatus`, `selectIsAuthed`, `selectIsChecking`, `selectHasSessionError`) as a separate co-located file - the established pattern for all future slices.
 - Changed: Every page, list, detail view, the statistics page and the recipe and menu filters now read and write through the shared store and cache instead of per-page data fetching, with no change to how the app behaves.
 
 ### Project
+
 - Added: A `git skip-checks <command>` helper (repo-local alias, auto-installed on `npm install`) runs a single git command with checks skipped, in any shell.
 - Changed: A single `SKIP_CHECKS=1` flag now skips both the local git hooks and CI for one commit or push - on commit it auto-stamps `[skip-checks]` into the message so CI skips its jobs too (`SKIP_HOOKS=1` kept as a backward-compatible alias; the direct-push-to-main block still applies).
 - Fixed: The pre-commit hook no longer reads the previous commit's message, so a `[skip-checks]` from an earlier commit can no longer wrongly skip checks on the next, unrelated commit.
 - Fixed: `[skip-checks]` now skips CI on pull requests too (a gate job reads the commit message directly), so it no longer has to be repeated in the PR title.
 
-
 ## 2.7 - 2026-06-22
 
 ### Project
+
 - Fixed: Deploy pipeline no longer reports a failed step when the migration job actually succeeded (bash set -e false-positive on the timeout guard).
 - Added: `[skip-checks]` in a commit message or PR title now skips all CI jobs and local pre-commit hooks (for pure ops-only commits such as workflow files and docs).
 - Fixed: Backend SonarJS lint no longer reports errors on compiled files in `dist/`.
@@ -90,82 +103,91 @@ changelogs and the tags and now track everything here against one shared version
 ## 2.6 - 2026-06-21
 
 ### Backend
+
 - Added: A single `deploy-db` script runs database migrations and reference-data seeding in one process, used by the deploy migration job.
 
 ### Project
+
 - Fixed: Migration job now reliably runs migrations and seeding on each deploy via a dedicated entry point, instead of mis-parsed shell arguments.
 - Changed: Local git hooks accept a `SKIP_HOOKS=1` escape hatch to bypass linters/tests/build (the direct-push-to-main block still applies), and CI skips its check jobs when the commit message or PR title contains `[skip-checks]` while still reporting the required success status.
 
 ## 2.5 - 2026-06-21
 
 ### Project
+
 - Changed: Deploy migration job points at an explicit command instead of the default web-server entry point (superseded by 2.6).
 
 ## 2.4 - 2026-06-21
 
 ### Project
+
 - Fixed: GHCR image references now use lowercase owner name so Azure Container Apps can pull images correctly.
 
 ## 2.3 - 2026-06-21
 
 ### Project
-- Fixed: Azure OIDC login now uses a GitHub environment subject, which is the only format Azure federated credentials support for tag-triggered deploys.
 
+- Fixed: Azure OIDC login now uses a GitHub environment subject, which is the only format Azure federated credentials support for tag-triggered deploys.
 
 ## 2.2 - 2026-06-21
 
 ### Project
-- Fixed: Deploy pipeline now authenticates to Azure correctly on any `v*` tag push.
 
+- Fixed: Deploy pipeline now authenticates to Azure correctly on any `v*` tag push.
 
 ## 2.1 - 2026-06-21
 
 ### Project
-- Fixed: Deploying a release tag (`v*`) from the `main` branch was blocked by the pre-push hook.
 
+- Fixed: Deploying a release tag (`v*`) from the `main` branch was blocked by the pre-push hook.
 
 ## 2.0 - 2026-06-21
 
 ### Project
-- Added: Cooking Assistant is publicly available at https://cooking-assistant.app
 
+- Added: Cooking Assistant is publicly available at https://cooking-assistant.app
 
 ## 1.43 - 2026-06-21
 
 ### Backend
+
 - Added: Backend is now packaged as a Docker image (multi-stage build via tsup) and published to GitHub Container Registry on each release tag.
 - Added: Database migrations and seed run automatically as a Container Apps Job on every deploy, before the new backend image goes live.
 
 ### Frontend
+
 - Added: Frontend is built into a Docker image served by nginx, with a SPA fallback so deep links load correctly in production.
 
 ### Project
-- Added: A `deploy.yml` GitHub Actions workflow that builds both images on a `v*` git tag, pushes them to GHCR, runs migrations, and updates both Azure Container Apps.
 
+- Added: A `deploy.yml` GitHub Actions workflow that builds both images on a `v*` git tag, pushes them to GHCR, runs migrations, and updates both Azure Container Apps.
 
 ## 1.42 - 2026-06-21
 
 ### Backend
+
 - Security: Added a global per-client request rate limit (both the window and the per-IP ceiling are configurable via env) on top of the stricter login/registration limit; throttled responses keep the standard JSON error shape.
 - Security: Responses now send an HTTP Strict-Transport-Security (HSTS) header, and database connections use TLS in production - configurable, including a relaxed-CA option for managed Postgres providers.
 - Security: The app refuses to start in production with default database credentials, now enforced for the migrate and seed scripts too, not just the web server.
 - Changed: Backend code quality was brought up to the frontend's level - stricter type-aware linting, enforced import-layering boundaries, and large data-access files split into smaller focused modules. No change to API behavior.
 
 ### Frontend
+
 - Security: Updated axios to a patched release and removed an unused build dependency, clearing known dependency advisories.
 - Changed: Production builds now strip `console` and `debugger` statements.
 - Changed: The custom ESLint complex-condition rule now reports in English instead of Russian.
 
-
 ## 1.41 - 2026-06-20
 
 ### Backend
+
 - Fixed: Editing a menu now preselects the saved category and its recipes correctly.
 - Fixed: Menu name search with special characters now works correctly; the server was decoding search terms a second time, which broke searches containing percent-signs and accented letters.
 - Fixed: Setting a pantry ingredient's quantity to 0 now removes it from the pantry instead of leaving a row with zero quantity.
 - Fixed: The update-pantry endpoint now correctly accepts 0 as a valid quantity (previously it rejected 0 with a validation error).
 
 ### Frontend
+
 - Fixed: After creating or editing a recipe, the app now navigates to the main recipe list instead of briefly bouncing through the home redirect.
 - Fixed: The recipe servings field is sent to the server as a number, not a string.
 - Fixed: The pantry quantity editor now allows 0 as input, so you can remove an ingredient by setting its quantity to zero.
@@ -179,21 +201,23 @@ changelogs and the tags and now track everything here against one shared version
 ## 1.40 - 2026-06-20
 
 ### Backend
+
 - Security: Your login session is now kept in a secure, httpOnly cookie set by the server, so it can no longer be read or stolen by scripts in the browser; signing out clears it.
 - Security: You can no longer open or change another user's menu — every menu is private to the person who created it, and its "missing ingredients" are now worked out against your own pantry.
 - Security: When you build a menu, the recipes you add are now checked to make sure they actually exist.
 - Removed: Creating, editing, and deleting recipe types is temporarily withdrawn pending a future, safer system; recipe types are now a fixed reference list you can still browse and pick from when adding a recipe.
 
 ### Frontend
+
 - Changed: Rebuilt the login and registration screens on the shared form components, added a password show/hide control, and translated every label, button, and validation message via a new `auth` namespace.
 - Fixed: The registration form now blocks submission while any field is still invalid (previously an invalid form could slip through).
 - Security: The app no longer keeps your login token in the browser - your session lives only in the secure cookie - and an expired session now returns you to the login screen instead of showing a broken page.
 - Removed: The recipe-type management screens (add, edit, delete) are gone while that feature is temporarily withdrawn; the read-only recipe-type list remains.
 
-
 ## 1.39 - 2026-06-18
 
 ### Frontend
+
 - Changed: refactored the recipes domain — filter and sort logic extracted into `useRecipeFilters` and `useRecipes` hooks, cooking-time formatting moved to `cookingTimeUtils`, `RecipeCard` and `RecipeTypeFilter` migrated to self-contained component folders, all visible strings translated via a new `recipes` i18n namespace.
 - Changed: refactored the menu domain — filter state extracted into `useMenuFilters`, form state into `useMenuForm`, `MenuCard` and `MenuCategoryFilter` migrated to self-contained component folders, all visible strings translated via a new `menu` i18n namespace.
 - Changed: refactored the ingredients domain — `IngredientsPage` decomposed from 528 lines into four focused sub-components (`IngredientList`, `IngredientSelector`, `QuantityEditor`, `DeleteConfirmModal`), pantry and quantity logic extracted into `useIngredientsData` and `useQuantityUpdates` hooks, expiration calculation deduplicated into `ingredientExpirationUtils`, `PurchaseHistoryModal` migrated to a self-contained component folder, all visible strings translated via a new `ingredients` i18n namespace.
@@ -207,84 +231,85 @@ changelogs and the tags and now track everything here against one shared version
 - Fixed: the recipe and menu detail pages no longer show an untranslated "Error:" prefix when something fails to load.
 - Security: removed a debug log on the login screen that printed the entered username and password to the browser console.
 
-
 ## 1.38 - 2026-06-17
 
 Frontend:
+
 - Changed: reorganised the shared UI components (header, search bar, date filter, confirmation dialog, private route guard) into self-contained folders with named exports.
 - Changed: tightened the build and lint tooling - type-aware ESLint rules, import path aliases throughout, CSS linting (Stylelint) in CI and pre-commit, and a faster test transformer. No change to how the app looks or behaves.
 - Added: translation groundwork for the shared interface elements (header navigation, search, date filter, confirmation dialog) - strings remain in English; the structure is in place for future languages.
 
-
 ## 1.37 - 2026-06-16
 
 Frontend:
-- Added: a frontend test suite (Jest + React Testing Library) that locks in current behaviour ahead of the upcoming UI refactor - unit tests for every API-layer function and the shared error helper, tests for the reusable UI components, and a behavioral smoke test for every page (login, registration, the recipe and menu lists, recipe and menu details, recipe and menu creation and editing, recipe types, the pantry, and statistics).
 
+- Added: a frontend test suite (Jest + React Testing Library) that locks in current behaviour ahead of the upcoming UI refactor - unit tests for every API-layer function and the shared error helper, tests for the reusable UI components, and a behavioral smoke test for every page (login, registration, the recipe and menu lists, recipe and menu details, recipe and menu creation and editing, recipe types, the pantry, and statistics).
 
 ## 1.36 - 2026-06-16
 
 Frontend:
-- Added: a Jest + React Testing Library test setup (jsdom) so UI components can be unit-tested, with a first smoke test covering the confirmation modal.
 
+- Added: a Jest + React Testing Library test setup (jsdom) so UI components can be unit-tested, with a first smoke test covering the confirmation modal.
 
 ## 1.35 - 2026-06-16
 
 Backend:
+
 - Changed: the API server now listens on port 3000 (previously 8080), and the default allowed CORS origin is now http://localhost:8080 (previously http://localhost:5173).
 
 Frontend:
-- Changed: the dev server now runs on port 8080 (previously 5173), and the default backend API URL is now http://localhost:3000 (previously http://localhost:8080).
 
+- Changed: the dev server now runs on port 8080 (previously 5173), and the default backend API URL is now http://localhost:3000 (previously http://localhost:8080).
 
 ## 1.34 - 2026-06-16
 
 Frontend:
-- Changed: ingredient-pantry and statistics HTTP calls extracted from their pages/components into `src/api/userIngredientsApi.ts` and `src/api/statsApi.ts`; paths centralised in `src/api/endpoints.ts`; pages and components no longer call axios directly or build hardcoded backend URLs for requests, completing the API-layer migration of every frontend domain.
 
+- Changed: ingredient-pantry and statistics HTTP calls extracted from their pages/components into `src/api/userIngredientsApi.ts` and `src/api/statsApi.ts`; paths centralised in `src/api/endpoints.ts`; pages and components no longer call axios directly or build hardcoded backend URLs for requests, completing the API-layer migration of every frontend domain.
 
 ## 1.33 - 2026-06-16
 
 Frontend:
-- Changed: menu and user-menu HTTP calls extracted from their pages into `src/api/menusApi.ts` and `src/api/menuCategoriesApi.ts`; `getRecipes()` added to `src/api/recipesApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios/fetch directly or reference hardcoded backend URLs.
 
+- Changed: menu and user-menu HTTP calls extracted from their pages into `src/api/menusApi.ts` and `src/api/menuCategoriesApi.ts`; `getRecipes()` added to `src/api/recipesApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios/fetch directly or reference hardcoded backend URLs.
 
 ## 1.32 - 2026-06-15
 
 Frontend:
-- Changed: recipe and recipe-type HTTP calls extracted from their pages into `src/api/recipesApi.ts`, `src/api/recipeTypesApi.ts`, and `src/api/ingredientsApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios/fetch directly or reference hardcoded backend URLs.
 
+- Changed: recipe and recipe-type HTTP calls extracted from their pages into `src/api/recipesApi.ts`, `src/api/recipeTypesApi.ts`, and `src/api/ingredientsApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios/fetch directly or reference hardcoded backend URLs.
 
 ## 1.31 - 2026-06-15
 
 Frontend:
-- Changed: auth HTTP calls (login, register) extracted from LoginPage/RegisterPage into `src/api/authApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios directly or reference hardcoded backend URLs.
 
+- Changed: auth HTTP calls (login, register) extracted from LoginPage/RegisterPage into `src/api/authApi.ts`; paths centralised in `src/api/endpoints.ts`; pages no longer call axios directly or reference hardcoded backend URLs.
 
 ## 1.30 - 2026-06-15
 
 Frontend:
-- Added: shared axios client instance with configurable base URL (via `VITE_API_URL` env var) and automatic auth-token injection, establishing the API layer foundation for future migration of inline HTTP calls.
 
+- Added: shared axios client instance with configurable base URL (via `VITE_API_URL` env var) and automatic auth-token injection, establishing the API layer foundation for future migration of inline HTTP calls.
 
 ## 1.29 - 2026-06-14
 
 Frontend:
+
 - Added: strict linting, accessibility checks, and code-quality analysis (ESLint strict mode, jsx-a11y, SonarJS) enforced on every commit via pre-commit hook and in CI.
 - Added: Prettier formatting enforced for all frontend TypeScript, TSX, and CSS files in CI and pre-commit.
 - Added: aggregate root scripts (`lint`, `typecheck`, `test`, `build`, `verify`) to run checks across both packages from the repo root.
 
-
 ## 1.28 - 2026-06-14
 
 Frontend:
+
 - Fixed: frontend build and lint now pass with 0 errors (unused-variable, no-explicit-any, unused-catch-binding, and ban-ts-comment errors resolved).
 - Fixed: removed unused Vite scaffold leftovers - vite.svg, react.svg, App.css, and 16 unreferenced Montserrat font variants.
-
 
 ## 1.27 - 2026-06-13
 
 Backend:
+
 - Fixed: editing a past purchase no longer overwrites the pantry stock with the sum of all
   purchases - it now adjusts the stock by the change, so ingredients you have already used up
   stay accounted for.
@@ -296,6 +321,7 @@ Backend:
 ## 1.26 - 2026-06-13
 
 Backend:
+
 - Creating or editing a recipe now accepts the number of servings sent as text (the
   way the current app sends it), instead of rejecting it with a validation error.
 - Adding pantry ingredients, updating their quantities, and building or editing a menu
@@ -305,11 +331,13 @@ Backend:
 - Concurrent updates to the same pantry ingredient no longer race and lose changes.
 
 Project:
+
 - Documentation and release metadata fixes: the example JWT secret in the backend
   README now meets the required minimum length, and the lockfile versions match the
   current release.
 
 Backend:
+
 - Security: recipes and menus can now be edited and deleted only by their owner; a request against
   someone else's recipe or menu returns 404. Deleting a recipe type still removes all recipes of that
   type, and no longer fails with a server error when such a recipe is part of a menu.
@@ -325,20 +353,20 @@ Backend:
 - Reliability: a dropped idle database connection no longer crashes the server, and frequent lookups
   got database indexes. `JWT_SECRET_KEY` must now be at least 32 characters (checked at startup).
 
-
 ## 1.24 - 2026-06-11
 
 Backend:
+
 - Switched password hashing from bcrypt to the API-compatible bcryptjs (same hash format, so existing
   passwords keep working). This removes bcrypt's vulnerable native build tooling and brings the whole
   project to zero dependency advisories.
 - Made the allowed CORS origin configurable through the `CORS_ORIGIN` environment variable (defaulting to
   `http://localhost:5173`), so a deployed frontend no longer needs a code change.
 
-
 ## 1.23 - 2026-06-11
 
 Backend:
+
 - Replaced the single non-idempotent database.sql setup with versioned migrations (node-pg-migrate) and
   a separate, re-runnable seed step, and removed the legacy database.sql. The schema is now created and
   rolled back reproducibly with `npm run migrate up` / `down`, and reference and sample data are loaded with
@@ -347,125 +375,127 @@ Backend:
 - Audited and patched dependency vulnerabilities: the root project is now clean, and the backend's
   remaining advisories are limited to bcrypt's native build tooling.
 
-
 ## 1.22 - 2026-06-11
 
 Backend:
+
 - Added schema validation (zod) for all request input, so malformed requests are rejected with a clear
   400 error instead of failing deeper. Unified every error response to the { error } shape (auth errors
   included) and added a JSON 404 for unknown routes. Environment variables are validated on startup.
 
-
 ## 1.21 - 2026-06-11
 
 Backend:
+
 - Hardened the server for production: security headers via helmet, rate limiting on the login and
   register endpoints, an explicit request body size limit, a /api/health check, structured logging
   with pino (replacing console), and graceful shutdown that drains the server and closes the database
   pool on SIGTERM/SIGINT.
 
-
 ## 1.20 - 2026-06-11
 
 Backend:
+
 - Upgraded the backend to Express 5. Async route handlers now rely on the framework's built-in
   promise-rejection forwarding, so the manual asyncHandler wrapper was removed. No API or behavior change.
-
 
 ## 1.19 - 2026-06-10
 
 Backend:
+
 - Added middleware unit tests and supertest HTTP integration tests covering routing, auth, and error
   responses. The Express app is now built through a createApp(controllers) factory so it can be
   exercised in tests without a database. No API or behavior change.
 
-
 ## 1.18 - 2026-06-10
 
 Backend:
-- Reorganized the backend so all source lives under backend/src/, with only tooling configs at the
-  package root, and introduced path aliases (@domain/*, @application/*, @infrastructure/*,
-  @controller/*, @routes/*, @middleware/*, @config/*, @test/*) so imports no longer use ../../.. chains.
-  Pure structural change - no API or behavior change.
 
+- Reorganized the backend so all source lives under backend/src/, with only tooling configs at the
+  package root, and introduced path aliases (@domain/_, @application/_, @infrastructure/_,
+  @controller/_, @routes/_, @middleware/_, @config/_, @test/_) so imports no longer use ../../.. chains.
+  Pure structural change - no API or behavior change.
 
 ## 1.17 - 2026-06-10
 
 Backend:
+
 - Migrated the backend to TypeScript. The whole API is now statically type-checked, with no change to
   endpoints, response shapes, or status codes. The Jest suite (now ts-jest) was the safety net.
 
 Project:
+
 - Backend now runs via tsx (no build step); CI gained a typecheck job and the pre-commit hook runs it
   too, so type errors are caught before a commit. Prettier/lint-staged now target backend .ts files.
-
 
 ## 1.16 - 2026-06-10
 
 Project:
+
 - Added Husky git hooks: pre-commit runs the full local quality gate (lint-staged auto-formats staged
   backend .js files with Prettier, then runs backend ESLint, SonarJS lint, and tests with coverage)
   so broken code can never be committed; pre-push blocks accidental direct pushes to main.
 
-
 ## 1.15 - 2026-06-10
 
 Backend:
+
 - Added eslint-plugin-sonarjs (recommended config) to the backend lint, bringing SonarSource
   code-smell and bug-detection rules locally - no SonarCloud account required.
 - Security: disabled the X-Powered-By response header (flagged by sonarjs), so the API no longer
   advertises that it runs on Express.
 
 Project:
+
 - Added a separate local SonarJS lint path: a dedicated backend ESLint config, a `lint:sonarjs`
   backend script, and a CI check, so pull requests show SonarJS separately from the regular backend
   ESLint job.
 
-
 ## 1.14 - 2026-06-10
 
 Project:
-- CI now runs once per change instead of twice: the workflow no longer triggers on pushes to
-  release/** branches (pull requests already cover them), so a release-branch PR shows three checks
-  (format, lint, test) instead of six.
 
+- CI now runs once per change instead of twice: the workflow no longer triggers on pushes to
+  release/\*\* branches (pull requests already cover them), so a release-branch PR shows three checks
+  (format, lint, test) instead of six.
 
 ## 1.13 - 2026-06-10
 
 Backend:
+
 - Tightened the backend ESLint setup: added eslint-plugin-n for Node correctness,
   eslint-plugin-promise for async correctness, eslint-plugin-jest for the test files,
   eslint-config-prettier to avoid formatter conflicts, and stricter core rules (eqeqeq, no-var,
   prefer-const, curly, no-throw-literal). Declared engines.node ">=20".
 
-
 ## 1.12 - 2026-06-09
 
 Backend:
+
 - Added a Jest unit-test suite covering the backend use cases and domain entities with no database
   required. CI now runs coverage-enforced tests on every push and pull request, with an 80% minimum
   threshold for the backend business-logic unit-test scope.
 
-
 ## 1.11 - 2026-06-09
 
 Project:
-- Added GitHub Actions CI: runs the backend lint and the Prettier format check on every pull request to
-  main and on pushes to main and release/** branches.
 
+- Added GitHub Actions CI: runs the backend lint and the Prettier format check on every pull request to
+  main and on pushes to main and release/\*\* branches.
 
 ## 1.10 - 2026-06-09
 
 Backend:
+
 - Fixed: editing a purchase record no longer inflates your pantry stock with other users' purchases of
   the same ingredient. The recalculated amount now counts only your own purchases. The whole update now
   runs in a single transaction, so a mid-operation failure no longer leaves the purchase and the pantry
   total out of sync.
 
-
 ## 1.9 - 2026-06-09
 
 Backend:
+
 - Reworked the backend into a layered (clean) architecture: domain entities, use cases, repository
   interfaces with a PostgreSQL implementation, and dependency injection via a composition root.
   Controllers are now thin HTTP adapters. SQL queries, response shapes, and status codes are
@@ -478,33 +508,33 @@ Backend:
 - Removed leftover dead code (a duplicate menu-category handler, an unused menu helper, a commented-out
   route, and an unreachable menus-by-category endpoint).
 
-
 ## 1.8 - 2026-06-08
 
 Backend:
+
 - The server now identifies the logged-in user from the auth token instead of the user id sent by the
   client (security hardening). No visible change for normal use.
-
 
 ## 1.7 - 2026-06-07
 
 Project:
+
 - Unified the comment style across the whole codebase (backend and frontend): removed the //? and //!
   prefixes, switched to plain // comments with a single space and a lowercase first letter (acronyms
   and proper nouns like JWT, SQL, URL, Express keep their case). Comments only - no code or behavior
   changed.
 
-
 ## 1.6 - 2026-06-04
 
 Project:
-- Normalized line endings to LF across the repo via .gitattributes (* text=auto eol=lf), so files
-  check out the same on every OS and prettier format:check stays stable on Windows and elsewhere.
 
+- Normalized line endings to LF across the repo via .gitattributes (\* text=auto eol=lf), so files
+  check out the same on every OS and prettier format:check stays stable on Windows and elsewhere.
 
 ## 1.5 - 2026-06-04
 
 Backend:
+
 - Reworked error handling. Every endpoint now runs through one shared error middleware that returns
   failures as { error: <message> } with a 500 status and logs them in one place, instead of each
   handler catching its own errors. Database transactions still roll back on failure.
@@ -514,39 +544,42 @@ Backend:
 - Changed the default database name from cooking_helper_final to cooking_helper. This only affects
   setups that rely on the fallback default; if you set DB_NAME in .env, nothing changes.
 
-
 ## 1.4 - 2026-06-03
 
 Backend:
+
 - Added ESLint (flat config) and a lint script. Existing dead/duplicate code is silenced with
   eslint-disable comments for now and left for a later cleanup.
 - Reformatted all backend files with Prettier (4-space indent). No behavior change.
 
 Project:
+
 - Added Prettier with a shared config (.prettierrc, .prettierignore) and format / format:check
   scripts. Only the backend is formatted; the frontend is not touched yet.
 - Started committing lockfiles and tool configs: removed package-lock.json and eslint.config.js
   from .gitignore so installs are reproducible and CI can run npm ci.
-
 
 ## 1.3 - 2026-06-03
 
 Documentation and versioning cleanup. No product code changed.
 
 Project:
+
 - Switched to one shared version and this single changelog. Removed the backend and frontend
   changelogs and stopped using git tags.
 
 Backend:
+
 - Simplified the README: removed emoji and decorative formatting, trimmed to the essentials.
 
 Frontend:
-- Simplified the README the same way.
 
+- Simplified the README the same way.
 
 ## 1.2 - 2026-06-03
 
 Backend:
+
 - Database credentials now come from environment variables (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT,
   DB_NAME) instead of being hardcoded in db.js. The old values stay as fallback defaults, so existing
   setups keep working.
@@ -554,25 +587,26 @@ Backend:
 - Stopped tracking backend/.env in git, so the JWT secret is no longer committed. On a fresh checkout,
   copy .env.example to .env and fill it in.
 
-
 ## 1.1 - 2026-04-26
 
 Monorepo tooling and documentation. No product code changed.
 
 Project:
+
 - One npm install at the root now installs both apps, and npm start runs them together.
 - Added the first READMEs and project notes.
-
 
 ## 1.0 - 2026-04-26
 
 First release. A working full-stack cooking app.
 
 Backend:
+
 - Express API on port 8080 with JWT login (24h) and bcrypt passwords, PostgreSQL via pg.
 - Recipes, recipe types, per-user pantry with purchase history, menu planning with missing-ingredient
   detection, and stats. Around 30 endpoints. Schema and seed data in backend/database.sql.
 
 Frontend:
+
 - React + TypeScript + Vite app with Tailwind and React Router.
 - Auth, recipe/menu/pantry/type management, and a statistics page with charts and PDF export.

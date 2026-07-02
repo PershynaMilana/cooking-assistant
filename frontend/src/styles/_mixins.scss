@@ -1,0 +1,24 @@
+@mixin focus-ring {
+    &:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
+    }
+}
+
+@mixin card-surface {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+}
+
+@mixin truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin reduced-motion {
+    @media (prefers-reduced-motion: reduce) {
+        @content;
+    }
+}

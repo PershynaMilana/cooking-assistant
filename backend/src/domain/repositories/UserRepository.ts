@@ -11,8 +11,17 @@ export interface NewUser {
     password: string;
 }
 
+// the safe, public-facing shape of a person row - no password
+export interface PublicUser {
+    id: number;
+    name: string;
+    surname: string;
+    login: string;
+}
+
 export interface UserRepository {
     findByLogin(login: string): Promise<UserRecord | null>;
+    findById(id: number): Promise<PublicUser | null>;
     create(user: NewUser): Promise<unknown>;
     findAll(): Promise<unknown[]>;
 }

@@ -38,7 +38,7 @@ export const useCreateMenuPage = () => {
         });
 
         if ("data" in result) {
-            navigate(ROUTES.menu);
+            navigate(ROUTES.menus);
         }
     };
 

@@ -62,6 +62,7 @@ function createPantryRepository(): jest.Mocked<PantryRepository> {
 function createUserRepository(): jest.Mocked<UserRepository> {
     return {
         findByLogin: jest.fn(),
+        findById: jest.fn(),
         create: jest.fn(),
         findAll: jest.fn(),
     };

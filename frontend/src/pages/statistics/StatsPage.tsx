@@ -9,7 +9,7 @@ import {
 import { useGetAllMenusQuery } from "redux/services/menusApi";
 import { useGetAllRecipesQuery } from "redux/services/recipesApi";
 
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 import { MenuCategoryChart } from "components/stats/MenuCategoryChart";
 import { MenuStatsSummary } from "components/stats/MenuStatsSummary";
 import { RecipeTypeChart } from "components/stats/RecipeTypeChart";
@@ -33,9 +33,7 @@ const StatsPage: React.FC = () => {
     const menuStats = useAppSelector(selectMenuStatistics);
 
     return (
-        <div>
-            <Header />
-
+        <AppShell>
             <div className="mx-[15vw] my-8">
                 <h1 className="text-relative-h3 font-bold text-center bg-gradient-to-r from-dark-purple to-perfect-purple text-white p-4 rounded-md mb-8">
                     {t("statsPage.heading")}
@@ -87,7 +85,7 @@ const StatsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </AppShell>
     );
 };
 

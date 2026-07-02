@@ -1,9 +1,9 @@
 export const ROUTES = {
     home: "/",
-    main: "/main",
     login: "/login",
     registration: "/registration",
 
+    allRecipes: "/all-recipes",
     myRecipes: "/my-recipes",
     addRecipe: "/add-recipe",
     recipeDetails: "/recipe/:id",
@@ -14,7 +14,7 @@ export const ROUTES = {
     ingredients: "/ingredients",
     stats: "/stats",
 
-    menu: "/menu",
+    menus: "/menus",
     myMenus: "/my-menus",
     addMenu: "/add-menu",
     menuDetails: "/menu/:id",

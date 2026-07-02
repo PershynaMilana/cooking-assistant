@@ -31,6 +31,7 @@ import GetRecipeStats from "application/use-cases/recipes/GetRecipeStats";
 import SearchPersonRecipes from "application/use-cases/recipes/SearchPersonRecipes";
 import SearchRecipes from "application/use-cases/recipes/SearchRecipes";
 import UpdateRecipe from "application/use-cases/recipes/UpdateRecipe";
+import GetCurrentUser from "application/use-cases/users/GetCurrentUser";
 import GetUsers from "application/use-cases/users/GetUsers";
 import LoginUser from "application/use-cases/users/LoginUser";
 import RegisterUser from "application/use-cases/users/RegisterUser";
@@ -128,6 +129,7 @@ export function buildControllers({
         registerUser: new RegisterUser(userRepository, passwordHasher),
         loginUser: new LoginUser(userRepository, passwordHasher, tokenService),
         getUsers: new GetUsers(userRepository),
+        getCurrentUser: new GetCurrentUser(userRepository),
     });
 
     return {

@@ -12,9 +12,6 @@ interface CheckboxFilterDropdownProps<T> {
     resetLabel: string;
 }
 
-// generic checkbox-filter dropdown: a toggle button revealing a checkbox list plus a
-// reset action, closing on outside click. The recipe-type and menu-category filters
-// are thin adapters that supply their item shape, key/label getters and i18n labels.
 export const CheckboxFilterDropdown = <T,>({
     items,
     selected,

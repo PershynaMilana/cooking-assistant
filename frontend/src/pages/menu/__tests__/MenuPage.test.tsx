@@ -7,6 +7,7 @@ import { API_ROUTES } from "api/endpoints";
 
 import MenuPage from "pages/menu/MenuPage";
 import { mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_MENUS } from "test/constants";
 import { renderWithProviders } from "test/router";
 
 jest.mock("api/client");
@@ -28,7 +29,7 @@ describe("MenuPage", () => {
             [API_ROUTES.menuCategories.list]: [],
         });
 
-        renderWithProviders(<MenuPage />, { initialEntries: ["/menu"] });
+        renderWithProviders(<MenuPage />, { initialEntries: [ROUTE_MENUS] });
 
         expect(await screen.findByText(TITLE)).toBeInTheDocument();
     });
@@ -40,7 +41,7 @@ describe("MenuPage", () => {
         });
 
         const { store } = renderWithProviders(<MenuPage />, {
-            initialEntries: ["/menu"],
+            initialEntries: [ROUTE_MENUS],
         });
 
         await userEvent.click(screen.getByRole("button", { name: "Filter" }));

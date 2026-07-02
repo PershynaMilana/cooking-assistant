@@ -1,0 +1,11 @@
+@use "styles/tokens";
+
+// respects the OS "reduce motion" accessibility setting
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}

@@ -45,7 +45,9 @@ export interface RecipeFilterParams {
     end_date?: string;
     min_cooking_time?: string;
     max_cooking_time?: string;
-    sort_order: string;
+    // omitted (not empty string - the backend enum-validates "asc"/"desc") falls
+    // back to creation_date DESC server-side, e.g. for a "most recent" view
+    sort_order?: string;
 }
 
 export interface CreateRecipeIngredient {

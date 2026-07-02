@@ -10,11 +10,11 @@ import { API_ROUTES } from "api/endpoints";
 
 import { MODAL_TYPE } from "redux/slices/uiSlice";
 
-import { ModalRoot } from "components/ui/Modals";
+import { ModalRoot } from "components/modals";
 
 import MenuDetailsPage from "pages/menu/MenuDetailsPage";
 import { mockedDelete, mockedGet } from "test/apiClientMock";
-import { BTN_DELETE_MENU, ROUTE_MENU } from "test/constants";
+import { BTN_DELETE_MENU, ROUTE_MENUS } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore } from "test/store";
 
@@ -100,7 +100,7 @@ describe("MenuDetailsPage", () => {
         expect(mockedDelete).toHaveBeenCalledWith(API_ROUTES.menu.byId(1), {
             params: undefined,
         });
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENU);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENUS);
     });
 
     it("should render the error message when loading the menu fails", async () => {

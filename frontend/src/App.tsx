@@ -1,21 +1,18 @@
 import type { ReactElement } from "react";
 import React, { Suspense } from "react";
-import {
-    BrowserRouter as Router,
-    Navigate,
-    Route,
-    Routes,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { PageSpinner } from "components/layout/PageSpinner";
 import { PrivateRoute } from "components/layout/PrivateRoute";
-import { ModalRoot } from "components/ui/Modals";
+import { ModalRoot } from "components/modals";
+import { ThemeManager } from "components/theme/ThemeManager";
 import { Toaster } from "components/ui/Toasts";
 
 const LoginPage = React.lazy(() => import("pages/auth/LoginPage"));
 const RegisterPage = React.lazy(() => import("pages/auth/RegisterPage"));
+const HomePage = React.lazy(() => import("pages/home/HomePage"));
 const ChangeMenuPage = React.lazy(() => import("pages/menu/ChangeMenuPage"));
 const CreateMenuPage = React.lazy(() => import("pages/menu/CreateMenuPage"));
 const MenuDetailsPage = React.lazy(() => import("pages/menu/MenuDetailsPage"));
@@ -47,7 +44,8 @@ interface AppRoute {
 }
 
 const PRIVATE_ROUTES: AppRoute[] = [
-    { path: ROUTES.main, element: <MainPage /> },
+    { path: ROUTES.home, element: <HomePage /> },
+    { path: ROUTES.allRecipes, element: <MainPage /> },
     { path: ROUTES.myRecipes, element: <UserRecipesPage /> },
     { path: ROUTES.myMenus, element: <UserMenuPage /> },
     { path: ROUTES.recipeTypes, element: <TypesPage /> },
@@ -56,7 +54,7 @@ const PRIVATE_ROUTES: AppRoute[] = [
     { path: ROUTES.changeRecipe, element: <ChangeRecipePage /> },
     { path: ROUTES.stats, element: <StatsPage /> },
     { path: ROUTES.ingredients, element: <IngredientsPage /> },
-    { path: ROUTES.menu, element: <MenuPage /> },
+    { path: ROUTES.menus, element: <MenuPage /> },
     { path: ROUTES.addMenu, element: <CreateMenuPage /> },
     { path: ROUTES.menuDetails, element: <MenuDetailsPage /> },
     { path: ROUTES.changeMenu, element: <ChangeMenuPage /> },
@@ -64,10 +62,6 @@ const PRIVATE_ROUTES: AppRoute[] = [
 
 const App: React.FC = () => (
     <Routes>
-        <Route
-            path={ROUTES.home}
-            element={<Navigate to={ROUTES.main} replace />}
-        />
         <Route path={ROUTES.login} element={<LoginPage />} />
         <Route path={ROUTES.registration} element={<RegisterPage />} />
         <Route element={<PrivateRoute />}>
@@ -80,7 +74,8 @@ const App: React.FC = () => (
 );
 
 const AppWrapper: React.FC = () => (
-    <Router>
+    <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+        <ThemeManager />
         <Suspense fallback={<PageSpinner />}>
             <App />
         </Suspense>

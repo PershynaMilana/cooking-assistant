@@ -1,0 +1,11 @@
+@use "styles/abstracts" as *;
+
+.stat-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+
+    @include respond-to(tablet) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}

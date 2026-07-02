@@ -6,6 +6,7 @@ import { baseApi } from "redux/services/baseApi";
 import { filtersReducer } from "redux/slices/filtersSlice";
 import { notificationsReducer } from "redux/slices/notificationsSlice";
 import { sessionReducer } from "redux/slices/sessionSlice";
+import { themeReducer } from "redux/slices/themeSlice";
 import { uiReducer } from "redux/slices/uiSlice";
 
 const rootReducer = combineReducers({
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
     ui: uiReducer,
     notifications: notificationsReducer,
     filters: filtersReducer,
+    theme: themeReducer,
     [baseApi.reducerPath]: baseApi.reducer,
 });
 

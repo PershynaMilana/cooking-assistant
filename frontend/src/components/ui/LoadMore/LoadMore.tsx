@@ -10,9 +10,7 @@ interface LoadMoreProps {
     errorMessage?: string;
 }
 
-// manual "show more" pagination footer: an optional live counter line, a button
-// that fetches the next page on click only (no auto-scroll/observer), and an
-// optional retry-friendly error line. Domain-agnostic - labels come from the consumer.
+// click-to-load-next-page only - no auto-scroll/observer
 export const LoadMore: React.FC<LoadMoreProps> = ({
     hasMore,
     isLoading,

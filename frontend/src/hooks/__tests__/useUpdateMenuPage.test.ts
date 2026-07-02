@@ -12,6 +12,7 @@ import { recipesApi } from "redux/services/recipesApi";
 import { useUpdateMenuPage } from "hooks/useUpdateMenuPage";
 
 import { mockedPut, mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_MENUS } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
@@ -80,7 +81,7 @@ describe("useUpdateMenuPage", () => {
         expect(result.current.isLoading).toBe(false);
     });
 
-    it("should update the menu and navigate to /menu on valid submit", async () => {
+    it("should update the menu and navigate to menus on valid submit", async () => {
         mockedPut.mockResolvedValue({ data: null });
         const { result } = await setup();
 
@@ -96,7 +97,7 @@ describe("useUpdateMenuPage", () => {
                 recipeIds: [MENU_RECIPE.recipe_id],
             }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith("/menu");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENUS);
     });
 
     it("should not call the mutation when no recipes are selected", async () => {

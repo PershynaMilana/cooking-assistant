@@ -10,9 +10,6 @@ interface ToggleButtonGroupProps<T> {
     errorMessage?: string | null;
 }
 
-// generic "pick from a list by toggling buttons" control: a labelled wrap of toggle
-// buttons with an optional error line. The ingredient and recipe pickers are thin
-// adapters supplying their item shape, getters and selected/unselected button styling.
 export const ToggleButtonGroup = <T,>({
     label,
     items,

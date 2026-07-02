@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import { SEARCH_PARAM_INGREDIENT_NAME } from "constants/queryParams";
-import { ROUTES } from "constants/routes";
 
 import SearchIcon from "assets/searchIcon.png";
 
@@ -17,7 +16,6 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [searchParams, setSearchParams] = useSearchParams();
     const inputRef = useRef<HTMLInputElement>(null);
-    const location = useLocation();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -26,13 +24,6 @@ export const SearchComponent: React.FC<SearchComponentProps> = ({
 
         setSearchTerm(initialSearchTerm);
     }, [searchParams]);
-
-    useEffect(() => {
-        if (location.pathname === ROUTES.home && location.search !== "") {
-            setSearchTerm("");
-            setSearchParams({});
-        }
-    }, [location, setSearchParams]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);

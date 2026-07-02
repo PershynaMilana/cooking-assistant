@@ -3,8 +3,9 @@ import { ROUTES } from "constants/routes";
 // navigation route targets used in navigate() assertions (sourced from the app
 // route constants so test expectations can never drift from the real paths)
 export const ROUTE_HOME = ROUTES.home;
-export const ROUTE_MAIN = ROUTES.main;
-export const ROUTE_MENU = ROUTES.menu;
+export const ROUTE_LOGIN = ROUTES.login;
+export const ROUTE_ALL_RECIPES = ROUTES.allRecipes;
+export const ROUTE_MENUS = ROUTES.menus;
 
 export const LABEL_COOKING_TIME = "Cooking Time (hh:mm)";
 

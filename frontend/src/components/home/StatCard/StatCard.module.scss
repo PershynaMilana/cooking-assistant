@@ -1,0 +1,52 @@
+@use "styles/abstracts" as *;
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-4) var(--s-5);
+
+    @include card-surface;
+
+    &__icon {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--r-md);
+        background: var(--brand-subtle);
+        color: var(--brand);
+    }
+
+    &__value {
+        display: block;
+        color: var(--text);
+        font:
+            700 30px/1 "Geist Mono",
+            monospace;
+    }
+
+    &__label {
+        display: block;
+        margin-top: 2px;
+        color: var(--text-muted);
+        font:
+            400 12px Inter,
+            sans-serif;
+    }
+}
+
+.stat-card--warning {
+    border-color: color-mix(in srgb, var(--warning) 35%, var(--border));
+
+    .stat-card__icon {
+        background: color-mix(in srgb, var(--warning) 14%, transparent);
+        color: var(--warning);
+    }
+
+    .stat-card__value {
+        color: var(--warning);
+    }
+}

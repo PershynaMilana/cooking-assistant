@@ -59,7 +59,7 @@ export const useCreateRecipePage = () => {
         });
 
         if ("data" in result) {
-            navigate(ROUTES.main);
+            navigate(ROUTES.allRecipes);
         }
     };
 

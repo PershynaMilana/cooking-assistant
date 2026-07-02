@@ -23,6 +23,7 @@ module.exports = {
         "^i18n/(.*)$": "<rootDir>/src/i18n/$1",
         "^pages/(.*)$": "<rootDir>/src/pages/$1",
         "^redux/(.*)$": "<rootDir>/src/redux/$1",
+        "^styles/(.*)$": "<rootDir>/src/styles/$1",
         "^test/(.*)$": "<rootDir>/src/test/$1",
         "^types/(.*)$": "<rootDir>/src/types/$1",
         "^utils/(.*)$": "<rootDir>/src/utils/$1",

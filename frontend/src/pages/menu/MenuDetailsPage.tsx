@@ -7,7 +7,7 @@ import { useAppDispatch } from "redux/hooks";
 import { useGetMenuByIdQuery } from "redux/services/menusApi";
 import { MODAL_TYPE, openModal } from "redux/slices/uiSlice";
 
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 import { GroupedRecipesList } from "components/menu/GroupedRecipesList";
 import { MenuMetaInfo } from "components/menu/MenuMetaInfo";
 import { MenuOwnerActions } from "components/menu/MenuOwnerActions";
@@ -25,27 +25,26 @@ const MenuDetailsPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const { data: menu, isError, error } = useGetMenuByIdQuery(id ?? skipToken);
 
-    if (isError) {
+    const renderContent = () => {
+        if (isError) {
+            return (
+                <div className="text-red-500">
+                    {t("menuDetailsPage.error", {
+                        message: getQueryErrorMessage(error),
+                    })}
+                </div>
+            );
+        }
+
+        if (!menu) {
+            return <div>{t("menuDetailsPage.loading")}</div>;
+        }
+
+        const isOwner = menu.menu.isOwner;
+        const groupedRecipes = groupRecipesByType(menu.recipes);
+        const missingIngredients = aggregateMissingIngredients(menu.recipes);
+
         return (
-            <div className="text-red-500">
-                {t("menuDetailsPage.error", {
-                    message: getQueryErrorMessage(error),
-                })}
-            </div>
-        );
-    }
-
-    if (!menu) {
-        return <div>{t("menuDetailsPage.loading")}</div>;
-    }
-
-    const isOwner = menu.menu.isOwner;
-    const groupedRecipes = groupRecipesByType(menu.recipes);
-    const missingIngredients = aggregateMissingIngredients(menu.recipes);
-
-    return (
-        <div>
-            <Header />
             <div className="mx-[15vw] mb-[5vh]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
                     {menu.menu.title}
@@ -78,8 +77,10 @@ const MenuDetailsPage: React.FC = () => {
                     />
                 )}
             </div>
-        </div>
-    );
+        );
+    };
+
+    return <AppShell>{renderContent()}</AppShell>;
 };
 
 export default MenuDetailsPage;

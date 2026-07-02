@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useUpdateRecipePage } from "hooks/useUpdateRecipePage";
 
 import { RecipeForm } from "components/forms/RecipeForm";
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 
 const ChangeRecipePage: React.FC = () => {
     const { t } = useTranslation("recipes");
@@ -12,8 +12,7 @@ const ChangeRecipePage: React.FC = () => {
         useUpdateRecipePage();
 
     return (
-        <div>
-            <Header />
+        <AppShell>
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-bold">
                     {t("changeRecipePage.heading")}
@@ -36,7 +35,7 @@ const ChangeRecipePage: React.FC = () => {
                     />
                 )}
             </div>
-        </div>
+        </AppShell>
     );
 };
 
