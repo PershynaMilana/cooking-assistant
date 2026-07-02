@@ -7,6 +7,7 @@ import { API_ROUTES } from "api/endpoints";
 
 import MenuPage from "pages/menu/MenuPage";
 import { mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_MENUS } from "test/constants";
 import { renderWithProviders } from "test/router";
 
 jest.mock("api/client");
@@ -19,27 +20,28 @@ const SAMPLE: Menu[] = [
 const CATEGORIES: MenuCategory[] = [
     { menu_category_id: 3, category_name: CATEGORY_NAME },
 ];
+const PAGE = { items: SAMPLE, total: SAMPLE.length };
 
 describe("MenuPage", () => {
     it("should render the menus loaded from the api", async () => {
         mockGetByUrl({
-            [API_ROUTES.menu.list]: SAMPLE,
+            [API_ROUTES.menu.list]: PAGE,
             [API_ROUTES.menuCategories.list]: [],
         });
 
-        renderWithProviders(<MenuPage />, { initialEntries: ["/menu"] });
+        renderWithProviders(<MenuPage />, { initialEntries: [ROUTE_MENUS] });
 
         expect(await screen.findByText(TITLE)).toBeInTheDocument();
     });
 
     it("should record the selected category and show the by-categories heading", async () => {
         mockGetByUrl({
-            [API_ROUTES.menu.list]: SAMPLE,
+            [API_ROUTES.menu.list]: PAGE,
             [API_ROUTES.menuCategories.list]: CATEGORIES,
         });
 
         const { store } = renderWithProviders(<MenuPage />, {
-            initialEntries: ["/menu"],
+            initialEntries: [ROUTE_MENUS],
         });
 
         await userEvent.click(screen.getByRole("button", { name: "Filter" }));

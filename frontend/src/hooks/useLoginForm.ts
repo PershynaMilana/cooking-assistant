@@ -85,7 +85,7 @@ export const useLoginForm = () => {
         if ("data" in result) {
             clearLockout();
             setLockout({ failures: 0, lockedUntil: null });
-            navigate(ROUTES.main);
+            navigate(ROUTES.home);
 
             return;
         }

@@ -8,8 +8,6 @@ interface OwnerActionsProps {
     deleteLabel: string;
 }
 
-// edit (link) + delete (button) action pair shared by the recipe and menu detail
-// pages. Presentational: labels and the edit target are supplied by domain adapters.
 export const OwnerActions: React.FC<OwnerActionsProps> = ({
     editTo,
     onDelete,

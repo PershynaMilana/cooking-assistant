@@ -5,6 +5,7 @@ export const ERROR_MESSAGES = {
     AUTHENTICATED_USER_MISSING: "Authenticated user is missing",
     JWT_NOT_CONFIGURED: "JWT secret is not configured",
     LOGIN_ALREADY_TAKEN: "Login already taken",
+    USER_NOT_FOUND: "User not found",
 
     // recipes
     RECIPE_NOT_FOUND: "Recipe not found",

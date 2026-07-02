@@ -24,15 +24,15 @@ export const RecipeTypesSummary: React.FC<RecipeTypesSummaryProps> = ({
     const { t } = useTranslation("stats");
 
     return (
-        <div className="ml-6 flex flex-col">
-            <h2 className="text-h3 font-semibold mb-4">
+        <div className="flex flex-col">
+            <h2 className="text-h3 font-semibold text-dark-purple mb-4">
                 {t("statsPage.recipeTypesSummary")}
             </h2>
             <ul className="space-y-2">
                 {stats.map((stat) => (
                     <li
                         key={stat.typeName}
-                        className="flex justify-between bg-gray-100 p-2 rounded-md"
+                        className="flex justify-between bg-gray-100 rounded-lg p-3"
                     >
                         <span className="font-medium">{stat.typeName}</span>
                         <span className="text-gray-600">{stat.count}</span>
@@ -40,8 +40,8 @@ export const RecipeTypesSummary: React.FC<RecipeTypesSummaryProps> = ({
                 ))}
             </ul>
 
-            <div className="mt-4">
-                <h2 className="text-h3 font-semibold mb-2">
+            <div className="mt-6 pt-6 border-t border-gray-200">
+                <h2 className="text-h3 font-semibold text-dark-purple mb-3">
                     {t("statsPage.recipeDetails")}
                 </h2>
                 <RecipeExtremeList

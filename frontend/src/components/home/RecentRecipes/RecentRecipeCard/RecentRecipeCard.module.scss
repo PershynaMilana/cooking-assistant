@@ -1,0 +1,44 @@
+@use "styles/abstracts" as *;
+
+.recent-recipe-card {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    text-decoration: none;
+    transition:
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base) var(--ease-out);
+
+    @include focus-ring;
+
+    &:hover {
+        border-color: var(--brand);
+        transform: translateY(-2px);
+    }
+
+    &__image {
+        aspect-ratio: 16 / 9;
+        background: var(--surface-2);
+    }
+
+    &__body {
+        padding: var(--s-3) var(--s-4);
+    }
+
+    &__title {
+        color: var(--text);
+        font:
+            600 13px Fraunces,
+            serif;
+    }
+
+    &__time {
+        margin-top: 3px;
+        color: var(--text-muted);
+        font:
+            500 11px "Geist Mono",
+            monospace;
+    }
+}

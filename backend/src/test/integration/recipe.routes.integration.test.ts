@@ -132,16 +132,35 @@ describe("recipe routes", () => {
 
     it("should search recipes by filters", async () => {
         const { app, deps } = buildTestApp();
-        const recipes = [{ id: 12, title: "Tomato soup" }];
+        const paginated = {
+            items: [{ id: 12, title: "Tomato soup" }],
+            total: 1,
+        };
 
-        deps.recipeRepository.search.mockResolvedValue(recipes);
+        deps.recipeRepository.search.mockResolvedValue(paginated);
 
         const res = await request(app)
             .get("/api/recipes-by-filters?ingredient_name=tomato")
             .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(recipes);
+        expect(res.body).toEqual(paginated);
+    });
+
+    it("should pass limit and offset through to the repository", async () => {
+        const { app, deps } = buildTestApp();
+
+        deps.recipeRepository.search.mockResolvedValue({ items: [], total: 0 });
+
+        const res = await request(app)
+            .get("/api/recipes-by-filters?limit=10&offset=20")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(200);
+        expect(deps.recipeRepository.search).toHaveBeenCalledWith({
+            limit: 10,
+            offset: 20,
+        });
     });
 
     it("should return a 400 error body for an invalid filter", async () => {
@@ -158,18 +177,35 @@ describe("recipe routes", () => {
         expect(deps.recipeRepository.search).not.toHaveBeenCalled();
     });
 
+    it("should return a 400 error body for an out-of-range limit", async () => {
+        const { app, deps } = buildTestApp();
+
+        const res = await request(app)
+            .get("/api/recipes-by-filters?limit=101")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(400);
+        expect(res.body).toEqual({
+            error: "limit: Limit must be at most 100",
+        });
+        expect(deps.recipeRepository.search).not.toHaveBeenCalled();
+    });
+
     it("should search person recipes by the authenticated user", async () => {
         const { app, deps } = buildTestApp();
-        const recipes = [{ id: 12, title: "Tomato soup" }];
+        const paginated = {
+            items: [{ id: 12, title: "Tomato soup" }],
+            total: 1,
+        };
 
-        deps.recipeRepository.searchByPerson.mockResolvedValue(recipes);
+        deps.recipeRepository.searchByPerson.mockResolvedValue(paginated);
 
         const res = await request(app)
             .get("/api/recipes-filters-person?ingredient_name=tomato")
             .set("Cookie", authCookie(7));
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(recipes);
+        expect(res.body).toEqual(paginated);
         expect(deps.recipeRepository.searchByPerson).toHaveBeenCalledWith(7, {
             ingredient_name: "tomato",
         });

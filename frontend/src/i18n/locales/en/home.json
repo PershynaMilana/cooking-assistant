@@ -1,0 +1,52 @@
+{
+    "greeting": {
+        "welcome": "Welcome back 👋",
+        "welcomeWithName": "Welcome back, {{name}} 👋",
+        "news": "News",
+        "newMenu": "New menu",
+        "newRecipe": "New recipe"
+    },
+    "stats": {
+        "recipes": "Recipes",
+        "menus": "Menus",
+        "pantryItems": "Pantry items",
+        "expiringSoon": "Expiring soon"
+    },
+    "recentRecipes": {
+        "title": "Recent recipes",
+        "viewAll": "View all →",
+        "empty": "No recipes yet - add your first one.",
+        "cookingTimeHoursMinutes": "{{hours}}h {{minutes}}m",
+        "cookingTimeMinutesOnly": "{{minutes}}m"
+    },
+    "expiringSoon": {
+        "title": "Expiring soon",
+        "pantryLink": "Pantry →",
+        "expired": "Expired",
+        "daysLeft_one": "{{count}} day",
+        "daysLeft_other": "{{count}} days",
+        "addToShoppingList": "+ Add to shopping list",
+        "empty": "Nothing expiring soon."
+    },
+    "newsModal": {
+        "title": "What's new",
+        "close": "Close",
+        "items": {
+            "ratings": {
+                "date": "Jun 28, 2026",
+                "title": "Ratings are here",
+                "description": "Rate recipes and menus 1–5 stars - top picks now surface in Stats."
+            },
+            "expiry": {
+                "date": "Jun 20, 2026",
+                "title": "Pantry expiry alerts",
+                "description": "The dashboard now flags ingredients expiring within a week."
+            },
+            "cards": {
+                "date": "Jun 12, 2026",
+                "title": "Redesigned recipe cards",
+                "description": "Cleaner cards across Recipes, Menus and search results."
+            }
+        }
+    }
+}

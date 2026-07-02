@@ -41,7 +41,7 @@ module.exports = tseslint.config(
             "no-throw-literal": "error",
             "@typescript-eslint/no-unused-vars": [
                 "error",
-                { argsIgnorePattern: "^_" },
+                { argsIgnorePattern: "^_", ignoreRestSiblings: true },
             ],
             "@typescript-eslint/consistent-type-imports": "error",
             "@typescript-eslint/naming-convention": [

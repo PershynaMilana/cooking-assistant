@@ -1,0 +1,29 @@
+@use "styles/abstracts" as *;
+
+.home-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-6);
+    padding: var(--s-6) var(--s-4);
+
+    @include respond-to(desktop) {
+        padding: var(--s-6) var(--s-5);
+    }
+
+    &__panels {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--s-5);
+
+        @include respond-to(desktop) {
+            grid-template-columns: 1.65fr 1fr;
+        }
+    }
+
+    &__error {
+        color: var(--danger);
+        font:
+            500 15px Inter,
+            sans-serif;
+    }
+}

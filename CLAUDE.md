@@ -159,12 +159,14 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every PR and o
 
 **Trigger:** push a `v*` tag (e.g. `v2.0`) - user does this, never Claude. GitHub Actions
 ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) then:
+
 1. Builds `cooking-backend` Docker image via `tsup` + `node`, pushes to GHCR.
 2. Builds `cooking-frontend` Docker image via Vite + nginx, pushes to GHCR.
 3. Runs DB migrations + seed as an Azure Container Apps Job (`cooking-migration-job`).
 4. Updates both Azure Container Apps with the new images.
 
 **Infrastructure (Germany West Central):**
+
 - Container Apps Environment: `cooking-assistant-env`
 - Backend Container App: `cooking-backend`
 - Frontend Container App: `cooking-frontend`
@@ -273,6 +275,8 @@ The "missing ingredients for a menu" feature works by joining `menu_recipe` -> `
 ## Conventions in this codebase
 
 - **i18n is mandatory for every user-visible string in the frontend.** Never hardcode English (or any other language) text in components, hooks, or Redux middleware. In React components/hooks use `useTranslation("namespace")` → `t("key")`; in non-React code (Redux middleware, utilities) use `import i18next from "i18next"` → `i18next.t("key")`. Add all new strings to the appropriate JSON file under `frontend/src/i18n/locales/en/` (`common.json` for cross-cutting messages like toasts and generic errors; domain namespaces for domain-specific text). i18next is initialized synchronously, so `i18next.t()` is safe to call anywhere, including in module-level constants.
+
+- **Hand-authored SVG icons are always their own React component, never an inline `<svg>` copy-pasted into a page/component.** This is only for custom marks that don't come from `lucide-react` (e.g. the Donburi brand mark) - Lucide icons are already components and are imported directly. Shared hand-authored icons live in `frontend/src/components/icons/`, one component per file, typed with a shared `{ size?: number; className?: string }` props shape, themed via `stroke="currentColor"` so they inherit the surrounding text color. If an icon has size-dependent detail tiers (see `components/icons/DonburiMark*.tsx` for the pattern), give each tier its own component rather than branching SVG path data inside one component.
 
 - Comments are plain `//` with a single space and a lowercase first letter (acronyms / proper nouns like JWT, SQL, URL, Express keep their case, e.g. `// JWT login`). The old `//?` / `//!` prefixes were removed - don't reintroduce them.
 - Backend source is TypeScript with ESM-style `import`/`export`, executed by `tsx` with CommonJS runtime semantics (`module: "CommonJS"` in [backend/tsconfig.json](backend/tsconfig.json)). Do not add new `require`/`module.exports` in backend source files; root tooling configs such as ESLint and Jest stay CommonJS `.js`.

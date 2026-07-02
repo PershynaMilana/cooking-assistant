@@ -1,3 +1,4 @@
+import { PAGE_SIZE } from "constants/pagination";
 import type {
     CreateRecipeRequest,
     RecipeDetails,
@@ -29,6 +30,7 @@ const LIST: RecipeListItem[] = [
         cooking_time: 30,
     },
 ];
+const PAGE = { items: LIST, total: LIST.length };
 const FILTERS: RecipeFilterParams = { ingredient_name: "", sort_order: "asc" };
 const CREATE: CreateRecipeRequest = {
     title: "Soup",
@@ -62,7 +64,7 @@ const DETAIL: RecipeDetails = {
 
 describe("recipesApi", () => {
     it("should fetch recipes by filters", async () => {
-        mockedGet.mockResolvedValue({ data: LIST });
+        mockedGet.mockResolvedValue({ data: PAGE });
         const store = makeTestStore();
 
         const result = await store.dispatch(
@@ -70,13 +72,13 @@ describe("recipesApi", () => {
         );
 
         expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.byFilters, {
-            params: FILTERS,
+            params: { ...FILTERS, limit: PAGE_SIZE, offset: 0 },
         });
-        expect(result.data).toEqual(LIST);
+        expect(result.data).toEqual({ pages: [PAGE], pageParams: [0] });
     });
 
     it("should fetch the current user's recipes by filters", async () => {
-        mockedGet.mockResolvedValue({ data: LIST });
+        mockedGet.mockResolvedValue({ data: PAGE });
         const store = makeTestStore();
 
         await store.dispatch(
@@ -84,7 +86,7 @@ describe("recipesApi", () => {
         );
 
         expect(mockedGet).toHaveBeenCalledWith(API_ROUTES.recipes.byPerson, {
-            params: FILTERS,
+            params: { ...FILTERS, limit: PAGE_SIZE, offset: 0 },
         });
     });
 

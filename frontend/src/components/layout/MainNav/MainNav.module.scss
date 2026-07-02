@@ -1,0 +1,53 @@
+@use "styles/abstracts" as *;
+
+.main-nav--bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1);
+}
+
+.main-nav--drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.main-nav__item {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    height: 38px;
+    padding: 0 var(--s-4);
+    border-radius: var(--r-sm);
+    color: var(--text-2);
+    font:
+        600 14px Inter,
+        sans-serif;
+    text-decoration: none;
+    transition:
+        background var(--dur-fast) var(--ease-out),
+        color var(--dur-fast) var(--ease-out);
+
+    @include focus-ring;
+
+    &:hover {
+        background: var(--surface-2);
+        color: var(--text);
+    }
+
+    .main-nav--drawer & {
+        height: 46px;
+        border-radius: var(--r-md);
+        color: var(--text);
+    }
+}
+
+.main-nav__item--active {
+    background: var(--brand-subtle);
+    color: var(--brand);
+
+    &:hover {
+        background: var(--brand-subtle);
+        color: var(--brand);
+    }
+}

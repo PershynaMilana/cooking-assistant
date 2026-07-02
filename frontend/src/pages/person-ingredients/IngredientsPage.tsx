@@ -10,7 +10,7 @@ import { IngredientList } from "components/ingredients/IngredientList";
 import { IngredientsActionBar } from "components/ingredients/IngredientsActionBar";
 import { IngredientSelector } from "components/ingredients/IngredientSelector";
 import { QuantityEditor } from "components/ingredients/QuantityEditor";
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 
 const IngredientsPage: React.FC = () => {
     const { t } = useTranslation("ingredients");
@@ -19,9 +19,8 @@ const IngredientsPage: React.FC = () => {
     const { handleSaveOrToggleEdit, saveUpdatedQuantities } = catalog;
 
     return (
-        <div>
-            <Header />
-            <div className="w-11/12 mx-auto">
+        <AppShell>
+            <div className="mx-[15vw]">
                 <h1 className="text-3xl font-bold mb-6 justify-self-center m-4">
                     {t("page.heading")}
                 </h1>
@@ -80,7 +79,7 @@ const IngredientsPage: React.FC = () => {
                     </>
                 )}
             </div>
-        </div>
+        </AppShell>
     );
 };
 

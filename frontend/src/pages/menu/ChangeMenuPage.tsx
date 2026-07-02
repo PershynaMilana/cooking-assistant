@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useUpdateMenuPage } from "hooks/useUpdateMenuPage";
 
 import { MenuFormFields } from "components/forms/MenuFormFields";
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 
 const UpdateMenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
@@ -12,12 +12,15 @@ const UpdateMenuPage: React.FC = () => {
         useUpdateMenuPage();
 
     if (isLoading) {
-        return <div>{t("changeMenuPage.loading")}</div>;
+        return (
+            <AppShell>
+                <div>{t("changeMenuPage.loading")}</div>
+            </AppShell>
+        );
     }
 
     return (
-        <div>
-            <Header />
+        <AppShell>
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
                     {t("changeMenuPage.heading")}
@@ -43,7 +46,7 @@ const UpdateMenuPage: React.FC = () => {
                     </div>
                 </form>
             </div>
-        </div>
+        </AppShell>
     );
 };
 

@@ -6,7 +6,7 @@ import { API_ROUTES } from "api/endpoints";
 
 import CreateMenuPage from "pages/menu/CreateMenuPage";
 import { mockedPost, mockGetByUrl } from "test/apiClientMock";
-import { ROUTE_MENU } from "test/constants";
+import { ROUTE_MENUS } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -70,6 +70,6 @@ describe("CreateMenuPage", () => {
             categoryId: CATEGORY_ID,
             recipeIds: [RECIPE_ID],
         });
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENU);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MENUS);
     });
 });

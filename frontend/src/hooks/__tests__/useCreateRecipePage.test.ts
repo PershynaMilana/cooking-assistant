@@ -9,6 +9,7 @@ import { recipeTypesApi } from "redux/services/recipeTypesApi";
 import { useCreateRecipePage } from "hooks/useCreateRecipePage";
 
 import { mockedPost, mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_ALL_RECIPES } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
@@ -74,7 +75,7 @@ describe("useCreateRecipePage", () => {
                 ingredients: [{ id: INGREDIENT_ID, quantity: 1 }],
             }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith("/main");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_ALL_RECIPES);
     });
 
     it("should not call the mutation when required fields are empty", async () => {

@@ -12,6 +12,7 @@ import { recipeTypesApi } from "redux/services/recipeTypesApi";
 import { useUpdateRecipePage } from "hooks/useUpdateRecipePage";
 
 import { mockedPut, mockGetByUrl } from "test/apiClientMock";
+import { ROUTE_ALL_RECIPES } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
@@ -77,7 +78,7 @@ describe("useUpdateRecipePage", () => {
             API_ROUTES.recipes.byId("1"),
             expect.objectContaining({ title: TITLE, cooking_time: 60 }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith("/main");
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_ALL_RECIPES);
     });
 
     it("should not call the mutation when the cooking time is invalid", async () => {

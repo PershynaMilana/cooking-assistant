@@ -62,7 +62,7 @@ export const useUpdateMenuPage = () => {
         });
 
         if ("data" in result) {
-            navigate(ROUTES.menu);
+            navigate(ROUTES.menus);
         }
     };
 

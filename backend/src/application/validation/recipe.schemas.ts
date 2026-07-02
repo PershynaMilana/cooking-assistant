@@ -3,8 +3,10 @@ import { z } from "zod";
 import {
     idListStringSchema,
     idSchema,
+    limitSchema,
     nonEmptyStringSchema,
     numberSchema,
+    offsetSchema,
     optionalStringSchema,
     positiveIntegerSchema,
     toNumber,
@@ -73,4 +75,6 @@ export const recipeFiltersSchema = z.object({
         positiveIntegerSchema("Max cooking time").optional(),
     ),
     sort_order: z.enum(["asc", "desc"]).optional(),
+    limit: limitSchema,
+    offset: offsetSchema,
 });

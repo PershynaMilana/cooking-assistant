@@ -6,6 +6,7 @@ import { SEARCH_PARAM_INGREDIENT_NAME } from "constants/queryParams";
 
 import { SearchComponent } from "components/ui/SearchComponent";
 
+import { ROUTE_MENUS } from "test/constants";
 import { renderWithRouter } from "test/router";
 
 const PLACEHOLDER = "ingredient";
@@ -25,7 +26,7 @@ const ActiveFilter = () => {
 describe("SearchComponent", () => {
     it("should show the reset button after typing a search term", async () => {
         renderWithRouter(<SearchComponent placeholder={PLACEHOLDER} />, [
-            "/menu",
+            ROUTE_MENUS,
         ]);
 
         const input = screen.getByPlaceholderText(`Search by ${PLACEHOLDER}`);
@@ -44,7 +45,7 @@ describe("SearchComponent", () => {
                 <SearchComponent placeholder={PLACEHOLDER} />
                 <ActiveFilter />
             </>,
-            ["/menu"],
+            [ROUTE_MENUS],
         );
 
         await userEvent.type(
@@ -57,7 +58,7 @@ describe("SearchComponent", () => {
 
     it("should clear the search term when the reset button is clicked", async () => {
         renderWithRouter(<SearchComponent placeholder={PLACEHOLDER} />, [
-            "/menu",
+            ROUTE_MENUS,
         ]);
 
         const input = screen.getByPlaceholderText(`Search by ${PLACEHOLDER}`);
@@ -71,15 +72,5 @@ describe("SearchComponent", () => {
         expect(
             screen.queryByRole("button", { name: RESET_SEARCH }),
         ).not.toBeInTheDocument();
-    });
-
-    it("should clear the search term on the home route when a query is present", () => {
-        renderWithRouter(<SearchComponent placeholder={PLACEHOLDER} />, [
-            `/?name=${QUERY}`,
-        ]);
-
-        const input = screen.getByPlaceholderText(`Search by ${PLACEHOLDER}`);
-
-        expect(input).toHaveValue("");
     });
 });

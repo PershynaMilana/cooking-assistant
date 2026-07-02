@@ -5,6 +5,7 @@ import { logger } from "config/logger";
 
 import auth from "i18n/locales/en/auth.json";
 import common from "i18n/locales/en/common.json";
+import home from "i18n/locales/en/home.json";
 import ingredients from "i18n/locales/en/ingredients.json";
 import menu from "i18n/locales/en/menu.json";
 import recipes from "i18n/locales/en/recipes.json";
@@ -24,6 +25,7 @@ i18n.use(initReactI18next)
                 ingredients,
                 stats,
                 auth,
+                home,
             },
         },
         lng: "en",

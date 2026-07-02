@@ -1,0 +1,16 @@
+$bp-tablet: 768px;
+$bp-desktop: 1280px;
+
+@mixin respond-to($breakpoint) {
+    @if $breakpoint == tablet {
+        @media (min-width: $bp-tablet) {
+            @content;
+        }
+    } @else if $breakpoint == desktop {
+        @media (min-width: $bp-desktop) {
+            @content;
+        }
+    } @else {
+        @error "Unknown breakpoint `#{$breakpoint}`. Use `tablet` or `desktop`.";
+    }
+}

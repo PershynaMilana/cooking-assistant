@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 
 interface ListPageLayoutProps {
     filterSlot: React.ReactNode;
@@ -10,12 +10,10 @@ interface ListPageLayoutProps {
     isEmpty: boolean;
     emptyMessage: string;
     error: string | null;
+    footerSlot?: React.ReactNode;
     children: React.ReactNode;
 }
 
-// shared shell for the recipe and menu list pages: Header, filter row, heading, a
-// responsive card grid (or an empty message) and an error line. Domain list views
-// are thin adapters that fill the slots with their own filters and cards.
 export const ListPageLayout: React.FC<ListPageLayoutProps> = ({
     filterSlot,
     actionSlot,
@@ -24,10 +22,10 @@ export const ListPageLayout: React.FC<ListPageLayoutProps> = ({
     isEmpty,
     emptyMessage,
     error,
+    footerSlot,
     children,
 }) => (
-    <div>
-        <Header />
+    <AppShell>
         <div className="mx-[15vw]">
             {filterSlot}
 
@@ -49,7 +47,9 @@ export const ListPageLayout: React.FC<ListPageLayoutProps> = ({
                 </div>
             )}
 
+            {footerSlot}
+
             {error && <div className="text-red-500 mb-4">{error}</div>}
         </div>
-    </div>
+    </AppShell>
 );

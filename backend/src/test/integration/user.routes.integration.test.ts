@@ -85,15 +85,24 @@ describe("user routes", () => {
         );
     });
 
-    it("should return the current user id for an authenticated request", async () => {
-        const { app } = buildTestApp();
+    it("should return the current user for an authenticated request", async () => {
+        const { app, deps } = buildTestApp();
+        const currentUser = {
+            id: 1,
+            name: "Bob",
+            surname: "Cook",
+            login: "bob",
+        };
+
+        deps.userRepository.findById.mockResolvedValue(currentUser);
 
         const res = await request(app)
             .get("/api/me")
             .set("Cookie", authCookie());
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({ id: 1 });
+        expect(res.body).toEqual(currentUser);
+        expect(deps.userRepository.findById).toHaveBeenCalledWith(1);
     });
 
     it("should return 401 on GET /api/me without a token", async () => {
@@ -102,6 +111,19 @@ describe("user routes", () => {
         const res = await request(app).get("/api/me");
 
         expect(res.status).toBe(401);
+    });
+
+    it("should return 404 on GET /api/me when the user no longer exists", async () => {
+        const { app, deps } = buildTestApp();
+
+        deps.userRepository.findById.mockResolvedValue(null);
+
+        const res = await request(app)
+            .get("/api/me")
+            .set("Cookie", authCookie());
+
+        expect(res.status).toBe(404);
+        expect(res.body).toEqual({ error: ERROR_MESSAGES.USER_NOT_FOUND });
     });
 
     it("should return users for an authenticated request", async () => {

@@ -53,7 +53,7 @@ const loadRecipes = async (store: ReturnType<typeof makeTestStore>) => {
 
 const loadMenus = async (store: ReturnType<typeof makeTestStore>) => {
     mockedGet.mockResolvedValue({ data: MENUS });
-    await store.dispatch(menusApi.endpoints.getMenus.initiate({}));
+    await store.dispatch(menusApi.endpoints.getAllMenus.initiate(null));
 };
 
 describe("statisticsSelectors", () => {

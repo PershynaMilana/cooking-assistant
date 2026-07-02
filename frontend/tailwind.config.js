@@ -21,7 +21,9 @@ module.exports = {
         'pale-beige': '#f4edf4',
       },
       fontFamily: {
-        kharkiv: ['Kharkiv Tone', 'sans-serif'],
+        // 3.3: the distorted "Kharkiv Tone" display font is replaced by the new
+        // brand heading font everywhere `font-kharkiv` is already used
+        kharkiv: ['Fraunces', 'serif'],
         montserratMedium: ['Montserrat-Medium', 'sans-serif'],
         montserratRegular: ['Montserrat-Regular', 'sans-serif'],
       },

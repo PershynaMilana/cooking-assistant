@@ -7,7 +7,7 @@ import { useAppDispatch } from "redux/hooks";
 import { useGetRecipeByIdQuery } from "redux/services/recipesApi";
 import { MODAL_TYPE, openModal } from "redux/slices/uiSlice";
 
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 import { RecipeIngredientsList } from "components/recipes/RecipeIngredientsList";
 import { RecipeMetaInfo } from "components/recipes/RecipeMetaInfo";
 import { RecipeOwnerActions } from "components/recipes/RecipeOwnerActions";
@@ -21,31 +21,33 @@ const RecipeDetailsPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const { data: recipe, isError } = useGetRecipeByIdQuery(id ?? skipToken);
 
-    if (isError) {
+    const renderContent = () => {
+        if (isError) {
+            return (
+                <div className="text-red-500">
+                    {t("recipeDetailsPage.error", {
+                        message: t("recipeDetailsPage.errorFetch"),
+                    })}
+                </div>
+            );
+        }
+
+        if (!recipe) {
+            return <div>{t("recipeDetailsPage.loading")}</div>;
+        }
+
+        const isOwner = recipe.isOwner;
+        const formattedDate = formatDate(recipe.creation_date, i18n.language);
+        const { hours, minutes } = splitCookingTime(recipe.cooking_time);
+        const formattedCookingTime =
+            hours > 0
+                ? t("recipeDetailsPage.cookingTimeHoursMinutes", {
+                      hours,
+                      minutes,
+                  })
+                : t("recipeDetailsPage.cookingTimeMinutes", { minutes });
+
         return (
-            <div className="text-red-500">
-                {t("recipeDetailsPage.error", {
-                    message: t("recipeDetailsPage.errorFetch"),
-                })}
-            </div>
-        );
-    }
-
-    if (!recipe) {
-        return <div>{t("recipeDetailsPage.loading")}</div>;
-    }
-
-    const isOwner = recipe.isOwner;
-    const formattedDate = formatDate(recipe.creation_date, i18n.language);
-    const { hours, minutes } = splitCookingTime(recipe.cooking_time);
-    const formattedCookingTime =
-        hours > 0
-            ? t("recipeDetailsPage.cookingTimeHoursMinutes", { hours, minutes })
-            : t("recipeDetailsPage.cookingTimeMinutes", { minutes });
-
-    return (
-        <div>
-            <Header />
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
                     {recipe.title}
@@ -85,8 +87,10 @@ const RecipeDetailsPage: React.FC = () => {
                     />
                 )}
             </div>
-        </div>
-    );
+        );
+    };
+
+    return <AppShell>{renderContent()}</AppShell>;
 };
 
 export default RecipeDetailsPage;

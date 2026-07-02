@@ -6,7 +6,7 @@ import { API_ROUTES } from "api/endpoints";
 
 import CreateRecipePage from "pages/recipes/CreateRecipePage";
 import { mockedPost, mockGetByUrl } from "test/apiClientMock";
-import { LABEL_COOKING_TIME, ROUTE_MAIN } from "test/constants";
+import { LABEL_COOKING_TIME, ROUTE_ALL_RECIPES } from "test/constants";
 import { mockNavigate, renderWithRouter } from "test/router";
 
 jest.mock("react-router-dom", () => ({
@@ -72,6 +72,6 @@ describe("CreateRecipePage", () => {
                 ingredients: [{ id: INGREDIENT_ID, quantity: 1 }],
             }),
         );
-        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_MAIN);
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTE_ALL_RECIPES);
     });
 });

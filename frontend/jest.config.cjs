@@ -23,6 +23,7 @@ module.exports = {
         "^i18n/(.*)$": "<rootDir>/src/i18n/$1",
         "^pages/(.*)$": "<rootDir>/src/pages/$1",
         "^redux/(.*)$": "<rootDir>/src/redux/$1",
+        "^styles/(.*)$": "<rootDir>/src/styles/$1",
         "^test/(.*)$": "<rootDir>/src/test/$1",
         "^types/(.*)$": "<rootDir>/src/types/$1",
         "^utils/(.*)$": "<rootDir>/src/utils/$1",
@@ -52,10 +53,6 @@ module.exports = {
         "!src/api/redirect.ts",
         // barrel re-export files - no logic
         "!src/**/index.ts",
-        // @react-pdf/renderer documents/styles - render PDF primitives, not DOM (not jsdom-testable)
-        "!src/pages/statistics/Pdf*.tsx",
-        "!src/pages/statistics/StatsReport*.tsx",
-        "!src/pages/statistics/reportStyles.ts",
     ],
     coverageProvider: "v8",
     coverageThreshold: {

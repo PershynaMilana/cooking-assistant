@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "private": true,
-  "version": "3.2.0",
+  "version": "3.3.0",
   "type": "module",
   "scripts": {
     "start": "npm run dev",
@@ -21,17 +21,16 @@
     "major": "npm version major --no-git-tag-version"
   },
   "dependencies": {
-    "@react-pdf/renderer": "^4.1.5",
     "@reduxjs/toolkit": "^2.12.0",
-    "apexcharts": "^3.54.0",
     "axios": "^1.18.0",
     "i18next": "26.3.1",
+    "lucide-react": "^1.22.0",
     "react": "^18.3.1",
-    "react-apexcharts": "^1.4.1",
     "react-dom": "^18.3.1",
     "react-i18next": "17.0.8",
     "react-redux": "^9.3.0",
-    "react-router-dom": "^6.26.2"
+    "react-router-dom": "^6.26.2",
+    "recharts": "^2.15.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
@@ -64,6 +63,7 @@
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "postcss": "^8.4.47",
+    "sass": "^1.101.0",
     "stylelint": "17.13.0",
     "stylelint-config-standard-scss": "17.0.0",
     "stylelint-config-tailwindcss": "1.0.1",

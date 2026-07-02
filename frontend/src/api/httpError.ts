@@ -34,9 +34,7 @@ export function getApiErrorStatus(error: unknown): number | undefined {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null;
 
-// Retry-After cool-down in seconds (e.g. a 429), parsed from the response header;
-// null when absent, non-numeric, or not an axios error. The header bag is read
-// defensively because a malformed/partial error response may lack headers
+// Retry-After cool-down in seconds (e.g. a 429); null when absent or non-numeric
 export function getApiErrorRetryAfter(error: unknown): number | null {
     if (!axios.isAxiosError(error)) {
         return null;

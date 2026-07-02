@@ -4,15 +4,14 @@ import { useTranslation } from "react-i18next";
 import { useCreateMenuPage } from "hooks/useCreateMenuPage";
 
 import { MenuFormFields } from "components/forms/MenuFormFields";
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 
 const CreateMenuPage: React.FC = () => {
     const { t } = useTranslation("menu");
     const { form, categories, allRecipes, handleSubmit } = useCreateMenuPage();
 
     return (
-        <div>
-            <Header />
+        <AppShell>
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
                     {t("createMenuPage.heading")}
@@ -38,7 +37,7 @@ const CreateMenuPage: React.FC = () => {
                     </div>
                 </form>
             </div>
-        </div>
+        </AppShell>
     );
 };
 

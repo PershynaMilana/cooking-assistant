@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useCreateRecipePage } from "hooks/useCreateRecipePage";
 
 import { RecipeForm } from "components/forms/RecipeForm";
-import { Header } from "components/layout/Header";
+import { AppShell } from "components/layout/AppShell";
 
 const CreateRecipePage: React.FC = () => {
     const { t } = useTranslation("recipes");
@@ -12,8 +12,7 @@ const CreateRecipePage: React.FC = () => {
         useCreateRecipePage();
 
     return (
-        <div>
-            <Header />
+        <AppShell>
             <div className="mx-[15vw]">
                 <h1 className="text-relative-h3 my-[7vh] font-kharkiv font-bold mb-4">
                     {t("createRecipePage.heading")}
@@ -35,7 +34,7 @@ const CreateRecipePage: React.FC = () => {
                     }}
                 />
             </div>
-        </div>
+        </AppShell>
     );
 };
 

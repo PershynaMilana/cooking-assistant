@@ -6,7 +6,7 @@ import type { UserIngredient } from "types/userIngredient";
 
 import { API_ROUTES } from "api/endpoints";
 
-import { ModalRoot } from "components/ui/Modals";
+import { ModalRoot } from "components/modals";
 
 import IngredientsPage from "pages/person-ingredients/IngredientsPage";
 import { mockedDelete, mockedGet, mockedPut } from "test/apiClientMock";

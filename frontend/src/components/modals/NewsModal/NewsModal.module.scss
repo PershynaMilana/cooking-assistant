@@ -1,0 +1,132 @@
+@use "styles/abstracts" as *;
+
+@keyframes newsModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.news-modal__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s-4);
+    background: rgb(0 0 0 / 55%);
+    backdrop-filter: blur(4px);
+}
+
+.news-modal {
+    width: 100%;
+    max-width: 420px;
+    max-height: 80svh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--s-6);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    box-shadow: var(--e-3);
+    animation: newsModalIn var(--dur-base) var(--ease-out);
+
+    @include reduced-motion {
+        animation: none;
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--s-3);
+        margin-bottom: var(--s-4);
+    }
+
+    &__heading {
+        display: flex;
+        align-items: center;
+        gap: var(--s-3);
+    }
+
+    &__icon {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--r-md);
+        background: var(--brand-subtle);
+        color: var(--brand);
+    }
+
+    &__title {
+        margin: 0;
+        color: var(--text);
+        font:
+            600 20px Fraunces,
+            serif;
+    }
+
+    &__close {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: var(--r-sm);
+        background: var(--surface-2);
+        color: var(--text-muted);
+        cursor: pointer;
+
+        @include focus-ring;
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--s-4);
+    }
+
+    &__item {
+        padding-bottom: var(--s-4);
+        border-bottom: 1px solid var(--border);
+
+        &:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    &__date {
+        margin-bottom: var(--s-1);
+        color: var(--text-muted);
+        font:
+            500 11px "Geist Mono",
+            monospace;
+    }
+
+    &__item-title {
+        margin-bottom: 4px;
+        color: var(--text);
+        font:
+            600 15px Inter,
+            sans-serif;
+    }
+
+    &__description {
+        color: var(--text-2);
+        font:
+            400 13px/1.5 Inter,
+            sans-serif;
+    }
+}
