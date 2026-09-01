@@ -20,6 +20,10 @@ changelogs and the tags and now track everything here against one shared version
 
 ## Unreleased
 
+### Project
+
+- Changed: Routine dependency maintenance across the whole project - refreshed build, test and lint tooling plus a few runtime libraries to their latest compatible releases.
+
 ## 4.3 - 2026-08-20
 
 ### Project
