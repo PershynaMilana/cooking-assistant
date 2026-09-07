@@ -15,6 +15,9 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
+# Next build output
+frontend/.next
+
 # Playwright artifacts
 test-results/
 playwright-report/

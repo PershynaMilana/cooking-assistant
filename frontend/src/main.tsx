@@ -1,11 +1,12 @@
 import "styles/global.scss";
 
+import { setupListeners } from "@reduxjs/toolkit/query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 import { Provider } from "react-redux";
 
-import { store } from "redux/store";
+import { createStore } from "redux/store";
 
 import i18n from "i18n/index";
 
@@ -17,8 +18,10 @@ if (!rootElement) {
     throw new Error("Root element not found");
 }
 
-// set before the first paint so the correct theme never flashes on load; ThemeManager takes over from here for subsequent changes
-document.documentElement.dataset.theme = store.getState().theme.mode;
+const store = createStore();
+
+// enables refetchOnFocus / refetchOnReconnect
+setupListeners(store.dispatch);
 
 createRoot(rootElement).render(
     <StrictMode>

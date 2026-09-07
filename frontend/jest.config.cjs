@@ -22,7 +22,7 @@ module.exports = {
         "^constants/(.*)$": "<rootDir>/src/constants/$1",
         "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
         "^i18n/(.*)$": "<rootDir>/src/i18n/$1",
-        "^pages/(.*)$": "<rootDir>/src/pages/$1",
+        "^views/(.*)$": "<rootDir>/src/views/$1",
         "^redux/(.*)$": "<rootDir>/src/redux/$1",
         "^styles/(.*)$": "<rootDir>/src/styles/$1",
         "^test/(.*)$": "<rootDir>/src/test/$1",
@@ -40,10 +40,12 @@ module.exports = {
         // entry + routing composition wiring (analogous to backend main/composition-root)
         "!src/main.tsx",
         "!src/App.tsx",
+        "!src/app/**",
         // redux wiring and typed hook re-exports - composition root, no logic
         "!src/redux/store.ts",
         "!src/redux/hooks.ts",
         "!src/vite-env.d.ts",
+        "!src/env.d.ts",
         // pure type declarations - no runtime code
         "!src/types/**",
         // globally replaced by mocks in tests (see moduleNameMapper), never executed

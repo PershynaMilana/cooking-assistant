@@ -1,7 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 
-import { THEME_STORAGE_KEY } from "constants/theme";
+import { DEFAULT_THEME_MODE, THEME_STORAGE_KEY } from "constants/theme";
 
 export type ThemeMode = "dark" | "light";
 
@@ -12,7 +12,7 @@ const prefersLightScheme = (): boolean =>
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-color-scheme: light)").matches;
 
-// persisted choice wins; otherwise the OS preference decides the first visit
+// browser-only: reads storage and the OS preference, so it never runs during a server render
 export const getInitialThemeMode = (): ThemeMode => {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
 
@@ -34,7 +34,8 @@ interface ThemeState {
     mode: ThemeMode;
 }
 
-const initialState: ThemeState = { mode: getInitialThemeMode() };
+// resolved by the browser and handed to the store as preloaded state; see the app providers
+const initialState: ThemeState = { mode: DEFAULT_THEME_MODE };
 
 const themeSlice = createSlice({
     name: "theme",

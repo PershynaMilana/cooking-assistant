@@ -48,6 +48,13 @@ export default defineConfig({
         // native tsconfig paths support (replaces the vite-tsconfig-paths plugin)
         tsconfigPaths: true,
     },
+    define: {
+        // temporary bridge while both builds coexist: the app reads process.env now,
+        // which Vite does not provide
+        "process.env.NEXT_PUBLIC_API_URL": JSON.stringify(
+            process.env.VITE_API_URL ?? "",
+        ),
+    },
     build: {
         rolldownOptions: {
             output: {

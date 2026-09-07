@@ -28,7 +28,8 @@ const preferNullRestrictions = [
 ];
 
 export default tseslint.config(
-    { ignores: ["dist", "coverage"] },
+    // build output and Next-generated declarations
+    { ignores: ["dist", "coverage", ".next", "next-env.d.ts"] },
     {
         extends: [
             js.configs.recommended,
@@ -39,7 +40,13 @@ export default tseslint.config(
         languageOptions: {
             globals: globals.browser,
             parserOptions: {
-                projectService: true,
+                // explicit list, not projectService: the root tsconfig.json belongs to
+                // Next and covers app code only, so tests and build configs need naming
+                project: [
+                    "./tsconfig.app.json",
+                    "./tsconfig.node.json",
+                    "./tsconfig.test.json",
+                ],
                 tsconfigRootDir: import.meta.dirname,
             },
         },
@@ -122,7 +129,7 @@ export default tseslint.config(
                         ["^\\u0000"],
                         // external packages - starts with letter/@, but not our bare aliases
                         [
-                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|redux|test|types|utils)/)@?\\w",
+                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|redux|test|types|utils|views)/)@?\\w",
                         ],
                         // config / constants / types layers
                         ["^(?:config|constants|types)/"],
@@ -136,8 +143,8 @@ export default tseslint.config(
                         ["^(?:components|assets|i18n)/"],
                         // utils layer
                         ["^utils/"],
-                        // pages / test (infra) layers
-                        ["^(?:pages|test)/"],
+                        // views / test (infra) layers
+                        ["^(?:test|views)/"],
                         // relative same-folder (./)
                         ["^\\."],
                     ],
@@ -258,8 +265,14 @@ export default tseslint.config(
         },
     },
     {
-        files: ["src/pages/**/*.{ts,tsx}"],
-        ignores: ["src/pages/**/__tests__/**/*.{ts,tsx}"],
+        // route files legitimately export metadata/viewport alongside the component;
+        // the rule guards Fast Refresh, which does not apply to server components
+        files: ["src/app/**/*.{ts,tsx}"],
+        rules: { "react-refresh/only-export-components": "off" },
+    },
+    {
+        files: ["src/views/**/*.{ts,tsx}"],
+        ignores: ["src/views/**/__tests__/**/*.{ts,tsx}"],
         rules: {
             "max-lines": [
                 "error",
@@ -326,7 +339,8 @@ export default tseslint.config(
                 { type: "redux", pattern: "src/redux/**" },
                 { type: "hooks", pattern: "src/hooks/*" },
                 { type: "components", pattern: "src/components/**" },
-                { type: "pages", pattern: "src/pages/**" },
+                { type: "views", pattern: "src/views/**" },
+                { type: "app", pattern: "src/app/**" },
             ],
         },
         rules: {
@@ -339,9 +353,9 @@ export default tseslint.config(
                         {
                             from: { element: { type: "components" } },
                             disallow: {
-                                to: { element: { type: "pages" } },
+                                to: { element: { type: "views" } },
                             },
-                            message: "Components must not import pages.",
+                            message: "Components must not import views.",
                         },
                         {
                             from: {
@@ -349,7 +363,7 @@ export default tseslint.config(
                                     types: {
                                         anyOf: [
                                             "components",
-                                            "pages",
+                                            "views",
                                             "hooks",
                                             "utils",
                                             "redux",
@@ -378,8 +392,9 @@ export default tseslint.config(
         // literal JSX text and the few attributes users actually read
         // (placeholder/alt/aria-label/title) before they ship un-translated
         files: [
+            "src/app/**/*.{ts,tsx}",
             "src/components/**/*.{ts,tsx}",
-            "src/pages/**/*.{ts,tsx}",
+            "src/views/**/*.{ts,tsx}",
             "src/hooks/**/*.{ts,tsx}",
             "src/i18n/**/*.{ts,tsx}",
         ],

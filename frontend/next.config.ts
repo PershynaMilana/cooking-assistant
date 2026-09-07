@@ -1,0 +1,65 @@
+import type { NextConfig } from "next";
+import fs from "node:fs";
+import path from "node:path";
+
+const rootDir = import.meta.dirname;
+const srcDir = path.join(rootDir, "src");
+
+// the design tokens stay the single source of truth for the browser-chrome colour
+const readThemeColors = () => {
+    const tokens = fs.readFileSync(
+        path.join(srcDir, "styles/_tokens.scss"),
+        "utf8",
+    );
+    const [dark, light] = [...tokens.matchAll(/--bg:\s*(#[0-9a-fA-F]+)/g)].map(
+        (match) => match[1],
+    );
+
+    if (!dark || !light) {
+        throw new Error("Theme colours: --bg values not found in _tokens.scss");
+    }
+
+    return { dark, light };
+};
+
+const scssLoadPaths = [srcDir, path.join(rootDir, "node_modules")];
+const themeColors = readThemeColors();
+const isProduction = process.env.NODE_ENV === "production";
+
+// dev-proxy target is overridable via env; defaults to the local backend port
+const apiProxyTarget = process.env.API_INTERNAL_URL ?? "http://localhost:3000";
+
+const nextConfig: NextConfig = {
+    output: "standalone",
+    // the repository documents its own conventions; a generated per-package copy would
+    // compete with them and be rewritten on every dev run
+    agentRules: false,
+    // this package is the workspace root; without it the sibling lockfiles upstream make
+    // Next guess, and standalone output would trace the wrong tree
+    turbopack: { root: rootDir },
+    outputFileTracingRoot: rootDir,
+    env: {
+        THEME_COLOR_DARK: themeColors.dark,
+        THEME_COLOR_LIGHT: themeColors.light,
+    },
+    sassOptions: {
+        // lets SCSS modules `@use "styles/..."` the same way TS uses the bare alias
+        loadPaths: scssLoadPaths,
+    },
+    // same-origin in dev: the browser sees /api on :8080 and Next forwards it to the
+    // backend, so the auth cookie is first-party without TLS. Deployed, the browser
+    // talks to the API domain directly.
+    rewrites: () =>
+        Promise.resolve(
+            isProduction
+                ? []
+                : [
+                      {
+                          source: "/api/:path*",
+                          destination: `${apiProxyTarget}/api/:path*`,
+                      },
+                  ],
+        ),
+};
+
+export default nextConfig;

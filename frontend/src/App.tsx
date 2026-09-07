@@ -20,43 +20,43 @@ import { ModalRoot } from "components/modals";
 import { ThemeManager } from "components/theme/ThemeManager";
 import { Toaster } from "components/ui/Toasts";
 
-const LoginPage = React.lazy(() => import("pages/auth/LoginPage"));
-const RegisterPage = React.lazy(() => import("pages/auth/RegisterPage"));
+const LoginPage = React.lazy(() => import("views/auth/LoginPage"));
+const RegisterPage = React.lazy(() => import("views/auth/RegisterPage"));
 const ForgotPasswordPage = React.lazy(
-    () => import("pages/auth/ForgotPasswordPage"),
+    () => import("views/auth/ForgotPasswordPage"),
 );
 const ResetPasswordPage = React.lazy(
-    () => import("pages/auth/ResetPasswordPage"),
+    () => import("views/auth/ResetPasswordPage"),
 );
-const VerifyEmailPage = React.lazy(() => import("pages/auth/VerifyEmailPage"));
-const HomePage = React.lazy(() => import("pages/home/HomePage"));
+const VerifyEmailPage = React.lazy(() => import("views/auth/VerifyEmailPage"));
+const HomePage = React.lazy(() => import("views/home/HomePage"));
 const GuestLandingPage = React.lazy(
-    () => import("pages/home/GuestLandingPage"),
+    () => import("views/home/GuestLandingPage"),
 );
-const ChangeMenuPage = React.lazy(() => import("pages/menu/ChangeMenuPage"));
-const CreateMenuPage = React.lazy(() => import("pages/menu/CreateMenuPage"));
-const MenuDetailsPage = React.lazy(() => import("pages/menu/MenuDetailsPage"));
-const MenuPage = React.lazy(() => import("pages/menu/MenuPage"));
-const NotFoundPage = React.lazy(() => import("pages/not-found/NotFoundPage"));
+const ChangeMenuPage = React.lazy(() => import("views/menu/ChangeMenuPage"));
+const CreateMenuPage = React.lazy(() => import("views/menu/CreateMenuPage"));
+const MenuDetailsPage = React.lazy(() => import("views/menu/MenuDetailsPage"));
+const MenuPage = React.lazy(() => import("views/menu/MenuPage"));
+const NotFoundPage = React.lazy(() => import("views/not-found/NotFoundPage"));
 const IngredientsPage = React.lazy(
-    () => import("pages/person-ingredients/IngredientsPage"),
+    () => import("views/person-ingredients/IngredientsPage"),
 );
-const ProfilePage = React.lazy(() => import("pages/profile/ProfilePage"));
-const SettingsPage = React.lazy(() => import("pages/settings/SettingsPage"));
+const ProfilePage = React.lazy(() => import("views/profile/ProfilePage"));
+const SettingsPage = React.lazy(() => import("views/settings/SettingsPage"));
 const ChangeRecipePage = React.lazy(
-    () => import("pages/recipes/ChangeRecipePage"),
+    () => import("views/recipes/ChangeRecipePage"),
 );
 const CreateRecipePage = React.lazy(
-    () => import("pages/recipes/CreateRecipePage"),
+    () => import("views/recipes/CreateRecipePage"),
 );
-const MainPage = React.lazy(() => import("pages/recipes/MainPage"));
+const MainPage = React.lazy(() => import("views/recipes/MainPage"));
 const RecipeDetailsPage = React.lazy(
-    () => import("pages/recipes/RecipeDetailsPage"),
+    () => import("views/recipes/RecipeDetailsPage"),
 );
-const StatsPage = React.lazy(() => import("pages/statistics/StatsPage"));
-const UserMenuPage = React.lazy(() => import("pages/user-menu/UserMenuPage"));
+const StatsPage = React.lazy(() => import("views/statistics/StatsPage"));
+const UserMenuPage = React.lazy(() => import("views/user-menu/UserMenuPage"));
 const UserRecipesPage = React.lazy(
-    () => import("pages/user-recipes/UserRecipesPage"),
+    () => import("views/user-recipes/UserRecipesPage"),
 );
 
 interface AppRoute {

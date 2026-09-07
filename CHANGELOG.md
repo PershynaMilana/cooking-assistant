@@ -24,6 +24,10 @@ changelogs and the tags and now track everything here against one shared version
 
 - Changed: Routine dependency maintenance across the whole project - refreshed build, test and lint tooling plus a few runtime libraries to their latest compatible releases.
 
+### Frontend
+
+- Fixed: The light and dark theme now settle before the page is first painted, so switching themes or reloading no longer flashes the wrong colours.
+
 ## 4.3 - 2026-08-20
 
 ### Project

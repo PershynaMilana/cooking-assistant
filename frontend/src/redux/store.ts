@@ -1,12 +1,11 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
 
 import { notificationsListener } from "redux/middleware/notificationsListener";
 import { baseApi } from "redux/services/baseApi";
 import { emailVerificationReducer } from "redux/slices/emailVerificationSlice";
 import { notificationsReducer } from "redux/slices/notificationsSlice";
 import { sessionReducer } from "redux/slices/sessionSlice";
-import { themeReducer } from "redux/slices/themeSlice";
+import { getInitialThemeMode, themeReducer } from "redux/slices/themeSlice";
 import { uiReducer } from "redux/slices/uiSlice";
 
 const rootReducer = combineReducers({
@@ -32,10 +31,13 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
         preloadedState,
     });
 
-export const store = setupStore();
-
-// enables refetchOnFocus / refetchOnReconnect for the real app store
-setupListeners(store.dispatch);
+// one store per render tree, never a module-level singleton: on a server render a shared
+// store would carry one request's state into the next. The browser resolves the theme
+// here, so the very first render already paints the right one.
+export const createStore = () =>
+    typeof window === "undefined"
+        ? setupStore()
+        : setupStore({ theme: { mode: getInitialThemeMode() } });
 
 export type AppStore = ReturnType<typeof setupStore>;
 export type AppDispatch = AppStore["dispatch"];

@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 
-// jsdom has no matchMedia - falls back to false there, same guard pattern as themeSlice's prefersLightScheme()
-const getMatches = (query: string): boolean =>
-    typeof window.matchMedia === "function" && window.matchMedia(query).matches;
+// the server has no window at all, and jsdom has no matchMedia
+const getMediaQueryList = (query: string): MediaQueryList | null =>
+    typeof window === "undefined" || typeof window.matchMedia !== "function"
+        ? null
+        : window.matchMedia(query);
 
 export const useMediaQuery = (query: string): boolean => {
-    const [matches, setMatches] = useState(() => getMatches(query));
+    const [matches, setMatches] = useState(
+        () => getMediaQueryList(query)?.matches ?? false,
+    );
 
     useEffect(() => {
-        if (typeof window.matchMedia !== "function") {
+        const mql = getMediaQueryList(query);
+
+        if (!mql) {
             return undefined;
         }
 
-        const mql = window.matchMedia(query);
         const handleChange = () => {
             setMatches(mql.matches);
         };

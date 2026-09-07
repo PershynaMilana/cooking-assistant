@@ -23,7 +23,7 @@
             }
         },
         {
-            "files": ["src/components/**/*.scss", "src/pages/**/*.scss"],
+            "files": ["src/components/**/*.scss", "src/views/**/*.scss"],
             "rules": {
                 "declaration-no-important": true
             }

@@ -1,0 +1,10 @@
+{
+  // `npm run typecheck` entry point: the root tsconfig.json belongs to Next, so the
+  // project references that cover app, build-config and test code live here instead
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.test.json" }
+  ]
+}

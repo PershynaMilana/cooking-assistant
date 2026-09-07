@@ -34,18 +34,18 @@ below only to work on the frontend alone.
 ```bash
 npm install
 npm run dev          # vite dev server -> http://localhost:8080
-npm run build        # tsc -b && vite build (the real type-check happens here)
+npm run build        # tsc -b tsconfig.build.json && vite build (the real type-check happens here)
 npm run preview      # serve the production dist/
 npm run lint         # eslint .
 npm run lint:fix     # eslint . --fix
 npm run lint:sonarjs # SonarJS static-analysis ruleset
 npm run stylelint    # stylelint src/**/*.{css,scss}
-npm run typecheck    # tsc -b
+npm run typecheck    # tsc -b tsconfig.build.json
 npm run test         # jest
 npm run test:coverage# jest --coverage (enforces the 80% threshold)
 ```
 
-Type errors only surface at `npm run build` / `npm run typecheck` (`tsc -b`), not at `npm run dev`. Run
+Type errors only surface at `npm run build` / `npm run typecheck` (`tsc -b tsconfig.build.json`), not at `npm run dev`. Run
 one of them before opening a PR.
 
 ## Production (Docker + nginx)
@@ -135,7 +135,7 @@ src/
 │
 ├── hooks/          all data fetching + stateful logic (50+ hooks, composed)
 │
-├── pages/          one folder per domain (route components, lazy-loaded)
+├── views/          one folder per domain (page components, lazy-loaded)
 │   ├── auth/                LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage,
 │   │                        VerifyEmailPage
 │   ├── home/                HomePage (dashboard at "/")
@@ -180,7 +180,7 @@ Data flow: page/hook -> RTK Query hook (`redux/services/*`) -> `axiosBaseQuery` 
 
 - [App.tsx](src/App.tsx) builds a data router (`createBrowserRouter`, not `<BrowserRouter>`) so forms
   can block in-app navigation away from unsaved edits via `useBlocker`. Every page is
-  `React.lazy(() => import("pages/..."))`, wrapped in one `<Suspense fallback={<PageSpinner/>}>` inside
+  `React.lazy(() => import("views/..."))`, wrapped in one `<Suspense fallback={<PageSpinner/>}>` inside
   the shared `RootLayout` (which also mounts the theme manager, modal root, offline modal, and toaster).
 - Private routes are a data-driven `PRIVATE_ROUTES` array rendered as children of a single
   `<Route element={<PrivateRoute/>}>` layout route. Public routes (login, registration, forgot/reset
@@ -266,7 +266,7 @@ Redux middleware.
 
 ## Layering, ESLint boundaries, path aliases
 
-- **Bare path aliases**, never `../` across folders: `api/`, `components/`, `hooks/`, `pages/`, `utils/`,
+- **Bare path aliases**, never `../` across folders: `api/`, `components/`, `hooks/`, `views/`, `utils/`,
   `types/`, `constants/`, `config/`, `redux/`, `i18n/`, `assets/`, `styles/`, `test/` (defined in
   `tsconfig.app.json`, mirrored in `vite.config.ts` and `jest.config.cjs`).
 - **`eslint-plugin-boundaries`** declares the layers and enforces (as errors): components may not import
@@ -278,7 +278,7 @@ Redux middleware.
 ## Testing
 
 Jest 30 + `@swc/jest` + React Testing Library + jsdom. ~224 co-located `__tests__/` files across `api/`,
-`redux/`, `hooks/`, `components/`, `pages/`, `utils/`, and `constants/`; `npm run test:coverage` enforces
+`redux/`, `hooks/`, `components/`, `views/`, `utils/`, and `constants/`; `npm run test:coverage` enforces
 an 80% global threshold (branches/functions/lines/statements).
 
 Read [src/test/jest.setup.ts](src/test/jest.setup.ts) and [jest.config.cjs](jest.config.cjs) before
