@@ -1,12 +1,12 @@
 import { Star } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { RECIPE_RATING } from "constants/ratings";
 import { recipeDetailsPath } from "constants/routes";
 
 import { UtensilsMark } from "components/icons";
+import { Link } from "components/ui/Link";
 
 import { formatKcal, roundCalories } from "utils/calories";
 import { splitCookingTime } from "utils/cookingTimeUtils";
@@ -44,7 +44,7 @@ export const MenuRecipeCard: React.FC<MenuRecipeCardProps> = ({ recipe }) => {
 
     return (
         <Link
-            to={recipeDetailsPath(recipe.id)}
+            href={recipeDetailsPath(recipe.id)}
             className={styles["menu-recipe-card"]}
         >
             <span className={styles["menu-recipe-card__image"]}>

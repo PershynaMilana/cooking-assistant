@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import { MINUTES_PER_HOUR } from "constants/time";
@@ -9,6 +8,7 @@ import { useGetIngredientsQuery } from "redux/services/ingredientsApi";
 import { useCreateRecipeMutation } from "redux/services/recipesApi";
 import { useGetRecipeTypesQuery } from "redux/services/recipeTypesApi";
 
+import { useAppRouter } from "hooks/useAppRouter";
 import { useRecipeForm } from "hooks/useRecipeForm";
 
 import { sortIngredientsByName } from "utils/sortIngredientsByName";
@@ -16,7 +16,7 @@ import { sortIngredientsByName } from "utils/sortIngredientsByName";
 export const useCreateRecipePage = () => {
     const { t } = useTranslation("recipes");
     const form = useRecipeForm();
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const { data: ingredients } = useGetIngredientsQuery(null);
     const { data: allTypes = [] } = useGetRecipeTypesQuery(null);
     const [createRecipe] = useCreateRecipeMutation();
@@ -64,7 +64,7 @@ export const useCreateRecipePage = () => {
 
         if ("data" in result) {
             form.markClean();
-            void navigate(ROUTES.allRecipes);
+            router.push(ROUTES.allRecipes);
         }
     };
 

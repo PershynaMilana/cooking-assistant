@@ -28,7 +28,7 @@ export const MenuHeroActions: React.FC<MenuHeroActionsProps> = ({
     logIntakeLabel,
 }) => (
     <div className={styles["menu-hero-actions"]}>
-        <LinkButton to={editTo} className={styles["menu-hero-actions__edit"]}>
+        <LinkButton href={editTo} className={styles["menu-hero-actions__edit"]}>
             <EditMark size={ICON_SIZE} />
             {editLabel}
         </LinkButton>

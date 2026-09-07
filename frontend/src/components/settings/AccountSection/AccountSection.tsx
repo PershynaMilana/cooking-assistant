@@ -40,7 +40,7 @@ export const AccountSection: React.FC<AccountSectionProps> = ({
                 title={t("accountSection.profileTitle")}
                 description={t("accountSection.profileDescription")}
             >
-                <LinkButton to={ROUTES.profile} variant="secondary" size="sm">
+                <LinkButton href={ROUTES.profile} variant="secondary" size="sm">
                     {t("accountSection.openProfileButton")}
                 </LinkButton>
             </SettingsRow>

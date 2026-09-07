@@ -1,8 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { profileDietaryPath } from "constants/routes";
+
+import { Link } from "components/ui/Link";
 
 import { calorieRingFraction, formatKcal } from "utils/calories";
 import {
@@ -35,7 +36,7 @@ export const KcalStatCard: React.FC<KcalStatCardProps> = ({
     if (goal === null) {
         return (
             <Link
-                to={profileDietaryPath()}
+                href={profileDietaryPath()}
                 className={styles["kcal-stat-card--empty"]}
             >
                 <span className={styles["kcal-stat-card__empty-label"]}>

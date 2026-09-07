@@ -27,6 +27,14 @@ const preferNullRestrictions = [
     },
 ];
 
+// repeated wherever no-restricted-imports is re-declared: a later block for the same files
+// replaces the rule outright, silently dropping whatever an earlier block set
+const parentImportRestriction = {
+    regex: "^\.\./",
+    message:
+        "Use bare path aliases (api/*, components/*, ...) instead of ../ parent imports.",
+};
+
 export default tseslint.config(
     // build output and Next-generated declarations
     { ignores: ["dist", "coverage", ".next", "next-env.d.ts"] },
@@ -129,7 +137,7 @@ export default tseslint.config(
                         ["^\\u0000"],
                         // external packages - starts with letter/@, but not our bare aliases
                         [
-                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|redux|test|types|utils|views)/)@?\\w",
+                            "^(?!(?:api|app|assets|components|config|constants|hooks|i18n|redux|test|types|utils|views)/)@?\\w",
                         ],
                         // config / constants / types layers
                         ["^(?:config|constants|types)/"],
@@ -143,8 +151,8 @@ export default tseslint.config(
                         ["^(?:components|assets|i18n)/"],
                         // utils layer
                         ["^utils/"],
-                        // views / test (infra) layers
-                        ["^(?:test|views)/"],
+                        // route tree / views / test (infra) layers
+                        ["^(?:app|test|views)/"],
                         // relative same-folder (./)
                         ["^\\."],
                     ],
@@ -177,7 +185,6 @@ export default tseslint.config(
                         "**/__tests__/**",
                         "src/test/**",
                         "**/*.config.{ts,js,cjs}",
-                        "vite.config.ts",
                     ],
                 },
             ],
@@ -209,15 +216,46 @@ export default tseslint.config(
                 },
                 {
                     selector:
-                        "JSXAttribute[name.name='to'] Literal[value=/^\\u002F/]",
+                        "JSXAttribute[name.name='href'] Literal[value=/^\\u002F/]",
                     message:
                         "Hardcoded route path. Use ROUTES from constants/routes.ts.",
                 },
                 {
                     selector:
-                        "CallExpression[callee.name='navigate'] Literal[value=/^\\u002F/]",
+                        "CallExpression[callee.object.name='router'] Literal[value=/^\\u002F/]",
                     message:
                         "Hardcoded route path. Use ROUTES from constants/routes.ts.",
+                },
+            ],
+        },
+    },
+    {
+        // navigation goes through the wrappers or the unsaved-changes guard is silently
+        // bypassed: a bare next/link still renders a working link, just an unguarded one
+        files: ["src/**/*.{ts,tsx}"],
+        ignores: [
+            "src/components/ui/Link/Link.tsx",
+            "src/hooks/useAppRouter.ts",
+            "src/test/**",
+        ],
+        rules: {
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [parentImportRestriction],
+                    paths: [
+                        {
+                            name: "next/link",
+                            message:
+                                "Use the Link from components/ui/Link - it goes through the navigation blocker.",
+                        },
+                        {
+                            name: "next/navigation",
+                            importNames: ["useRouter"],
+                            message:
+                                "Use useAppRouter from hooks/useAppRouter - it goes through the navigation blocker.",
+                        },
+                    ],
                 },
             ],
         },
@@ -271,8 +309,12 @@ export default tseslint.config(
         rules: { "react-refresh/only-export-components": "off" },
     },
     {
-        files: ["src/views/**/*.{ts,tsx}"],
-        ignores: ["src/views/**/__tests__/**/*.{ts,tsx}"],
+        // a page stays thin: it composes, it does not hold logic
+        files: ["src/app/**/page.tsx", "src/app/not-found.tsx", "src/views/**/*.{ts,tsx}"],
+        ignores: [
+            "src/app/**/__tests__/**/*.{ts,tsx}",
+            "src/views/**/__tests__/**/*.{ts,tsx}",
+        ],
         rules: {
             "max-lines": [
                 "error",
@@ -353,15 +395,18 @@ export default tseslint.config(
                         {
                             from: { element: { type: "components" } },
                             disallow: {
-                                to: { element: { type: "views" } },
+                                to: {
+                                    element: { types: ["app", "views"] },
+                                },
                             },
-                            message: "Components must not import views.",
+                            message: "Components must not import pages.",
                         },
                         {
                             from: {
                                 element: {
                                     types: {
                                         anyOf: [
+                                            "app",
                                             "components",
                                             "views",
                                             "hooks",

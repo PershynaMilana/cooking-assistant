@@ -1,6 +1,14 @@
 import type { Locator, Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 
 // shared create-recipe/create-menu form flows - four specs need them, and the returned select-option texts feed the filter assertions in search-filter.spec.ts
+
+// a public page is on screen before React hydrates, and anything typed before then is discarded
+// when hydration takes over; the submit control is the app's own signal that it is ready
+export async function gotoPublicForm(page: Page, path: string): Promise<void> {
+    await page.goto(path);
+    await expect(page.locator("button[type=submit]").first()).toBeEnabled();
+}
 
 // an ingredient option's accessible name is "<name> <unit>" (HighlightedMatch highlights the
 // matched substring wherever it occurs, so a plain exact-text match on that substring still

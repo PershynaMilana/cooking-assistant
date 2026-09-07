@@ -1,5 +1,5 @@
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 
 import { useGetMeQuery } from "redux/services/authApi";
 import {
@@ -31,7 +31,7 @@ const isProfileTab = (value: string | null): value is ProfileTab =>
 
 export const useProfilePage = () => {
     const { data: currentUser } = useGetMeQuery(null);
-    const [searchParams] = useSearchParams();
+    const searchParams = useSearchParams();
     // supports deep-linking into a tab (e.g. profileDietaryPath()) - only the initial value is read, clicking a tab does not sync back to the URL
     const [activeTab, setActiveTab] = useState<ProfileTab>(() => {
         const requestedTab = searchParams.get("tab");

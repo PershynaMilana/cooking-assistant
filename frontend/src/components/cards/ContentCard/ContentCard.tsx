@@ -1,7 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 import { RECIPE_RATING, RECIPE_RATING_COUNT } from "constants/ratings";
+
+import { Link } from "components/ui/Link";
 
 import styles from "./ContentCard.module.scss";
 import type {
@@ -20,7 +21,7 @@ export type {
 export { META_ITEM_TONE_CALORIE_OVER } from "./ContentCard.types";
 
 interface ContentCardProps {
-    to: string;
+    href: string;
     title: string;
     imageIcon: ContentCardIcon;
     chipLabel: string;
@@ -42,7 +43,7 @@ interface ContentCardProps {
 }
 
 export const ContentCard: React.FC<ContentCardProps> = ({
-    to,
+    href,
     title,
     imageIcon: ImageIcon,
     chipLabel,
@@ -72,7 +73,7 @@ export const ContentCard: React.FC<ContentCardProps> = ({
         .join(" ");
 
     return (
-        <Link to={to} className={cardClassNames}>
+        <Link href={href} className={cardClassNames}>
             <ContentCardImage
                 isRow={isRow}
                 imageIcon={ImageIcon}

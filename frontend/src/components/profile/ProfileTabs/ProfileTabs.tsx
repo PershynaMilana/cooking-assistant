@@ -1,12 +1,13 @@
 import { LogOut } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import type { ProfileTab } from "hooks/useProfilePage";
 import { PROFILE_TAB } from "hooks/useProfilePage";
+
+import { Link } from "components/ui/Link";
 
 import styles from "./ProfileTabs.module.scss";
 
@@ -53,7 +54,10 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
                     {t(labelKey)}
                 </button>
             ))}
-            <Link to={ROUTES.settings} className={styles["profile-tabs__tab"]}>
+            <Link
+                href={ROUTES.settings}
+                className={styles["profile-tabs__tab"]}
+            >
                 {t("profilePage.settingsTab")}
             </Link>
             <div className={styles["profile-tabs__spacer"]} />

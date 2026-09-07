@@ -1,8 +1,9 @@
-import { skipToken } from "@reduxjs/toolkit/query";
+"use client";
+
 import { ChevronRight } from "lucide-react";
+import { useParams } from "next/navigation";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
 
 import { changeRecipePath, ROUTES } from "constants/routes";
 
@@ -19,6 +20,7 @@ import { AppShell } from "components/layout/AppShell";
 import { RecipeDetailsSecondary } from "components/recipes/RecipeDetailsSecondary";
 import { RecipeHero } from "components/recipes/RecipeHero";
 import { ErrorState } from "components/ui/ErrorState";
+import { Link } from "components/ui/Link";
 
 import { getRecipeAllergens } from "utils/recipeAllergens";
 
@@ -27,11 +29,7 @@ import styles from "./RecipeDetailsPage.module.scss";
 const RecipeDetailsPage: React.FC = () => {
     const { t } = useTranslation("recipes");
     const { id } = useParams<{ id: string }>();
-    const {
-        data: recipe,
-        isError,
-        refetch,
-    } = useGetRecipeByIdQuery(id ?? skipToken);
+    const { data: recipe, isError, refetch } = useGetRecipeByIdQuery(id);
 
     const portions = usePortionScaling();
     const ingredients = recipe?.ingredients ?? [];
@@ -83,7 +81,7 @@ const RecipeDetailsPage: React.FC = () => {
                     aria-label={t("recipeDetailsPage.breadcrumb")}
                     className={styles["recipe-details-page__breadcrumb"]}
                 >
-                    <Link to={ROUTES.allRecipes}>
+                    <Link href={ROUTES.allRecipes}>
                         {t("recipeDetailsPage.breadcrumbRecipes")}
                     </Link>
                     <ChevronRight size={14} aria-hidden="true" />

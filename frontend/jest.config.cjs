@@ -11,11 +11,16 @@ module.exports = {
         // env and logger mocks must win for both relative and bare `config/*` imports
         "^(.*/)?config/env$": "<rootDir>/src/test/envMock.ts",
         "^(.*/)?config/logger$": "<rootDir>/src/test/loggerMock.ts",
+        // next/navigation and next/link need a real app-router context; these stand in for it
+        // and give tests a URL they can read and write (see src/test/nextNavigationMock.ts)
+        "^next/navigation$": "<rootDir>/src/test/nextNavigationMock.ts",
+        "^next/link$": "<rootDir>/src/test/nextLinkMock.tsx",
         "\\.(css|less|scss|sass)$": "identity-obj-proxy",
         "\\.(svg|png|jpg|jpeg|gif|webp|avif|ttf|woff|woff2|eot)$":
             "<rootDir>/src/test/fileMock.ts",
         // bare path aliases - keep in sync with tsconfig.app.json "paths"
         "^api/(.*)$": "<rootDir>/src/api/$1",
+        "^app/(.*)$": "<rootDir>/src/app/$1",
         "^assets/(.*)$": "<rootDir>/src/assets/$1",
         "^components/(.*)$": "<rootDir>/src/components/$1",
         "^config/(.*)$": "<rootDir>/src/config/$1",
@@ -37,14 +42,21 @@ module.exports = {
         "src/**/*.{ts,tsx}",
         "!src/**/__tests__/**",
         "!src/test/**",
-        // entry + routing composition wiring (analogous to backend main/composition-root)
-        "!src/main.tsx",
-        "!src/App.tsx",
-        "!src/app/**",
+        // routing composition wiring (analogous to backend main/composition-root). Only the
+        // wiring is excluded - page.tsx holds real page components now, and they are measured
+        "!src/app/**/layout.tsx",
+        "!src/app/loading.tsx",
+        "!src/app/error.tsx",
+        "!src/app/providers.tsx",
+        "!src/app/themeInit.ts",
+        // still one-line re-exports of views/ until they become server components
+        "!src/app/(public)/all-menus/page.tsx",
+        "!src/app/(public)/all-recipes/page.tsx",
+        "!src/app/(public)/menu/[id]/page.tsx",
+        "!src/app/(public)/recipe/[id]/page.tsx",
         // redux wiring and typed hook re-exports - composition root, no logic
         "!src/redux/store.ts",
         "!src/redux/hooks.ts",
-        "!src/vite-env.d.ts",
         "!src/env.d.ts",
         // pure type declarations - no runtime code
         "!src/types/**",

@@ -1,7 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { MOBILE_MEDIA_QUERY } from "constants/breakpoints";
 import { ROUTES } from "constants/routes";
@@ -14,6 +13,7 @@ import { useMediaQuery } from "hooks/useMediaQuery";
 import { RecipeCard } from "components/cards/RecipeCard";
 import { UtensilsMark } from "components/icons";
 import { EmptyState } from "components/ui/EmptyState";
+import { Link } from "components/ui/Link";
 import { LinkButton } from "components/ui/LinkButton";
 
 import styles from "./GuestLanding.module.scss";
@@ -40,7 +40,7 @@ export const GuestLandingRecipes: React.FC = () => {
                     {t("popularTitle")}
                 </h2>
                 <Link
-                    to={ROUTES.allRecipes}
+                    href={ROUTES.allRecipes}
                     className={styles["guest-landing-section__see-all"]}
                 >
                     {t("seeAllRecipes")}
@@ -53,7 +53,7 @@ export const GuestLandingRecipes: React.FC = () => {
                     title={t("emptyRecipesTitle")}
                     description={t("emptyRecipesDescription")}
                     action={
-                        <LinkButton to={ROUTES.registration}>
+                        <LinkButton href={ROUTES.registration}>
                             {t("common:nav.register")}
                         </LinkButton>
                     }

@@ -1,5 +1,4 @@
 import { act } from "@testing-library/react";
-import type * as ReactRouterDom from "react-router-dom";
 
 import { ERROR_CODES } from "constants/errorCodes";
 
@@ -9,29 +8,19 @@ import { useResetPasswordForm } from "hooks/useResetPasswordForm";
 
 import { mockedPost } from "test/apiClientMock";
 import { ROUTE_LOGIN } from "test/constants";
+import { setTestLocation } from "test/nextNavigationMock";
 import { mockNavigate } from "test/router";
 import { renderHookWithStore } from "test/store";
 
-const mockUseSearchParams = jest.fn<
-    ReturnType<typeof ReactRouterDom.useSearchParams>,
-    []
->();
-
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-    useSearchParams: () => mockUseSearchParams(),
-}));
 jest.mock("api/client");
 
 const TOKEN = "reset-token";
 const NEW_PASSWORD = "new-secret1!";
 
 const withToken = (token: string | null) => {
-    mockUseSearchParams.mockReturnValue([
-        new URLSearchParams(token ? { token } : {}),
-        jest.fn(),
-    ]);
+    setTestLocation(
+        token ? `/reset-password?token=${token}` : "/reset-password",
+    );
 };
 
 const renderResetPasswordForm = () =>

@@ -1,8 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
-import type { ReactNode } from "react";
-import React from "react";
-import { Provider } from "react-redux";
-import type * as ReactRouterDom from "react-router-dom";
+import { act } from "@testing-library/react";
 
 import { ERROR_CODES } from "constants/errorCodes";
 
@@ -12,12 +8,8 @@ import { useRegisterForm } from "hooks/useRegisterForm";
 
 import { mockedPost } from "test/apiClientMock";
 import { mockNavigate } from "test/router";
-import { makeTestStore } from "test/store";
+import { renderHookWithStore } from "test/store";
 
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 jest.mock("api/client");
 
 const EMAIL = "tester@example.com";
@@ -26,11 +18,7 @@ interface FormResult {
     current: ReturnType<typeof useRegisterForm>;
 }
 
-const wrapper = ({ children }: { children: ReactNode }) =>
-    React.createElement(Provider, { store: makeTestStore(), children });
-
-const renderRegisterForm = () =>
-    renderHook(() => useRegisterForm(), { wrapper });
+const renderRegisterForm = () => renderHookWithStore(() => useRegisterForm());
 
 const setField = (
     result: FormResult,

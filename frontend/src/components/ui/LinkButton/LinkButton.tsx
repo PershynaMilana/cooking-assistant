@@ -1,9 +1,9 @@
 import React from "react";
-import type { LinkProps } from "react-router-dom";
-import { Link } from "react-router-dom";
 
 import type { ButtonSize, ButtonVariant } from "components/ui/Button";
 import buttonStyles from "components/ui/Button/Button.module.scss";
+import type { LinkProps } from "components/ui/Link";
+import { Link } from "components/ui/Link";
 
 interface LinkButtonProps extends LinkProps {
     variant?: ButtonVariant;

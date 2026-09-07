@@ -1,13 +1,13 @@
 import { Flame, Star } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { RECIPE_RATING } from "constants/ratings";
 import { recipeDetailsPath } from "constants/routes";
 import type { RecipeSearchResultItem } from "types/recipe";
 
 import { DonburiMarkCompact } from "components/icons";
+import { Link } from "components/ui/Link";
 
 import { formatKcal, roundCalories } from "utils/calories";
 import { splitCookingTime } from "utils/cookingTimeUtils";
@@ -41,7 +41,7 @@ export const RecentRecipeCard: React.FC<RecentRecipeCardProps> = ({
 
     return (
         <Link
-            to={recipeDetailsPath(recipe.id)}
+            href={recipeDetailsPath(recipe.id)}
             className={styles["recent-recipe-card"]}
         >
             <div

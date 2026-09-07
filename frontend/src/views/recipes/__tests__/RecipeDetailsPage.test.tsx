@@ -1,8 +1,5 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider } from "react-redux";
-import type * as ReactRouterDom from "react-router-dom";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import type { RecipeDetails } from "types/recipe";
 
@@ -19,14 +16,11 @@ import {
     BTN_EDIT_RECIPE,
     ROUTE_ALL_RECIPES,
 } from "test/constants";
-import { mockNavigate } from "test/router";
+import { setTestParams } from "test/nextNavigationMock";
+import { mockNavigate, renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
 import RecipeDetailsPage from "views/recipes/RecipeDetailsPage";
 
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 jest.mock("api/client");
 
 const TITLE = "Borscht";
@@ -53,25 +47,15 @@ const mockRecipe = (recipe: RecipeDetails = SAMPLE) => {
 };
 
 const renderPage = (store = makeTestStore()) => {
-    const view = render(
-        <Provider store={store}>
-            <MemoryRouter initialEntries={["/recipe/1"]}>
-                <Routes>
-                    <Route
-                        path="/recipe/:id"
-                        element={
-                            <>
-                                <RecipeDetailsPage />
-                                <ModalRoot />
-                            </>
-                        }
-                    />
-                </Routes>
-            </MemoryRouter>
-        </Provider>,
-    );
+    setTestParams({ id: "1" });
 
-    return { store, ...view };
+    return renderWithProviders(
+        <>
+            <RecipeDetailsPage />
+            <ModalRoot />
+        </>,
+        { store, initialEntries: ["/recipe/1"] },
+    );
 };
 
 describe("RecipeDetailsPage", () => {

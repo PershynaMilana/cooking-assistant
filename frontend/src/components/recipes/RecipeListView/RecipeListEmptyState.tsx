@@ -30,7 +30,7 @@ export const RecipeListEmptyState: React.FC<RecipeListEmptyStateProps> = ({
 }) => {
     const { t } = useTranslation("recipes");
     const createFirstButton = (
-        <LinkButton to={ROUTES.addRecipe} size="lg">
+        <LinkButton href={ROUTES.addRecipe} size="lg">
             <Plus size={NEW_RECIPE_ICON_SIZE} aria-hidden="true" />
             {t("recipeListView.createFirst")}
         </LinkButton>
@@ -43,7 +43,7 @@ export const RecipeListEmptyState: React.FC<RecipeListEmptyStateProps> = ({
                 title={t("filterPanel.pantryEmptyTitle")}
                 description={t("filterPanel.pantryEmptyDescription")}
                 action={
-                    <LinkButton to={ROUTES.ingredients} size="lg">
+                    <LinkButton href={ROUTES.ingredients} size="lg">
                         {t("filterPanel.pantryEmptyAction")}
                     </LinkButton>
                 }

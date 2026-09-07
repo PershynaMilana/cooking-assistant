@@ -1,6 +1,6 @@
 # Cooking Assistant - Frontend
 
-React 19 + TypeScript + Vite client for the [Cooking Assistant](../README.md) platform. It talks to the
+React 19 + TypeScript + Next.js client for the [Cooking Assistant](../README.md) platform. It talks to the
 [backend](../backend/README.md) API under `/api`. Authentication is a server-set **httpOnly cookie**, so
 the client never sees or stores a token - it just sends requests with credentials and lets the browser
 carry the cookie.
@@ -10,9 +10,8 @@ carry the cookie.
 ## Tech stack
 
 - **React 19 + TypeScript** - UI
-- **Vite 8** - dev server, HMR, production bundler
-- **React Router DOM v7** - a data router (`createBrowserRouter`), with `React.lazy` + `Suspense`
-  code splitting (one chunk per page) and `useBlocker` support for unsaved-edit guards on forms
+- **Next.js 16 (App Router)** - dev server, bundler, routing and server rendering. Routes are the
+  folder tree under `src/app/`; per-route code splitting comes with it
 - **Redux Toolkit + RTK Query** - server-state caching. A single `baseApi` built on a custom
   `axiosBaseQuery` (routes every request through the shared `apiClient`, never `fetch`, so the auth
   cookie and 401/403 interceptor still apply), with one injected endpoint file per domain under
@@ -33,9 +32,9 @@ below only to work on the frontend alone.
 
 ```bash
 npm install
-npm run dev          # vite dev server -> http://localhost:8080
-npm run build        # tsc -b tsconfig.build.json && vite build (the real type-check happens here)
-npm run preview      # serve the production dist/
+npm run dev          # next dev -> http://localhost:8080
+npm run build        # next build (type-checks as part of the build)
+npm run preview      # next start - serve the production build
 npm run lint         # eslint .
 npm run lint:fix     # eslint . --fix
 npm run lint:sonarjs # SonarJS static-analysis ruleset
@@ -67,14 +66,18 @@ A frontend `.env` is optional - copy [.env.example](.env.example) only if you ne
 location.
 
 ```
-# VITE_API_URL=<deployed API origin>
+# NEXT_PUBLIC_API_URL=<deployed API origin>
+# NEXT_PUBLIC_SITE_URL=<public origin of the site>
+# API_INTERNAL_URL=<backend the dev server forwards /api to>
 ```
 
-- **Dev:** leave `VITE_API_URL` unset. The base URL falls back to `""` ([src/config/env.ts](src/config/env.ts)),
-  so requests go to `/api` on the same origin (`:8080`). The Vite dev server proxies `/api` to the backend
-  (`VITE_DEV_PROXY_TARGET`, default `http://localhost:3000` - see [vite.config.ts](vite.config.ts)). Keeping
+- **Dev:** leave `NEXT_PUBLIC_API_URL` unset. The base URL falls back to `""` ([src/config/env.ts](src/config/env.ts)),
+  so requests go to `/api` on the same origin (`:8080`), and Next rewrites `/api` to the backend
+  (`API_INTERNAL_URL`, default `http://localhost:3000` - see [next.config.ts](next.config.ts)). Keeping
   requests same-origin is what lets the httpOnly auth cookie be first-party without TLS in dev.
-- **Production:** set `VITE_API_URL` to the deployed API origin.
+- **Production:** set `NEXT_PUBLIC_API_URL` to the deployed API origin, and `NEXT_PUBLIC_SITE_URL` to the
+  site's own origin - a production build fails without it rather than ship canonical and social URLs
+  pointing at localhost. Both are read at **build** time, so changing them needs a rebuilt image.
 
 ## Auth - read this before touching auth code
 
@@ -97,7 +100,7 @@ Auth is a **server-set httpOnly cookie** (`authToken`). The client cannot read i
   `localStorage` and does **not** inspect a token.
 - **401/403 handling** is centralized in the axios response interceptor (`handleAuthError` in
   [src/api/client.ts](src/api/client.ts)): a 401/403 on a protected request hard-redirects to `/login`
-  (via `window.location.assign`, since it runs outside React Router - see [src/api/redirect.ts](src/api/redirect.ts)).
+  (via `window.location.assign`, since it runs outside React - see [src/api/redirect.ts](src/api/redirect.ts)).
   `GET /api/me` and `POST /api/change-password` are exempt (`SKIP_REDIRECT_URLS` - a 401 on
   change-password means "wrong current password", not an expired session), and the public paths are
   exempt too.
@@ -106,8 +109,18 @@ Auth is a **server-set httpOnly cookie** (`authToken`). The client cannot read i
 
 ```
 src/
-├── main.tsx        ReactDOM root (mounts <AppWrapper/>, imports i18n + global styles)
-├── App.tsx         data router (createBrowserRouter) + Suspense + PrivateRoute layout route
+├── app/            the route tree - a route is one folder: page.tsx, page.module.scss, __tests__/
+│   ├── layout.tsx           <html>/<body>, metadata, providers
+│   ├── loading.tsx          the one Suspense boundary every route gets
+│   ├── error.tsx            render error; not-found.tsx  unknown URL (real HTTP 404)
+│   ├── (auth)/              login, registration, forgot-password, reset-password, verify-email
+│   │                        AuthPage.module.scss is shared by the group
+│   ├── (public)/            "/", all-recipes, all-menus, recipe/[id], menu/[id]
+│   │                        these five still re-export from views/ - see below
+│   └── (private)/           layout.tsx = PrivateRoute; my-recipes, my-menus, add-recipe,
+│                            change-recipe/[id], add-menu, change-menu/[id], ingredients,
+│                            stats, profile, settings. The two form stylesheets are shared
+│                            by the group, like the auth one
 │
 ├── api/            the ONLY place axios is touched
 │   ├── client.ts      shared axios instance (withCredentials) + 401/403 interceptor
@@ -135,19 +148,11 @@ src/
 │
 ├── hooks/          all data fetching + stateful logic (50+ hooks, composed)
 │
-├── views/          one folder per domain (page components, lazy-loaded)
-│   ├── auth/                LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage,
-│   │                        VerifyEmailPage
-│   ├── home/                HomePage (dashboard at "/")
-│   ├── recipes/             MainPage (all recipes), CreateRecipePage, RecipeDetailsPage,
-│   │                        ChangeRecipePage
-│   ├── user-recipes/        UserRecipesPage ("my recipes")
-│   ├── person-ingredients/  IngredientsPage (the pantry)
-│   ├── menu/                MenuPage, CreateMenuPage, MenuDetailsPage, ChangeMenuPage
-│   ├── user-menu/           UserMenuPage ("my menus")
-│   ├── statistics/          StatsPage (charts)
-│   ├── profile/, settings/  ProfilePage, SettingsPage
-│   └── not-found/           NotFoundPage (404)
+├── views/          TEMPORARY - only the five public pages awaiting their server-component
+│   │                rewrite; each is still re-exported by its page.tsx. Goes away with them
+│   ├── home/                HomePage (dashboard), GuestLandingPage
+│   ├── recipes/             MainPage (all recipes), RecipeDetailsPage
+│   └── menu/                MenuPage (all menus), MenuDetailsPage, MenuDetailsSecondary
 │
 ├── constants/      routes.ts (ROUTES + path builders + PUBLIC_PATHS), pagination, theme, ...
 ├── config/         env.ts (API_BASE_URL), logger.ts (dev-only console wrapper)
@@ -176,35 +181,64 @@ Data flow: page/hook -> RTK Query hook (`redux/services/*`) -> `axiosBaseQuery` 
   Cache invalidation runs off `tagTypes` - a mutation invalidates the tags its queries provide, so
   lists refetch automatically.
 
-## Routing and code splitting
+## Routing
 
-- [App.tsx](src/App.tsx) builds a data router (`createBrowserRouter`, not `<BrowserRouter>`) so forms
-  can block in-app navigation away from unsaved edits via `useBlocker`. Every page is
-  `React.lazy(() => import("views/..."))`, wrapped in one `<Suspense fallback={<PageSpinner/>}>` inside
-  the shared `RootLayout` (which also mounts the theme manager, modal root, offline modal, and toaster).
-- Private routes are a data-driven `PRIVATE_ROUTES` array rendered as children of a single
-  `<Route element={<PrivateRoute/>}>` layout route. Public routes (login, registration, forgot/reset
-  password, verify email), and the `*` 404 sit outside the guard.
-- All paths come from [src/constants/routes.ts](src/constants/routes.ts) (`ROUTES`, path builders like
-  `recipeDetailsPath(id)`, and `PUBLIC_PATHS`).
+- Routes are the folder tree under [src/app/](src/app/). Three route groups carry the map and never
+  appear in a URL: `(auth)` for sign-in, `(public)` for anything a guest may read, and `(private)`,
+  whose `layout.tsx` is a single `PrivateRoute` wrapper - **a page is private because of where it
+  lives**, so it cannot forget its own guard. **`page.tsx` is the page**: the component, its
+  stylesheet and its co-located `__tests__/` all live in the route folder, so a route is one place
+  and nothing mirrors it. [src/views/](src/views/) still holds the five public pages (`/`, both
+  listings, both detail pages) because they are about to be rewritten as server components - the
+  folder goes away with them.
+- `layout.tsx` owns `<html>`/`<body>`, the metadata and the client providers; `loading.tsx` is the one
+  Suspense boundary every route gets (and what lets a page read search params); `error.tsx` and
+  `not-found.tsx` cover a thrown render error and an unknown URL - the latter now answers with a real
+  HTTP 404 instead of a 200 and an empty shell.
+- All paths still come from [src/constants/routes.ts](src/constants/routes.ts) (`ROUTES`, builders like
+  `recipeDetailsPath(id)`, and `PUBLIC_PATHS`, which feeds `matchRoutePattern` in the api layer). It is
+  no longer the router's source of truth, but it is still the only place a path may be written.
+
+### Navigation, and the unsaved-changes guard
+
+Next has no router-level navigation blocker, so the app builds one and closes the ways around it:
+
+- Links use `Link` from [src/components/ui/Link/](src/components/ui/Link/); programmatic navigation uses
+  `useAppRouter` from [src/hooks/useAppRouter.ts](src/hooks/useAppRouter.ts). Importing `next/link`, or
+  `useRouter` from `next/navigation`, is an **ESLint error** anywhere else - a bare `next/link` renders a
+  perfectly working link with no guard at all, and nothing at the call site would show it.
+- Both go through `NavigationBlockerProvider`
+  ([src/components/layout/NavigationBlocker/](src/components/layout/NavigationBlocker/)). A form with
+  unsaved edits registers a dirty ref via `useUnsavedChangesBlocker`; the provider then intercepts link
+  clicks, programmatic pushes, tab close (`beforeunload`) and the back button. The back button needs a
+  duplicate history entry, pushed while a guarded form is mounted, because a browser pop cannot be
+  cancelled once it has happened.
+
+### Hydration
+
+A server-rendered page is on screen before React hydrates, so anything that would differ in that window
+has to say so. [src/hooks/useIsHydrated.ts](src/hooks/useIsHydrated.ts) is false for the server render
+and the first client render, true from the next one on: `useLoginLockout` uses it to read stored state
+without a mismatch, and `Button` uses it to keep a `type="submit"` button disabled until hydration - a
+submit landing earlier is a native browser submit that would put every field, passwords included, in the
+URL.
 
 ### Routes
 
-| Path                                                   | Page                                | Access  |
-| ------------------------------------------------------ | ----------------------------------- | ------- |
-| `/`                                                    | HomePage - dashboard                | private |
-| `/login`, `/registration`                              | LoginPage, RegisterPage             | public  |
-| `/forgot-password`, `/reset-password`, `/verify-email` | password reset / email verification | public  |
-| `/all-recipes`                                         | MainPage - all recipes              | private |
-| `/my-recipes`                                          | UserRecipesPage                     | private |
-| `/add-recipe`, `/recipe/:id`, `/change-recipe/:id`     | Recipe create / details / edit      | private |
-| `/all-menus`                                           | MenuPage                            | private |
-| `/my-menus`                                            | UserMenuPage                        | private |
-| `/add-menu`, `/menu/:id`, `/change-menu/:id`           | Menu create / details / edit        | private |
-| `/ingredients`                                         | IngredientsPage (pantry)            | private |
-| `/stats`                                               | StatsPage (charts)                  | private |
-| `/profile`, `/settings`                                | ProfilePage, SettingsPage           | private |
-| `*`                                                    | NotFoundPage                        | public  |
+| Path                                                   | Page                                | Group     |
+| ------------------------------------------------------ | ----------------------------------- | --------- |
+| `/`                                                    | dashboard or guest landing          | (public)  |
+| `/login`, `/registration`                              | LoginPage, RegisterPage             | (auth)    |
+| `/forgot-password`, `/reset-password`, `/verify-email` | password reset / email verification | (auth)    |
+| `/all-recipes`, `/recipe/:id`                          | MainPage, RecipeDetailsPage         | (public)  |
+| `/all-menus`, `/menu/:id`                              | MenuPage, MenuDetailsPage           | (public)  |
+| `/my-recipes`, `/my-menus`                             | UserRecipesPage, UserMenuPage       | (private) |
+| `/add-recipe`, `/change-recipe/:id`                    | Recipe create / edit                | (private) |
+| `/add-menu`, `/change-menu/:id`                        | Menu create / edit                  | (private) |
+| `/ingredients`                                         | IngredientsPage (pantry)            | (private) |
+| `/stats`                                               | StatsPage (charts)                  | (private) |
+| `/profile`, `/settings`                                | ProfilePage, SettingsPage           | (private) |
+| anything else                                          | not-found.tsx (real HTTP 404)       | -         |
 
 ## State
 
@@ -266,9 +300,9 @@ Redux middleware.
 
 ## Layering, ESLint boundaries, path aliases
 
-- **Bare path aliases**, never `../` across folders: `api/`, `components/`, `hooks/`, `views/`, `utils/`,
+- **Bare path aliases**, never `../` across folders: `api/`, `app/`, `components/`, `hooks/`, `views/`, `utils/`,
   `types/`, `constants/`, `config/`, `redux/`, `i18n/`, `assets/`, `styles/`, `test/` (defined in
-  `tsconfig.app.json`, mirrored in `vite.config.ts` and `jest.config.cjs`).
+  `tsconfig.app.json`, mirrored in `jest.config.cjs` and the ESLint resolver).
 - **`eslint-plugin-boundaries`** declares the layers and enforces (as errors): components may not import
   pages, and only the `api/` layer may import `axios`.
 - Other guards: `simple-import-sort` (layer-aware order), `import/no-cycle`, `no-restricted-imports`
@@ -288,7 +322,10 @@ writing tests. Conventions:
 - Prefer `act` over `waitFor` (per the repo rule); render hooks with `renderHook`.
 - Use `renderWithRouter` from [src/test/router.tsx](src/test/router.tsx) (defaults to a non-root route
   so tests aren't coupled to whatever page currently lives at `/`); assert navigation against the
-  shared `mockNavigate`.
+  shared `mockNavigate`. `next/navigation` and `next/link` are mapped to
+  [src/test/nextNavigationMock.ts](src/test/nextNavigationMock.ts), which holds a real, writable URL, so
+  hooks built on search params are exercised rather than stubbed - seed it with `setTestLocation` /
+  `setTestParams`. No test mocks the router itself.
 - **Mocking**: both RTK Query service tests and component/page/hook tests `jest.mock("api/client")`
   and drive real RTK Query hooks through a real store (`makeTestStore`/`setupStore`), asserting
   against the typed mocks in [src/test/apiClientMock.ts](src/test/apiClientMock.ts)
@@ -303,8 +340,9 @@ writing tests. Conventions:
 - All user-facing copy goes through i18n (`useTranslation`), not string literals.
 - SCSS modules for styling, one per component; shared breakpoints/mixins live in `src/styles/`.
   Stylelint guards CSS/SCSS.
-- New routes go in [src/constants/routes.ts](src/constants/routes.ts) and the `PRIVATE_ROUTES` array
-  (or the public route list) in [App.tsx](src/App.tsx); add the page as a `React.lazy` import.
+- A new route is a folder under `src/app/` in the group matching its access, holding the page as
+  `page.tsx` (plus `page.module.scss` and `__tests__/page.test.tsx` beside it); add its path to
+  [src/constants/routes.ts](src/constants/routes.ts) as well.
 - Hand-authored SVG icons (not from `lucide-react`) live in `src/components/icons/`, one component per
   file, path data traced verbatim from the design mockups.
 

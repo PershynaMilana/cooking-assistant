@@ -1,8 +1,9 @@
-import { skipToken } from "@reduxjs/toolkit/query";
+"use client";
+
 import { ChevronRight } from "lucide-react";
+import { useParams } from "next/navigation";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
 
 import { changeMenuPath, ROUTES } from "constants/routes";
 
@@ -17,6 +18,7 @@ import { usePageTitle } from "hooks/usePageTitle";
 import { AppShell } from "components/layout/AppShell";
 import { MenuHero } from "components/menu/MenuHero";
 import { ErrorState } from "components/ui/ErrorState";
+import { Link } from "components/ui/Link";
 
 import styles from "./MenuDetailsPage.module.scss";
 import { MenuDetailsSecondary } from "./MenuDetailsSecondary";
@@ -25,11 +27,7 @@ const MenuDetailsPage: React.FC = () => {
     const { t } = useTranslation("menu");
     const { id } = useParams<{ id: string }>();
     const dispatch = useAppDispatch();
-    const {
-        data: menu,
-        isError,
-        refetch,
-    } = useGetMenuByIdQuery(id ?? skipToken);
+    const { data: menu, isError, refetch } = useGetMenuByIdQuery(id);
     // sum of each recipe's own per-portion calories - null recipes contribute nothing, matching the backend's SUM(COALESCE(...)) in findMenuCalories; 0 is falsy, so an empty/zero-calorie menu also reads as "no calorie data" rather than a literal 0
     const menuCalories =
         (menu?.recipes ?? []).reduce(
@@ -82,7 +80,7 @@ const MenuDetailsPage: React.FC = () => {
                     aria-label={t("menuDetailsPage.breadcrumb")}
                     className={styles["menu-details-page__breadcrumb"]}
                 >
-                    <Link to={ROUTES.allMenus}>
+                    <Link href={ROUTES.allMenus}>
                         {t("menuDetailsPage.breadcrumbMenus")}
                     </Link>
                     <ChevronRight size={14} aria-hidden="true" />

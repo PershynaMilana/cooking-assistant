@@ -8,7 +8,7 @@ const APP_NAME = "Cooking Assistant";
 
 describe("Logo", () => {
     it("should render as a link to the given path", () => {
-        renderWithRouter(<Logo to="/" />);
+        renderWithRouter(<Logo href="/" />);
 
         expect(screen.getByRole("link", { name: APP_NAME })).toHaveAttribute(
             "href",

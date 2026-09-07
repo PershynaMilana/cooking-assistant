@@ -53,7 +53,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
 
     return (
         <ContentCard
-            to={recipeDetailsPath(recipe.id)}
+            href={recipeDetailsPath(recipe.id)}
             title={recipe.title}
             imageIcon={UtensilsMark}
             chipLabel={recipe.type_name}

@@ -125,7 +125,6 @@
     },
     "routeError": {
         "description": "An unexpected error interrupted this page. Your data is safe - try again.",
-        "responseDescription": "This page ran into an error ({{status}}). Your data is safe - try again.",
         "goHome": "Go to homepage"
     }
 }

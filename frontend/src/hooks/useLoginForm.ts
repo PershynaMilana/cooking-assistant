@@ -1,12 +1,13 @@
 import type { RefObject } from "react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import type { LoginRequest } from "types/auth";
 
 import { useLoginMutation } from "redux/services/authApi";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import { isValidEmail } from "utils/authValidation";
 import {
@@ -15,7 +16,7 @@ import {
     registerFailure,
     writeLockout,
 } from "utils/loginLockout";
-import { getLoginRedirectFrom, locationToPath } from "utils/loginRedirect";
+import { takeLoginRedirect } from "utils/loginRedirect";
 import {
     getRateLimitSeconds,
     isRateLimitError,
@@ -42,8 +43,7 @@ function applyIfCurrent(
 // a failed login shows one generic message, never revealing whether the username or the password was wrong
 export const useLoginForm = () => {
     const { t } = useTranslation("auth");
-    const navigate = useNavigate();
-    const location = useLocation();
+    const router = useAppRouter();
     const [login, { isLoading: isSubmitting }] = useLoginMutation();
 
     const [values, setValues] = useState<LoginRequest>(EMPTY_FORM);
@@ -104,11 +104,7 @@ export const useLoginForm = () => {
             });
             // return the user to the page they were trying to reach (e.g. a private route, or a
             // guest-only "Log in" CTA) instead of always dropping them on the home dashboard
-            const from = getLoginRedirectFrom(location.state);
-
-            void navigate(from ? locationToPath(from) : ROUTES.home, {
-                replace: true,
-            });
+            router.replace(takeLoginRedirect() ?? ROUTES.home);
 
             return;
         }
@@ -146,11 +142,10 @@ export const useLoginForm = () => {
     }, [
         currentLoginRef,
         isLocked,
-        location.state,
         loginMode,
         lockout,
         login,
-        navigate,
+        router,
         setLockout,
         t,
         values,

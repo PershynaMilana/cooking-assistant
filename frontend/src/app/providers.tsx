@@ -10,6 +10,7 @@ import { createStore } from "redux/store";
 
 import { useOfflineNotice } from "hooks/useOfflineNotice";
 
+import { NavigationBlockerProvider } from "components/layout/NavigationBlocker";
 import { ModalRoot } from "components/modals";
 import { ThemeManager } from "components/theme/ThemeManager";
 import { Toaster } from "components/ui/Toasts";
@@ -43,7 +44,9 @@ export const Providers = ({ children }: ProvidersProps) => {
     return (
         <Provider store={store}>
             <I18nextProvider i18n={i18n}>
-                <AppRuntime>{children}</AppRuntime>
+                <NavigationBlockerProvider>
+                    <AppRuntime>{children}</AppRuntime>
+                </NavigationBlockerProvider>
             </I18nextProvider>
         </Provider>
     );

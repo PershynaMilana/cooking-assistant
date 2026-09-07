@@ -1,6 +1,5 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type * as ReactRouterDom from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
@@ -17,10 +16,6 @@ import { mockNavigate, renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
 
 jest.mock("api/client");
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 
 const MODAL_ID = "m1";
 const MODAL: ActiveModal = { id: MODAL_ID, type: MODAL_TYPE.logout };

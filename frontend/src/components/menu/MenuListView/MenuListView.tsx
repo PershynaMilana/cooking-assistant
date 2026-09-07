@@ -90,7 +90,7 @@ export const MenuListView: React.FC<MenuListViewProps> = ({
                             {subtitle}
                         </p>
                     </div>
-                    <LinkButton to={ROUTES.addMenu}>
+                    <LinkButton href={ROUTES.addMenu}>
                         <Plus size={NEW_MENU_ICON_SIZE} aria-hidden="true" />
                         {t("menu:menuListView.newMenu")}
                     </LinkButton>

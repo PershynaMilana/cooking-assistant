@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import type { MenuCategory } from "types/menu";
@@ -11,6 +10,7 @@ import { useUnsavedChangesBlocker } from "hooks/useUnsavedChangesBlocker";
 
 import { ConfirmModal } from "components/modals/ConfirmModal";
 import { Button } from "components/ui/Button";
+import { Link } from "components/ui/Link";
 
 import styles from "./MenuForm.module.scss";
 import { MenuFormFields } from "./MenuFormFields";
@@ -39,7 +39,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({
 }) => {
     const { t } = useTranslation("menu");
     // catches every way out of a dirty form (Cancel, navbar, breadcrumb, back)
-    const blocker = useUnsavedChangesBlocker(form.isDirtyRef);
+    const blocker = useUnsavedChangesBlocker(form.isDirty, form.isDirtyRef);
 
     const selectedRecipes: RecipeListItem[] = [];
 
@@ -79,7 +79,7 @@ export const MenuForm: React.FC<MenuFormProps> = ({
                 </span>
                 <div className={styles["menu-form__summary-actions"]}>
                     <Link
-                        to={ROUTES.allMenus}
+                        href={ROUTES.allMenus}
                         className={styles["menu-form__cancel"]}
                     >
                         {t("menuForm.cancel")}

@@ -1,62 +1,31 @@
-import { render, screen } from "@testing-library/react";
-import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { RouteErrorBoundary } from "components/layout/RouteErrorBoundary";
 
-const ThrowingComponent = () => {
-    throw new Error("boom");
-};
-
-// isRouteErrorResponse duck-types on {status, statusText, internal, data} - decorating a real Error satisfies both that check and the "always throw an Error" lint rule
-const ThrowingResponseComponent = () => {
-    throw Object.assign(new Error("Not Found"), {
-        status: 404,
-        statusText: "Not Found",
-        internal: false,
-        data: "Not Found",
-    });
-};
+import { renderWithRouter } from "test/router";
 
 describe("RouteErrorBoundary", () => {
-    it("should render a generic error message for a thrown JS error", () => {
-        const router = createMemoryRouter(
-            [
-                {
-                    path: "/",
-                    element: <ThrowingComponent />,
-                    errorElement: <RouteErrorBoundary />,
-                },
-            ],
-            { initialEntries: ["/"] },
-        );
-
-        render(<RouterProvider router={router} />);
+    it("should render a generic error message with a retry and a home link", () => {
+        renderWithRouter(<RouteErrorBoundary onRetry={jest.fn()} />);
 
         expect(screen.getByText("Something went wrong")).toBeInTheDocument();
         expect(
-            screen.getByRole("button", { name: "Try again" }),
+            screen.getByText(/An unexpected error interrupted this page/),
         ).toBeInTheDocument();
         expect(
             screen.getByRole("link", { name: "Go to homepage" }),
-        ).toBeInTheDocument();
+        ).toHaveAttribute("href", "/");
     });
 
-    it("should render a status-aware message for a route error response", () => {
-        const router = createMemoryRouter(
-            [
-                {
-                    path: "/",
-                    element: <ThrowingResponseComponent />,
-                    errorElement: <RouteErrorBoundary />,
-                },
-            ],
-            { initialEntries: ["/"] },
+    it("should call onRetry when the retry button is clicked", async () => {
+        const onRetry = jest.fn();
+
+        renderWithRouter(<RouteErrorBoundary onRetry={onRetry} />);
+        await userEvent.click(
+            screen.getByRole("button", { name: "Try again" }),
         );
 
-        render(<RouterProvider router={router} />);
-
-        expect(
-            screen.getByText(/ran into an error \(404\)/),
-        ).toBeInTheDocument();
+        expect(onRetry).toHaveBeenCalledTimes(1);
     });
 });

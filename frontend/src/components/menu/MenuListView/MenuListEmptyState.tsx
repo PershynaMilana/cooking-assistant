@@ -28,7 +28,7 @@ export const MenuListEmptyState: React.FC<MenuListEmptyStateProps> = ({
 }) => {
     const { t } = useTranslation("menu");
     const createFirstButton = (
-        <LinkButton to={ROUTES.addMenu} size="lg">
+        <LinkButton href={ROUTES.addMenu} size="lg">
             <Plus size={NEW_MENU_ICON_SIZE} aria-hidden="true" />
             {t("menuListView.createFirst")}
         </LinkButton>

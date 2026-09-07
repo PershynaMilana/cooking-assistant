@@ -7,9 +7,10 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
 
-    /* Bare path aliases (mirrored in vite.config.ts, jest.config.cjs, eslint resolver) */
+    /* Bare path aliases (mirrored in jest.config.cjs and the eslint resolver) */
     "paths": {
       "api/*": ["./src/api/*"],
+      "app/*": ["./src/app/*"],
       "components/*": ["./src/components/*"],
       "hooks/*": ["./src/hooks/*"],
       "utils/*": ["./src/utils/*"],

@@ -33,11 +33,11 @@ export const GreetingHeader: React.FC = () => {
                 </h1>
             </div>
             <div className={styles["greeting-header__actions"]}>
-                <LinkButton to={ROUTES.addMenu} variant="secondary">
+                <LinkButton href={ROUTES.addMenu} variant="secondary">
                     <Plus size={ICON_SIZE} aria-hidden="true" />
                     {t("actions.newMenu")}
                 </LinkButton>
-                <LinkButton to={ROUTES.addRecipe}>
+                <LinkButton href={ROUTES.addRecipe}>
                     <Plus size={ICON_SIZE} aria-hidden="true" />
                     {t("actions.newRecipe")}
                 </LinkButton>

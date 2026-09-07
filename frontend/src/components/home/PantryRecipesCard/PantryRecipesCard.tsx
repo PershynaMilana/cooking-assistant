@@ -33,7 +33,7 @@ export const PantryRecipesCard: React.FC = () => {
                 </p>
             </div>
             <LinkButton
-                to={PANTRY_LINK}
+                href={PANTRY_LINK}
                 variant="secondary"
                 className={styles["pantry-recipes-card__cta"]}
             >

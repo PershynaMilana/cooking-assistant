@@ -28,7 +28,7 @@ export const OwnerActions: React.FC<OwnerActionsProps> = ({
     logIntakeLabel,
 }) => (
     <div className={styles["owner-actions"]}>
-        <LinkButton to={editTo} className={styles["owner-actions__edit"]}>
+        <LinkButton href={editTo} className={styles["owner-actions__edit"]}>
             <EditMark size={ICON_SIZE} />
             {editLabel}
         </LinkButton>

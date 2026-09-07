@@ -27,6 +27,7 @@ changelogs and the tags and now track everything here against one shared version
 ### Frontend
 
 - Fixed: The light and dark theme now settle before the page is first painted, so switching themes or reloading no longer flashes the wrong colours.
+- Fixed: A link to a page that does not exist now properly reports itself as missing, instead of answering as though the page had loaded.
 
 ## 4.3 - 2026-08-20
 

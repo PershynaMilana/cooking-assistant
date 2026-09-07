@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
+
+import { Link } from "components/ui/Link";
 
 import styles from "./TwoColumnStatList.module.scss";
 
@@ -10,7 +11,7 @@ export interface StatListItem {
     name: string;
     value: string;
     // links the row to the recipe/menu it describes - omit for a plain, non-interactive row
-    to?: string;
+    href?: string;
 }
 
 export interface StatListColumn {
@@ -58,9 +59,9 @@ const StatListColumnView: React.FC<{ column: StatListColumn }> = ({
         <ul className={styles["two-column-stat-list__items"]}>
             {column.items.map((item) => (
                 <li key={item.key}>
-                    {item.to ? (
+                    {item.href ? (
                         <Link
-                            to={item.to}
+                            href={item.href}
                             className={styles["two-column-stat-list__row"]}
                         >
                             <StatListRowContent

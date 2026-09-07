@@ -1,6 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { useIsHydrated } from "hooks/useIsHydrated";
+
 import styles from "./Button.module.scss";
 
 export type ButtonVariant =
@@ -40,6 +42,11 @@ export const Button: React.FC<ButtonProps> = ({
     ...rest
 }) => {
     const { t } = useTranslation();
+    // the server sends a fully clickable form before React hydrates; a submit landing then is a
+    // native browser submit, which puts every field - passwords included - into the URL
+    const isHydrated = useIsHydrated();
+    const isAwaitingHydration = type === "submit" && !isHydrated;
+    const isDisabled = disabled || loading || isAwaitingHydration;
 
     const classNames = [
         styles.button,
@@ -47,6 +54,7 @@ export const Button: React.FC<ButtonProps> = ({
         SIZE_CLASS[size],
         iconOnly && styles["button--icon-only"],
         loading && styles["button--loading"],
+        isAwaitingHydration && styles["button--awaiting-hydration"],
         className,
     ]
         .filter(Boolean)
@@ -56,7 +64,7 @@ export const Button: React.FC<ButtonProps> = ({
         <button
             type={type}
             className={classNames}
-            disabled={disabled || loading}
+            disabled={isDisabled}
             aria-busy={loading || undefined}
             {...rest}
         >

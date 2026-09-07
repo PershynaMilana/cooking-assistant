@@ -1,12 +1,14 @@
 import type { TFunction } from "i18next";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { ERROR_CODES } from "constants/errorCodes";
 import { ROUTES } from "constants/routes";
 
 import { useResetPasswordMutation } from "redux/services/authApi";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import { isValidPassword } from "utils/authValidation";
 import { getQueryErrorCode, getQueryErrorStatus } from "utils/queryError";
@@ -30,8 +32,8 @@ function getResetPasswordErrorMessage(error: unknown, t: TFunction): string {
 
 export const useResetPasswordForm = () => {
     const { t } = useTranslation("auth");
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+    const router = useAppRouter();
+    const searchParams = useSearchParams();
     const [resetPassword] = useResetPasswordMutation();
 
     const token = searchParams.get("token") ?? "";
@@ -62,7 +64,7 @@ export const useResetPasswordForm = () => {
         const result = await resetPassword({ token, newPassword });
 
         if ("data" in result) {
-            void navigate(ROUTES.login);
+            router.push(ROUTES.login);
 
             return;
         }
@@ -77,7 +79,7 @@ export const useResetPasswordForm = () => {
         }
 
         setError(getResetPasswordErrorMessage(result.error, t));
-    }, [confirmPassword, navigate, newPassword, resetPassword, t, token]);
+    }, [confirmPassword, router, newPassword, resetPassword, t, token]);
 
     return {
         newPassword,

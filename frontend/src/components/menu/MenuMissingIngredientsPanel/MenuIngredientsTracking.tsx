@@ -1,11 +1,11 @@
 import { Check } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { BasketAddMark } from "components/icons";
+import { Link } from "components/ui/Link";
 
 import { resolveIngredientName, resolveUnit } from "utils/ingredientName";
 import type { AggregatedIngredient } from "utils/menuUtils";
@@ -123,7 +123,7 @@ export const MenuIngredientsTracking: React.FC<
                         )}
                     </ul>
                     <Link
-                        to={ROUTES.ingredients}
+                        href={ROUTES.ingredients}
                         className={
                             styles["menu-missing-ingredients-panel__add"]
                         }

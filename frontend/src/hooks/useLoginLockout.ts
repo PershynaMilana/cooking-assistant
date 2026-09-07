@@ -3,8 +3,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { MS_PER_MINUTE } from "constants/time";
 
+import { useIsHydrated } from "hooks/useIsHydrated";
+
 import {
     ATTEMPTS_PER_LOCK,
+    EMPTY_LOCKOUT,
     LOCKOUT_LADDER_MINUTES,
     type LockoutState,
     readLockout,
@@ -26,8 +29,9 @@ export const useLoginLockout = (
     login: string,
     onUnlock?: () => void,
 ): UseLoginLockoutResult => {
-    const [lockout, setLockout] = useState(() => readLockout(login));
-    const [syncedLogin, setSyncedLogin] = useState(login);
+    const isHydrated = useIsHydrated();
+    const [lockout, setLockout] = useState<LockoutState>(EMPTY_LOCKOUT);
+    const [syncedLogin, setSyncedLogin] = useState<string | null>(null);
     const [now, setNow] = useState(() => Date.now());
 
     const { lockedUntil } = lockout;
@@ -41,8 +45,8 @@ export const useLoginLockout = (
         onUnlockRef.current = onUnlock;
     });
 
-    // lockout is scoped per identifier, so switching which account is typed re-reads that account's own state - adjusted during render (not via an effect) so a locked account never flashes as unlocked for a frame
-    if (login !== syncedLogin) {
+    // lockout is scoped per identifier, so switching which account is typed re-reads that account's own state - adjusted during render (not via an effect) so a locked account never flashes as unlocked for a frame. Gated on hydration because the stored state is a browser-only fact: reading it any earlier would make the server and the first client render disagree
+    if (isHydrated && login !== syncedLogin) {
         setSyncedLogin(login);
         setLockout(readLockout(login));
     }

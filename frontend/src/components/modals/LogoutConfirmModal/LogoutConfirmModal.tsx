@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
@@ -9,6 +8,8 @@ import { getErrorMessage } from "redux/middleware/notificationsListener";
 import { useLogoutMutation } from "redux/services/authApi";
 import { baseApi } from "redux/services/baseApi";
 import { closeModal } from "redux/slices/uiSlice";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import { ConfirmModal } from "components/modals/ConfirmModal";
 
@@ -19,7 +20,7 @@ interface LogoutConfirmModalProps {
 export const LogoutConfirmModal = ({ modalId }: LogoutConfirmModalProps) => {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const [logout, { isLoading }] = useLogoutMutation();
     const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +32,7 @@ export const LogoutConfirmModal = ({ modalId }: LogoutConfirmModalProps) => {
             // drop every cached query so the next user starts clean
             dispatch(baseApi.util.resetApiState());
             dispatch(closeModal(modalId));
-            void navigate(ROUTES.login);
+            router.push(ROUTES.login);
         } else {
             setError(getErrorMessage(result.error));
         }

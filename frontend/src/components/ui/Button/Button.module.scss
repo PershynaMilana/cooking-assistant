@@ -37,6 +37,13 @@
     }
 }
 
+// inert only until React takes over, which is not the same as unavailable: without this the
+// primary action on a server-rendered form paints grey and then snaps to the brand colour
+.button--awaiting-hydration:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
 .button--primary {
     background: var(--brand-strong);
     color: var(--on-brand);
@@ -52,6 +59,11 @@
     &:disabled {
         background: var(--surface-2);
         color: var(--text-muted);
+    }
+
+    &.button--awaiting-hydration:disabled {
+        background: var(--brand-strong);
+        color: var(--on-brand);
     }
 }
 

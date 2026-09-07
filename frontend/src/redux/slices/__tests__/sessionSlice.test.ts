@@ -137,6 +137,20 @@ describe("sessionSlice", () => {
         expect(store.getState().session.status).toBe("guest");
     });
 
+    it("should go back to checking when login succeeds, so a guest status cannot outlive it", async () => {
+        mockedPost.mockResolvedValue({ data: null });
+        const store = makeTestStore({ session: { status: "guest" } });
+
+        await store.dispatch(
+            authApi.endpoints.login.initiate({
+                login: "claude",
+                password: "secret1",
+            }),
+        );
+
+        expect(store.getState().session.status).toBe("checking");
+    });
+
     it("should set the status to guest when logout succeeds", async () => {
         mockedPost.mockResolvedValue({ data: null });
         const store = makeTestStore();

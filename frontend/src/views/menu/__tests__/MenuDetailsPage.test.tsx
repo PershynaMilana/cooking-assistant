@@ -1,8 +1,5 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider } from "react-redux";
-import type * as ReactRouterDom from "react-router-dom";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import type { MenuDetails } from "types/menu";
 
@@ -19,14 +16,11 @@ import {
     BTN_EDIT_MENU,
     ROUTE_ALL_MENUS,
 } from "test/constants";
-import { mockNavigate } from "test/router";
+import { setTestParams } from "test/nextNavigationMock";
+import { mockNavigate, renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
 import MenuDetailsPage from "views/menu/MenuDetailsPage";
 
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 jest.mock("api/client");
 
 const TITLE = "Weekday menu";
@@ -94,25 +88,15 @@ const mockMenuDetails = () => {
 const renderPage = (
     store = makeTestStore({ session: { status: "authed" } }),
 ) => {
-    const view = render(
-        <Provider store={store}>
-            <MemoryRouter initialEntries={["/menu/1"]}>
-                <Routes>
-                    <Route
-                        path="/menu/:id"
-                        element={
-                            <>
-                                <MenuDetailsPage />
-                                <ModalRoot />
-                            </>
-                        }
-                    />
-                </Routes>
-            </MemoryRouter>
-        </Provider>,
-    );
+    setTestParams({ id: "1" });
 
-    return { store, ...view };
+    return renderWithProviders(
+        <>
+            <MenuDetailsPage />
+            <ModalRoot />
+        </>,
+        { store, initialEntries: ["/menu/1"] },
+    );
 };
 
 describe("MenuDetailsPage", () => {

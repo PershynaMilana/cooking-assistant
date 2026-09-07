@@ -47,7 +47,7 @@ export const MenuRecipesPanel: React.FC<MenuRecipesPanelProps> = ({
                 description={t("menuDetailsPage.noRecipesYetDescription")}
                 action={
                     isOwner && (
-                        <LinkButton to={addRecipesTo} size="lg">
+                        <LinkButton href={addRecipesTo} size="lg">
                             <Plus size={ICON_SIZE} aria-hidden="true" />
                             {t("menuDetailsPage.addRecipes")}
                         </LinkButton>

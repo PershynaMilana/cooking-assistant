@@ -1,8 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
+
+import { Link } from "components/ui/Link";
 
 import styles from "./RecipeIngredientsPanel.module.scss";
 
@@ -44,7 +45,7 @@ export const RecipeIngredientsBanner: React.FC<
                               total: totalCount,
                           })}{" "}
                     <Link
-                        to={ROUTES.ingredients}
+                        href={ROUTES.ingredients}
                         className={
                             styles["recipe-ingredients-panel__banner-link"]
                         }

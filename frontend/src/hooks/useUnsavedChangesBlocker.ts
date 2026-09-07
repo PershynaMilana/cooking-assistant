@@ -1,13 +1,24 @@
+"use client";
+
 import type { RefObject } from "react";
-import { useBlocker } from "react-router-dom";
+import { useEffect } from "react";
 
-// intercepts in-app navigation while a form has unsaved edits; reads dirtiness through a ref so a just-saved form can disarm it synchronously before navigate
-export const useUnsavedChangesBlocker = (isDirtyRef: RefObject<boolean>) => {
-    const blocker = useBlocker(() => isDirtyRef.current);
+import { useNavigationBlocker } from "components/layout/NavigationBlocker";
 
-    return {
-        isBlocked: blocker.state === "blocked",
-        proceed: () => blocker.proceed?.(),
-        reset: () => blocker.reset?.(),
-    };
+// intercepts in-app navigation while a form has unsaved edits. Dirtiness is read through a ref at
+// navigation time, so a just-saved form can disarm itself synchronously before navigating; the
+// boolean drives the back-button guard, which must be armed the moment there is something to lose
+export const useUnsavedChangesBlocker = (
+    isDirty: boolean,
+    isDirtyRef: RefObject<boolean>,
+) => {
+    const { register, arm, isBlocked, proceed, reset } = useNavigationBlocker();
+
+    useEffect(() => register(isDirtyRef), [register, isDirtyRef]);
+
+    useEffect(() => {
+        arm(isDirty);
+    }, [arm, isDirty]);
+
+    return { isBlocked, proceed, reset };
 };

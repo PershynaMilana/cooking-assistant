@@ -1,12 +1,12 @@
 import { Search } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { useGetMenuCategoriesQuery } from "redux/services/menuCategoriesApi";
 
+import { Link } from "components/ui/Link";
 import { LinkButton } from "components/ui/LinkButton";
 
 import { MENU_CATEGORY_URL_PARAM } from "utils/filters/menuFilterDefs";
@@ -24,7 +24,7 @@ export const GuestLandingMenuFilters: React.FC = () => {
     return (
         <div className={styles["guest-landing-filters"]}>
             <LinkButton
-                to={ROUTES.allMenus}
+                href={ROUTES.allMenus}
                 variant="secondary"
                 className={styles["guest-landing-filters__search-button"]}
             >
@@ -33,7 +33,7 @@ export const GuestLandingMenuFilters: React.FC = () => {
             </LinkButton>
             <div className={styles["guest-landing-filters__chips"]}>
                 <Link
-                    to={ROUTES.allMenus}
+                    href={ROUTES.allMenus}
                     className={[
                         styles["guest-landing-filters__chip"],
                         styles["guest-landing-filters__chip--active"],
@@ -44,7 +44,7 @@ export const GuestLandingMenuFilters: React.FC = () => {
                 {categories.map((category) => (
                     <Link
                         key={category.menu_category_id}
-                        to={`${ROUTES.allMenus}?${MENU_CATEGORY_URL_PARAM}=${category.menu_category_id}`}
+                        href={`${ROUTES.allMenus}?${MENU_CATEGORY_URL_PARAM}=${category.menu_category_id}`}
                         className={styles["guest-landing-filters__chip"]}
                     >
                         {category.category_name}

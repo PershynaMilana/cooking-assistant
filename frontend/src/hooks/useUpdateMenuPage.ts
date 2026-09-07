@@ -1,7 +1,6 @@
-import { skipToken } from "@reduxjs/toolkit/query";
+import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
@@ -12,12 +11,13 @@ import {
 } from "redux/services/menusApi";
 import { useGetAllRecipesQuery } from "redux/services/recipesApi";
 
+import { useAppRouter } from "hooks/useAppRouter";
 import { useMenuForm } from "hooks/useMenuForm";
 
 export const useUpdateMenuPage = () => {
     const { t } = useTranslation("menu");
     const { id } = useParams<{ id: string }>();
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const form = useMenuForm({
         errorMessages: {
             emptyTitle: t("changeMenuPage.errorTitle"),
@@ -29,7 +29,7 @@ export const useUpdateMenuPage = () => {
     const { setInitialValues } = form;
     const { data: categories = [] } = useGetMenuCategoriesQuery(null);
     const { data: allRecipes = [] } = useGetAllRecipesQuery(null);
-    const { data: menu, isLoading } = useGetMenuByIdQuery(id ?? skipToken);
+    const { data: menu, isLoading } = useGetMenuByIdQuery(id);
     const [updateMenu] = useUpdateMenuMutation();
 
     useEffect(() => {
@@ -63,7 +63,7 @@ export const useUpdateMenuPage = () => {
 
         if ("data" in result) {
             form.markClean();
-            void navigate(ROUTES.allMenus);
+            router.push(ROUTES.allMenus);
         }
     };
 

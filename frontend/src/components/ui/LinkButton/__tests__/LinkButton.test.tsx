@@ -1,14 +1,13 @@
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { screen } from "@testing-library/react";
 
 import { LinkButton } from "components/ui/LinkButton";
 
+import { renderWithRouter } from "test/router";
+
 describe("LinkButton", () => {
     it("should render as a link to the given destination", () => {
-        render(
-            <MemoryRouter>
-                <LinkButton to="/add-recipe">New recipe</LinkButton>
-            </MemoryRouter>,
+        renderWithRouter(
+            <LinkButton href="/add-recipe">New recipe</LinkButton>,
         );
 
         expect(
@@ -17,22 +16,18 @@ describe("LinkButton", () => {
     });
 
     it("should apply the primary variant class by default", () => {
-        render(
-            <MemoryRouter>
-                <LinkButton to="/add-recipe">New recipe</LinkButton>
-            </MemoryRouter>,
+        renderWithRouter(
+            <LinkButton href="/add-recipe">New recipe</LinkButton>,
         );
 
         expect(screen.getByRole("link")).toHaveClass("button--primary");
     });
 
     it("should apply the requested variant and size classes", () => {
-        render(
-            <MemoryRouter>
-                <LinkButton to="/add-recipe" variant="secondary" size="sm">
-                    New recipe
-                </LinkButton>
-            </MemoryRouter>,
+        renderWithRouter(
+            <LinkButton href="/add-recipe" variant="secondary" size="sm">
+                New recipe
+            </LinkButton>,
         );
 
         const link = screen.getByRole("link");

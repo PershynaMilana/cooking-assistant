@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
 import { ERROR_CODES } from "constants/errorCodes";
 import { ROUTES } from "constants/routes";
 import { MS_PER_MINUTE } from "constants/time";
 
 import { useDeleteAccountMutation } from "redux/services/authApi";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import {
     ATTEMPTS_PER_LOCK,
@@ -29,7 +30,7 @@ const TICK_INTERVAL_MS = 1000;
 
 export const useDeleteAccountForm = (login: string) => {
     const { t } = useTranslation("settings");
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const [deleteAccount, { isLoading: isSubmitting }] =
         useDeleteAccountMutation();
 
@@ -93,7 +94,7 @@ export const useDeleteAccountForm = (login: string) => {
 
         if ("data" in result) {
             clearLockout(login, DELETE_ACCOUNT_STORAGE_KEY_PREFIX);
-            void navigate(ROUTES.login);
+            router.push(ROUTES.login);
 
             return;
         }
@@ -134,7 +135,7 @@ export const useDeleteAccountForm = (login: string) => {
         }
 
         setError(t("deleteAccountModal.errors.genericError"));
-    }, [deleteAccount, isLocked, lockout, login, navigate, password, t]);
+    }, [deleteAccount, isLocked, lockout, login, router, password, t]);
 
     return {
         password,
