@@ -47,18 +47,34 @@ npm run test:coverage# jest --coverage (enforces the 80% threshold)
 Type errors only surface at `npm run build` / `npm run typecheck` (`tsc -b tsconfig.build.json`), not at `npm run dev`. Run
 one of them before opening a PR.
 
-## Production (Docker + nginx)
+## Production (Docker + Node)
 
-In production the frontend is a static bundle served by nginx. The [Dockerfile](Dockerfile) has two stages:
+In production the frontend is a Node process, not a pile of static files - it renders pages on
+request. The [Dockerfile](Dockerfile) has two stages:
 
-1. **builder** - sets `ARG VITE_API_URL` (baked into the Vite bundle at build time), runs `npm run build`,
-   produces `dist/`.
-2. **runner** - copies `dist/` into `nginx:alpine`, uses [nginx.conf](nginx.conf) which sets the SPA
-   fallback (`try_files $uri $uri/ /index.html`) so React Router deep-links work, 1-year cache headers
-   for content-hashed assets, and serves `public/robots.txt` as a real static file at that path.
+1. **builder** - takes `ARG NEXT_PUBLIC_API_URL` and `ARG NEXT_PUBLIC_SITE_URL` (Next inlines the
+   first into the client bundle and resolves canonical/social URLs against the second, both at build
+   time), runs `npm run build`.
+2. **runner** - copies `.next/standalone` (the traced server plus only the `node_modules` it
+   reaches), and then `.next/static` and `public/` **separately**: neither is part of the trace, and
+   omitting them ships a site with no stylesheets and no icons. Runs `node server.js` as the
+   unprivileged `node` user.
 
-`VITE_API_URL` is passed as a Docker build-arg from GitHub Actions (value: `https://api.cooking-assistant.app`).
-Once baked in it cannot be changed at runtime - to point the bundle at a different API, rebuild the image.
+The server listens on **8080**, not 80 - an unprivileged user cannot bind a port below 1024, so the
+reverse proxy targets that port ([../deploy/Caddyfile](../deploy/Caddyfile)).
+
+`GET /health` ([src/app/health/route.ts](src/app/health/route.ts)) is the container liveness probe -
+the one route handler in the app, and a deliberate exception to the rule that all HTTP goes through
+the `api/` layer, which is about the product's own API. It has to be a route of its own: probing `/`
+would run a full render, and a request to the backend, every fifteen seconds.
+
+Both build-args are passed from GitHub Actions and baked in - pointing the image at a different API
+or origin means rebuilding it, not restarting it.
+
+**Server-rendered requests must forward the visitor's IP.** Every server-side call into the backend
+has to pass `x-forwarded-for` through unchanged, so the backend's rate limiter keeps attributing the
+request to the real visitor. Without it every rendered request arrives from the frontend container's
+own address and the whole site looks like one very busy client to the limiter.
 
 ## Environment
 

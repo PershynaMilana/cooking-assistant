@@ -66,6 +66,17 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
+            # both are baked in below; unset, they would expand to a bare "https://" and fail
+            # deep inside the build with an unexplained URL parse error
+            - name: Require the domain variables
+              env:
+                  API_DOMAIN: ${{ vars.API_DOMAIN }}
+                  APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+              run: |
+                  for name in API_DOMAIN APP_DOMAIN; do
+                      [ -n "${!name}" ] || { echo "::error::repository variable $name is not set"; exit 1; }
+                  done
+
             - uses: docker/metadata-action@v6
               id: meta
               with:
@@ -81,8 +92,12 @@ jobs:
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
+                  # both are baked into the build: NEXT_PUBLIC_* is inlined into the client
+                  # bundle, and the site origin resolves canonical and social URLs. Changing
+                  # either needs a rebuilt image, not a restart.
                   build-args: |
-                      VITE_API_URL=https://${{ vars.API_DOMAIN }}
+                      NEXT_PUBLIC_API_URL=https://${{ vars.API_DOMAIN }}
+                      NEXT_PUBLIC_SITE_URL=https://${{ vars.APP_DOMAIN }}
 
     deploy:
         name: Migrate & deploy to the server
@@ -109,7 +124,7 @@ jobs:
                   # GHCR paths are lowercase, GitHub logins are not.
                   OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
 
-                  # deploy.sh pulls the images, runs migrations, waits for the health check and
-                  # restores the previous release if the backend never reports healthy
+                  # deploy.sh pulls the images, runs migrations, waits for both containers to
+                  # report healthy and restores the previous release if either never does
                   ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
                       "$DEPLOY_USER@$DEPLOY_HOST" "$OWNER $RELEASE_TAG"

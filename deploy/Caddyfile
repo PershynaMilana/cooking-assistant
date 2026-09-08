@@ -4,7 +4,8 @@
 
 {$APP_DOMAIN} {
 	encode zstd gzip
-	reverse_proxy cooking-frontend:80
+	# 8080, not 80: the frontend runs as an unprivileged user and cannot bind a low port
+	reverse_proxy cooking-frontend:8080
 }
 
 {$API_DOMAIN} {

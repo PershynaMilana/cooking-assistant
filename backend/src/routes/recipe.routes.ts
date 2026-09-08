@@ -1,52 +1,60 @@
 import express, { type Router } from "express";
 
+import { ROUTES } from "constants/routes";
+
 import type RecipeController from "controller/recipe.controller";
 import authenticateToken from "middleware/jwtMiddleware";
 import optionalAuth from "middleware/optionalAuth";
-
-const RECIPE_BY_ID_PATH = "/recipe/:id";
 
 export default function createRecipeRouter(
     recipeController: RecipeController,
 ): Router {
     const router = express.Router();
 
-    router.post("/recipe", authenticateToken, recipeController.createRecipe);
-
-    router.get("/recipes", authenticateToken, recipeController.getAllRecipes);
+    router.post(
+        ROUTES.recipes.create,
+        authenticateToken,
+        recipeController.createRecipe,
+    );
 
     router.get(
-        RECIPE_BY_ID_PATH,
+        ROUTES.recipes.list,
+        authenticateToken,
+        recipeController.getAllRecipes,
+    );
+
+    router.get(
+        ROUTES.recipes.byId,
         optionalAuth,
         recipeController.getRecipeWithIngredients,
     );
 
     router.put(
-        RECIPE_BY_ID_PATH,
+        ROUTES.recipes.byId,
         authenticateToken,
         recipeController.updateRecipe,
     );
 
     router.delete(
-        RECIPE_BY_ID_PATH,
+        ROUTES.recipes.byId,
         authenticateToken,
         recipeController.deleteRecipe,
     );
 
     router.get(
-        "/recipes-by-filters",
+        ROUTES.recipes.byFilters,
         optionalAuth,
         recipeController.searchRecipes,
     );
 
     router.get(
-        "/recipes-filters-person",
+        ROUTES.recipes.byPerson,
         authenticateToken,
         recipeController.searchPersonRecipes,
     );
 
     router.get(
-        "/recipes-stats",
+        ROUTES.recipes.stats,
         authenticateToken,
         recipeController.getRecipesStats,
     );

@@ -1,7 +1,6 @@
 # dependencies and build output
 node_modules
-dist
-dist-ssr
+.next
 coverage
 
 # environment secrets

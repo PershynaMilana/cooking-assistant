@@ -136,7 +136,7 @@ for the variables it must define.
 
 ## Tech stack
 
-- Frontend: React 19, TypeScript, Next.js 16 (App Router), Redux Toolkit + RTK Query, SCSS modules, axios, i18next + react-i18next, Recharts; served by nginx in production
+- Frontend: React 19, TypeScript, Next.js 16 (App Router), Redux Toolkit + RTK Query, SCSS modules, axios, i18next + react-i18next, Recharts; server-rendered by a Node process in production
 - Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `cookie-parser`, `zod`, `helmet`, `pino`, `tsx` (dev) / `tsup` + `node` (prod)
 - Database: PostgreSQL 18, running as a container next to the app
 - Infra: Docker multi-stage builds (arm64), GHCR, GitHub Actions, Docker Compose on a self-hosted ARM server, Caddy with automatic HTTPS
