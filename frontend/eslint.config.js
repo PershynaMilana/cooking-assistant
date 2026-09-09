@@ -27,8 +27,17 @@ const preferNullRestrictions = [
     },
 ];
 
+// repeated wherever no-restricted-imports is re-declared: a later block for the same files
+// replaces the rule outright, silently dropping whatever an earlier block set
+const parentImportRestriction = {
+    regex: "^\.\./",
+    message:
+        "Use bare path aliases (api/*, components/*, ...) instead of ../ parent imports.",
+};
+
 export default tseslint.config(
-    { ignores: ["dist", "coverage"] },
+    // build output and Next-generated declarations
+    { ignores: ["dist", "coverage", ".next", "next-env.d.ts"] },
     {
         extends: [
             js.configs.recommended,
@@ -39,7 +48,13 @@ export default tseslint.config(
         languageOptions: {
             globals: globals.browser,
             parserOptions: {
-                projectService: true,
+                // explicit list, not projectService: the root tsconfig.json belongs to
+                // Next and covers app code only, so tests and build configs need naming
+                project: [
+                    "./tsconfig.app.json",
+                    "./tsconfig.node.json",
+                    "./tsconfig.test.json",
+                ],
                 tsconfigRootDir: import.meta.dirname,
             },
         },
@@ -122,7 +137,7 @@ export default tseslint.config(
                         ["^\\u0000"],
                         // external packages - starts with letter/@, but not our bare aliases
                         [
-                            "^(?!(?:api|assets|components|config|constants|hooks|i18n|pages|redux|test|types|utils)/)@?\\w",
+                            "^(?!(?:api|app|assets|components|config|constants|hooks|i18n|redux|test|types|utils)/)@?\\w",
                         ],
                         // config / constants / types layers
                         ["^(?:config|constants|types)/"],
@@ -136,8 +151,8 @@ export default tseslint.config(
                         ["^(?:components|assets|i18n)/"],
                         // utils layer
                         ["^utils/"],
-                        // pages / test (infra) layers
-                        ["^(?:pages|test)/"],
+                        // route tree / test (infra) layers
+                        ["^(?:app|test)/"],
                         // relative same-folder (./)
                         ["^\\."],
                     ],
@@ -170,7 +185,6 @@ export default tseslint.config(
                         "**/__tests__/**",
                         "src/test/**",
                         "**/*.config.{ts,js,cjs}",
-                        "vite.config.ts",
                     ],
                 },
             ],
@@ -202,15 +216,46 @@ export default tseslint.config(
                 },
                 {
                     selector:
-                        "JSXAttribute[name.name='to'] Literal[value=/^\\u002F/]",
+                        "JSXAttribute[name.name='href'] Literal[value=/^\\u002F/]",
                     message:
                         "Hardcoded route path. Use ROUTES from constants/routes.ts.",
                 },
                 {
                     selector:
-                        "CallExpression[callee.name='navigate'] Literal[value=/^\\u002F/]",
+                        "CallExpression[callee.object.name='router'] Literal[value=/^\\u002F/]",
                     message:
                         "Hardcoded route path. Use ROUTES from constants/routes.ts.",
+                },
+            ],
+        },
+    },
+    {
+        // navigation goes through the wrappers or the unsaved-changes guard is silently
+        // bypassed: a bare next/link still renders a working link, just an unguarded one
+        files: ["src/**/*.{ts,tsx}"],
+        ignores: [
+            "src/components/ui/Link/Link.tsx",
+            "src/hooks/useAppRouter.ts",
+            "src/test/**",
+        ],
+        rules: {
+            "no-restricted-imports": [
+                "error",
+                {
+                    patterns: [parentImportRestriction],
+                    paths: [
+                        {
+                            name: "next/link",
+                            message:
+                                "Use the Link from components/ui/Link - it goes through the navigation blocker.",
+                        },
+                        {
+                            name: "next/navigation",
+                            importNames: ["useRouter"],
+                            message:
+                                "Use useAppRouter from hooks/useAppRouter - it goes through the navigation blocker.",
+                        },
+                    ],
                 },
             ],
         },
@@ -258,8 +303,15 @@ export default tseslint.config(
         },
     },
     {
-        files: ["src/pages/**/*.{ts,tsx}"],
-        ignores: ["src/pages/**/__tests__/**/*.{ts,tsx}"],
+        // route files legitimately export metadata/viewport alongside the component;
+        // the rule guards Fast Refresh, which does not apply to server components
+        files: ["src/app/**/*.{ts,tsx}"],
+        rules: { "react-refresh/only-export-components": "off" },
+    },
+    {
+        // a page stays thin: it composes, it does not hold logic
+        files: ["src/app/**/page.tsx", "src/app/not-found.tsx"],
+        ignores: ["src/app/**/__tests__/**/*.{ts,tsx}"],
         rules: {
             "max-lines": [
                 "error",
@@ -326,7 +378,7 @@ export default tseslint.config(
                 { type: "redux", pattern: "src/redux/**" },
                 { type: "hooks", pattern: "src/hooks/*" },
                 { type: "components", pattern: "src/components/**" },
-                { type: "pages", pattern: "src/pages/**" },
+                { type: "app", pattern: "src/app/**" },
             ],
         },
         rules: {
@@ -339,7 +391,9 @@ export default tseslint.config(
                         {
                             from: { element: { type: "components" } },
                             disallow: {
-                                to: { element: { type: "pages" } },
+                                to: {
+                                    element: { types: ["app"] },
+                                },
                             },
                             message: "Components must not import pages.",
                         },
@@ -348,8 +402,8 @@ export default tseslint.config(
                                 element: {
                                     types: {
                                         anyOf: [
+                                            "app",
                                             "components",
-                                            "pages",
                                             "hooks",
                                             "utils",
                                             "redux",
@@ -378,8 +432,8 @@ export default tseslint.config(
         // literal JSX text and the few attributes users actually read
         // (placeholder/alt/aria-label/title) before they ship un-translated
         files: [
+            "src/app/**/*.{ts,tsx}",
             "src/components/**/*.{ts,tsx}",
-            "src/pages/**/*.{ts,tsx}",
             "src/hooks/**/*.{ts,tsx}",
             "src/i18n/**/*.{ts,tsx}",
         ],

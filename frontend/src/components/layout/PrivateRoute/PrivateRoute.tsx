@@ -1,33 +1,41 @@
+"use client";
+
 import type { ReactNode } from "react";
-import React from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
 
 import { ROUTES } from "constants/routes";
 
+import { useAppRouter } from "hooks/useAppRouter";
 import { useSessionGate } from "hooks/useSessionGate";
 
+import { BlankScreen } from "components/layout/BlankScreen";
 import { SessionErrorState } from "components/layout/SessionErrorState";
 
-import type { LoginRedirectState } from "utils/loginRedirect";
+import { rememberLoginRedirect } from "utils/loginRedirect";
 
 interface PrivateRouteProps {
-    children?: ReactNode;
+    children: ReactNode;
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-    const location = useLocation();
+    const router = useAppRouter();
+    const redirectedRef = useRef(false);
     const { isChecking, isAuthed, isGuest } = useSessionGate();
 
-    if (isChecking) return <div className="min-h-screen" />;
-    if (isAuthed) return <>{children ?? <Outlet />}</>;
+    useEffect(() => {
+        if (!isGuest || redirectedRef.current) {
+            return;
+        }
 
-    if (isGuest) {
-        // carries where the guest was trying to go, so a successful login returns them there
+        redirectedRef.current = true;
+        // records where the guest was trying to go, so a successful login returns them there
         // instead of dropping them on the home dashboard - see utils/loginRedirect
-        const state: LoginRedirectState = { from: location };
+        rememberLoginRedirect();
+        router.replace(ROUTES.login);
+    }, [isGuest, router]);
 
-        return <Navigate to={ROUTES.login} state={state} replace />;
-    }
+    if (isChecking || isGuest) return <BlankScreen />;
+    if (isAuthed) return <>{children}</>;
 
     return <SessionErrorState />;
 };

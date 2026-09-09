@@ -86,7 +86,8 @@
         "subtitle": "Browse your cookbook",
         "emptyTitle": "No recipes yet",
         "emptyDescription": "Your cookbook is empty. Add your first recipe and it'll show up here.",
-        "searchPlaceholder": "recipe title"
+        "searchPlaceholder": "recipe title",
+        "metaDescription": "Browse every published recipe - filter by type, cooking time and the ingredients you already have."
     },
     "userRecipesPage": {
         "myRecipes": "My recipes",
@@ -170,6 +171,11 @@
         "allergens": "Allergens",
         "logIntake": "Log intake",
         "guestCta": "Log in for the full experience",
-        "customCaloriesNote": "The creator set a custom calorie total for this recipe, so per-ingredient calories aren't shown - only the total above applies."
+        "customCaloriesNote": "The creator set a custom calorie total for this recipe, so per-ingredient calories aren't shown - only the total above applies.",
+        "metaFallbackDescription_one": "A {{type}} recipe with {{count}} ingredient.",
+        "metaFallbackDescription_other": "A {{type}} recipe with {{count}} ingredients.",
+        "cookingTimeUnavailable": "—",
+        "metaFallbackDescriptionUntyped_one": "A recipe with {{count}} ingredient.",
+        "metaFallbackDescriptionUntyped_other": "A recipe with {{count}} ingredients."
     }
 }

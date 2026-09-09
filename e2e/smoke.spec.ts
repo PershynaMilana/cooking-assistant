@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
-import { selectFromPicker } from "./forms";
+import { gotoPublicForm, selectFromPicker } from "./forms";
 
 // serial + a shared page: the httpOnly auth cookie must carry across tests
 test.describe.configure({ mode: "serial" });
@@ -31,7 +31,7 @@ test.afterAll(async () => {
 });
 
 test("should register a new account and land on the dashboard already logged in", async () => {
-    await page.goto("/registration");
+    await gotoPublicForm(page, "/registration");
     await page.getByLabel("Name:", { exact: true }).fill(NAME);
     await page.getByLabel("Surname:", { exact: true }).fill("Smoke");
     await page.getByLabel("Username", { exact: true }).fill(login);

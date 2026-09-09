@@ -45,7 +45,7 @@ export const CalorieLimitModal = ({
             footer={
                 <>
                     <LinkButton
-                        to={profileDietaryPath()}
+                        href={profileDietaryPath()}
                         variant="secondary"
                         onClick={handleClose}
                     >

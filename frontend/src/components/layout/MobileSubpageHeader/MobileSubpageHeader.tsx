@@ -1,12 +1,12 @@
 import { ChevronLeft } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { EditMark } from "components/icons";
 import { Logo } from "components/layout/Logo";
+import { Link } from "components/ui/Link";
 
 import styles from "./MobileSubpageHeader.module.scss";
 
@@ -31,7 +31,7 @@ export const MobileSubpageHeader: React.FC<MobileSubpageHeaderProps> = ({
     return (
         <header className={styles["mobile-subpage-header"]}>
             <Link
-                to={backTo}
+                href={backTo}
                 aria-label={t("mobileSubpageHeader.back")}
                 className={styles["mobile-subpage-header__back"]}
             >
@@ -44,7 +44,7 @@ export const MobileSubpageHeader: React.FC<MobileSubpageHeaderProps> = ({
             ) : (
                 <div className={styles["mobile-subpage-header__wordmark"]}>
                     <Logo
-                        to={ROUTES.home}
+                        href={ROUTES.home}
                         size={LOGO_SIZE}
                         variant="detailed"
                     />
@@ -52,7 +52,7 @@ export const MobileSubpageHeader: React.FC<MobileSubpageHeaderProps> = ({
             )}
             {editTo ? (
                 <Link
-                    to={editTo}
+                    href={editTo}
                     aria-label={t("mobileSubpageHeader.edit")}
                     className={styles["mobile-subpage-header__edit"]}
                 >

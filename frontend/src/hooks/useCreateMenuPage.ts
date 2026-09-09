@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
@@ -7,11 +6,12 @@ import { useGetMenuCategoriesQuery } from "redux/services/menuCategoriesApi";
 import { useCreateMenuMutation } from "redux/services/menusApi";
 import { useGetAllRecipesQuery } from "redux/services/recipesApi";
 
+import { useAppRouter } from "hooks/useAppRouter";
 import { useMenuForm } from "hooks/useMenuForm";
 
 export const useCreateMenuPage = () => {
     const { t } = useTranslation("menu");
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const form = useMenuForm({
         errorMessages: {
             emptyTitle: t("createMenuPage.errorTitle"),
@@ -39,7 +39,7 @@ export const useCreateMenuPage = () => {
 
         if ("data" in result) {
             form.markClean();
-            void navigate(ROUTES.allMenus);
+            router.push(ROUTES.allMenus);
         }
     };
 

@@ -1,11 +1,11 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import type { ExpiringIngredient } from "types/expiry";
 
 import { ExpiringItem } from "components/home/ExpiringSoon/ExpiringItem";
+import { Link } from "components/ui/Link";
 
 import styles from "./ExpiringSoon.module.scss";
 
@@ -23,7 +23,7 @@ export const ExpiringSoon: React.FC<ExpiringSoonProps> = ({ items }) => {
                     {t("expiringSoon.title")}
                 </span>
                 <Link
-                    to={ROUTES.ingredients}
+                    href={ROUTES.ingredients}
                     className={styles["expiring-soon__link"]}
                 >
                     {t("expiringSoon.pantryLink")}

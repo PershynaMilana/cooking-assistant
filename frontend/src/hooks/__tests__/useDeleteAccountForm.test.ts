@@ -1,5 +1,4 @@
 import { act } from "@testing-library/react";
-import type * as ReactRouterDom from "react-router-dom";
 
 import { ERROR_CODES } from "constants/errorCodes";
 import { ROUTES } from "constants/routes";
@@ -13,10 +12,6 @@ import { mockNavigate } from "test/router";
 import { renderHookWithStore } from "test/store";
 
 jest.mock("api/client");
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 
 const LOGIN = "claude";
 const PASSWORD = "secret1!";

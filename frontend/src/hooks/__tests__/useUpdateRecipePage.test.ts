@@ -1,5 +1,4 @@
 import { act } from "@testing-library/react";
-import type * as ReactRouterDom from "react-router-dom";
 
 import type { RecipeDetails } from "types/recipe";
 
@@ -13,14 +12,10 @@ import { useUpdateRecipePage } from "hooks/useUpdateRecipePage";
 
 import { mockedPut, mockGetByUrl } from "test/apiClientMock";
 import { ROUTE_ALL_RECIPES } from "test/constants";
+import { setTestParams } from "test/nextNavigationMock";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-    useParams: () => ({ id: "1" }),
-}));
 jest.mock("api/client");
 
 const TITLE = "Borscht";
@@ -74,6 +69,10 @@ const setup = async (recipe: RecipeDetails = SAMPLE) => {
 };
 
 describe("useUpdateRecipePage", () => {
+    beforeEach(() => {
+        setTestParams({ id: "1" });
+    });
+
     it("should fill the form from the loaded recipe", async () => {
         const { result } = await setup();
 

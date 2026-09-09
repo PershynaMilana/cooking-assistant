@@ -37,6 +37,18 @@ const baseProps = {
 };
 
 describe("RecipeHero", () => {
+    it("should show a placeholder instead of a duration when the recipe has no cooking time", () => {
+        renderWithRouter(
+            <RecipeHero
+                {...baseProps}
+                recipe={{ ...BASE_RECIPE, cooking_time: null }}
+            />,
+        );
+
+        expect(screen.queryByText("0 min")).not.toBeInTheDocument();
+        expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+    });
+
     it("should render the title and type chip", () => {
         renderWithRouter(<RecipeHero {...baseProps} />);
 

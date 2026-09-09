@@ -169,6 +169,10 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
           install: npm --prefix frontend ci
       - name: Build frontend
+        # a production build refuses to guess the public origin; CI builds are never deployed,
+        # so a placeholder is enough to exercise the build itself
+        env:
+          NEXT_PUBLIC_SITE_URL: https://example.com
         run: npm --prefix frontend run build
 
   stylelint-frontend:

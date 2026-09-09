@@ -62,7 +62,7 @@ cooking-assistant/
 ├── CLAUDE.md        notes for AI tooling (also useful for humans)
 ├── e2e/             Playwright smoke suite (npm run test:e2e)
 ├── backend/         Express + PostgreSQL API on :3000  (see backend/README.md)
-└── frontend/        React + Vite SPA on :8080          (see frontend/README.md)
+└── frontend/        React + Next.js app on :8080       (see frontend/README.md)
 ```
 
 It is a plain monorepo - no workspaces. The root `package.json` only holds `concurrently` and a few
@@ -75,7 +75,7 @@ per-app detail.
 npm install              # installs root + backend + frontend (postinstall hook)
 npm start                # boot backend + frontend together (alias: npm run dev)
 npm run start:backend    # backend only (tsx watch -> :3000)
-npm run start:frontend   # frontend only (vite -> :8080)
+npm run start:frontend   # frontend only (next dev -> :8080)
 npm test                 # run both Jest suites
 npm run verify           # full local gate: format:check + lint + sonarjs + stylelint + typecheck + test + build
 npm run test:e2e         # Playwright smoke suite against a live dev stack (needs both apps running)
@@ -136,7 +136,7 @@ for the variables it must define.
 
 ## Tech stack
 
-- Frontend: React 19, TypeScript, Vite 8, React Router v7, Redux Toolkit + RTK Query, SCSS modules, axios, i18next + react-i18next, Recharts; served by nginx in production
+- Frontend: React 19, TypeScript, Next.js 16 (App Router), Redux Toolkit + RTK Query, SCSS modules, axios, i18next + react-i18next, Recharts; server-rendered by a Node process in production
 - Backend: Node.js, TypeScript, Express 5, `pg`, `node-pg-migrate`, `jsonwebtoken`, `bcryptjs`, `cookie-parser`, `zod`, `helmet`, `pino`, `tsx` (dev) / `tsup` + `node` (prod)
 - Database: PostgreSQL 18, running as a container next to the app
 - Infra: Docker multi-stage builds (arm64), GHCR, GitHub Actions, Docker Compose on a self-hosted ARM server, Caddy with automatic HTTPS

@@ -1,8 +1,11 @@
+"use client";
+
 import type { ReactNode } from "react";
 import React from "react";
 
 import { useSessionGate } from "hooks/useSessionGate";
 
+import { BlankScreen } from "components/layout/BlankScreen";
 import { SessionErrorState } from "components/layout/SessionErrorState";
 
 interface HomeRouteProps {
@@ -19,7 +22,7 @@ export const HomeRoute: React.FC<HomeRouteProps> = ({
 }) => {
     const { isChecking, isAuthed, isGuest } = useSessionGate();
 
-    if (isChecking) return <div className="min-h-screen" />;
+    if (isChecking) return <BlankScreen />;
     if (isAuthed) return <>{authedElement}</>;
     if (isGuest) return <>{guestElement}</>;
 

@@ -46,14 +46,19 @@ export const RecipeHero: React.FC<RecipeHeroProps> = ({
     const { t } = useTranslation("recipes");
     const { canFavourite } = useAppSelector(selectViewerCapabilities);
     const favouriteLabel = t("recipeDetailsPage.favourite");
-    const { hours, minutes } = splitCookingTime(recipe.cooking_time);
-    const formattedCookingTime =
+    const { hours, minutes } = splitCookingTime(recipe.cooking_time ?? 0);
+    const durationLabel =
         hours > 0
             ? t("recipeDetailsPage.cookingTimeHoursMinutes", {
                   hours,
                   minutes,
               })
             : t("recipeDetailsPage.cookingTimeMinutes", { minutes });
+    // a recipe can carry no cooking time at all - the column is nullable
+    const formattedCookingTime =
+        recipe.cooking_time === null
+            ? t("recipeDetailsPage.cookingTimeUnavailable")
+            : durationLabel;
     const formattedDate = formatFullDate(recipe.creation_date);
     const formattedCalories =
         recipe.calories_per_portion === null

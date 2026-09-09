@@ -1,7 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { MOBILE_MEDIA_QUERY } from "constants/breakpoints";
 import { ROUTES } from "constants/routes";
@@ -14,6 +13,7 @@ import { useMediaQuery } from "hooks/useMediaQuery";
 import { NotebookMark } from "components/icons";
 import { MenuCard } from "components/menu/MenuCard";
 import { EmptyState } from "components/ui/EmptyState";
+import { Link } from "components/ui/Link";
 
 import styles from "./GuestLanding.module.scss";
 
@@ -37,7 +37,7 @@ export const GuestLandingMenus: React.FC = () => {
                     {t("menusTitle")}
                 </h2>
                 <Link
-                    to={ROUTES.allMenus}
+                    href={ROUTES.allMenus}
                     className={styles["guest-landing-section__see-all"]}
                 >
                     {t("seeAllMenus")}

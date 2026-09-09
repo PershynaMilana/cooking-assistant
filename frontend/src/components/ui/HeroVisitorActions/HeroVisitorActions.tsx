@@ -1,13 +1,12 @@
 import { Flame, Heart, Sparkles } from "lucide-react";
 import React from "react";
-import { useLocation } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { Button } from "components/ui/Button";
 import { LinkButton } from "components/ui/LinkButton";
 
-import type { LoginRedirectState } from "utils/loginRedirect";
+import { rememberLoginRedirect } from "utils/loginRedirect";
 
 import styles from "./HeroVisitorActions.module.scss";
 
@@ -29,15 +28,12 @@ export const HeroVisitorActions: React.FC<HeroVisitorActionsProps> = ({
     logIntakeLabel,
     onLogIntake,
 }) => {
-    const location = useLocation();
-    const loginState: LoginRedirectState = { from: location };
-
     if (!canFavourite) {
         return (
             <div className={styles["hero-visitor-actions"]}>
                 <LinkButton
-                    to={ROUTES.login}
-                    state={loginState}
+                    href={ROUTES.login}
+                    onClick={rememberLoginRedirect}
                     variant="secondary"
                     className={styles["hero-visitor-actions__log-intake"]}
                 >

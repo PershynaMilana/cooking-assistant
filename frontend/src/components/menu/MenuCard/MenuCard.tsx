@@ -29,7 +29,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
 
     return (
         <ContentCard
-            to={menuDetailsPath(id)}
+            href={menuDetailsPath(id)}
             title={title}
             imageIcon={NotebookMark}
             chipLabel={categoryName}

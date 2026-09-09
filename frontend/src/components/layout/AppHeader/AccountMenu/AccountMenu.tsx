@@ -1,13 +1,14 @@
 import { ChevronDown, Lock, LogOut, User } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
+import { useIsHydrated } from "hooks/useIsHydrated";
 import { usePopoverDismiss } from "hooks/usePopoverDismiss";
 
 import { Avatar } from "components/ui/Avatar";
+import { Link } from "components/ui/Link";
 
 import { getInitials } from "utils/getInitials";
 
@@ -43,6 +44,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         setIsOpen(false);
     };
 
+    const isHydrated = useIsHydrated();
+
     usePopoverDismiss(containerRef, isOpen, closeMenu);
 
     return (
@@ -55,6 +58,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                 aria-haspopup="menu"
                 aria-expanded={isOpen}
                 aria-label={t("accountMenu.trigger")}
+                // the header is on screen before React hydrates, and until then this opens nothing
+                disabled={!isHydrated}
                 className={styles["account-menu__trigger"]}
             >
                 <Avatar
@@ -90,7 +95,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                     <div className={styles["account-menu__divider"]} />
                     <Link
                         role="menuitem"
-                        to={ROUTES.profile}
+                        href={ROUTES.profile}
                         onClick={closeMenu}
                         className={styles["account-menu__item"]}
                     >
@@ -99,7 +104,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                     </Link>
                     <Link
                         role="menuitem"
-                        to={ROUTES.settings}
+                        href={ROUTES.settings}
                         onClick={closeMenu}
                         className={styles["account-menu__item"]}
                     >

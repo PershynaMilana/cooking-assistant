@@ -1,11 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Provider } from "react-redux";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import { BottomNav } from "components/layout/BottomNav";
-
-import type { LoginRedirectState } from "utils/loginRedirect";
 
 import { renderWithProviders, renderWithRouter } from "test/router";
 import { makeTestStore } from "test/store";
@@ -40,29 +36,14 @@ describe("BottomNav", () => {
         ).toEqual(["Recipes", "Menus", "Log In"]);
     });
 
-    it("should carry the current page as router state on the guest's Log In tab", async () => {
-        function LoginPageStub() {
-            const location = useLocation();
-            const state = location.state as LoginRedirectState | null;
-
-            return <div>login-from:{state?.from?.pathname ?? "none"}</div>;
-        }
-
-        render(
-            <Provider store={makeTestStore({ session: { status: "guest" } })}>
-                <MemoryRouter initialEntries={["/all-recipes"]}>
-                    <Routes>
-                        <Route path="/all-recipes" element={<BottomNav />} />
-                        <Route path="/login" element={<LoginPageStub />} />
-                    </Routes>
-                </MemoryRouter>
-            </Provider>,
-        );
+    it("should record the current page as the login redirect on the guest's Log In tab", async () => {
+        renderWithProviders(<BottomNav />, {
+            store: makeTestStore({ session: { status: "guest" } }),
+            initialEntries: ["/all-recipes"],
+        });
 
         await userEvent.click(screen.getByRole("link", { name: /Log In/ }));
 
-        expect(
-            await screen.findByText("login-from:/all-recipes"),
-        ).toBeInTheDocument();
+        expect(sessionStorage.getItem("login-redirect")).toBe("/all-recipes");
     });
 });

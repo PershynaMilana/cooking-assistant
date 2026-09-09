@@ -13,6 +13,7 @@ STACK_DIR=/srv/cooking-assistant
 ENV_FILE="$STACK_DIR/.env"
 REGISTRY=ghcr.io
 BACKEND_CONTAINER=cooking-assistant-backend-1
+FRONTEND_CONTAINER=cooking-assistant-frontend-1
 HEALTH_TIMEOUT_SECONDS=150
 POLL_INTERVAL_SECONDS=5
 
@@ -42,8 +43,14 @@ write_release() {
         "$ENV_FILE"
 }
 
-backend_healthy() {
-    [ "$(docker inspect -f '{{.State.Health.Status}}' "$BACKEND_CONTAINER" 2>/dev/null)" = healthy ]
+container_healthy() {
+    [ "$(docker inspect -f '{{.State.Health.Status}}' "$1" 2>/dev/null)" = healthy ]
+}
+
+# the frontend is a server-rendering process now, not a static file server: it can start, answer
+# nothing useful, and still look fine to anything that only watches the backend
+stack_healthy() {
+    container_healthy "$BACKEND_CONTAINER" && container_healthy "$FRONTEND_CONTAINER"
 }
 
 roll_back() {
@@ -65,11 +72,11 @@ docker compose --profile tools run --rm migrate || roll_back
 log "starting containers"
 docker compose up -d || roll_back
 
-log "waiting for the backend to report healthy"
+log "waiting for both containers to report healthy"
 deadline=$(( SECONDS + HEALTH_TIMEOUT_SECONDS ))
-until backend_healthy; do
+until stack_healthy; do
     if [ "$SECONDS" -ge "$deadline" ]; then
-        docker compose logs --tail 40 backend || true
+        docker compose logs --tail 40 backend frontend || true
         roll_back
     fi
     sleep "$POLL_INTERVAL_SECONDS"

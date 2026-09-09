@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import type { RecipeSearchResultItem } from "types/recipe";
@@ -8,6 +7,7 @@ import type { RecipeSearchResultItem } from "types/recipe";
 import { RecentRecipeCard } from "components/home/RecentRecipes/RecentRecipeCard";
 import { UtensilsMark } from "components/icons";
 import { EmptyState } from "components/ui/EmptyState";
+import { Link } from "components/ui/Link";
 import { LinkButton } from "components/ui/LinkButton";
 
 import { exceedsCalorieBudget } from "utils/calories";
@@ -34,7 +34,7 @@ export const RecentRecipes: React.FC<RecentRecipesProps> = ({
                     {t("recentRecipes.title")}
                 </span>
                 <Link
-                    to={ROUTES.myRecipes}
+                    href={ROUTES.myRecipes}
                     className={styles["recent-recipes__view-all"]}
                 >
                     {t("recentRecipes.viewAll")}
@@ -60,7 +60,7 @@ export const RecentRecipes: React.FC<RecentRecipesProps> = ({
                     title={t("recentRecipes.emptyTitle")}
                     description={t("recentRecipes.emptyDescription")}
                     action={
-                        <LinkButton to={ROUTES.addRecipe}>
+                        <LinkButton href={ROUTES.addRecipe}>
                             {t("recentRecipes.emptyAction")}
                         </LinkButton>
                     }

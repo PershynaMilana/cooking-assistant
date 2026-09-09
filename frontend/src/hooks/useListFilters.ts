@@ -1,5 +1,9 @@
-import { useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+"use client";
+
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import type { FilterDef } from "utils/filters/filterDef";
 import {
@@ -51,20 +55,63 @@ export interface UseListFiltersResult<TState, TParams> {
 export function useListFilters<TState extends object, TParams>(
     defs: readonly FilterDef<unknown, TParams>[],
 ): UseListFiltersResult<TState, TParams> {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const router = useAppRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    // a router push does not update useSearchParams() straight away, so a second write made
+    // before the first one lands would merge onto pre-write state - resetting the filters and
+    // immediately picking another one would silently keep both. Until some navigation lands,
+    // the value we last asked for is the truth; any change to the URL hands control back to it
+    const [requested, setRequested] = useState<{
+        params: string;
+        writtenOver: string;
+    } | null>(null);
+    const actualParams = searchParams.toString();
 
-    const rawValues = readState<TParams>(defs, searchParams);
+    if (requested !== null && requested.writtenOver !== actualParams) {
+        setRequested(null);
+    }
+
+    const pendingParams =
+        requested?.writtenOver === actualParams ? requested.params : null;
+    const currentParams = useMemo(
+        () =>
+            pendingParams === null
+                ? searchParams
+                : new URLSearchParams(pendingParams),
+        [pendingParams, searchParams],
+    );
+
+    const setSearchParams = useCallback(
+        (next: URLSearchParams, options?: SetFilterValueOptions) => {
+            const query = next.toString();
+            const href = query ? `${pathname}?${query}` : pathname;
+
+            // only remember the write once the navigation is under way: a write the guard
+            // defers may be dropped, and the filters must not claim to be applied then
+            const navigated = options?.replace
+                ? router.replace(href)
+                : router.push(href);
+
+            if (navigated) {
+                setRequested({ params: query, writtenOver: actualParams });
+            }
+        },
+        [actualParams, pathname, router],
+    );
+
+    const rawValues = readState<TParams>(defs, currentParams);
     const values = rawValues as TState;
     const params = buildParams<TParams>(defs, rawValues);
 
     const setRaw = useCallback(
         (key: string, value: unknown, options?: SetFilterValueOptions) => {
             const nextValues = { ...rawValues, [key]: value };
-            const next = writeState<TParams>(defs, nextValues, searchParams);
+            const next = writeState<TParams>(defs, nextValues, currentParams);
 
-            setSearchParams(next, { replace: options?.replace });
+            setSearchParams(next, options);
         },
-        [defs, rawValues, searchParams, setSearchParams],
+        [currentParams, defs, rawValues, setSearchParams],
     );
 
     const setValue = useCallback(
@@ -84,22 +131,22 @@ export function useListFilters<TState extends object, TParams>(
     const setValues = useCallback(
         (partial: Partial<TState>, options?: SetFilterValueOptions) => {
             const nextValues = { ...rawValues, ...partial };
-            const next = writeState<TParams>(defs, nextValues, searchParams);
+            const next = writeState<TParams>(defs, nextValues, currentParams);
 
-            setSearchParams(next, { replace: options?.replace });
+            setSearchParams(next, options);
         },
-        [defs, rawValues, searchParams, setSearchParams],
+        [currentParams, defs, rawValues, setSearchParams],
     );
 
     const reset = useCallback(() => {
         const next = writeState<TParams>(
             defs,
             resetState<TParams>(defs),
-            searchParams,
+            currentParams,
         );
 
         setSearchParams(next);
-    }, [defs, searchParams, setSearchParams]);
+    }, [currentParams, defs, setSearchParams]);
 
     const activeFilters: ActiveFilterEntry<TParams>[] =
         computeActiveDefs<TParams>(defs, rawValues).map(({ def, value }) => ({

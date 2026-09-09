@@ -1,10 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { DonburiMarkDetailed } from "components/icons";
+import { Link } from "components/ui/Link";
 
 import styles from "./AuthLayout.module.scss";
 
@@ -30,14 +30,17 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
     return (
         <div className={styles["auth-layout"]}>
             <div className={styles["auth-layout__illustration"]}>
-                <Link to={ROUTES.home} className={styles["auth-layout__brand"]}>
+                <Link
+                    href={ROUTES.home}
+                    className={styles["auth-layout__brand"]}
+                >
                     {brandIcon && (
                         <DonburiMarkDetailed size={BRAND_ICON_SIZE} />
                     )}
                     {t("appName")}
                 </Link>
                 <Link
-                    to={ROUTES.home}
+                    href={ROUTES.home}
                     className={styles["auth-layout__icon-circle"]}
                 >
                     <DonburiMarkDetailed size={ILLUSTRATION_ICON_SIZE} />
@@ -53,7 +56,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
             </div>
             <div className={styles["auth-layout__panel"]}>
                 <Link
-                    to={ROUTES.home}
+                    href={ROUTES.home}
                     className={styles["auth-layout__mobile-header"]}
                 >
                     <span

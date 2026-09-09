@@ -23,3 +23,13 @@
         border-color: var(--brand);
     }
 }
+
+// both icons ship in the markup and the applied theme picks one, so the control is
+// correct before React hydrates and never disagrees with server-rendered HTML
+.icon--dark {
+    display: var(--show-in-dark);
+}
+
+.icon--light {
+    display: var(--show-in-light);
+}

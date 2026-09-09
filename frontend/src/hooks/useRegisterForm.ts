@@ -1,13 +1,14 @@
 import type { TFunction } from "i18next";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
 import { ERROR_CODES } from "constants/errorCodes";
 import { ROUTES } from "constants/routes";
 import type { RegisterErrors, RegisterRequest } from "types/auth";
 
 import { useRegisterMutation } from "redux/services/authApi";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import {
     isValidEmail,
@@ -61,7 +62,7 @@ function getRegisterErrorMessage(error: unknown, t: TFunction): string {
 // validate() returns the next errors instead of relying on state, which would still be stale here
 export const useRegisterForm = () => {
     const { t } = useTranslation("auth");
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const [registerUser] = useRegisterMutation();
 
     const [values, setValues] = useState<RegisterRequest>(EMPTY_FORM);
@@ -132,13 +133,13 @@ export const useRegisterForm = () => {
         });
 
         if ("data" in result) {
-            void navigate(ROUTES.home);
+            router.push(ROUTES.home);
 
             return;
         }
 
         setError(getRegisterErrorMessage(result.error, t));
-    }, [navigate, registerUser, t, validate, values]);
+    }, [router, registerUser, t, validate, values]);
 
     return { values, errors, error, setField, handleSubmit };
 };

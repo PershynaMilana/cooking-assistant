@@ -29,10 +29,10 @@ export const GuestLandingHero: React.FC = () => {
                 {t("descriptionShort")}
             </p>
             <div className={styles["guest-landing-hero__actions"]}>
-                <LinkButton to={ROUTES.registration}>
+                <LinkButton href={ROUTES.registration}>
                     {t("common:nav.register")}
                 </LinkButton>
-                <LinkButton to={ROUTES.login} variant="secondary">
+                <LinkButton href={ROUTES.login} variant="secondary">
                     {t("common:nav.login")}
                 </LinkButton>
             </div>

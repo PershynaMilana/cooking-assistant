@@ -1,10 +1,15 @@
 // switching [data-theme] on <html> repaints every var(--...) consumer instantly.
-// the --bg values are mirrored by the theme-color meta + pre-paint script in
-// index.html - keep them in sync when changing the palette
+// the --bg values are read at build time and mirrored into the theme-color meta by the
+// pre-paint script, which takes the first as dark and the second as light - keep the
+// dark block above the light one
 :root,
 [data-theme="dark"] {
     color-scheme: dark;
 
+    // theme-conditional visibility, so a component can ship both variants and let the
+    // applied theme pick one, without reading the theme in JavaScript
+    --show-in-dark: flex;
+    --show-in-light: none;
     --bg: #15131a;
     --surface: #1e1b26;
     --surface-2: #2a2533;
@@ -35,6 +40,8 @@
 [data-theme="light"] {
     color-scheme: light;
 
+    --show-in-dark: none;
+    --show-in-light: flex;
     --bg: #f7f5fb;
     --surface: #fff;
     --surface-2: #f1edf8;

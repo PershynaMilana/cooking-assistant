@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { useAppDispatch } from "redux/hooks";
 import { useDeleteRecipeMutation } from "redux/services/recipesApi";
 import { closeModal } from "redux/slices/uiSlice";
+
+import { useAppRouter } from "hooks/useAppRouter";
 
 import { ConfirmModal } from "components/modals/ConfirmModal";
 
@@ -22,7 +23,7 @@ export const DeleteRecipeModal = ({
 }: DeleteRecipeModalProps) => {
     const { t } = useTranslation("recipes");
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
+    const router = useAppRouter();
     const [deleteRecipe, { isLoading }] = useDeleteRecipeMutation();
 
     const handleConfirm = async () => {
@@ -31,7 +32,7 @@ export const DeleteRecipeModal = ({
 
         if ("data" in result) {
             dispatch(closeModal(modalId));
-            void navigate(ROUTES.allRecipes);
+            router.push(ROUTES.allRecipes);
         }
     };
 

@@ -3,15 +3,26 @@
     "rules": {
         "keyframes-name-pattern": "^([a-z][a-zA-Z0-9]*)(-[a-z0-9]+)*$",
         "selector-class-pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$",
-        "selector-no-vendor-prefix": [true, { "ignoreSelectors": ["/-webkit-/", "/-moz-/"] }],
+        "selector-no-vendor-prefix": [
+            true,
+            { "ignoreSelectors": ["/-webkit-/", "/-moz-/"] }
+        ],
         "property-no-vendor-prefix": [
             true,
-            { "ignoreProperties": ["-webkit-font-smoothing", "-moz-osx-font-smoothing"] }
+            {
+                "ignoreProperties": [
+                    "-webkit-font-smoothing",
+                    "-moz-osx-font-smoothing"
+                ]
+            }
         ],
         "color-no-hex": true,
         "color-named": "never",
         "selector-max-id": 0,
-        "max-nesting-depth": [3, { "ignore": ["blockless-at-rules", "pseudo-classes"] }],
+        "max-nesting-depth": [
+            3,
+            { "ignore": ["blockless-at-rules", "pseudo-classes"] }
+        ],
         "declaration-block-single-line-max-declarations": 1,
         "font-weight-notation": "numeric"
     },
@@ -23,7 +34,7 @@
             }
         },
         {
-            "files": ["src/components/**/*.scss", "src/pages/**/*.scss"],
+            "files": ["src/components/**/*.scss", "src/views/**/*.scss"],
             "rules": {
                 "declaration-no-important": true
             }

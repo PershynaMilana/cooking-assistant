@@ -6,6 +6,8 @@ export default [
         ignores: [
             "dist",
             "coverage",
+            ".next",
+            "next-env.d.ts",
             "eslint.config.js",
             "eslint.sonarjs.config.js",
         ],

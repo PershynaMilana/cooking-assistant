@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import type { DonburiMarkProps } from "components/icons";
 import {
@@ -10,13 +9,14 @@ import {
     DonburiMarkSimple,
     DonburiMarkStandard,
 } from "components/icons";
+import { Link } from "components/ui/Link";
 
 import styles from "./Logo.module.scss";
 
 type LogoVariant = "minimal" | "compact" | "simple" | "standard" | "detailed";
 
 interface LogoProps {
-    to?: string;
+    href?: string;
     withWordmark?: boolean;
     size?: number;
     variant?: LogoVariant;
@@ -33,7 +33,7 @@ const MARK_BY_VARIANT: Record<LogoVariant, React.FC<DonburiMarkProps>> = {
 };
 
 export const Logo: React.FC<LogoProps> = ({
-    to,
+    href,
     withWordmark = true,
     size = DEFAULT_SIZE,
     variant = "detailed",
@@ -51,9 +51,9 @@ export const Logo: React.FC<LogoProps> = ({
         </>
     );
 
-    if (to) {
+    if (href) {
         return (
-            <Link to={to} aria-label={appName} className={styles.logo}>
+            <Link href={href} aria-label={appName} className={styles.logo}>
                 {content}
             </Link>
         );

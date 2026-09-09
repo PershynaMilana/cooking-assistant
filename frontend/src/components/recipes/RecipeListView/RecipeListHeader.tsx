@@ -31,7 +31,7 @@ export const RecipeListHeader: React.FC<RecipeListHeaderProps> = ({
                     {subtitle}
                 </p>
             </div>
-            <LinkButton to={ROUTES.addRecipe}>
+            <LinkButton href={ROUTES.addRecipe}>
                 <Plus size={NEW_RECIPE_ICON_SIZE} aria-hidden="true" />
                 {t("recipes:recipeListView.newRecipe")}
             </LinkButton>

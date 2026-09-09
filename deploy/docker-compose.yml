@@ -15,7 +15,8 @@ services:
             # PG18 keeps data in /var/lib/postgresql/18/docker - mount the declared parent volume
             - postgres-data:/var/lib/postgresql
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+            test:
+                ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
             interval: 10s
             timeout: 5s
             retries: 12
@@ -38,7 +39,11 @@ services:
         restart: unless-stopped
         env_file: .env
         healthcheck:
-            test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q ok"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "wget -qO- http://127.0.0.1:3000/api/health | grep -q ok",
+                ]
             interval: 15s
             timeout: 5s
             retries: 5
@@ -57,11 +62,35 @@ services:
     frontend:
         image: ${FRONTEND_IMAGE}:${IMAGE_TAG}
         restart: unless-stopped
+        environment:
+            # server-side rendering talks to the backend over this project's own network, so it
+            # never leaves the host and needs no TLS; the browser still uses the public API domain
+            API_INTERNAL_URL: http://backend:3000
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "wget -qO- http://127.0.0.1:8080/health | grep -q ok",
+                ]
+            interval: 15s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+        # deliberately not waiting for the backend to be healthy: compose refuses to start a
+        # dependent whose dependency misses its own health budget - which is shorter than the one
+        # deploy.sh allows - and the site still comes up, degrading to the guest landing until
+        # the API answers
+        depends_on:
+            backend:
+                condition: service_started
         networks:
             default: {}
             edge:
                 aliases: [cooking-frontend]
-        mem_limit: 96m
+        # 96m was sized for nginx serving static files (8.9 MB in practice). The Node runtime
+        # measures ~33 MB idle, but that is before pages fetch and render data, and too low a
+        # limit is an OOM-kill loop rather than a slow page. Revisit against production numbers.
+        mem_limit: 512m
         cpus: 0.5
 
 networks:

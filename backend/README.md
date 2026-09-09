@@ -224,7 +224,8 @@ backend/
     ├── config/logger.ts      shared pino logger, LOG_LEVEL-aware and silent in tests
     ├── config/cookie.ts      AUTH_COOKIE_NAME + AUTH_COOKIE_OPTIONS (httpOnly, sameSite, secure, maxAge)
     ├── config/security.ts    rate-limit configs, purpose-token TTLs, SESSION_TOKEN_TYPE, DUMMY_PASSWORD_HASH
-    ├── constants/             errorMessages.ts (ERROR_CODES/ERROR_MESSAGES), pagination.ts, avatarKeys.ts
+    ├── constants/             routes.ts (every API path), errorMessages.ts (ERROR_CODES/ERROR_MESSAGES),
+    │                          pagination.ts, avatarKeys.ts
     ├── i18n/locales/en/       transactional-email copy (email.json), read by ResendEmailService
     │
     ├── domain/               innermost layer (no framework/db deps)
@@ -250,7 +251,7 @@ backend/
     │   └── errorHandler.ts   turns thrown errors into { error, code? } responses (mounted last)
     │
     ├── routes/               route factories (controller) => router, all under /api
-    │   └── *.routes.ts
+    │   └── *.routes.ts       paths come from constants/routes.ts, never written inline
     │
     ├── controller/           thin HTTP adapters (DI classes) that call use cases
     │   ├── *.controller.ts
@@ -271,7 +272,10 @@ public health check, a global rate limiter, then the seven domain routers, and f
 
 - **routes/** - factory functions `(controller) => router`; map `METHOD /path` directly to a
   controller handler, guard with `authenticateToken` (the public routes are `/health`, `/register`,
-  `/login`, `/logout`, `/forgot-password`, `/reset-password`, and `/confirm-email`).
+  `/login`, `/logout`, `/forgot-password`, `/reset-password`, and `/confirm-email`). Paths are never
+  literals here: they live in [src/constants/routes.ts](src/constants/routes.ts) as `ROUTES`, grouped
+  by domain and router-relative, alongside `API_PREFIX` (the `/api` mount) and `HEALTH_PATH` (derived
+  from both, because request logging has to filter the probe out by its full path).
 - **controller/** - thin classes; a handler reads `req`, calls a use case, sends the response. No try/catch.
 - **application/validation/** - zod request schemas and the shared `validate()` helper. Schemas describe
   request shape only (types, required scalars, formats, ranges, array item shape).

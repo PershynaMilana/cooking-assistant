@@ -51,7 +51,7 @@ export const ExpiredIngredientsModal = ({
                     <Button variant="secondary" onClick={handleClose}>
                         {t("expiredNoticeModal.close")}
                     </Button>
-                    <LinkButton to={ROUTES.ingredients} onClick={handleClose}>
+                    <LinkButton href={ROUTES.ingredients} onClick={handleClose}>
                         {t("expiredNoticeModal.goToPantry")}
                     </LinkButton>
                 </>

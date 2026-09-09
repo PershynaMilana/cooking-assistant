@@ -14,6 +14,7 @@ import {
     TRUST_PROXY_HOPS,
 } from "config/security";
 import { ERROR_MESSAGES } from "constants/errorMessages";
+import { API_PREFIX, HEALTH_PATH } from "constants/routes";
 
 import errorHandler from "middleware/errorHandler";
 import { createGlobalLimiter } from "middleware/rateLimit";
@@ -29,6 +30,14 @@ import createUserIngredientsRouter from "routes/userIngredients.routes";
 
 import type { Controllers } from "./composition-root";
 
+// req.url is the raw request target: a prober's cache-buster query and a trailing slash are both
+// served by the same route, so neither may slip past the filter
+const isHealthProbe = (req: { url?: string }): boolean => {
+    const [pathname = ""] = (req.url ?? "").split("?");
+
+    return pathname.replace(/\/$/, "") === HEALTH_PATH;
+};
+
 export function createApp(controllers: Controllers): Express {
     const app = express();
 
@@ -40,6 +49,9 @@ export function createApp(controllers: Controllers): Express {
             logger,
             // keep auth tokens and cookies out of logs
             redact: ["req.headers.authorization", "req.headers.cookie"],
+            // the liveness probe runs every 15s and says nothing; at 3 rotated files of 10 MB it
+            // was crowding out the logs that do
+            autoLogging: { ignore: isHealthProbe },
         }),
     );
     app.use(
@@ -52,22 +64,25 @@ export function createApp(controllers: Controllers): Express {
     app.use(express.json({ limit: JSON_BODY_LIMIT }));
     app.use(cookieParser());
 
-    app.use("/api", createHealthRouter());
+    app.use(API_PREFIX, createHealthRouter());
     app.use(createGlobalLimiter());
-    app.use("/api", createUserRouter(controllers.userController));
-    app.use("/api", createIngredientRouter(controllers.ingredientController));
-    app.use("/api", createRecipeRouter(controllers.recipeController));
-    app.use("/api", createTypeRouter(controllers.recipeTypeController));
+    app.use(API_PREFIX, createUserRouter(controllers.userController));
     app.use(
-        "/api",
+        API_PREFIX,
+        createIngredientRouter(controllers.ingredientController),
+    );
+    app.use(API_PREFIX, createRecipeRouter(controllers.recipeController));
+    app.use(API_PREFIX, createTypeRouter(controllers.recipeTypeController));
+    app.use(
+        API_PREFIX,
         createUserIngredientsRouter(controllers.userIngredientsController),
     );
-    app.use("/api", createMenuRouter(controllers.menuController));
+    app.use(API_PREFIX, createMenuRouter(controllers.menuController));
     app.use(
-        "/api",
+        API_PREFIX,
         createMenuCategoryRouter(controllers.menuCategoryController),
     );
-    app.use("/api", createCalorieRouter(controllers.calorieController));
+    app.use(API_PREFIX, createCalorieRouter(controllers.calorieController));
 
     app.use((_req, res) => {
         res.status(404).json({ error: ERROR_MESSAGES.NOT_FOUND });

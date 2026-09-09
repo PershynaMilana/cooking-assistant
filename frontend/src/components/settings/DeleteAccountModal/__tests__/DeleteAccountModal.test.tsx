@@ -1,6 +1,5 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type * as ReactRouterDom from "react-router-dom";
 
 import { ERROR_CODES } from "constants/errorCodes";
 import { ROUTES } from "constants/routes";
@@ -13,10 +12,6 @@ import { mockedDelete } from "test/apiClientMock";
 import { mockNavigate, renderWithProviders } from "test/router";
 
 jest.mock("api/client");
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 
 const LOGIN = "claude";
 const DELETE_ACCOUNT = "Delete account";

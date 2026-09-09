@@ -1,5 +1,10 @@
 {
     "appName": "Cooking Assistant",
+    "meta": {
+        "titleTemplate": "%s · Cooking Assistant",
+        "description": "Track your pantry, store recipes, plan menus, and auto-generate shopping lists — a full-stack home kitchen management app.",
+        "shortDescription": "Full-stack kitchen management app — recipes, pantry tracking, and menu planning."
+    },
     "sessionError": "Could not verify session. Please refresh the page.",
     "modal": {
         "cancel": "Cancel",
@@ -120,7 +125,6 @@
     },
     "routeError": {
         "description": "An unexpected error interrupted this page. Your data is safe - try again.",
-        "responseDescription": "This page ran into an error ({{status}}). Your data is safe - try again.",
         "goHome": "Go to homepage"
     }
 }

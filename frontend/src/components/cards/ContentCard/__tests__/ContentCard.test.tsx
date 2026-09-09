@@ -12,7 +12,7 @@ const renderCard = (
 ) =>
     renderWithRouter(
         <ContentCard
-            to="/recipe/1"
+            href="/recipe/1"
             title="Slow-roasted ragù"
             imageIcon={UtensilsCrossed}
             chipLabel="Main course"

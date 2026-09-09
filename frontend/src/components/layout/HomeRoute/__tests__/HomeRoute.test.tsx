@@ -1,13 +1,11 @@
-import { render, screen } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { screen } from "@testing-library/react";
 
 import type { CurrentUser } from "types/auth";
 
 import { HomeRoute } from "components/layout/HomeRoute";
 
 import { mockedGet } from "test/apiClientMock";
-import { makeTestStore } from "test/store";
+import { renderWithRouter } from "test/router";
 
 jest.mock("api/client");
 
@@ -29,22 +27,12 @@ const CURRENT_USER: CurrentUser = {
 };
 
 const renderHomeRoute = () =>
-    render(
-        <Provider store={makeTestStore()}>
-            <MemoryRouter initialEntries={[HOME_PATH]}>
-                <Routes>
-                    <Route
-                        path={HOME_PATH}
-                        element={
-                            <HomeRoute
-                                authedElement={<div>{AUTHED}</div>}
-                                guestElement={<div>{GUEST}</div>}
-                            />
-                        }
-                    />
-                </Routes>
-            </MemoryRouter>
-        </Provider>,
+    renderWithRouter(
+        <HomeRoute
+            authedElement={<div>{AUTHED}</div>}
+            guestElement={<div>{GUEST}</div>}
+        />,
+        [HOME_PATH],
     );
 
 describe("HomeRoute", () => {

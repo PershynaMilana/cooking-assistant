@@ -1,8 +1,10 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.test.json" }
-  ]
+    "extends": "./tsconfig.app.json",
+    "compilerOptions": {
+        "jsx": "preserve",
+        "esModuleInterop": true,
+        "incremental": true,
+        "plugins": [{ "name": "next" }]
+    },
+    "include": ["next-env.d.ts", "src", ".next/types/**/*.ts"]
 }

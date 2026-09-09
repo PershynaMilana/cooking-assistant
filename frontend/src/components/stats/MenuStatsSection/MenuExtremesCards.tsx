@@ -42,7 +42,7 @@ export const MenuExtremesCards: React.FC<MenuExtremesCardsProps> = ({
                                 key: m.id,
                                 name: m.title,
                                 value: formatTime(m.total_cooking_time),
-                                to: menuDetailsPath(m.id),
+                                href: menuDetailsPath(m.id),
                             })),
                     }}
                     right={{
@@ -54,7 +54,7 @@ export const MenuExtremesCards: React.FC<MenuExtremesCardsProps> = ({
                                 key: m.id,
                                 name: m.title,
                                 value: formatTime(m.total_cooking_time),
-                                to: menuDetailsPath(m.id),
+                                href: menuDetailsPath(m.id),
                             })),
                     }}
                 />
@@ -73,7 +73,7 @@ export const MenuExtremesCards: React.FC<MenuExtremesCardsProps> = ({
                                 key: m.id,
                                 name: m.title,
                                 value: String(m.recipe_count),
-                                to: menuDetailsPath(m.id),
+                                href: menuDetailsPath(m.id),
                             })),
                     }}
                     right={{
@@ -85,7 +85,7 @@ export const MenuExtremesCards: React.FC<MenuExtremesCardsProps> = ({
                                 key: m.id,
                                 name: m.title,
                                 value: String(m.recipe_count),
-                                to: menuDetailsPath(m.id),
+                                href: menuDetailsPath(m.id),
                             })),
                     }}
                 />
@@ -104,7 +104,7 @@ export const MenuExtremesCards: React.FC<MenuExtremesCardsProps> = ({
                                 key: m.id,
                                 name: m.title,
                                 value: formatCalories(m.total_calories),
-                                to: menuDetailsPath(m.id),
+                                href: menuDetailsPath(m.id),
                             })),
                     }}
                     right={{
@@ -116,7 +116,7 @@ export const MenuExtremesCards: React.FC<MenuExtremesCardsProps> = ({
                                 key: m.id,
                                 name: m.title,
                                 value: formatCalories(m.total_calories),
-                                to: menuDetailsPath(m.id),
+                                href: menuDetailsPath(m.id),
                             })),
                     }}
                 />

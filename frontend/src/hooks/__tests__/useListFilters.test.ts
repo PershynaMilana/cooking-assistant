@@ -6,6 +6,7 @@ import type { FilterDef } from "utils/filters/filterDef";
 import { idListFilter, textFilter } from "utils/filters/filterDefFactories";
 import { booleanFilter } from "utils/filters/filterDefFactories.scalar";
 
+import { mockNavigate } from "test/router";
 import { renderHookWithRouter } from "test/store";
 
 interface TestState {
@@ -81,6 +82,9 @@ describe("useListFilters", () => {
 
         expect(result.current.values.types).toEqual([3]);
         expect(result.current.params).toEqual({ type_ids: "3" });
+        // the derived values come from the write we asked for, so the URL itself is asserted
+        // too - otherwise a wrong URL param would go unnoticed here
+        expect(mockNavigate).toHaveBeenCalledWith("/test?types=3");
     });
 
     it("should update several URL-backed values in one write when setValues is called", () => {
@@ -95,6 +99,9 @@ describe("useListFilters", () => {
             types: [3],
             inStock: true,
         });
+        expect(mockNavigate).toHaveBeenCalledWith(
+            "/test?q=milk&types=3&stock=1",
+        );
     });
 
     it("should lose all but the last update when setValue is called several times in the same tick, unlike setValues", () => {
@@ -128,6 +135,23 @@ describe("useListFilters", () => {
             inStock: false,
         });
         expect(result.current.hasActiveFilters).toBe(false);
+        expect(mockNavigate).toHaveBeenCalledWith("/test");
+    });
+
+    it("should base a write on the previous one when the URL has not caught up yet", () => {
+        const { result } = setup(["/test?types=1"]);
+
+        // a router push does not update the URL straight away: resetting and immediately
+        // picking another filter must not merge back onto the pre-reset value
+        act(() => {
+            result.current.reset();
+        });
+        act(() => {
+            result.current.setValue("types", [3]);
+        });
+
+        expect(result.current.values.types).toEqual([3]);
+        expect(mockNavigate).toHaveBeenLastCalledWith("/test?types=3");
     });
 
     it("should clear only the removed filter when an active entry's remove() is called", () => {

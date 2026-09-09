@@ -18,39 +18,39 @@ export type NavIcon = React.ComponentType<{
 }>;
 
 export interface NavItem {
-    to: string;
+    href: string;
     labelKey: string;
     Icon: NavIcon;
 }
 
 // shared items, reused across the authed/guest x top-bar/bottom-bar variants below
 const RECIPES_ITEM: NavItem = {
-    to: ROUTES.allRecipes,
+    href: ROUTES.allRecipes,
     labelKey: "nav.recipes",
     Icon: BookMark,
 };
 const MENUS_ITEM: NavItem = {
-    to: ROUTES.allMenus,
+    href: ROUTES.allMenus,
     labelKey: "nav.menus",
     Icon: NotebookMark,
 };
 const INGREDIENTS_ITEM: NavItem = {
-    to: ROUTES.ingredients,
+    href: ROUTES.ingredients,
     labelKey: "nav.ingredients",
     Icon: BasketMark,
 };
 const STATS_ITEM: NavItem = {
-    to: ROUTES.stats,
+    href: ROUTES.stats,
     labelKey: "nav.stats",
     Icon: BarChartMark,
 };
 const PROFILE_ITEM: NavItem = {
-    to: ROUTES.profile,
+    href: ROUTES.profile,
     labelKey: "nav.profile",
     Icon: UserCircleMark,
 };
 const LOGIN_ITEM: NavItem = {
-    to: ROUTES.login,
+    href: ROUTES.login,
     labelKey: "nav.login",
     Icon: UserCircleMark,
 };

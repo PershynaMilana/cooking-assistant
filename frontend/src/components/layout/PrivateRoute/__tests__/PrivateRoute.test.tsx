@@ -1,134 +1,70 @@
-import { render, screen } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import { act, screen } from "@testing-library/react";
 
-import type { CurrentUser } from "types/auth";
+import { ROUTES } from "constants/routes";
 
 import { PrivateRoute } from "components/layout/PrivateRoute";
 
-import type { LoginRedirectState } from "utils/loginRedirect";
-
 import { mockedGet } from "test/apiClientMock";
+import { mockNavigate, renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
 
 jest.mock("api/client");
 
 const PROTECTED = "Protected content";
-const LOGIN = "Login page";
 const PROTECTED_PATH = "/protected";
-const LOGIN_PATH = "/login";
 const SESSION_ERROR = "Could not verify session. Please refresh the page.";
+const LOGIN_REDIRECT_KEY = "login-redirect";
 
-const CURRENT_USER: CurrentUser = {
-    id: 1,
-    name: "Claude",
-    surname: "Cook",
-    login: "claude",
-    created_at: "2025-06-15T00:00:00.000Z",
-    email: "claude@example.com",
-    email_verified_at: null,
-    avatar: null,
-    calorie_goal: null,
-};
+// the guest redirect fires from an effect, one commit after the render that saw the guest state
+const flushRedirect = () =>
+    act(async () => {
+        await Promise.resolve();
+    });
 
-// stands in for LoginPage to assert the redirect carries the guest's intended destination
-function LoginPageStub() {
-    const location = useLocation();
-    const state = location.state as LoginRedirectState | null;
-
-    return <div>{state?.from?.pathname ?? "none"}</div>;
-}
-
-const renderWithChildren = () =>
-    render(
-        <Provider store={makeTestStore()}>
-            <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                <Routes>
-                    <Route
-                        path={PROTECTED_PATH}
-                        element={
-                            <PrivateRoute>
-                                <div>{PROTECTED}</div>
-                            </PrivateRoute>
-                        }
-                    />
-                    <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                </Routes>
-            </MemoryRouter>
-        </Provider>,
+const renderAs = (status: "checking" | "authed" | "guest") =>
+    renderWithProviders(
+        <PrivateRoute>
+            <div>{PROTECTED}</div>
+        </PrivateRoute>,
+        {
+            store: makeTestStore({ session: { status } }),
+            initialEntries: [PROTECTED_PATH],
+        },
     );
 
 describe("PrivateRoute", () => {
-    it("should render children when getMe resolves with a user", async () => {
-        mockedGet.mockResolvedValue({ data: CURRENT_USER });
+    it("should render children for an authenticated session", () => {
+        renderAs("authed");
 
-        renderWithChildren();
-
-        expect(await screen.findByText(PROTECTED)).toBeInTheDocument();
+        expect(screen.getByText(PROTECTED)).toBeInTheDocument();
     });
 
-    it("should render the nested outlet when no children are given", async () => {
-        mockedGet.mockResolvedValue({ data: CURRENT_USER });
+    it("should redirect to login for a guest", async () => {
+        renderAs("guest");
+        await flushRedirect();
 
-        render(
-            <Provider store={makeTestStore()}>
-                <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                    <Routes>
-                        <Route element={<PrivateRoute />}>
-                            <Route
-                                path={PROTECTED_PATH}
-                                element={<div>{PROTECTED}</div>}
-                            />
-                        </Route>
-                        <Route path={LOGIN_PATH} element={<div>{LOGIN}</div>} />
-                    </Routes>
-                </MemoryRouter>
-            </Provider>,
-        );
-
-        expect(await screen.findByText(PROTECTED)).toBeInTheDocument();
-    });
-
-    it("should redirect to login when getMe resolves with a null payload (guest)", async () => {
-        mockedGet.mockResolvedValue({ data: null });
-
-        renderWithChildren();
-
-        expect(await screen.findByText(LOGIN)).toBeInTheDocument();
+        expect(mockNavigate).toHaveBeenCalledWith(ROUTES.login);
         expect(screen.queryByText(PROTECTED)).not.toBeInTheDocument();
     });
 
-    it("should carry the page the guest was trying to reach on the redirect to login", async () => {
-        mockedGet.mockResolvedValue({ data: null });
+    it("should record the page the guest was trying to reach before redirecting to login", async () => {
+        renderAs("guest");
+        await flushRedirect();
 
-        render(
-            <Provider store={makeTestStore()}>
-                <MemoryRouter initialEntries={[PROTECTED_PATH]}>
-                    <Routes>
-                        <Route
-                            path={PROTECTED_PATH}
-                            element={
-                                <PrivateRoute>
-                                    <div>{PROTECTED}</div>
-                                </PrivateRoute>
-                            }
-                        />
-                        <Route path={LOGIN_PATH} element={<LoginPageStub />} />
-                    </Routes>
-                </MemoryRouter>
-            </Provider>,
-        );
-
-        expect(await screen.findByText(PROTECTED_PATH)).toBeInTheDocument();
+        expect(sessionStorage.getItem(LOGIN_REDIRECT_KEY)).toBe(PROTECTED_PATH);
     });
 
     it("should show a session error when getMe rejects with a genuine failure", async () => {
         mockedGet.mockRejectedValue(new Error("Network error"));
 
-        renderWithChildren();
+        renderWithProviders(
+            <PrivateRoute>
+                <div>{PROTECTED}</div>
+            </PrivateRoute>,
+            { initialEntries: [PROTECTED_PATH] },
+        );
 
         expect(await screen.findByText(SESSION_ERROR)).toBeInTheDocument();
         expect(screen.queryByText(PROTECTED)).not.toBeInTheDocument();
-        expect(screen.queryByText(LOGIN)).not.toBeInTheDocument();
     });
 });

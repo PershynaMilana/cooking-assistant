@@ -1,5 +1,4 @@
 import { act } from "@testing-library/react";
-import type * as ReactRouterDom from "react-router-dom";
 
 import type { MenuDetails } from "types/menu";
 
@@ -13,14 +12,10 @@ import { useUpdateMenuPage } from "hooks/useUpdateMenuPage";
 
 import { mockedPut, mockGetByUrl } from "test/apiClientMock";
 import { ROUTE_ALL_MENUS } from "test/constants";
+import { setTestParams } from "test/nextNavigationMock";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-    useParams: () => ({ id: "1" }),
-}));
 jest.mock("api/client");
 
 const TITLE = "Weekday menu";
@@ -72,6 +67,10 @@ const setup = async (sample: MenuDetails = SAMPLE) => {
 };
 
 describe("useUpdateMenuPage", () => {
+    beforeEach(() => {
+        setTestParams({ id: "1" });
+    });
+
     it("should fill the form from the loaded menu", async () => {
         const { result } = await setup();
 

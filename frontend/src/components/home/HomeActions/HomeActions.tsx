@@ -42,7 +42,7 @@ export const HomeActions: React.FC<HomeActionsProps> = ({
                 )}
             </Button>
             <LinkButton
-                to={ROUTES.addMenu}
+                href={ROUTES.addMenu}
                 variant="secondary"
                 className={styles["home-actions__menu"]}
             >
@@ -50,7 +50,7 @@ export const HomeActions: React.FC<HomeActionsProps> = ({
                 {t("actions.newMenu")}
             </LinkButton>
             <LinkButton
-                to={ROUTES.addRecipe}
+                href={ROUTES.addRecipe}
                 className={styles["home-actions__recipe"]}
             >
                 <Plus size={PLUS_ICON_SIZE} aria-hidden="true" />

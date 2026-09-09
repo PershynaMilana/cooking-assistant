@@ -42,7 +42,7 @@ export const RecipeExtremesCards: React.FC<RecipeExtremesCardsProps> = ({
                                 key: r.id,
                                 name: r.title,
                                 value: formatTime(r.cookingTime),
-                                to: recipeDetailsPath(r.id),
+                                href: recipeDetailsPath(r.id),
                             })),
                     }}
                     right={{
@@ -54,7 +54,7 @@ export const RecipeExtremesCards: React.FC<RecipeExtremesCardsProps> = ({
                                 key: r.id,
                                 name: r.title,
                                 value: formatTime(r.cookingTime),
-                                to: recipeDetailsPath(r.id),
+                                href: recipeDetailsPath(r.id),
                             })),
                     }}
                 />
@@ -73,7 +73,7 @@ export const RecipeExtremesCards: React.FC<RecipeExtremesCardsProps> = ({
                                 key: r.id,
                                 name: r.title,
                                 value: String(r.ingredientCount),
-                                to: recipeDetailsPath(r.id),
+                                href: recipeDetailsPath(r.id),
                             })),
                     }}
                     right={{
@@ -85,7 +85,7 @@ export const RecipeExtremesCards: React.FC<RecipeExtremesCardsProps> = ({
                                 key: r.id,
                                 name: r.title,
                                 value: String(r.ingredientCount),
-                                to: recipeDetailsPath(r.id),
+                                href: recipeDetailsPath(r.id),
                             })),
                     }}
                 />
@@ -104,7 +104,7 @@ export const RecipeExtremesCards: React.FC<RecipeExtremesCardsProps> = ({
                                 key: r.id,
                                 name: r.title,
                                 value: formatCalories(r.caloriesPerPortion),
-                                to: recipeDetailsPath(r.id),
+                                href: recipeDetailsPath(r.id),
                             })),
                     }}
                     right={{
@@ -116,7 +116,7 @@ export const RecipeExtremesCards: React.FC<RecipeExtremesCardsProps> = ({
                                 key: r.id,
                                 name: r.title,
                                 value: formatCalories(r.caloriesPerPortion),
-                                to: recipeDetailsPath(r.id),
+                                href: recipeDetailsPath(r.id),
                             })),
                     }}
                 />

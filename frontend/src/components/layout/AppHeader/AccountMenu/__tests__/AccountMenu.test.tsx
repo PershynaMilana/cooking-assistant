@@ -1,21 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 
 import { AccountMenu } from "components/layout/AppHeader/AccountMenu";
+
+import { renderWithRouter } from "test/router";
 
 const TRIGGER_NAME = "Account menu";
 
 const renderMenu = (onLogout = jest.fn()) =>
-    render(
-        <MemoryRouter>
-            <AccountMenu
-                name="Claude"
-                surname="Cook"
-                login="claude"
-                onLogout={onLogout}
-            />
-        </MemoryRouter>,
+    renderWithRouter(
+        <AccountMenu
+            name="Claude"
+            surname="Cook"
+            login="claude"
+            onLogout={onLogout}
+        />,
     );
 
 const openMenu = async () => {
@@ -94,18 +93,16 @@ describe("AccountMenu", () => {
     });
 
     it("should close the menu when clicking outside of it", async () => {
-        render(
-            <MemoryRouter>
-                <div>
-                    <AccountMenu
-                        name="Claude"
-                        surname="Cook"
-                        login="claude"
-                        onLogout={jest.fn()}
-                    />
-                    <button type="button">Outside</button>
-                </div>
-            </MemoryRouter>,
+        renderWithRouter(
+            <div>
+                <AccountMenu
+                    name="Claude"
+                    surname="Cook"
+                    login="claude"
+                    onLogout={jest.fn()}
+                />
+                <button type="button">Outside</button>
+            </div>,
         );
 
         await openMenu();

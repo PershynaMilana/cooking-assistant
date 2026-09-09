@@ -30,7 +30,7 @@ export interface LockoutState {
     lastFailureAt: number | null;
 }
 
-const EMPTY_LOCKOUT: LockoutState = {
+export const EMPTY_LOCKOUT: LockoutState = {
     failures: 0,
     lockedUntil: null,
     lastFailureAt: null,
@@ -46,6 +46,11 @@ const isLockoutState = (value: unknown): value is LockoutState =>
     (value.lastFailureAt === null || typeof value.lastFailureAt === "number");
 
 export const readLockout = (login: string, prefix?: string): LockoutState => {
+    // a server render has no storage, so there is nothing to have been locked out from
+    if (typeof window === "undefined") {
+        return EMPTY_LOCKOUT;
+    }
+
     const raw = localStorage.getItem(storageKey(login, prefix));
 
     if (!raw) {

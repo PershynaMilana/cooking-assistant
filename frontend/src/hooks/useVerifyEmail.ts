@@ -1,5 +1,5 @@
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 
 import { useConfirmEmailMutation, useGetMeQuery } from "redux/services/authApi";
 
@@ -9,7 +9,7 @@ export const useVerifyEmail = (): {
     status: VerifyEmailStatus;
     isAuthed: boolean;
 } => {
-    const [searchParams] = useSearchParams();
+    const searchParams = useSearchParams();
     const [confirmEmail] = useConfirmEmailMutation();
     // /api/me is exempt from the global 401 redirect, so this is safe to call whether or not the browser already has a session
     const { data: currentUser } = useGetMeQuery(null);

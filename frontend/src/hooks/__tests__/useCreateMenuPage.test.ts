@@ -1,5 +1,4 @@
 import { act } from "@testing-library/react";
-import type * as ReactRouterDom from "react-router-dom";
 
 import { API_ROUTES } from "api/endpoints";
 
@@ -13,10 +12,6 @@ import { ROUTE_ALL_MENUS } from "test/constants";
 import { mockNavigate } from "test/router";
 import { makeTestStore, renderHookWithStore } from "test/store";
 
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual<typeof ReactRouterDom>("react-router-dom"),
-    useNavigate: () => mockNavigate,
-}));
 jest.mock("api/client");
 
 const CATEGORY_ID = 2;

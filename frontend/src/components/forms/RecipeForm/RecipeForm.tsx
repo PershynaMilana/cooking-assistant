@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import type { Ingredient } from "types/ingredient";
@@ -11,6 +10,7 @@ import { useUnsavedChangesBlocker } from "hooks/useUnsavedChangesBlocker";
 
 import { ConfirmModal } from "components/modals/ConfirmModal";
 import { Button } from "components/ui/Button";
+import { Link } from "components/ui/Link";
 
 import { splitCookingTime } from "utils/cookingTimeUtils";
 
@@ -43,7 +43,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
 }) => {
     const { t } = useTranslation("recipes");
     // catches every way out of a dirty form (Cancel, navbar, breadcrumb, back)
-    const blocker = useUnsavedChangesBlocker(form.isDirtyRef);
+    const blocker = useUnsavedChangesBlocker(form.isDirty, form.isDirtyRef);
 
     const totalMinutes =
         (Number(form.cookingHours) || 0) * MINUTES_PER_HOUR +
@@ -82,7 +82,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                 </span>
                 <div className={styles["recipe-form__summary-actions"]}>
                     <Link
-                        to={ROUTES.allRecipes}
+                        href={ROUTES.allRecipes}
                         className={styles["recipe-form__cancel"]}
                     >
                         {t("recipeForm.cancel")}

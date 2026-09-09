@@ -1,5 +1,7 @@
 import express, { type Router } from "express";
 
+import { ROUTES } from "constants/routes";
+
 import type UserController from "controller/user.controller";
 import authenticateToken from "middleware/jwtMiddleware";
 import optionalAuth from "middleware/optionalAuth";
@@ -22,50 +24,54 @@ export default function createUserRouter(
     const router = express.Router();
 
     router.post(
-        "/register",
+        ROUTES.auth.register,
         registerIpLimiter,
         registerLimiter,
         userController.registerUser,
     );
     router.post(
-        "/login",
+        ROUTES.auth.login,
         loginIpLimiter,
         loginLimiter,
         userController.loginUser,
     );
-    router.post("/logout", userController.logout);
-    router.get("/me", optionalAuth, userController.me);
+    router.post(ROUTES.auth.logout, userController.logout);
+    router.get(ROUTES.auth.me, optionalAuth, userController.me);
     router.post(
-        "/forgot-password",
+        ROUTES.auth.forgotPassword,
         forgotPasswordLimiter,
         userController.requestPasswordReset,
     );
     router.post(
-        "/reset-password",
+        ROUTES.auth.resetPassword,
         resetPasswordLimiter,
         userController.confirmPasswordReset,
     );
     router.post(
-        "/change-password",
+        ROUTES.auth.changePassword,
         authenticateToken,
         changePasswordLimiter,
         userController.changePassword,
     );
-    router.patch("/me", authenticateToken, userController.updateProfile);
+    router.patch(
+        ROUTES.auth.me,
+        authenticateToken,
+        userController.updateProfile,
+    );
     router.delete(
-        "/me",
+        ROUTES.auth.me,
         authenticateToken,
         deleteAccountLimiter,
         userController.deleteAccount,
     );
     router.post(
-        "/resend-verification-email",
+        ROUTES.auth.resendVerificationEmail,
         authenticateToken,
         resendVerificationLimiter,
         userController.requestEmailVerification,
     );
     router.post(
-        "/confirm-email",
+        ROUTES.auth.confirmEmail,
         confirmEmailLimiter,
         userController.confirmEmailVerification,
     );

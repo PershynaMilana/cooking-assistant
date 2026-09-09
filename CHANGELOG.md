@@ -20,6 +20,21 @@ changelogs and the tags and now track everything here against one shared version
 
 ## Unreleased
 
+## 4.4 - 2026-09-09
+
+### Project
+
+- Changed: Routine dependency maintenance across the whole project - refreshed build, test and lint tooling plus a few runtime libraries to their latest compatible releases.
+
+### Frontend
+
+- Added: Recipe and menu pages are now built on the server, so a shared link shows that recipe's own title, description and preview in chats and search results instead of the same generic text for every page.
+- Added: The site now publishes a map of its public recipes and menus for search engines, and asks them to leave the signed-in pages alone.
+- Changed: Pages arrive with their content already on them instead of appearing blank first, and the home page no longer flickers between the guest and signed-in versions.
+- Fixed: A button pressed in the first instant a page appears no longer does nothing - it stays visibly unavailable until it can actually be used.
+- Fixed: The light and dark theme now settle before the page is first painted, so switching themes or reloading no longer flashes the wrong colours.
+- Fixed: A link to a page, recipe or menu that does not exist now properly reports itself as missing, instead of answering as though it had loaded.
+
 ## 4.3 - 2026-08-20
 
 ### Project

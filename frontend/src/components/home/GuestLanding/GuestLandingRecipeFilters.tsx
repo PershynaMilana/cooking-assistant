@@ -1,12 +1,12 @@
 import { Clock, Flame, Search } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 
 import { useGetRecipeTypesQuery } from "redux/services/recipeTypesApi";
 
+import { Link } from "components/ui/Link";
 import { LinkButton } from "components/ui/LinkButton";
 
 import { RECIPE_TYPE_URL_PARAM } from "utils/filters/recipeFilterDefs";
@@ -25,7 +25,7 @@ export const GuestLandingRecipeFilters: React.FC = () => {
     return (
         <div className={styles["guest-landing-filters"]}>
             <LinkButton
-                to={ROUTES.allRecipes}
+                href={ROUTES.allRecipes}
                 variant="secondary"
                 className={styles["guest-landing-filters__search-button"]}
             >
@@ -34,7 +34,7 @@ export const GuestLandingRecipeFilters: React.FC = () => {
             </LinkButton>
             <div className={styles["guest-landing-filters__chips"]}>
                 <Link
-                    to={ROUTES.allRecipes}
+                    href={ROUTES.allRecipes}
                     className={[
                         styles["guest-landing-filters__chip"],
                         styles["guest-landing-filters__chip--active"],
@@ -45,21 +45,21 @@ export const GuestLandingRecipeFilters: React.FC = () => {
                 {types.map((type) => (
                     <Link
                         key={type.id}
-                        to={`${ROUTES.allRecipes}?${RECIPE_TYPE_URL_PARAM}=${type.id}`}
+                        href={`${ROUTES.allRecipes}?${RECIPE_TYPE_URL_PARAM}=${type.id}`}
                         className={styles["guest-landing-filters__chip"]}
                     >
                         {type.type_name}
                     </Link>
                 ))}
                 <Link
-                    to={ROUTES.allRecipes}
+                    href={ROUTES.allRecipes}
                     className={styles["guest-landing-filters__chip"]}
                 >
                     <Clock size={CHIP_ICON_SIZE} aria-hidden="true" />
                     {t("cookingTimeChip")}
                 </Link>
                 <Link
-                    to={ROUTES.allRecipes}
+                    href={ROUTES.allRecipes}
                     className={styles["guest-landing-filters__chip"]}
                 >
                     <Flame size={CHIP_ICON_SIZE} aria-hidden="true" />

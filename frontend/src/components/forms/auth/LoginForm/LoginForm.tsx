@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 import { ROUTES } from "constants/routes";
 import type { LoginRequest } from "types/auth";
@@ -10,6 +9,7 @@ import type { LoginMode } from "hooks/useLoginForm";
 import { Button } from "components/ui/Button";
 import { FormErrorBanner } from "components/ui/FormErrorBanner";
 import { FormField } from "components/ui/FormField";
+import { Link } from "components/ui/Link";
 import { PasswordInput } from "components/ui/PasswordInput";
 import { SegmentedControl } from "components/ui/SegmentedControl";
 import { TextInput } from "components/ui/TextInput";
@@ -94,7 +94,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 label={t("fields.passwordLabel")}
                 labelRight={
                     <Link
-                        to={ROUTES.forgotPassword}
+                        href={ROUTES.forgotPassword}
                         className={styles["login-form__forgot-password"]}
                     >
                         {t("fields.forgotPasswordLink")}
