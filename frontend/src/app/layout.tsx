@@ -3,33 +3,15 @@ import "styles/global.scss";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import { resolveSiteUrl } from "config/site";
+
 import { DEFAULT_LANGUAGE } from "i18n/resources";
 import { getServerTranslation } from "i18n/server";
 
 import { Providers } from "./providers";
 import { themeInitScript } from "./themeInit";
 
-const DEV_SITE_URL = "http://localhost:8080";
 const ICON_PATH = "/favicon.svg";
-
-// absolute URLs in metadata are resolved against this, so canonical and social tags
-// follow the deployment. A production build without it would ship localhost URLs that
-// nothing downstream would flag, so it fails the build instead.
-const resolveSiteUrl = () => {
-    const configured = process.env.NEXT_PUBLIC_SITE_URL;
-
-    if (configured) {
-        return configured;
-    }
-
-    if (process.env.NODE_ENV === "production") {
-        throw new Error(
-            "NEXT_PUBLIC_SITE_URL must be set for a production build: canonical and social URLs resolve against it.",
-        );
-    }
-
-    return DEV_SITE_URL;
-};
 
 // canonical and og:url are per-route facts and are set by each route: inherited here they
 // would tell search engines every page is the same one

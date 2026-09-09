@@ -76,9 +76,10 @@ services:
             timeout: 5s
             retries: 5
             start_period: 20s
-        # deliberately not waiting for the backend to be healthy: pages render without it, and
-        # compose refuses to start a dependent whose dependency misses its own health budget -
-        # which is shorter than the one deploy.sh allows
+        # deliberately not waiting for the backend to be healthy: compose refuses to start a
+        # dependent whose dependency misses its own health budget - which is shorter than the one
+        # deploy.sh allows - and the site still comes up, degrading to the guest landing until
+        # the API answers
         depends_on:
             backend:
                 condition: service_started

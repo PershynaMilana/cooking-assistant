@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { ROUTES } from "constants/routes";
 
+import { useIsHydrated } from "hooks/useIsHydrated";
 import { usePopoverDismiss } from "hooks/usePopoverDismiss";
 
 import { Avatar } from "components/ui/Avatar";
@@ -43,6 +44,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         setIsOpen(false);
     };
 
+    const isHydrated = useIsHydrated();
+
     usePopoverDismiss(containerRef, isOpen, closeMenu);
 
     return (
@@ -55,6 +58,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                 aria-haspopup="menu"
                 aria-expanded={isOpen}
                 aria-label={t("accountMenu.trigger")}
+                // the header is on screen before React hydrates, and until then this opens nothing
+                disabled={!isHydrated}
                 className={styles["account-menu__trigger"]}
             >
                 <Avatar

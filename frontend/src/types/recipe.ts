@@ -44,9 +44,10 @@ export interface RecipeDetails {
     title: string;
     content: string;
     ingredients: RecipeDetailIngredient[];
-    type_id: number;
-    type_name: string;
-    cooking_time: number;
+    type_id: number | null;
+    // the FK is ON DELETE SET NULL, so deleting a recipe type empties it on every recipe
+    type_name: string | null;
+    cooking_time: number | null;
     creation_date: string;
     // computed by the backend (r.person_id = current user) so the client can gate Edit/Delete without decoding the session
     isOwner: boolean;

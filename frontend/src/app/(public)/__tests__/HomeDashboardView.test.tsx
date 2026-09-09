@@ -2,13 +2,13 @@ import { screen } from "@testing-library/react";
 
 import { API_ROUTES } from "api/endpoints";
 
+import { HomeDashboardView } from "app/(public)/HomeDashboardView";
 import { mockGetByUrl } from "test/apiClientMock";
 import { renderWithProviders } from "test/router";
-import HomePage from "views/home/HomePage";
 
 jest.mock("api/client");
 
-describe("HomePage", () => {
+describe("HomeDashboardView", () => {
     it("should render the dashboard inside the app shell", async () => {
         mockGetByUrl({
             [API_ROUTES.recipes.list]: [],
@@ -18,7 +18,7 @@ describe("HomePage", () => {
             [API_ROUTES.auth.me]: null,
         });
 
-        renderWithProviders(<HomePage />);
+        renderWithProviders(<HomeDashboardView />);
 
         expect(await screen.findByText("Welcome back 👋")).toBeInTheDocument();
     });

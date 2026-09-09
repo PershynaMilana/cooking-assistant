@@ -31,6 +31,11 @@ const apiProxyTarget = process.env.API_INTERNAL_URL ?? "http://localhost:3000";
 
 const nextConfig: NextConfig = {
     output: "standalone",
+    // wait for generateMetadata before answering instead of streaming it in later. The page
+    // needs that same request anyway (React cache() shares it), so it costs nothing - and it is
+    // half of what makes a missing recipe answer with a real 404. The other half is that no
+    // loading.tsx sits above those routes: either one alone still yields a 200 with a 404 body
+    htmlLimitedBots: /.*/,
     // the repository documents its own conventions; a generated per-package copy would
     // compete with them and be rewritten on every dev run
     agentRules: false,

@@ -137,7 +137,7 @@ export default tseslint.config(
                         ["^\\u0000"],
                         // external packages - starts with letter/@, but not our bare aliases
                         [
-                            "^(?!(?:api|app|assets|components|config|constants|hooks|i18n|redux|test|types|utils|views)/)@?\\w",
+                            "^(?!(?:api|app|assets|components|config|constants|hooks|i18n|redux|test|types|utils)/)@?\\w",
                         ],
                         // config / constants / types layers
                         ["^(?:config|constants|types)/"],
@@ -151,8 +151,8 @@ export default tseslint.config(
                         ["^(?:components|assets|i18n)/"],
                         // utils layer
                         ["^utils/"],
-                        // route tree / views / test (infra) layers
-                        ["^(?:app|test|views)/"],
+                        // route tree / test (infra) layers
+                        ["^(?:app|test)/"],
                         // relative same-folder (./)
                         ["^\\."],
                     ],
@@ -310,11 +310,8 @@ export default tseslint.config(
     },
     {
         // a page stays thin: it composes, it does not hold logic
-        files: ["src/app/**/page.tsx", "src/app/not-found.tsx", "src/views/**/*.{ts,tsx}"],
-        ignores: [
-            "src/app/**/__tests__/**/*.{ts,tsx}",
-            "src/views/**/__tests__/**/*.{ts,tsx}",
-        ],
+        files: ["src/app/**/page.tsx", "src/app/not-found.tsx"],
+        ignores: ["src/app/**/__tests__/**/*.{ts,tsx}"],
         rules: {
             "max-lines": [
                 "error",
@@ -381,7 +378,6 @@ export default tseslint.config(
                 { type: "redux", pattern: "src/redux/**" },
                 { type: "hooks", pattern: "src/hooks/*" },
                 { type: "components", pattern: "src/components/**" },
-                { type: "views", pattern: "src/views/**" },
                 { type: "app", pattern: "src/app/**" },
             ],
         },
@@ -396,7 +392,7 @@ export default tseslint.config(
                             from: { element: { type: "components" } },
                             disallow: {
                                 to: {
-                                    element: { types: ["app", "views"] },
+                                    element: { types: ["app"] },
                                 },
                             },
                             message: "Components must not import pages.",
@@ -408,7 +404,6 @@ export default tseslint.config(
                                         anyOf: [
                                             "app",
                                             "components",
-                                            "views",
                                             "hooks",
                                             "utils",
                                             "redux",
@@ -439,7 +434,6 @@ export default tseslint.config(
         files: [
             "src/app/**/*.{ts,tsx}",
             "src/components/**/*.{ts,tsx}",
-            "src/views/**/*.{ts,tsx}",
             "src/hooks/**/*.{ts,tsx}",
             "src/i18n/**/*.{ts,tsx}",
         ],

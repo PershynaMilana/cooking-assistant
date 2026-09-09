@@ -4,11 +4,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { MENU_SOURCE, useMenuListView } from "hooks/useMenuListView";
-import { usePageTitle } from "hooks/usePageTitle";
 
 import { MenuListView } from "components/menu/MenuListView";
 
-const MenuPage: React.FC = () => {
+export const AllMenusView: React.FC = () => {
     const { t } = useTranslation("menu");
     const list = useMenuListView(MENU_SOURCE.all);
 
@@ -18,8 +17,6 @@ const MenuPage: React.FC = () => {
                   names: list.selectedCategoryNames,
               })
             : t("menuPage.allMenus");
-
-    usePageTitle(heading);
 
     return (
         <MenuListView
@@ -35,5 +32,3 @@ const MenuPage: React.FC = () => {
         />
     );
 };
-
-export default MenuPage;

@@ -10,16 +10,15 @@ import { MODAL_TYPE } from "redux/slices/uiSlice";
 
 import { ModalRoot } from "components/modals";
 
-import { mockedDelete, mockedGet, mockGetByUrl } from "test/apiClientMock";
+import { MenuDetailsView } from "app/(public)/menu/[id]/MenuDetailsView";
+import { mockedDelete, mockGetByUrl } from "test/apiClientMock";
 import {
     BTN_DELETE_MENU,
     BTN_EDIT_MENU,
     ROUTE_ALL_MENUS,
 } from "test/constants";
-import { setTestParams } from "test/nextNavigationMock";
 import { mockNavigate, renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
-import MenuDetailsPage from "views/menu/MenuDetailsPage";
 
 jest.mock("api/client");
 
@@ -71,10 +70,13 @@ const SAMPLE_WITH_CALORIES: MenuDetails = {
     ],
 };
 
-// AppShell (via AppHeader/useExpiredIngredientsNotice) also hits getMe and the pantry list - scope every GET by url instead of blanket-resolving to the menu payload
-const mockMenuDetails = () => {
+// the menu itself comes from the server render now, as a prop; AppShell (via
+// AppHeader/useExpiredIngredientsNotice) still hits getMe and the pantry list from the browser
+const renderPage = (
+    menu: MenuDetails = SAMPLE,
+    store = makeTestStore({ session: { status: "authed" } }),
+) => {
     mockGetByUrl({
-        [API_ROUTES.menu.byId(1)]: SAMPLE,
         [API_ROUTES.userIngredients.list]: [],
         [API_ROUTES.auth.me]: {
             id: 1,
@@ -83,49 +85,35 @@ const mockMenuDetails = () => {
             login: "claude",
         },
     });
-};
-
-const renderPage = (
-    store = makeTestStore({ session: { status: "authed" } }),
-) => {
-    setTestParams({ id: "1" });
 
     return renderWithProviders(
         <>
-            <MenuDetailsPage />
+            <MenuDetailsView menu={menu} />
             <ModalRoot />
         </>,
         { store, initialEntries: ["/menu/1"] },
     );
 };
 
-describe("MenuDetailsPage", () => {
-    it("should render the menu title loaded from the api", async () => {
-        mockMenuDetails();
-
+describe("MenuDetailsView", () => {
+    it("should render the menu title it is given", () => {
         renderPage();
 
         expect(
-            await screen.findByRole("heading", { name: TITLE }),
+            screen.getByRole("heading", { name: TITLE }),
         ).toBeInTheDocument();
     });
 
-    it("should render the menu's recipes and its missing ingredients", async () => {
-        mockMenuDetails();
-
+    it("should render the menu's recipes and its missing ingredients", () => {
         renderPage();
-        await screen.findByRole("heading", { name: TITLE });
 
         expect(screen.getByText("Soup")).toBeInTheDocument();
         expect(screen.getByText("Carrot")).toBeInTheDocument();
         expect(screen.getByText("2 piece")).toBeInTheDocument();
     });
 
-    it("should show Edit and Delete buttons when current user is the menu owner", async () => {
-        mockMenuDetails();
-
+    it("should show Edit and Delete buttons when current user is the menu owner", () => {
         renderPage();
-        await screen.findByRole("heading", { name: TITLE });
 
         expect(
             screen.getByRole("link", { name: BTN_EDIT_MENU }),
@@ -136,12 +124,9 @@ describe("MenuDetailsPage", () => {
     });
 
     it("should open the global delete modal and navigate to /menu after delete", async () => {
-        mockMenuDetails();
         mockedDelete.mockResolvedValue({ data: null });
 
         const { store } = renderPage();
-
-        await screen.findByRole("heading", { name: TITLE });
 
         await userEvent.click(
             screen.getByRole("button", { name: BTN_DELETE_MENU }),
@@ -163,32 +148,8 @@ describe("MenuDetailsPage", () => {
         expect(mockNavigate).toHaveBeenCalledWith(ROUTE_ALL_MENUS);
     });
 
-    it("should render the error state when loading the menu fails", async () => {
-        mockedGet.mockRejectedValue(new Error("boom"));
-
-        renderPage();
-
-        expect(
-            await screen.findByText("Error: Error fetching menu details"),
-        ).toBeInTheDocument();
-    });
-
-    it("should render a translated Try again button, not a raw i18n key", async () => {
-        mockedGet.mockRejectedValue(new Error("boom"));
-
-        renderPage();
-
-        expect(
-            await screen.findByRole("button", { name: "Try again" }),
-        ).toBeInTheDocument();
-    });
-
     it("should close the modal when Cancel is clicked", async () => {
-        mockMenuDetails();
-
         const { store } = renderPage();
-
-        await screen.findByRole("heading", { name: TITLE });
 
         await userEvent.click(
             screen.getByRole("button", { name: BTN_DELETE_MENU }),
@@ -198,11 +159,8 @@ describe("MenuDetailsPage", () => {
         expect(selectActiveModal(store.getState())).toBeNull();
     });
 
-    it("should not show the log-intake button when no recipe has calorie data", async () => {
-        mockMenuDetails();
-
+    it("should not show the log-intake button when no recipe has calorie data", () => {
         renderPage();
-        await screen.findByRole("heading", { name: TITLE });
 
         expect(
             screen.queryByRole("button", { name: "Log intake" }),
@@ -210,20 +168,7 @@ describe("MenuDetailsPage", () => {
     });
 
     it("should open the log-intake modal with the summed calories across recipes", async () => {
-        mockGetByUrl({
-            [API_ROUTES.menu.byId(1)]: SAMPLE_WITH_CALORIES,
-            [API_ROUTES.userIngredients.list]: [],
-            [API_ROUTES.auth.me]: {
-                id: 1,
-                name: "Claude",
-                surname: "Cook",
-                login: "claude",
-            },
-        });
-
-        const { store } = renderPage();
-
-        await screen.findByRole("heading", { name: TITLE });
+        const { store } = renderPage(SAMPLE_WITH_CALORIES);
 
         const triggers = screen.getAllByRole("button", {
             name: "Log intake",
@@ -239,15 +184,8 @@ describe("MenuDetailsPage", () => {
         });
     });
 
-    it("should not render the missing-ingredients aside for a guest when the menu has no allergens", async () => {
-        mockGetByUrl({
-            [API_ROUTES.menu.byId(1)]: SAMPLE,
-            [API_ROUTES.userIngredients.list]: [],
-            [API_ROUTES.auth.me]: null,
-        });
-
-        renderPage(makeTestStore({ session: { status: "guest" } }));
-        await screen.findByRole("heading", { name: TITLE });
+    it("should not render the missing-ingredients aside for a guest when the menu has no allergens", () => {
+        renderPage(SAMPLE, makeTestStore({ session: { status: "guest" } }));
 
         expect(screen.queryByText("Carrot")).not.toBeInTheDocument();
         expect(screen.queryByRole("complementary")).not.toBeInTheDocument();

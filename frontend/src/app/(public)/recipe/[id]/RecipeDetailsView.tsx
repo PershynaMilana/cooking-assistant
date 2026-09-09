@@ -1,78 +1,53 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { useParams } from "next/navigation";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { changeRecipePath, ROUTES } from "constants/routes";
-
-import { useGetRecipeByIdQuery } from "redux/services/recipesApi";
+import type { RecipeDetails } from "types/recipe";
 
 import { useDeleteRecipeHandler } from "hooks/useDeleteRecipeHandler";
 import { useExceedsCalorieBudget } from "hooks/useExceedsCalorieBudget";
 import { useIngredientAvailability } from "hooks/useIngredientAvailability";
 import { useLogIntakeHandler } from "hooks/useLogIntakeHandler";
-import { usePageTitle } from "hooks/usePageTitle";
 import { usePortionScaling } from "hooks/usePortionScaling";
 
 import { AppShell } from "components/layout/AppShell";
 import { RecipeDetailsSecondary } from "components/recipes/RecipeDetailsSecondary";
 import { RecipeHero } from "components/recipes/RecipeHero";
-import { ErrorState } from "components/ui/ErrorState";
 import { Link } from "components/ui/Link";
 
 import { getRecipeAllergens } from "utils/recipeAllergens";
 
-import styles from "./RecipeDetailsPage.module.scss";
+import styles from "./RecipeDetailsView.module.scss";
 
-const RecipeDetailsPage: React.FC = () => {
+interface RecipeDetailsViewProps {
+    recipe: RecipeDetails;
+}
+
+// the recipe itself arrives from the server render; only what depends on the viewer's own
+// browser - their pantry, their calorie budget, the portion stepper - is fetched here
+export const RecipeDetailsView: React.FC<RecipeDetailsViewProps> = ({
+    recipe,
+}) => {
     const { t } = useTranslation("recipes");
-    const { id } = useParams<{ id: string }>();
-    const { data: recipe, isError, refetch } = useGetRecipeByIdQuery(id);
-
     const portions = usePortionScaling();
-    const ingredients = recipe?.ingredients ?? [];
-    const { availability, haveCount, missingCount } =
-        useIngredientAvailability(ingredients);
-    const allergens = getRecipeAllergens(ingredients);
+    const { availability, haveCount, missingCount } = useIngredientAvailability(
+        recipe.ingredients,
+    );
+    const allergens = getRecipeAllergens(recipe.ingredients);
     const handleDeleteRecipe = useDeleteRecipeHandler(recipe);
     const handleLogIntake = useLogIntakeHandler({
-        recipeId: recipe?.id,
-        title: recipe?.title ?? "",
-        caloriesPerPortion: recipe?.calories_per_portion ?? null,
+        recipeId: recipe.id,
+        title: recipe.title,
+        caloriesPerPortion: recipe.calories_per_portion,
         initialPortions: portions.count,
     });
     const exceedsBudget = useExceedsCalorieBudget(
-        recipe?.calories_per_portion ?? null,
+        recipe.calories_per_portion,
         portions.count,
     );
-
-    usePageTitle(recipe?.title);
-
-    if (isError) {
-        return (
-            <AppShell mobileBackTo={ROUTES.allRecipes}>
-                <ErrorState
-                    title={t("recipeDetailsPage.error", {
-                        message: t("recipeDetailsPage.errorFetch"),
-                    })}
-                    onRetry={() => {
-                        refetch().catch(() => undefined);
-                    }}
-                    retryLabel={t("common:errorState.retry")}
-                />
-            </AppShell>
-        );
-    }
-
-    if (!recipe) {
-        return (
-            <AppShell mobileBackTo={ROUTES.allRecipes}>
-                <p>{t("recipeDetailsPage.loading")}</p>
-            </AppShell>
-        );
-    }
 
     return (
         <AppShell mobileBackTo={ROUTES.allRecipes}>
@@ -121,5 +96,3 @@ const RecipeDetailsPage: React.FC = () => {
         </AppShell>
     );
 };
-
-export default RecipeDetailsPage;

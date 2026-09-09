@@ -66,3 +66,9 @@ export const PUBLIC_PATHS: string[] = [
     ROUTES.allMenus,
     ROUTES.menuDetails,
 ];
+
+// crawler-facing form of the private area: a robots rule matches a path prefix, not a route
+// pattern, so ":id" is dropped rather than matched literally
+export const PRIVATE_PATH_PREFIXES: string[] = Object.values(ROUTES)
+    .filter((path) => !PUBLIC_PATHS.includes(path))
+    .map((path) => path.replace(":id", ""));

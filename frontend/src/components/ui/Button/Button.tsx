@@ -24,31 +24,30 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
     link: styles["button--link"],
 };
 
+interface ButtonClassNameInput {
+    variant: ButtonVariant;
+    size: ButtonSize;
+    iconOnly: boolean;
+    loading: boolean;
+    isAwaitingHydration: boolean;
+    className?: string;
+}
+
 const SIZE_CLASS: Record<ButtonSize, string> = {
     sm: styles["button--sm"],
     md: styles["button--md"],
     lg: styles["button--lg"],
 };
 
-export const Button: React.FC<ButtonProps> = ({
-    variant = "primary",
-    size = "md",
-    iconOnly = false,
-    loading = false,
-    disabled = false,
+const buildClassName = ({
+    variant,
+    size,
+    iconOnly,
+    loading,
+    isAwaitingHydration,
     className,
-    children,
-    type = "button",
-    ...rest
-}) => {
-    const { t } = useTranslation();
-    // the server sends a fully clickable form before React hydrates; a submit landing then is a
-    // native browser submit, which puts every field - passwords included - into the URL
-    const isHydrated = useIsHydrated();
-    const isAwaitingHydration = type === "submit" && !isHydrated;
-    const isDisabled = disabled || loading || isAwaitingHydration;
-
-    const classNames = [
+}: ButtonClassNameInput): string =>
+    [
         styles.button,
         VARIANT_CLASS[variant],
         SIZE_CLASS[size],
@@ -60,11 +59,41 @@ export const Button: React.FC<ButtonProps> = ({
         .filter(Boolean)
         .join(" ");
 
+export const Button: React.FC<ButtonProps> = ({
+    variant = "primary",
+    size = "md",
+    iconOnly = false,
+    loading = false,
+    disabled = false,
+    className,
+    children,
+    type = "button",
+    onClick,
+    ...rest
+}) => {
+    const { t } = useTranslation();
+    // the server sends fully clickable markup before React hydrates. A submit landing then is a
+    // native browser submit, which puts every field - passwords included - into the URL; a click
+    // handler does not exist yet at all, so the press is swallowed and the button lies about being
+    // ready. Either way the control is not usable until hydration, so it says so
+    const isHydrated = useIsHydrated();
+    const needsHydration = type === "submit" || Boolean(onClick);
+    const isAwaitingHydration = !isHydrated && needsHydration;
+    const isDisabled = disabled || loading || isAwaitingHydration;
+
     return (
         <button
             type={type}
-            className={classNames}
+            className={buildClassName({
+                variant,
+                size,
+                iconOnly,
+                loading,
+                isAwaitingHydration,
+                className,
+            })}
             disabled={isDisabled}
+            onClick={onClick}
             aria-busy={loading || undefined}
             {...rest}
         >

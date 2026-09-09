@@ -2,6 +2,11 @@
     "title": "What's new",
     "newCount": "{{total}} new",
     "items": {
+        "fasterPagesAndLinks": {
+            "date": "2026-09-09",
+            "title": "Pages open faster, links look right",
+            "description": "Recipes and menus are now put together on the server, so a page shows up with its content already on it instead of loading into an empty screen. Share a recipe in a chat and the preview finally shows that recipe's own name and description - and search engines can read the site properly too."
+        },
         "instantWakeUp": {
             "date": "2026-08-20",
             "title": "The app wakes up instantly",

@@ -14,7 +14,7 @@ import { HeroVisitorActions } from "components/ui/HeroVisitorActions";
 import { aggregateMenuIngredients } from "utils/menuUtils";
 import { filterAllergens } from "utils/recipeAllergens";
 
-import styles from "./MenuDetailsPage.module.scss";
+import styles from "./MenuDetailsView.module.scss";
 
 interface MenuDetailsSecondaryProps {
     recipes: MenuDetailRecipe[];
@@ -28,7 +28,7 @@ interface MenuDetailsSecondaryProps {
 
 // ingredients -> actions -> recipes, in that DOM order everywhere - the reading order the page
 // commits to. Desktop keeps ingredients as a right-side aside via grid-template-areas, which
-// repositions items visually without changing this source order (see MenuDetailsPage.module.scss)
+// repositions items visually without changing this source order (see MenuDetailsView.module.scss)
 export const MenuDetailsSecondary: React.FC<MenuDetailsSecondaryProps> = ({
     recipes,
     allergens,

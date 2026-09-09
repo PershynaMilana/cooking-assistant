@@ -37,7 +37,8 @@
         "subtitle_other": "{{count}} menus published",
         "emptyTitle": "No menus yet",
         "emptyDescription": "Your menu collection is empty. Add your first menu and it'll show up here.",
-        "searchPlaceholder": "menu title"
+        "searchPlaceholder": "menu title",
+        "metaDescription": "Browse every published menu - see what each one cooks, how long it takes and which ingredients it needs."
     },
     "userMenuPage": {
         "myMenus": "My menus",
@@ -127,6 +128,10 @@
         "error": "Error: {{message}}",
         "errorFetch": "Error fetching menu details",
         "logIntake": "Log intake",
-        "guestCta": "Log in for the full experience"
+        "guestCta": "Log in for the full experience",
+        "metaFallbackDescription_one": "A {{category}} menu built from {{count}} recipe.",
+        "metaFallbackDescription_other": "A {{category}} menu built from {{count}} recipes.",
+        "metaFallbackDescriptionUncategorised_one": "A menu built from {{count}} recipe.",
+        "metaFallbackDescriptionUncategorised_other": "A menu built from {{count}} recipes."
     }
 }

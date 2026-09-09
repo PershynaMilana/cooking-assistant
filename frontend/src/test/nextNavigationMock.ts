@@ -74,3 +74,7 @@ export const useRouter = () => router;
 
 export const notFound = jest.fn();
 export const redirect = jest.fn();
+
+// the real one re-throws Next's own control-flow errors and ignores everything else; nothing
+// in a test throws one of those, so ignoring is the faithful behaviour here
+export const unstable_rethrow = (): void => undefined;

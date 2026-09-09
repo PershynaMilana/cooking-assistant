@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch } from "redux/hooks";
 import { MODAL_TYPE, openModal } from "redux/slices/uiSlice";
 
+import { useIsHydrated } from "hooks/useIsHydrated";
 import { useTheme } from "hooks/useTheme";
 
 import styles from "./ThemeToggle.module.scss";
@@ -15,6 +16,8 @@ export const ThemeToggle: React.FC = () => {
     const { t } = useTranslation();
     const { isDark } = useTheme();
     const dispatch = useAppDispatch();
+    // on screen from the server render; until React hydrates this opens nothing
+    const isHydrated = useIsHydrated();
 
     const handleClick = () => {
         dispatch(
@@ -29,6 +32,7 @@ export const ThemeToggle: React.FC = () => {
         <button
             type="button"
             onClick={handleClick}
+            disabled={!isHydrated}
             aria-label={t("theme.toggleLabel")}
             className={styles["theme-toggle"]}
         >

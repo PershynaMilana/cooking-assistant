@@ -131,8 +131,10 @@ src/
 │   ├── error.tsx            render error; not-found.tsx  unknown URL (real HTTP 404)
 │   ├── (auth)/              login, registration, forgot-password, reset-password, verify-email
 │   │                        AuthPage.module.scss is shared by the group
-│   ├── (public)/            "/", all-recipes, all-menus, recipe/[id], menu/[id]
-│   │                        these five still re-export from views/ - see below
+│   ├── (public)/            "/", all-recipes, all-menus, recipe/[id], menu/[id] - server
+│   │                        components; each renders a client island beside it (*View.tsx)
+│   ├── sitemap.ts           public URLs only, walked from the paginated API per request
+│   ├── robots.ts            allow public, disallow the private prefixes, point at the sitemap
 │   └── (private)/           layout.tsx = PrivateRoute; my-recipes, my-menus, add-recipe,
 │                            change-recipe/[id], add-menu, change-menu/[id], ingredients,
 │                            stats, profile, settings. The two form stylesheets are shared
@@ -142,6 +144,8 @@ src/
 │   ├── client.ts      shared axios instance (withCredentials) + 401/403 interceptor
 │   ├── endpoints.ts   API_ROUTES - typed map of every backend path (param routes are builders)
 │   ├── httpError.ts   getApiErrorMessage/Code/Status/RetryAfter(err) - normalize any error
+│   ├── server.ts      the server render's own requests: fetchAsVisitor (forwards the cookie
+│   │                  and x-forwarded-for, never cached) and fetchPublic (no session, cacheable)
 │   └── redirect.ts    redirectToLogin() - hard navigation used by the interceptor
 │
 ├── redux/          Redux Toolkit store
@@ -163,12 +167,6 @@ src/
 │       theme/, avatars/, connectivity/, auth/   domain-specific components
 │
 ├── hooks/          all data fetching + stateful logic (50+ hooks, composed)
-│
-├── views/          TEMPORARY - only the five public pages awaiting their server-component
-│   │                rewrite; each is still re-exported by its page.tsx. Goes away with them
-│   ├── home/                HomePage (dashboard), GuestLandingPage
-│   ├── recipes/             MainPage (all recipes), RecipeDetailsPage
-│   └── menu/                MenuPage (all menus), MenuDetailsPage, MenuDetailsSecondary
 │
 ├── constants/      routes.ts (ROUTES + path builders + PUBLIC_PATHS), pagination, theme, ...
 ├── config/         env.ts (API_BASE_URL), logger.ts (dev-only console wrapper)
@@ -204,13 +202,32 @@ Data flow: page/hook -> RTK Query hook (`redux/services/*`) -> `axiosBaseQuery` 
   whose `layout.tsx` is a single `PrivateRoute` wrapper - **a page is private because of where it
   lives**, so it cannot forget its own guard. **`page.tsx` is the page**: the component, its
   stylesheet and its co-located `__tests__/` all live in the route folder, so a route is one place
-  and nothing mirrors it. [src/views/](src/views/) still holds the five public pages (`/`, both
-  listings, both detail pages) because they are about to be rewritten as server components - the
-  folder goes away with them.
-- `layout.tsx` owns `<html>`/`<body>`, the metadata and the client providers; `loading.tsx` is the one
-  Suspense boundary every route gets (and what lets a page read search params); `error.tsx` and
+  and nothing mirrors it.
+- **The five public read pages render on the server.** `/`, both listings and both detail pages are
+  server components: `page.tsx` fetches the data and renders it, and the interactive half sits beside
+  it as a client island (`RecipeDetailsView`, `AllRecipesView`, ...) that receives what it needs as
+  props instead of fetching it a second time. A shared recipe link therefore arrives with the recipe
+  already in the HTML, and with metadata describing that recipe rather than the app.
+- **The server's own requests go through [src/api/server.ts](src/api/server.ts)**, never a bare
+  `fetch`. `fetchAsVisitor` forwards the visitor's session cookie - that one, not everything else the
+  browser holds for this origin - plus `x-forwarded-for`, and is always
+  `no-store`, so a page built for one session can never be handed to another; `fetchPublic` carries no
+  session and may be reused, which is what the sitemap uses. The cookie is forwarded, never parsed -
+  the API stays the only place a token is verified. Both have a request deadline: a hung API would
+  otherwise pile up renders until this container failed its own health check. Importing the module
+  from a client component is a build error (`server-only`).
+- **Metadata is a per-route fact.** Each public page has its own `generateMetadata`, and the two list
+  pages point every filtered permutation back at one canonical URL. A record that does not exist
+  answers a real HTTP 404. Two things make that work and neither is optional: `htmlLimitedBots: /.*/`
+  in `next.config.ts`, so Next waits for `generateMetadata` rather than streaming it in afterwards,
+  and the absence of a `loading.tsx` above the route. `sitemap.ts` lists public URLs only; `robots.ts` derives its
+  disallow list from `constants/routes.ts`; the `(private)` layout carries one `noindex` for the group.
+- `layout.tsx` owns `<html>`/`<body>`, the metadata and the client providers; `error.tsx` and
   `not-found.tsx` cover a thrown render error and an unknown URL - the latter now answers with a real
-  HTTP 404 instead of a 200 and an empty shell.
+  HTTP 404 instead of a 200 and an empty shell. `loading.tsx` lives in the client-rendered groups
+  (`(auth)`, `(private)`, both listings) and deliberately **not** at the root: it is the Suspense
+  boundary those pages need to read search params, but a boundary above a server-rendered page
+  flushes the response before that page has decided anything.
 - All paths still come from [src/constants/routes.ts](src/constants/routes.ts) (`ROUTES`, builders like
   `recipeDetailsPath(id)`, and `PUBLIC_PATHS`, which feeds `matchRoutePattern` in the api layer). It is
   no longer the router's source of truth, but it is still the only place a path may be written.
@@ -316,7 +333,7 @@ Redux middleware.
 
 ## Layering, ESLint boundaries, path aliases
 
-- **Bare path aliases**, never `../` across folders: `api/`, `app/`, `components/`, `hooks/`, `views/`, `utils/`,
+- **Bare path aliases**, never `../` across folders: `api/`, `app/`, `components/`, `hooks/`, `utils/`,
   `types/`, `constants/`, `config/`, `redux/`, `i18n/`, `assets/`, `styles/`, `test/` (defined in
   `tsconfig.app.json`, mirrored in `jest.config.cjs` and the ESLint resolver).
 - **`eslint-plugin-boundaries`** declares the layers and enforces (as errors): components may not import
@@ -328,7 +345,7 @@ Redux middleware.
 ## Testing
 
 Jest 30 + `@swc/jest` + React Testing Library + jsdom. ~224 co-located `__tests__/` files across `api/`,
-`redux/`, `hooks/`, `components/`, `views/`, `utils/`, and `constants/`; `npm run test:coverage` enforces
+`redux/`, `hooks/`, `components/`, `utils/`, and `constants/`; `npm run test:coverage` enforces
 an 80% global threshold (branches/functions/lines/statements).
 
 Read [src/test/jest.setup.ts](src/test/jest.setup.ts) and [jest.config.cjs](jest.config.cjs) before

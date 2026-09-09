@@ -3,12 +3,11 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { usePageTitle } from "hooks/usePageTitle";
 import { RECIPE_SOURCE, useRecipeListView } from "hooks/useRecipeListView";
 
 import { RecipeListView } from "components/recipes/RecipeListView";
 
-const MainPage: React.FC = () => {
+export const AllRecipesView: React.FC = () => {
     const { t } = useTranslation("recipes");
     const list = useRecipeListView(RECIPE_SOURCE.all);
 
@@ -16,8 +15,6 @@ const MainPage: React.FC = () => {
         list.filters.types.length > 0
             ? t("mainPage.recipesBy", { types: list.typesHeader })
             : t("mainPage.allRecipes");
-
-    usePageTitle(heading);
 
     return (
         <RecipeListView
@@ -33,5 +30,3 @@ const MainPage: React.FC = () => {
         />
     );
 };
-
-export default MainPage;

@@ -5,10 +5,10 @@ import type { Menu, MenuCategory } from "types/menu";
 
 import { API_ROUTES } from "api/endpoints";
 
+import { AllMenusView } from "app/(public)/all-menus/AllMenusView";
 import { mockGetByUrl } from "test/apiClientMock";
 import { ROUTE_ALL_MENUS } from "test/constants";
 import { renderWithProviders } from "test/router";
-import MenuPage from "views/menu/MenuPage";
 
 jest.mock("api/client");
 
@@ -28,14 +28,14 @@ const CATEGORIES: MenuCategory[] = [
 ];
 const PAGE = { items: SAMPLE, total: SAMPLE.length };
 
-describe("MenuPage", () => {
+describe("AllMenusView", () => {
     it("should render the menus loaded from the api", async () => {
         mockGetByUrl({
             [API_ROUTES.menu.list]: PAGE,
             [API_ROUTES.menuCategories.list]: [],
         });
 
-        renderWithProviders(<MenuPage />, {
+        renderWithProviders(<AllMenusView />, {
             initialEntries: [ROUTE_ALL_MENUS],
         });
 
@@ -48,7 +48,7 @@ describe("MenuPage", () => {
             [API_ROUTES.menuCategories.list]: CATEGORIES,
         });
 
-        renderWithProviders(<MenuPage />, {
+        renderWithProviders(<AllMenusView />, {
             initialEntries: [ROUTE_ALL_MENUS],
         });
 

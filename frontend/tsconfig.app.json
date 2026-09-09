@@ -1,44 +1,43 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
+    "compilerOptions": {
+        "target": "ES2020",
+        "useDefineForClassFields": true,
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
 
-    /* Bare path aliases (mirrored in jest.config.cjs and the eslint resolver) */
-    "paths": {
-      "api/*": ["./src/api/*"],
-      "app/*": ["./src/app/*"],
-      "components/*": ["./src/components/*"],
-      "hooks/*": ["./src/hooks/*"],
-      "utils/*": ["./src/utils/*"],
-      "types/*": ["./src/types/*"],
-      "constants/*": ["./src/constants/*"],
-      "config/*": ["./src/config/*"],
-      "redux/*": ["./src/redux/*"],
-      "i18n/*": ["./src/i18n/*"],
-      "views/*": ["./src/views/*"],
-      "assets/*": ["./src/assets/*"],
-      "styles/*": ["./src/styles/*"],
-      "test/*": ["./src/test/*"]
+        /* Bare path aliases (mirrored in jest.config.cjs and the eslint resolver) */
+        "paths": {
+            "api/*": ["./src/api/*"],
+            "app/*": ["./src/app/*"],
+            "components/*": ["./src/components/*"],
+            "hooks/*": ["./src/hooks/*"],
+            "utils/*": ["./src/utils/*"],
+            "types/*": ["./src/types/*"],
+            "constants/*": ["./src/constants/*"],
+            "config/*": ["./src/config/*"],
+            "redux/*": ["./src/redux/*"],
+            "i18n/*": ["./src/i18n/*"],
+            "assets/*": ["./src/assets/*"],
+            "styles/*": ["./src/styles/*"],
+            "test/*": ["./src/test/*"]
+        },
+
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+        "jsx": "react-jsx",
+
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true
     },
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"],
-  "exclude": ["src/**/__tests__/**", "src/test/**", "src/**/__mocks__/**"]
+    "include": ["src"],
+    "exclude": ["src/**/__tests__/**", "src/test/**", "src/**/__mocks__/**"]
 }

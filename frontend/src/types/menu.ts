@@ -48,7 +48,8 @@ export interface MenuDetails {
     menu: {
         id: number;
         title: string;
-        categoryname: string;
+        // a menu row may carry no category: the column is nullable
+        categoryname: string | null;
         menucontent: string;
         category_id: number;
         isOwner: boolean;

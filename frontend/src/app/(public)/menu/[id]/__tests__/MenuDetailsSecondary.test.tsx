@@ -3,9 +3,9 @@ import userEvent from "@testing-library/user-event";
 
 import type { MenuDetailRecipe } from "types/menu";
 
+import { MenuDetailsSecondary } from "app/(public)/menu/[id]/MenuDetailsSecondary";
 import { renderWithProviders } from "test/router";
 import { makeTestStore } from "test/store";
-import { MenuDetailsSecondary } from "views/menu/MenuDetailsSecondary";
 
 const LOG_INTAKE_BUTTON = "Log intake";
 const FAVOURITE_BUTTON = "Favourite";

@@ -39,7 +39,7 @@ export const useUpdateRecipePage = () => {
             return;
         }
 
-        const { hours, minutes } = splitCookingTime(recipe.cooking_time);
+        const { hours, minutes } = splitCookingTime(recipe.cooking_time ?? 0);
 
         setInitialValues({
             title: recipe.title,

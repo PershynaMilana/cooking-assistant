@@ -15,6 +15,10 @@ module.exports = {
         // and give tests a URL they can read and write (see src/test/nextNavigationMock.ts)
         "^next/navigation$": "<rootDir>/src/test/nextNavigationMock.ts",
         "^next/link$": "<rootDir>/src/test/nextLinkMock.tsx",
+        // the request-scoped server APIs, likewise stood in for with real state
+        "^next/headers$": "<rootDir>/src/test/nextHeadersMock.ts",
+        // the real module throws on import outside a server render - its whole purpose
+        "^server-only$": "<rootDir>/src/test/serverOnlyMock.ts",
         "\\.(css|less|scss|sass)$": "identity-obj-proxy",
         "\\.(svg|png|jpg|jpeg|gif|webp|avif|ttf|woff|woff2|eot)$":
             "<rootDir>/src/test/fileMock.ts",
@@ -27,7 +31,6 @@ module.exports = {
         "^constants/(.*)$": "<rootDir>/src/constants/$1",
         "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
         "^i18n/(.*)$": "<rootDir>/src/i18n/$1",
-        "^views/(.*)$": "<rootDir>/src/views/$1",
         "^redux/(.*)$": "<rootDir>/src/redux/$1",
         "^styles/(.*)$": "<rootDir>/src/styles/$1",
         "^test/(.*)$": "<rootDir>/src/test/$1",
@@ -49,11 +52,6 @@ module.exports = {
         "!src/app/error.tsx",
         "!src/app/providers.tsx",
         "!src/app/themeInit.ts",
-        // still one-line re-exports of views/ until they become server components
-        "!src/app/(public)/all-menus/page.tsx",
-        "!src/app/(public)/all-recipes/page.tsx",
-        "!src/app/(public)/menu/[id]/page.tsx",
-        "!src/app/(public)/recipe/[id]/page.tsx",
         // redux wiring and typed hook re-exports - composition root, no logic
         "!src/redux/store.ts",
         "!src/redux/hooks.ts",

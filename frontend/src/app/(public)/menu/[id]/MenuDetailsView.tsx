@@ -1,77 +1,50 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { useParams } from "next/navigation";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { changeMenuPath, ROUTES } from "constants/routes";
+import type { MenuDetails } from "types/menu";
 
 import { useAppDispatch } from "redux/hooks";
-import { useGetMenuByIdQuery } from "redux/services/menusApi";
 import { MODAL_TYPE, openModal } from "redux/slices/uiSlice";
 
 import { useExceedsCalorieBudget } from "hooks/useExceedsCalorieBudget";
 import { useLogIntakeHandler } from "hooks/useLogIntakeHandler";
-import { usePageTitle } from "hooks/usePageTitle";
 
 import { AppShell } from "components/layout/AppShell";
 import { MenuHero } from "components/menu/MenuHero";
-import { ErrorState } from "components/ui/ErrorState";
 import { Link } from "components/ui/Link";
 
-import styles from "./MenuDetailsPage.module.scss";
 import { MenuDetailsSecondary } from "./MenuDetailsSecondary";
+import styles from "./MenuDetailsView.module.scss";
 
-const MenuDetailsPage: React.FC = () => {
+interface MenuDetailsViewProps {
+    menu: MenuDetails;
+}
+
+// the menu itself arrives from the server render; only what depends on the viewer's own
+// browser - their pantry, their calorie budget, the delete modal - lives here
+export const MenuDetailsView: React.FC<MenuDetailsViewProps> = ({ menu }) => {
     const { t } = useTranslation("menu");
-    const { id } = useParams<{ id: string }>();
     const dispatch = useAppDispatch();
-    const { data: menu, isError, refetch } = useGetMenuByIdQuery(id);
     // sum of each recipe's own per-portion calories - null recipes contribute nothing, matching the backend's SUM(COALESCE(...)) in findMenuCalories; 0 is falsy, so an empty/zero-calorie menu also reads as "no calorie data" rather than a literal 0
     const menuCalories =
-        (menu?.recipes ?? []).reduce(
+        menu.recipes.reduce(
             (total, recipe) => total + (recipe.calories_per_portion ?? 0),
             0,
         ) || null;
     const handleLogIntake = useLogIntakeHandler({
-        menuId: menu?.menu.id,
-        title: menu?.menu.title ?? "",
+        menuId: menu.menu.id,
+        title: menu.menu.title,
         caloriesPerPortion: menuCalories,
     });
     const exceedsBudget = useExceedsCalorieBudget(menuCalories);
-
-    usePageTitle(menu?.menu.title);
-
-    if (isError) {
-        return (
-            <AppShell mobileBackTo={ROUTES.allMenus}>
-                <ErrorState
-                    title={t("menuDetailsPage.error", {
-                        message: t("menuDetailsPage.errorFetch"),
-                    })}
-                    onRetry={() => {
-                        refetch().catch(() => undefined);
-                    }}
-                    retryLabel={t("common:errorState.retry")}
-                />
-            </AppShell>
-        );
-    }
-
-    if (!menu) {
-        return (
-            <AppShell mobileBackTo={ROUTES.allMenus}>
-                <p>{t("menuDetailsPage.loading")}</p>
-            </AppShell>
-        );
-    }
-
     const totalCookingTime = menu.recipes.reduce(
         (total, recipe) => total + recipe.cooking_time,
         0,
     );
-    const isOwner = menu.menu.isOwner;
 
     return (
         <AppShell mobileBackTo={ROUTES.allMenus} mobileTitle={menu.menu.title}>
@@ -96,7 +69,7 @@ const MenuDetailsPage: React.FC = () => {
                 <MenuDetailsSecondary
                     recipes={menu.recipes}
                     allergens={menu.allergens}
-                    isOwner={isOwner}
+                    isOwner={menu.menu.isOwner}
                     addRecipesTo={changeMenuPath(menu.menu.id)}
                     editTo={changeMenuPath(menu.menu.id)}
                     onDelete={() => {
@@ -114,5 +87,3 @@ const MenuDetailsPage: React.FC = () => {
         </AppShell>
     );
 };
-
-export default MenuDetailsPage;

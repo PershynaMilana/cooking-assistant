@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 
 import { API_ROUTES } from "api/endpoints";
 
+import { AllRecipesView } from "app/(public)/all-recipes/AllRecipesView";
 import { mockGetByUrl } from "test/apiClientMock";
 import { ROUTE_ALL_RECIPES } from "test/constants";
 import { renderWithProviders } from "test/router";
-import MainPage from "views/recipes/MainPage";
 
 jest.mock("api/client");
 
@@ -34,7 +34,7 @@ const SAMPLE_RECIPES = [
     },
 ];
 
-describe("MainPage", () => {
+describe("AllRecipesView", () => {
     it("should render recipe titles returned by the api", async () => {
         mockGetByUrl({
             [API_ROUTES.recipes.byFilters]: {
@@ -44,7 +44,7 @@ describe("MainPage", () => {
             [API_ROUTES.recipeTypes.list]: [],
         });
 
-        renderWithProviders(<MainPage />, {
+        renderWithProviders(<AllRecipesView />, {
             initialEntries: [ROUTE_ALL_RECIPES],
         });
 
@@ -58,7 +58,7 @@ describe("MainPage", () => {
             [API_ROUTES.recipeTypes.list]: SAMPLE_TYPES,
         });
 
-        renderWithProviders(<MainPage />, {
+        renderWithProviders(<AllRecipesView />, {
             initialEntries: [ROUTE_ALL_RECIPES],
         });
 
